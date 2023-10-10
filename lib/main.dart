@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:merlin/componets/appbar.dart';
-import 'package:merlin/componets/navbar.dart';
+import 'package:merlin/components/appbar.dart';
+import 'package:merlin/components/navbar.dart';
+import 'package:merlin/style/colors.dart';
+import 'components/button.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,9 +42,33 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
+              CustomButton(
+                  text: "Нажми меня",
+                  width: 312,
+                  height: 48,
+                  horizontalPadding: 0,
+                  verticalPadding: 0,
+                  buttonColor: MyColors.puple,
+                  textColor: MyColors.white,
+                  fontSize: 14,
+                  onPressed: printbutton),
               Text(
                 'You have pushed the button this many times:',
               ),
+              CustomButton(
+                  text: "Страна",
+                  width: 76,
+                  height: 40,
+                  horizontalPadding: 0,
+                  verticalPadding: 0,
+                  buttonColor: MyColors.puple,
+                  textColor: MyColors.white,
+                  fontSize: 14,
+                  onPressed: printbutton)
             ])));
   }
+}
+
+void printbutton() {
+  print("123");
 }

@@ -17,7 +17,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               Container(
                   padding: const EdgeInsets.only(left: 24, right: 16),
                   child: SvgPicture.asset(
-                    'merlin.svg',
+                    'assets/images/merlin.svg',
                   )),
               const Text('Merlin',
                   style: TextStyle(
