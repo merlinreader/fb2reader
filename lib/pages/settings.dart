@@ -201,11 +201,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.white,
                               onChanged: (newValue) {
                                 setState(() {
-                                  textColorBlack = newValue;
-                                  textColorWhite = false;
-                                  textColorMint = false;
-                                  textColorBeige = false;
-                                  updateTextColor(MyColors.black);
+                                  if (!textColorBlack) {
+                                    textColorBlack = newValue;
+                                    textColorWhite = false;
+                                    textColorMint = false;
+                                    textColorBeige = false;
+                                    updateTextColor(MyColors.black);
+                                  }
                                 });
                               },
                             ),
@@ -216,11 +218,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  textColorBlack = false;
-                                  textColorWhite = newValue;
-                                  textColorMint = false;
-                                  textColorBeige = false;
-                                  updateTextColor(MyColors.white);
+                                  if (!textColorWhite) {
+                                    textColorBlack = false;
+                                    textColorWhite = newValue;
+                                    textColorMint = false;
+                                    textColorBeige = false;
+                                    updateTextColor(MyColors.white);
+                                  }
                                 });
                               },
                             ),
@@ -231,11 +235,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  textColorBlack = false;
-                                  textColorWhite = false;
-                                  textColorMint = newValue;
-                                  textColorBeige = false;
-                                  updateTextColor(MyColors.mint);
+                                  if (!textColorMint) {
+                                    textColorBlack = false;
+                                    textColorWhite = false;
+                                    textColorMint = newValue;
+                                    textColorBeige = false;
+                                    updateTextColor(MyColors.mint);
+                                  }
                                 });
                               },
                             ),
@@ -246,11 +252,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  textColorBlack = false;
-                                  textColorWhite = false;
-                                  textColorMint = false;
-                                  textColorBeige = newValue;
-                                  updateTextColor(MyColors.beige);
+                                  if (!textColorBeige) {
+                                    textColorBlack = false;
+                                    textColorWhite = false;
+                                    textColorMint = false;
+                                    textColorBeige = newValue;
+                                    updateTextColor(MyColors.beige);
+                                  }
                                 });
                               },
                             ),
@@ -275,11 +283,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.white,
                               onChanged: (newValue) {
                                 setState(() {
-                                  updateBackgroundColor(MyColors.black);
-                                  backgroundColorBlack = newValue;
-                                  backgroundColorWhite = false;
-                                  backgroundColorMint = false;
-                                  backgroundColorBeige = false;
+                                  if (!backgroundColorBlack) {
+                                    backgroundColorBlack = newValue;
+                                    backgroundColorWhite = false;
+                                    backgroundColorMint = false;
+                                    backgroundColorBeige = false;
+                                    updateBackgroundColor(MyColors.black);
+                                  }
                                 });
                               },
                             ),
@@ -290,11 +300,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  updateBackgroundColor(MyColors.white);
-                                  backgroundColorBlack = false;
-                                  backgroundColorWhite = newValue;
-                                  backgroundColorMint = false;
-                                  backgroundColorBeige = false;
+                                  if (!backgroundColorWhite) {
+                                    backgroundColorBlack = false;
+                                    backgroundColorWhite = newValue;
+                                    backgroundColorMint = false;
+                                    backgroundColorBeige = false;
+                                    updateBackgroundColor(MyColors.white);
+                                  }
                                 });
                               },
                             ),
@@ -305,11 +317,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  updateBackgroundColor(MyColors.mint);
-                                  backgroundColorBlack = false;
-                                  backgroundColorWhite = false;
-                                  backgroundColorMint = newValue;
-                                  backgroundColorBeige = false;
+                                  if (!backgroundColorMint) {
+                                    backgroundColorBlack = false;
+                                    backgroundColorWhite = false;
+                                    backgroundColorMint = newValue;
+                                    backgroundColorBeige = false;
+                                    updateBackgroundColor(MyColors.mint);
+                                  }
                                 });
                               },
                             ),
@@ -320,11 +334,13 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  updateBackgroundColor(MyColors.beige);
-                                  backgroundColorBlack = false;
-                                  backgroundColorWhite = false;
-                                  backgroundColorMint = false;
-                                  backgroundColorBeige = newValue;
+                                  if (!backgroundColorBeige) {
+                                    backgroundColorBlack = false;
+                                    backgroundColorWhite = false;
+                                    backgroundColorMint = false;
+                                    backgroundColorBeige = newValue;
+                                    updateBackgroundColor(MyColors.beige);
+                                  }
                                 });
                               },
                             ),
