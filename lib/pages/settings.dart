@@ -89,6 +89,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     const Spacer(),
                     CustomCheckbox(
                       isChecked: isChecked,
+                      bgColor: MyColors.white,
                       borderColor: MyColors.black,
                       checkColor: MyColors.puple,
                       onChanged: (newValue) {
@@ -133,8 +134,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           children: [
                             CustomCheckbox(
                               isChecked: isChecked,
+                              bgColor: MyColors.black,
                               borderColor: MyColors.black,
-                              checkColor: MyColors.puple,
+                              checkColor: MyColors.white,
                               onChanged: (newValue) {
                                 setState(() {
                                   isChecked = newValue;
@@ -143,8 +145,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             CustomCheckbox(
                               isChecked: isChecked,
+                              bgColor: MyColors.white,
                               borderColor: MyColors.black,
-                              checkColor: MyColors.puple,
+                              checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
                                   isChecked = newValue;
@@ -153,8 +156,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             CustomCheckbox(
                               isChecked: isChecked,
+                              bgColor: MyColors.mint,
                               borderColor: MyColors.black,
-                              checkColor: MyColors.puple,
+                              checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
                                   isChecked = newValue;
@@ -163,8 +167,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             CustomCheckbox(
                               isChecked: isChecked,
+                              bgColor: MyColors.beige,
                               borderColor: MyColors.black,
-                              checkColor: MyColors.puple,
+                              checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
                                   isChecked = newValue;
@@ -187,8 +192,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           children: [
                             CustomCheckbox(
                               isChecked: isChecked,
+                              bgColor: MyColors.black,
                               borderColor: MyColors.black,
-                              checkColor: MyColors.puple,
+                              checkColor: MyColors.white,
                               onChanged: (newValue) {
                                 setState(() {
                                   isChecked = newValue;
@@ -197,8 +203,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             CustomCheckbox(
                               isChecked: isChecked,
+                              bgColor: MyColors.white,
                               borderColor: MyColors.black,
-                              checkColor: MyColors.puple,
+                              checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
                                   isChecked = newValue;
@@ -207,8 +214,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             CustomCheckbox(
                               isChecked: isChecked,
+                              bgColor: MyColors.mint,
                               borderColor: MyColors.black,
-                              checkColor: MyColors.puple,
+                              checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
                                   isChecked = newValue;
@@ -217,8 +225,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             CustomCheckbox(
                               isChecked: isChecked,
+                              bgColor: MyColors.beige,
                               borderColor: MyColors.black,
-                              checkColor: MyColors.puple,
+                              checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
                                   isChecked = newValue;
@@ -231,6 +240,33 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ],
                 ),
+                Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: 56,
+                        decoration: const BoxDecoration(),
+                        child: Stack(children: <Widget>[
+                          Center(
+                              child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 56,
+                                  decoration: const BoxDecoration(
+                                    color: Color.fromRGBO(203, 223, 206, 1),
+                                  ))),
+                          const Center(
+                              child: Text(
+                            'Тестовый текст темы',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: MyColors.black,
+                              fontFamily: 'Roboto',
+                              fontSize: 14,
+                              fontWeight:
+                                  FontWeight.normal, /*PERCENT not supported*/
+                            ),
+                          )),
+                        ])))
               ],
             ),
           ),

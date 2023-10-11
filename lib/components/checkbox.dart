@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 class CustomCheckbox extends StatelessWidget {
   final bool isChecked;
   final Function(bool) onChanged;
+  final Color bgColor;
   final Color borderColor;
   final Color checkColor;
 
-  CustomCheckbox(
-      {required this.isChecked,
+  const CustomCheckbox(
+      {super.key,
+      required this.isChecked,
       required this.onChanged,
+      required this.bgColor,
       required this.borderColor,
       required this.checkColor});
 
@@ -25,6 +28,7 @@ class CustomCheckbox extends StatelessWidget {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
+            color: bgColor,
             border: Border.all(
               width: 2,
               color: borderColor, // Цвет рамки
