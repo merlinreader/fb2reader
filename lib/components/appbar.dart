@@ -21,7 +21,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   )),
               const Text('Merlin',
                   style: TextStyle(
-                      fontFamily: 'Tektur', color: Colors.black, fontSize: 24))
+                      fontFamily: 'Tektur',
+                      color: Colors.black,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold))
             ],
           ),
         ));

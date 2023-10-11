@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'pages/stat.dart';
+import 'pages/statistic.dart';
 
 void main() {
-  runApp(StatPage());
+  runApp(StatisticPage());
 }

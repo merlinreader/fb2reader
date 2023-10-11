@@ -23,7 +23,7 @@ class CustomNavBar extends StatelessWidget {
             icon: Icon(
               CustomIcons.chart,
             ),
-            label: 'Мой профиль'),
+            label: 'Статистика'),
       ],
       // Цвет выбранного элемента
       selectedItemColor: MyColors.puple,
@@ -32,9 +32,13 @@ class CustomNavBar extends StatelessWidget {
       // Показывать текст для не выбранных элементов
       showUnselectedLabels: true,
       //стили текста для нав. меню
-      selectedLabelStyle:
-          const TextStyle(fontSize: 11, fontFamily: 'Tektur', height: 2.2),
-      unselectedLabelStyle: const TextStyle(fontSize: 11, fontFamily: 'Tektur'),
+      selectedLabelStyle: const TextStyle(
+          fontSize: 11,
+          fontFamily: 'Tektur',
+          height: 2.2,
+          fontWeight: FontWeight.bold),
+      unselectedLabelStyle: const TextStyle(
+          fontSize: 11, fontFamily: 'Tektur', fontWeight: FontWeight.bold),
     );
   }
 }
