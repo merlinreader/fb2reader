@@ -10,6 +10,7 @@ class Button extends StatelessWidget {
   final Color textColor;
   final double fontSize;
   final VoidCallback onPressed;
+  final FontWeight fontWeight;
 
   const Button({
     required this.text,
@@ -21,6 +22,7 @@ class Button extends StatelessWidget {
     required this.textColor,
     required this.fontSize,
     required this.onPressed,
+    required this.fontWeight,
     super.key,
   });
 
@@ -41,10 +43,10 @@ class Button extends StatelessWidget {
         ),
         child: Text(text,
             style: TextStyle(
-              color: textColor,
-              fontFamily: 'Tektur',
-              fontSize: fontSize,
-            )),
+                color: textColor,
+                fontFamily: 'Tektur',
+                fontSize: fontSize,
+                fontWeight: fontWeight)),
       ),
     );
   }

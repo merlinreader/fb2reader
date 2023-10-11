@@ -32,14 +32,14 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  // Перменная для изменения темы
+  bool isChecked = false;
   // Переменные для темы
   bool darkThemeBackground = false;
   Color themeAppBackground = MyColors.bgWhite;
   Color themeBackground = MyColors.white;
   Color themeTextColor = MyColors.black;
   Color themeGrayTextColor = MyColors.grey;
-  // Перменная для изменения темы
-  bool isChecked = false;
   // Переменные для изменений цвета предпросмотра
   bool backgroundColorBlack = false;
   bool backgroundColorWhite = false;
