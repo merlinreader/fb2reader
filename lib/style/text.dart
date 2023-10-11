@@ -21,3 +21,20 @@ class Text14 extends StatelessWidget {
         style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14));
   }
 }
+
+class TextTektur extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  final double fontsize;
+  const TextTektur(
+      {super.key,
+      required this.text,
+      required this.fontsize,
+      required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text,
+        style: TextStyle(
+            fontFamily: 'Tektur', color: textColor, fontSize: fontsize));
+  }
+}
