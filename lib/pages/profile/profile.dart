@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:merlin/components/appbar/appbar.dart';
 import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
+import 'package:merlin/style/colors.dart';
 //import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 
@@ -33,7 +34,10 @@ class _ProfilePage extends State<ProfilePage> {
             padding: const EdgeInsets.only(left: 24, top: 24),
             child: const Row(
               children: [
-                Text24(text: 'Мой профиль'),
+                Text24(
+                  text: 'Мой профиль',
+                  textColor: MyColors.black,
+                ),
               ],
             )),
         const SizedBox(height: 24),
@@ -42,10 +46,15 @@ class _ProfilePage extends State<ProfilePage> {
             children: [
               MerlinWidget(),
               SizedBox(height: 12),
-              Text24(text: 'Merlin'),
-              Text14(text:'Страна, область, город'), //когда подключим хрень для получения геолокации надо заменить
+              Text24(
+                text: 'Merlin',
+                textColor: MyColors.black,
+              ),
+              Text14(
+                text: 'Страна, область, город',
+                textColor: MyColors.black,
+              ), //когда подключим хрень для получения геолокации надо заменить
               SizedBox(height: 12),
-              
             ],
           ),
         ),

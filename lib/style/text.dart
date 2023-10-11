@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 
-import 'package:merlin/style/colors.dart';
-
 class Text24 extends StatelessWidget {
   final String text;
-  const Text24({super.key, required this.text});
+  final Color textColor;
+  const Text24({super.key, required this.text, required this.textColor});
   @override
   Widget build(BuildContext context) {
     return Text(text,
-        style: const TextStyle(
-            fontFamily: 'Tektur', color: MyColors.black, fontSize: 24));
+        style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 24));
   }
 }
 
 class Text14 extends StatelessWidget {
   final String text;
-  const Text14({super.key, required this.text});
+  final Color textColor;
+  const Text14({super.key, required this.text, required this.textColor});
   @override
   Widget build(BuildContext context) {
     return Text(text,
-        style: const TextStyle(
-            fontFamily: 'Tektur', color: MyColors.black, fontSize: 14));
+        style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14));
   }
 }

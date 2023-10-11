@@ -15,7 +15,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         elevation: 1,
         leading: const Center(
           child: Row(
-            children: [LogoWidget(), Text24(text: 'Merlin')],
+            children: [
+              LogoWidget(),
+              Text24(
+                text: 'Merlin',
+                textColor: MyColors.black,
+              )
+            ],
           ),
         ));
   }
