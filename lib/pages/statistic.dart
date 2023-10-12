@@ -41,7 +41,7 @@ Widget _buildBody() {
           SizedBox(height: 10),
           SizedBox(height: 10),
           Row(children: [
-            CustomButton(
+            Button(
               text: 'Страна',
               width: 76,
               height: 40,
@@ -50,9 +50,10 @@ Widget _buildBody() {
               buttonColor: MyColors.white,
               textColor: MyColors.black,
               fontSize: 14,
+              fontWeight: FontWeight.normal,
               onPressed: printFunc,
             ),
-            CustomButton(
+            Button(
               text: 'Регион',
               width: 76,
               height: 40,
@@ -61,9 +62,10 @@ Widget _buildBody() {
               buttonColor: MyColors.white,
               textColor: MyColors.black,
               fontSize: 14,
+              fontWeight: FontWeight.normal,
               onPressed: printFunc,
             ),
-            CustomButton(
+            Button(
               text: 'Город',
               width: 76,
               height: 40,
@@ -72,6 +74,7 @@ Widget _buildBody() {
               buttonColor: MyColors.white,
               textColor: MyColors.black,
               fontSize: 14,
+              fontWeight: FontWeight.normal,
               onPressed: printFunc,
             ),
           ]),
