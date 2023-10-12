@@ -6,6 +6,7 @@ import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/colors.dart';
 //import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
+import 'package:merlin/components/button/button.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -41,24 +42,61 @@ class _ProfilePage extends State<ProfilePage> {
               ],
             )),
         const SizedBox(height: 24),
-        const Center(
-          child: Column(
-            children: [
-              MerlinWidget(),
-              SizedBox(height: 12),
-              Text24(
-                text: 'Merlin',
-                textColor: MyColors.black,
-              ),
-              Text14(
-                text: 'Страна, область, город',
-                textColor: MyColors.black,
-              ), //когда подключим хрень для получения геолокации надо заменить
-              SizedBox(height: 12),
-            ],
+        const Expanded(
+          child: Center(
+            child: Column(
+              children: [
+                MerlinWidget(),
+                SizedBox(height: 12),
+                Text24(
+                  text: 'Merlin',
+                  textColor: MyColors.black,
+                ),
+                Text14(
+                  text: 'Страна, область, город',
+                  textColor: MyColors.black,
+                ), //когда подключим хрень для получения геолокации надо заменить
+                SizedBox(height: 81),
+
+                Button(
+                    text: 'Авторизоваться',
+                    width: 312,
+                    height: 48,
+                    horizontalPadding: 97,
+                    verticalPadding: 12,
+                    buttonColor: MyColors.puple,
+                    textColor: MyColors.white,
+                    fontSize: 14,
+                    onPressed: pres),
+                SizedBox(
+                  height: 10,
+                ),
+
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.bottomCenter,
+                    child: Button(
+                        text: 'Написать нам',
+                        width: 312,
+                        height: 48,
+                        horizontalPadding: 97,
+                        verticalPadding: 12,
+                        buttonColor: MyColors.white,
+                        textColor: MyColors.black,
+                        fontSize: 14,
+                        onPressed: pres),
+                  ),
+                ),
+                SizedBox(height: 24)
+              ],
+            ),
           ),
         ),
       ]),
     );
   }
+}
+
+void pres() {
+  print('стас крутой');
 }

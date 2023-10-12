@@ -20,7 +20,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               Text24(
                 text: 'Merlin',
                 textColor: MyColors.black,
-              )
+              ),
+              
             ],
           ),
         ));

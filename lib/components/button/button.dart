@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class CustomButton extends StatelessWidget {
+class Button extends StatelessWidget {
   final String text;
   final double width;
   final double height;
@@ -11,7 +11,7 @@ class CustomButton extends StatelessWidget {
   final double fontSize;
   final VoidCallback onPressed;
 
-  const CustomButton({
+  const Button({
     required this.text,
     required this.width,
     required this.height,
@@ -41,10 +41,10 @@ class CustomButton extends StatelessWidget {
         ),
         child: Text(text,
             style: TextStyle(
-              color: textColor,
-              fontFamily: 'Tektur',
-              fontSize: fontSize,
-            )),
+                color: textColor,
+                fontFamily: 'Tektur',
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold)),
       ),
     );
   }

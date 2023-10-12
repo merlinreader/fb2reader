@@ -7,7 +7,11 @@ class Text24 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(text,
-        style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 24));
+        style: TextStyle(
+            fontFamily: 'Tektur',
+            color: textColor,
+            fontSize: 24,
+            fontWeight: FontWeight.bold));
   }
 }
 

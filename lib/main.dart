@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:merlin/pages/profile/profile.dart';
-import 'package:merlin/pages/settings.dart';
+//import 'package:merlin/pages/settings.dart';
 
 void main() {
-  runApp(const MySettings());
+  runApp(const Profile());
 }
