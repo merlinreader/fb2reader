@@ -148,22 +148,22 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
           children: const [
             Center(
                 child: Text14(
-              text: 'Заказчик',
+              text: 'Вот',
               textColor: MyColors.black,
             )),
             Center(
                 child: Text14(
-              text: 'Ебаный',
+              text: 'Листающиеся',
               textColor: MyColors.black,
             )),
             Center(
                 child: Text14(
-              text: 'Гомункул',
+              text: 'Страницы',
               textColor: MyColors.black,
             )),
             Center(
                 child: Text14(
-              text: 'Я его в бравоСтас ебал',
+              text: ':)',
               textColor: MyColors.black,
             )),
           ],
