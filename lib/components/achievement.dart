@@ -37,7 +37,6 @@ class AchievementCard extends StatelessWidget {
       width: mediaQuery.size.width - 48,
       height: 83.0,
       alignment: Alignment.center,
-      /* ТЕНЬ И ВСЁ ТАКОЕ
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -49,7 +48,6 @@ class AchievementCard extends StatelessWidget {
           ),
         ],
       ),
-      */
       child: Row(children: [
         Container(
           alignment: Alignment.centerLeft,
