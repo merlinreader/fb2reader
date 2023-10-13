@@ -53,7 +53,8 @@ class AchievementCard extends StatelessWidget {
       child: Row(children: [
         Container(
           alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(top: 16, bottom: 16, right: 8),
+          padding:
+              const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),
           child: SvgPicture.asset(
             icon,
             width: 48,

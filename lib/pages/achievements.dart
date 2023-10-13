@@ -9,32 +9,30 @@ import 'package:merlin/components/achievement.dart';
 class AchievementsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         backgroundColor: Colors.white,
-        appBar: CustomAppBar(),
-        body: AchievementCard(
-          name: '1 место за что-то там',
-          dataText: 'Июль 2023',
-          icon: 'assets/images/merlin.svg',
-        ),
-        bottomNavigationBar: CustomNavBar(),
+        appBar: const CustomAppBar(),
+        body: _buildBody(),
+        bottomNavigationBar: const CustomNavBar(),
       ),
     );
   }
 }
-/*
+
 Widget _buildBody() {
   return const SafeArea(
     child: Column(children: <Widget>[
       Padding(
         padding: EdgeInsets.all(24),
+        //mainAxisAlignment: MainAxisAlignment.center,
+        //padding: const EdgeInsets.only(top: 16, bottom: 16, right: 8),
         child: Column(children: <Widget>[
           Row(
             children: [
               Text(
-                'Статистика',
+                'Достижения',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                     fontSize: 24,
@@ -43,49 +41,31 @@ Widget _buildBody() {
               ),
             ],
           ),
-          SizedBox(height: 10),
-          SizedBox(height: 10),
-          Row(children: [
-            Button(
-              text: 'Страна',
-              width: 76,
-              height: 40,
-              horizontalPadding: 12,
-              verticalPadding: 8,
-              buttonColor: MyColors.white,
-              textColor: MyColors.black,
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
-              onPressed: printFunc,
-            ),
-            Button(
-              text: 'Регион',
-              width: 76,
-              height: 40,
-              horizontalPadding: 12,
-              verticalPadding: 8,
-              buttonColor: MyColors.white,
-              textColor: MyColors.black,
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
-              onPressed: printFunc,
-            ),
-            Button(
-              text: 'Город',
-              width: 76,
-              height: 40,
-              horizontalPadding: 12,
-              verticalPadding: 8,
-              buttonColor: MyColors.white,
-              textColor: MyColors.black,
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
-              onPressed: printFunc,
-            ),
-          ]),
+          AchievementCard(
+            name: '1 место за что-то там',
+            dataText: 'Июль 2023',
+            icon: 'assets/images/merlin.svg',
+          ),
+          SizedBox(height: 8),
+          AchievementCard(
+            name: '1 место за что-то там',
+            dataText: 'Июль 2023',
+            icon: 'assets/images/merlin.svg',
+          ),
+          SizedBox(height: 8),
+          AchievementCard(
+            name: '1 место за что-то там',
+            dataText: 'Июль 2023',
+            icon: 'assets/images/merlin.svg',
+          ),
+          SizedBox(height: 8),
+          AchievementCard(
+            name: '1 место за что-то там',
+            dataText: 'Июль 2023',
+            icon: 'assets/images/merlin.svg',
+          ),
         ]),
       ),
     ]),
   );
 }
-*/
