@@ -23,10 +23,10 @@ class MySettings extends StatelessWidget {
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
   @override
-  _SettingsPageState createState() => _SettingsPageState();
+  SettingsPageState createState() => SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage> {
+class SettingsPageState extends State<SettingsPage> {
   bool darkBackground = false;
   Color textColor = Colors.black;
 

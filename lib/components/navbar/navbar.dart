@@ -1,12 +1,32 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:open_file/open_file.dart';
-
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 
-class CustomNavBar extends StatelessWidget {
+class CustomNavBar extends StatefulWidget {
   const CustomNavBar({super.key});
+
+  @override
+  _CustomNavBarState createState() => _CustomNavBarState();
+}
+
+class _CustomNavBarState extends State<CustomNavBar> {
+  void pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+    );
+
+    if (result != null) {
+      final fileName = result.files.first.name;
+      print(fileName);
+      final pickedfile = result.files.first;
+      final fileToDisplay = File(pickedfile.path.toString());
+      print(fileToDisplay);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
@@ -30,6 +50,11 @@ class CustomNavBar extends StatelessWidget {
             ),
             label: 'Статистика'),
       ],
+      onTap: (index) {
+        if (index == 1) {
+          pickFile();
+        }
+      },
       // Цвет выбранного элемента
       selectedItemColor: MyColors.puple,
       // Цвет не выбранных элементов
