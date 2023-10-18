@@ -4,124 +4,71 @@ import 'package:flutter_svg/flutter_svg.dart';
 class AchievementCard extends StatelessWidget {
   final String name;
   final String dataText;
-  final String icon;
-  // final double width;
-  // final double height;
-  // final double horizontalPadding;
-  // final double verticalPadding;
-  // final Color buttonColor;
-  // final Color textColor;
-  // final double fontSize;
-  // final FontWeight fontWeight;
+  final String picture;
+  final bool isLocked;
 
   const AchievementCard({
     required this.name,
     required this.dataText,
-    required this.icon,
-    // required this.width,
-    // required this.height,
-    // required this.horizontalPadding,
-    // required this.verticalPadding,
-    // required this.buttonColor,
-    // required this.textColor,
-    // required this.fontSize,
-    // required this.fontWeight,
-    super.key,
-  });
+    required this.picture,
+    required this.isLocked,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    return Center(
-        child: Container(
+    return Container(
       width: mediaQuery.size.width - 48,
       height: 83.0,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black,
-            blurRadius: 4,
-            offset: Offset(4, 8), // Shadow position
-          ),
-        ],
+        color:
+            isLocked ? Colors.transparent.withOpacity(0.5) : Colors.transparent,
       ),
-      child: Row(children: [
-        Container(
-          alignment: Alignment.centerLeft,
-          padding:
-              const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),
-          child: SvgPicture.asset(
-            icon,
-            width: 48,
-            height: 48,
-          ),
-        ),
-        Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Flexible(
-              child: Text(
-            name,
-            style: const TextStyle(
-                fontFamily: 'Tektur',
-                color: Colors.black,
-                fontSize: 11,
-                fontWeight: FontWeight.bold),
-          )),
-          Text(
-            dataText,
-            style: const TextStyle(
-                fontFamily: 'Tektur',
-                color: Colors.black,
-                fontSize: 11,
-                fontWeight: FontWeight.bold),
-          )
-        ]),
-      ]),
-    ));
-  }
-}
-
-/*
-@override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Row(children: [
-        Container(
-          width: 312.0,
-          height: 83.0,
-          color: Colors.orange,
-          alignment: Alignment.center,
-          child: Container(
+      child: Row(
+        children: [
+          Container(
+            alignment: Alignment.centerLeft,
+            padding:
+                const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),
             child: SvgPicture.asset(
-              icon,
+              picture,
               width: 48,
               height: 48,
+              color: isLocked ? Colors.white.withOpacity(0.5) : null,
             ),
           ),
-          decoration: BoxDecoration(
-            color: Colors.teal,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black,
-                blurRadius: 4,
-                offset: Offset(4, 8), // Shadow position
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    fontFamily: 'Tektur',
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        isLocked ? Colors.white.withOpacity(0.5) : Colors.black,
+                  ),
+                ),
+              ),
+              Text(
+                dataText,
+                style: TextStyle(
+                  fontFamily: 'Tektur',
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color:
+                      isLocked ? Colors.white.withOpacity(0.5) : Colors.black,
+                ),
               ),
             ],
           ),
-        ),
-        Text(
-          name,
-          textAlign: TextAlign.left,
-          style: const TextStyle(
-              fontFamily: 'Tektur',
-              color: Colors.black,
-              fontSize: 11,
-              fontWeight: FontWeight.bold),
-        )
-      ]),
+        ],
+      ),
     );
   }
-*/
+}

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
+// import 'package:file_picker/file_picker.dart';
 // import 'package:open_file/open_file.dart';
 
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -34,7 +34,7 @@ class CustomNavBar extends StatelessWidget {
       ],
       onTap: (index) async {
         if (index == 1) {
-          pickFile();
+          // pickFile();
         }
       },
       // Цвет выбранного элемента
@@ -53,7 +53,7 @@ class CustomNavBar extends StatelessWidget {
           fontSize: 11, fontFamily: 'Tektur', fontWeight: FontWeight.bold),
     );
   }
-
+/*
   void pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.any,
@@ -71,5 +71,5 @@ class CustomNavBar extends StatelessWidget {
       print(fileToDisplay);
       print(fileToDisplay);
     }
-  }
+  }*/
 }

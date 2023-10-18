@@ -3,7 +3,8 @@ import 'package:merlin/components/appbar.dart';
 import 'package:merlin/components/navbar.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
-import 'package:merlin/components/button.dart';
+import 'package:merlin/components/svg/svg_asset.dart';
+import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/components/achievement.dart';
 
 class AchievementsPage extends StatelessWidget {
@@ -12,7 +13,7 @@ class AchievementsPage extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFAFAFAFA),
         appBar: const CustomAppBar(),
         body: _buildBody(),
         bottomNavigationBar: const CustomNavBar(),
@@ -42,28 +43,28 @@ Widget _buildBody() {
             ],
           ),
           AchievementCard(
-            name: '1 место за что-то там',
-            dataText: 'Июль 2023',
-            icon: 'assets/images/merlin.svg',
-          ),
+              name: '1 место за что-то там',
+              dataText: 'Июль 2023',
+              picture: SvgAsset.dragon1,
+              isLocked: true),
           SizedBox(height: 8),
           AchievementCard(
-            name: '1 место за что-то там',
-            dataText: 'Июль 2023',
-            icon: 'assets/images/merlin.svg',
-          ),
+              name: '1 место за что-то там',
+              dataText: 'Июль 2023',
+              picture: SvgAsset.dragon2,
+              isLocked: true),
           SizedBox(height: 8),
           AchievementCard(
-            name: '1 место за что-то там',
-            dataText: 'Июль 2023',
-            icon: 'assets/images/merlin.svg',
-          ),
+              name: '1 место за что-то там',
+              dataText: 'Июль 2023',
+              picture: SvgAsset.dragon3,
+              isLocked: false),
           SizedBox(height: 8),
           AchievementCard(
-            name: '1 место за что-то там',
-            dataText: 'Июль 2023',
-            icon: 'assets/images/merlin.svg',
-          ),
+              name: '1 место за что-то там',
+              dataText: 'Июль 2023',
+              picture: SvgAsset.dragon4,
+              isLocked: false),
         ]),
       ),
     ]),
