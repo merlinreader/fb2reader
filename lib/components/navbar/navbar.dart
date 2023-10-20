@@ -1,27 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:open_file/open_file.dart';
-
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 
-class CustomNavBar extends StatelessWidget {
+import 'package:merlin/pages/profile/profile.dart';
+import 'package:merlin/pages/settings.dart';
+
+import 'package:merlin/functions/pickfile.dart';
+
+class CustomNavBar extends StatefulWidget {
   const CustomNavBar({super.key});
+
+  @override
+  CustomNavBarState createState() => CustomNavBarState();
+}
+
+class CustomNavBarState extends State<CustomNavBar> {
+  int selectedPage = 0;
+  final List screen = [Profile, MySettings];
+  
+  void onItemTapped(int index) {
+    setState(() {
+      selectedPage = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      currentIndex: selectedPage,
       backgroundColor: MyColors.white,
-      //одинаковое расстояние между иконками
       type: BottomNavigationBarType.fixed,
-      //тень
       elevation: 1,
+      
       items: const [
-        BottomNavigationBarItem(
-            icon: Icon(CustomIcons.clock), label: 'Последнее'),
         BottomNavigationBarItem(
           icon: Icon(CustomIcons.bookOpen),
           label: 'Книги',
         ),
+        BottomNavigationBarItem(
+            icon: Icon(CustomIcons.clock), label: 'Последнее'),
         BottomNavigationBarItem(
             icon: Icon(CustomIcons.trophy), label: 'Достижения'),
         BottomNavigationBarItem(
@@ -30,13 +47,14 @@ class CustomNavBar extends StatelessWidget {
             ),
             label: 'Статистика'),
       ],
-      // Цвет выбранного элемента
+      onTap: (index) {
+       
+        onItemTapped(index); 
+      },
+
       selectedItemColor: MyColors.puple,
-      // Цвет не выбранных элементов
       unselectedItemColor: MyColors.grey,
-      // Показывать текст для не выбранных элементов
       showUnselectedLabels: true,
-      //стили текста для нав. меню
       selectedLabelStyle: const TextStyle(
           fontSize: 11,
           fontFamily: 'Tektur',
