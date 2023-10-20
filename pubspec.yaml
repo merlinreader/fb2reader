@@ -1,0 +1,31 @@
+name: merlin
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+flutter_svg: ^2.0.7
+
+environment:
+  sdk: '>=3.1.2 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  flutter_svg: ^2.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    
+    
+  fonts:
+    - family:  MyFlutterApp
+      fonts:
+        - asset: ./lib/UI/fonts/MyFlutterApp.ttf
+    - family: Tektur
+      fonts:
+        - asset: ./lib/UI/fonts/Tektur.ttf
