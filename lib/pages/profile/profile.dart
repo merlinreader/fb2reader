@@ -29,10 +29,6 @@ class _ProfilePage extends State<ProfilePage> {
   late String adminArea;
   late String locality;
 
-  late String country;
-  late String adminArea;
-  late String locality;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

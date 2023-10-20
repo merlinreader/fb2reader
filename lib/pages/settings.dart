@@ -6,9 +6,6 @@ import 'package:merlin/components/checkbox.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/checkbox.dart';
 
-void main() {
-  runApp(const MySettings());
-}
 
 class MySettings extends StatelessWidget {
   const MySettings({super.key});
@@ -17,9 +14,7 @@ class MySettings extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-            
             seedColor: Colors.deepPurple,
-            background: const Color.fromRGBO(250, 250, 250, 1),
             background: const Color.fromRGBO(250, 250, 250, 1)),
         useMaterial3: true,
       ),

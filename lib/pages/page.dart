@@ -55,7 +55,7 @@ class _Page extends State {
           currentIndex: _selectedPage,
           backgroundColor: MyColors.white,
           type: BottomNavigationBarType.fixed,
-          elevation: ,
+          elevation: 1,
           items: const [
             BottomNavigationBarItem(
               icon: Icon(CustomIcons.bookOpen),
