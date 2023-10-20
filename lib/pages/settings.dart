@@ -3,10 +3,9 @@ import 'package:merlin/style/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/checkbox.dart';
+import 'package:merlin/style/text.dart';
+import 'package:merlin/components/checkbox.dart';
 
-void main() {
-  runApp(const MySettings());
-}
 
 class MySettings extends StatelessWidget {
   const MySettings({super.key});

@@ -1,20 +1,44 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 
-class CustomNavBar extends StatelessWidget {
+import 'package:merlin/pages/profile/profile.dart';
+import 'package:merlin/pages/settings.dart';
+
+import 'package:merlin/functions/pickfile.dart';
+
+class CustomNavBar extends StatefulWidget {
   const CustomNavBar({super.key});
+
+  @override
+  CustomNavBarState createState() => CustomNavBarState();
+}
+
+class CustomNavBarState extends State<CustomNavBar> {
+  int selectedPage = 0;
+  final List screen = [Profile, MySettings];
+  
+  void onItemTapped(int index) {
+    setState(() {
+      selectedPage = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      currentIndex: selectedPage,
       backgroundColor: MyColors.white,
-      //одинаковое расстояние между иконками
       type: BottomNavigationBarType.fixed,
-      //тень
       elevation: 1,
+      
       items: const [
         BottomNavigationBarItem(
-            icon: Icon(CustomIcons.bookOpen), label: 'Книги'),
+          icon: Icon(CustomIcons.bookOpen),
+          label: 'Книги',
+        ),
         BottomNavigationBarItem(
             icon: Icon(CustomIcons.clock), label: 'Последнее'),
         BottomNavigationBarItem(
@@ -23,18 +47,23 @@ class CustomNavBar extends StatelessWidget {
             icon: Icon(
               CustomIcons.chart,
             ),
-            label: 'Мой профиль'),
+            label: 'Статистика'),
       ],
-      // Цвет выбранного элемента
+      onTap: (index) {
+       
+        onItemTapped(index); 
+      },
+
       selectedItemColor: MyColors.puple,
-      // Цвет не выбранных элементов
       unselectedItemColor: MyColors.grey,
-      // Показывать текст для не выбранных элементов
       showUnselectedLabels: true,
-      //стили текста для нав. меню
-      selectedLabelStyle:
-          const TextStyle(fontSize: 11, fontFamily: 'Tektur', height: 2.2),
-      unselectedLabelStyle: const TextStyle(fontSize: 11, fontFamily: 'Tektur'),
+      selectedLabelStyle: const TextStyle(
+          fontSize: 11,
+          fontFamily: 'Tektur',
+          height: 2.2,
+          fontWeight: FontWeight.bold),
+      unselectedLabelStyle: const TextStyle(
+          fontSize: 11, fontFamily: 'Tektur', fontWeight: FontWeight.bold),
     );
   }
 }
