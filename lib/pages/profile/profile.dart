@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/colors.dart';
@@ -24,6 +25,10 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePage extends State<ProfilePage> {
+  late String country;
+  late String adminArea;
+  late String locality;
+
   late String country;
   late String adminArea;
   late String locality;
@@ -103,5 +108,17 @@ class _ProfilePage extends State<ProfilePage> {
 
 void pres() {
   // ignore: avoid_print
+  // ignore: avoid_print
   print('стас крутой');
+}
+
+void sendEmail() async {
+  final Uri _emailLaunchUri = Uri(
+    scheme: 'mailto',
+    path: 'example@example.com',
+    queryParameters: {'subject': 'Тема письма', 'body': 'Текст письма'},
+  );
+  if (await canLaunch(_emailLaunchUri.toString())) {
+    await launch(_emailLaunchUri.toString());
+  }
 }
