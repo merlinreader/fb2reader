@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+//import 'package:url_launcher/url_launcher.dart';
 
-import 'package:merlin/components/svg/svg_widget.dart';
+//import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
@@ -46,7 +46,7 @@ class _ProfilePage extends State<ProfilePage> {
       const SizedBox(height: 24),
       Center(
           child: Column(children: [
-        const MerlinWidget(),
+        //const MerlinWidget(),
         const SizedBox(height: 12),
         const Text24(
           text: 'Merlin',
@@ -67,15 +67,17 @@ class _ProfilePage extends State<ProfilePage> {
         child: Column(
           children: [
             Button(
-                text: 'Авторизоваться',
-                width: 312,
-                height: 48,
-                horizontalPadding: 97,
-                verticalPadding: 12,
-                buttonColor: MyColors.puple,
-                textColor: MyColors.white,
-                fontSize: 14,
-                onPressed: pres),
+              text: 'Авторизоваться',
+              width: 312,
+              height: 48,
+              horizontalPadding: 97,
+              verticalPadding: 12,
+              buttonColor: MyColors.puple,
+              textColor: MyColors.white,
+              fontSize: 14,
+              onPressed: sendEmail,
+              //fontWeight: ,
+            ),
             SizedBox(
               height: 10,
             ),
@@ -106,15 +108,4 @@ void pres() {
   // ignore: avoid_print
   // ignore: avoid_print
   print('стас крутой');
-}
-
-void sendEmail() async {
-  final Uri _emailLaunchUri = Uri(
-    scheme: 'mailto',
-    path: 'example@example.com',
-    queryParameters: {'subject': 'Тема письма', 'body': 'Текст письма'},
-  );
-  if (await canLaunch(_emailLaunchUri.toString())) {
-    await launch(_emailLaunchUri.toString());
-  }
 }
