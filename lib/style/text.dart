@@ -37,8 +37,13 @@ class TextTektur extends StatelessWidget {
       required this.textColor});
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        style: TextStyle(
-            fontFamily: 'Tektur', color: textColor, fontSize: fontsize));
+    return Text(
+      text,
+      style: TextStyle(
+          fontFamily: 'Tektur',
+          color: textColor,
+          fontSize: fontsize,
+          fontWeight: FontWeight.w500),
+    );
   }
 }

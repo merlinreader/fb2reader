@@ -6,6 +6,7 @@ import 'package:merlin/functions/location.dart';
 import 'package:merlin/style/colors.dart';
 
 import 'package:merlin/pages/settings.dart';
+import 'package:merlin/pages/recent/recent.dart';
 
 import 'package:merlin/pages/page.dart';
 
@@ -13,6 +14,6 @@ void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: MyColors.white,
   ));
-  runApp(const MySettings());
+  runApp(const Recent());
   getLocation();
 }
