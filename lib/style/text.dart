@@ -37,6 +37,21 @@ class Text11 extends StatelessWidget {
   }
 }
 
+class Text11Bold extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const Text11Bold({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text,
+        style: TextStyle(
+            fontFamily: 'Tektur',
+            color: textColor,
+            fontSize: 11,
+            fontWeight: FontWeight.bold));
+  }
+}
+
 class TextTektur extends StatelessWidget {
   final String text;
   final Color textColor;

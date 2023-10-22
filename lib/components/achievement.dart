@@ -23,8 +23,7 @@ class AchievementCard extends StatelessWidget {
       height: 83.0,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color:
-            isLocked ? Colors.transparent.withOpacity(0.5) : Colors.transparent,
+        color: isLocked ? Colors.white.withOpacity(0.2) : Colors.transparent,
       ),
       child: Row(
         children: [
@@ -36,7 +35,7 @@ class AchievementCard extends StatelessWidget {
               picture,
               width: 48,
               height: 48,
-              color: isLocked ? Colors.white.withOpacity(0.5) : null,
+              color: isLocked ? Colors.transparent.withOpacity(0.5) : null,
             ),
           ),
           Column(
@@ -51,7 +50,7 @@ class AchievementCard extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color:
-                        isLocked ? Colors.white.withOpacity(0.5) : Colors.black,
+                        isLocked ? Colors.black.withOpacity(0.2) : Colors.black,
                   ),
                 ),
               ),
@@ -61,8 +60,7 @@ class AchievementCard extends StatelessWidget {
                   fontFamily: 'Tektur',
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color:
-                      isLocked ? Colors.white.withOpacity(0.5) : Colors.black,
+                  color: isLocked ? Colors.grey.withOpacity(0.2) : Colors.grey,
                 ),
               ),
             ],

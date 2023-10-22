@@ -14,7 +14,7 @@ class StatisticPage extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: MyColors.bgWhite,
         body: _buildBody(),
       ),
     );
@@ -29,14 +29,8 @@ Widget _buildBody() {
         child: Column(children: <Widget>[
           Row(
             children: [
-              Text(
-                'Статистика',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    fontSize: 24,
-                    fontFamily: 'Tektur',
-                    fontWeight: FontWeight.bold),
-              ),
+              TextTektur(
+                  text: 'Статистика', fontsize: 24, textColor: MyColors.black),
             ],
           ),
           SizedBox(height: 10),
@@ -51,7 +45,7 @@ Widget _buildBody() {
               buttonColor: MyColors.white,
               textColor: MyColors.black,
               fontSize: 14,
-              //fontWeight: FontWeight.normal,
+              fontWeight: FontWeight.bold,
               onPressed: printFunc,
             ),
             Button(
@@ -63,7 +57,7 @@ Widget _buildBody() {
               buttonColor: MyColors.white,
               textColor: MyColors.black,
               fontSize: 14,
-              //fontWeight: FontWeight.normal,
+              fontWeight: FontWeight.bold,
               onPressed: printFunc,
             ),
             Button(
@@ -75,7 +69,7 @@ Widget _buildBody() {
               buttonColor: MyColors.white,
               textColor: MyColors.black,
               fontSize: 14,
-              //fontWeight: FontWeight.normal,
+              fontWeight: FontWeight.bold,
               onPressed: printFunc,
             ),
           ]),

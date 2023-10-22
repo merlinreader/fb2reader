@@ -75,7 +75,7 @@ class _ProfilePage extends State<ProfilePage> {
               textColor: MyColors.white,
               fontSize: 14,
               onPressed: sendEmail,
-              //fontWeight: ,
+              fontWeight: FontWeight.bold,
             ),
             SizedBox(
               height: 10,
@@ -92,6 +92,7 @@ class _ProfilePage extends State<ProfilePage> {
                     buttonColor: MyColors.white,
                     textColor: MyColors.black,
                     fontSize: 14,
+                    fontWeight: FontWeight.bold,
                     onPressed: sendEmail),
               ),
             ),
@@ -108,5 +109,3 @@ void pres() {
   // ignore: avoid_print
   print('стас крутой');
 }
-
-
