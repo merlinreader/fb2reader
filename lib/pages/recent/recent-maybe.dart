@@ -6,9 +6,7 @@ import 'package:merlin/components/appbar/appbar.dart';
 import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
-import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'dart:async';
@@ -63,7 +61,7 @@ class BookImageWidget extends StatelessWidget {
 
 class _RecentPage extends State<RecentPage> {
   final ScrollController _scrollController = ScrollController();
-  bool _isVisible = true;
+  bool isVisible = true;
 
   @override
   void initState() {
@@ -71,7 +69,7 @@ class _RecentPage extends State<RecentPage> {
 
     _scrollController.addListener(() {
       setState(() {
-        _isVisible = _scrollController.position.userScrollDirection ==
+        isVisible = _scrollController.position.userScrollDirection ==
             ScrollDirection.reverse;
       });
     });
@@ -124,7 +122,7 @@ class _RecentPage extends State<RecentPage> {
             Expanded(
               child: ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 controller: _scrollController,
                 itemCount: _bookImages.length,
                 itemBuilder: (context, index) {

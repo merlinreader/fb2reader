@@ -3,17 +3,15 @@ import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 
 import 'package:merlin/pages/profile/profile.dart';
-import 'package:merlin/pages/settings.dart';
 import 'package:merlin/pages/achievements.dart';
-import 'package:merlin/style/colors.dart';
-
-import 'package:merlin/pages/profile/profile.dart';
 //import 'package:merlin/pages/settings.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/text.dart';
 
 import 'package:merlin/functions/pickfile.dart';
 import 'package:merlin/pages/statistic.dart';
+
+import 'package:merlin/pages/recent/recent.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({Key? key}) : super(key: key);
@@ -26,7 +24,7 @@ class Page extends State {
   int _selectedPage = 1;
   static const List<Widget> _widgetOptions = <Widget>[
     Profile(),
-    Profile(),
+    Recent(),
     AchievementsPage(),
     StatisticPage()
   ];

@@ -5,8 +5,6 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:merlin/components/appbar/appbar.dart';
-import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -37,10 +35,10 @@ class RecentPage extends StatefulWidget {
 class _RecentPage extends State<RecentPage> {
   final ScrollController _scrollController = ScrollController();
   bool _isVisible = true;
-  String? firstName = null;
-  String? lastName = null;
-  String? name = null;
-  String? title = null;
+  String? firstName;
+  String? lastName;
+  String? name;
+  String? title;
   String? base64Image;
   String? cachedImagePath;
   Uint8List? _cachedImageBytes;
@@ -70,7 +68,7 @@ class _RecentPage extends State<RecentPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Изменить значение'),
+          title: const Text('Изменить значение'),
           content: TextField(
             onChanged: (value) {
               updatedValue =
@@ -79,14 +77,14 @@ class _RecentPage extends State<RecentPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Отмена'),
+              child: const Text('Отмена'),
               onPressed: () {
                 Navigator.of(context)
                     .pop(); // Закрываем диалоговое окно без сохранения изменений
               },
             ),
             TextButton(
-              child: Text('Сохранить'),
+              child: const Text('Сохранить'),
               onPressed: () {
                 setState(() {
                   yourVariable = updatedValue; // Сохраняем измененное значение
@@ -108,7 +106,7 @@ class _RecentPage extends State<RecentPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Изменить значение'),
+          title: const Text('Изменить значение'),
           content: TextField(
             onChanged: (value) {
               updatedValue =
@@ -117,14 +115,14 @@ class _RecentPage extends State<RecentPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Отмена'),
+              child: const Text('Отмена'),
               onPressed: () {
                 Navigator.of(context)
                     .pop(); // Закрываем диалоговое окно без сохранения изменений
               },
             ),
             TextButton(
-              child: Text('Сохранить'),
+              child: const Text('Сохранить'),
               onPressed: () {
                 setState(() {
                   yourVariable = updatedValue; // Сохраняем измененное значение
@@ -431,8 +429,6 @@ class _RecentPage extends State<RecentPage> {
                   ),
                 ],
               ))),
-      appBar: const CustomAppBar(),
-      bottomNavigationBar: const CustomNavBar(),
       floatingActionButton: AnimatedOpacity(
         duration: const Duration(milliseconds: 150),
         opacity: _isVisible ? 1.0 : 0.0,
