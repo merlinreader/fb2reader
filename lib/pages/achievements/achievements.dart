@@ -23,48 +23,118 @@ class AchievementsPage extends StatelessWidget {
 }
 
 Widget _buildBody() {
-  return const SafeArea(
-    child: Column(children: <Widget>[
-      Padding(
-        padding: EdgeInsets.all(24),
-        child: Column(children: <Widget>[
-          Row(
-            children: [
-              Text(
-                'Достижения',
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                    fontSize: 24,
-                    fontFamily: 'Tektur',
-                    fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          AchievementCard(
-              name: '1 место за что-то там',
-              dataText: 'Июль 2023',
-              picture: SvgAsset.dragon1,
-              isLocked: true),
-          SizedBox(height: 8),
-          AchievementCard(
-              name: '1 место за что-то там',
-              dataText: 'Июль 2023',
-              picture: SvgAsset.dragon2,
-              isLocked: true),
-          SizedBox(height: 8),
-          AchievementCard(
-              name: '1 место за что-то там',
-              dataText: 'Июль 2023',
-              picture: SvgAsset.dragon3,
-              isLocked: false),
-          SizedBox(height: 8),
-          AchievementCard(
-              name: '1 место за что-то там',
-              dataText: 'Июль 2023',
-              picture: SvgAsset.dragon4,
-              isLocked: false),
-        ]),
-      ),
+  return SafeArea(
+      child: Expanded(
+    child: ListView(children: const [
+      Column(children: <Widget>[
+        Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(children: <Widget>[
+            Row(
+              children: [
+                Text(
+                  'Достижения',
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Tektur',
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            AchievementCard(
+                name: '1 место за что-то там',
+                dataText: 'Июль 2023',
+                picture: SvgAsset.dragon1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '1 место за что-то там',
+                dataText: '',
+                picture: SvgAsset.dragon2,
+                isLocked: true),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '1 место за что-то там',
+                dataText: '',
+                picture: SvgAsset.dragon3,
+                isLocked: true),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+            AchievementCard(
+                name: '3 место за что-то там',
+                dataText: 'Март 2022',
+                picture: SvgAsset.blood1,
+                isLocked: false),
+            SizedBox(height: 8),
+          ]),
+        ),
+      ])
     ]),
-  );
+  ));
 }
