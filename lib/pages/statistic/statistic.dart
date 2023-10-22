@@ -144,21 +144,21 @@ class _StatisticPageState extends State<StatisticPage> {
 class Country extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Swipe(); // Возвращаемый виджет для страницы "Регион"
+    return Swipe();
   }
 }
 
 class Region extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Swipe(); // Возвращаемый виджет для страницы "Регион"
+    return Swipe();
   }
 }
 
 class City extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Swipe(); // Возвращаемый виджет для страницы "Город"
+    return Swipe();
   }
 }
 
