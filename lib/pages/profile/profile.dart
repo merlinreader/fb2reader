@@ -71,7 +71,7 @@ class _ProfilePage extends State<ProfilePage> {
               height: 48,
               horizontalPadding: 97,
               verticalPadding: 12,
-              buttonColor: MyColors.puple,
+              buttonColor: MyColors.purple,
               textColor: MyColors.white,
               fontSize: 14,
               onPressed: sendEmail,

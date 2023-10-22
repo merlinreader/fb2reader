@@ -3,7 +3,7 @@ import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 
 import 'package:merlin/pages/profile/profile.dart';
-import 'package:merlin/pages/achievements.dart';
+import 'package:merlin/pages/achievements/achievements.dart';
 //import 'package:merlin/pages/settings.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/text.dart';
@@ -82,7 +82,7 @@ class Page extends State {
             }
             onSelectTab(index);
           },
-          selectedItemColor: MyColors.puple,
+          selectedItemColor: MyColors.purple,
           unselectedItemColor: MyColors.grey,
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(

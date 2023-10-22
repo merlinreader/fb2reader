@@ -29,6 +29,7 @@ class StatTable extends StatelessWidget {
                     .copyWith(dividerColor: Colors.transparent),
                 child: DataTable(
                   dividerThickness: 0.0,
+                  // ignore: deprecated_member_use
                   dataRowHeight: 38,
                   headingRowColor: MaterialStateColor.resolveWith(
                       (states) => MyColors.white),
@@ -79,7 +80,7 @@ class StatTable extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Text('Ошибка: ${snapshot.error}');
         } else {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
       },
     ));
