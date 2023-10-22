@@ -9,7 +9,7 @@ import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/text.dart';
 
 import 'package:merlin/functions/pickfile.dart';
-import 'package:merlin/pages/statistic.dart';
+import 'package:merlin/pages/statistic/statistic.dart';
 
 import 'package:merlin/pages/recent/recent.dart';
 
@@ -21,7 +21,7 @@ class AppPage extends StatefulWidget {
 }
 
 class Page extends State {
-  int _selectedPage = 1;
+  int _selectedPage = 3;
   static const List<Widget> _widgetOptions = <Widget>[
     Profile(),
     Recent(),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
+import 'package:merlin/components/table.dart';
 
 class StatisticPage extends StatelessWidget {
   const StatisticPage({super.key});
@@ -85,8 +86,6 @@ Widget _buildBody() {
   );
 }
 
-enum Calendar { day, week, month, year }
-
 class Swipe extends StatefulWidget {
   const Swipe({super.key});
 
@@ -146,26 +145,10 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
             child: TabBarView(
           controller: tabController,
           children: const [
-            Center(
-                child: Text14(
-              text: 'Вот',
-              textColor: MyColors.black,
-            )),
-            Center(
-                child: Text14(
-              text: 'Листающиеся',
-              textColor: MyColors.black,
-            )),
-            Center(
-                child: Text14(
-              text: 'Страницы',
-              textColor: MyColors.black,
-            )),
-            Center(
-                child: Text14(
-              text: ':)',
-              textColor: MyColors.black,
-            )),
+            StatTable(),
+            StatTable(),
+            StatTable(),
+            StatTable(),
           ],
         ))
       ],
