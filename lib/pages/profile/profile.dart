@@ -67,15 +67,17 @@ class _ProfilePage extends State<ProfilePage> {
         child: Column(
           children: [
             Button(
-                text: 'Авторизоваться',
-                width: 312,
-                height: 48,
-                horizontalPadding: 97,
-                verticalPadding: 12,
-                buttonColor: MyColors.puple,
-                textColor: MyColors.white,
-                fontSize: 14,
-                onPressed: pres),
+              text: 'Авторизоваться',
+              width: 312,
+              height: 48,
+              horizontalPadding: 97,
+              verticalPadding: 12,
+              buttonColor: MyColors.puple,
+              textColor: MyColors.white,
+              fontSize: 14,
+              onPressed: sendEmail,
+              //fontWeight: ,
+            ),
             SizedBox(
               height: 10,
             ),
@@ -108,13 +110,4 @@ void pres() {
   print('стас крутой');
 }
 
-void sendEmail() async {
-  final Uri _emailLaunchUri = Uri(
-    scheme: 'mailto',
-    path: 'example@example.com',
-    queryParameters: {'subject': 'Тема письма', 'body': 'Текст письма'},
-  );
-  if (await canLaunch(_emailLaunchUri.toString())) {
-    await launch(_emailLaunchUri.toString());
-  }
-}
+

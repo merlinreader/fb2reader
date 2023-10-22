@@ -4,24 +4,31 @@ import 'package:merlin/style/colors.dart';
 
 import 'package:merlin/pages/profile/profile.dart';
 import 'package:merlin/pages/settings.dart';
+import 'package:merlin/pages/achievements.dart';
+import 'package:merlin/style/colors.dart';
+
+import 'package:merlin/pages/profile/profile.dart';
+//import 'package:merlin/pages/settings.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/text.dart';
 
 import 'package:merlin/functions/pickfile.dart';
+import 'package:merlin/pages/statistic.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({Key? key}) : super(key: key);
 
   @override
-  _Page createState() => _Page();
+  Page createState() => Page();
 }
 
-class _Page extends State {
+class Page extends State {
   int _selectedPage = 1;
   static const List<Widget> _widgetOptions = <Widget>[
-    MySettings(),
     Profile(),
-    MySettings()
+    Profile(),
+    AchievementsPage(),
+    StatisticPage()
   ];
 
   void onSelectTab(int index) {
@@ -40,7 +47,6 @@ class _Page extends State {
           backgroundColor: MyColors.white,
           elevation: 0.5,
           title: const Row(
-            //crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               LogoWidget(),
               Text24(

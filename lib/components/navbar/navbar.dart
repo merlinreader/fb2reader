@@ -1,13 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 
 import 'package:merlin/pages/profile/profile.dart';
 import 'package:merlin/pages/settings.dart';
-
-import 'package:merlin/functions/pickfile.dart';
 
 class CustomNavBar extends StatefulWidget {
   const CustomNavBar({super.key});
