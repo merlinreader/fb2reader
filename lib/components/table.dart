@@ -5,9 +5,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class StatTable extends StatelessWidget {
+  final String path;
+
+  const StatTable({
+    required this.path,
+    Key? key,
+  }) : super(key: key);
+
   Future<List<dynamic>> fetchJson() async {
     final url = Uri.parse(
-        'https://aipro-energy.leam.pro/statistic/annual?sortBy=totalPageCountWordMode');
+        'https://fb2.cloud.leam.pro/api/statistic/$path?sortBy=totalPageCountWordMode');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -27,7 +34,6 @@ class StatTable extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final dataList = snapshot.data!;
-
             return Padding(
               padding: const EdgeInsets.only(top: 8.0, right: 1),
               child: Theme(
@@ -45,19 +51,19 @@ class StatTable extends StatelessWidget {
                   columnSpacing: 15,
                   columns: const [
                     DataColumn(
-                      label: Text11(
+                      label: Text11Bold(
                         text: 'Имя',
                         textColor: MyColors.grey,
                       ),
                     ),
                     DataColumn(
-                      label: Text11(
+                      label: Text11Bold(
                         text: 'Страниц',
                         textColor: MyColors.grey,
                       ),
                     ),
                     DataColumn(
-                      label: Text11(
+                      label: Text11Bold(
                         text: 'Страниц в \nрежиме слова',
                         textColor: MyColors.grey,
                       ),
