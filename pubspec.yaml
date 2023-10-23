@@ -47,5 +47,5 @@ flutter:
         - asset: ./lib/UI/fonts/Tektur.ttf
   assets:
     - assets/images/
-    
+    - assets/stat.json
     

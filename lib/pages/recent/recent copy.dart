@@ -226,7 +226,7 @@ class _RecentPage extends State<RecentPage> {
         opacity: _isVisible ? 0.0 : 1.0,
         child: const FloatingActionButton(
           onPressed: testbutton,
-          backgroundColor: MyColors.puple,
+          backgroundColor: MyColors.purple,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.zero)),
           autofocus: true,

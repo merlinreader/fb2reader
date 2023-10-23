@@ -4,10 +4,21 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/pages/profile/profile.dart';
+<<<<<<< HEAD
 import 'package:merlin/pages/achievements.dart';
+=======
+import 'package:merlin/pages/achievements/achievements.dart';
+//import 'package:merlin/pages/settings.dart';
+import 'package:merlin/components/svg/svg_widget.dart';
+>>>>>>> 5b57ec10bcd8e8746aedc36ac9c56279453d4579
 import 'package:merlin/style/text.dart';
 import 'package:merlin/functions/pickfile.dart';
+<<<<<<< HEAD
 import 'package:merlin/pages/statistic.dart';
+=======
+import 'package:merlin/pages/statistic/statistic.dart';
+
+>>>>>>> 5b57ec10bcd8e8746aedc36ac9c56279453d4579
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
 
@@ -19,7 +30,7 @@ class AppPage extends StatefulWidget {
 }
 
 class Page extends State {
-  int _selectedPage = 1;
+  int _selectedPage = 3;
   static const List<Widget> _widgetOptions = <Widget>[
     Profile(),
     Recent(),
@@ -96,7 +107,7 @@ class Page extends State {
             }
             onSelectTab(index);
           },
-          selectedItemColor: MyColors.puple,
+          selectedItemColor: MyColors.purple,
           unselectedItemColor: MyColors.grey,
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(

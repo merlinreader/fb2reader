@@ -6,7 +6,6 @@ import 'package:merlin/components/checkbox.dart';
 //import 'package:merlin/style/text.dart';
 //import 'package:merlin/components/checkbox.dart';
 
-
 class MySettings extends StatelessWidget {
   const MySettings({super.key});
   @override
