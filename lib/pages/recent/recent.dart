@@ -261,20 +261,6 @@ class _RecentPage extends State<RecentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
-      //bottomNavigationBar: CustomNavBar(),
-      body: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(24, 28, 24, 24),
-          child: MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              child: ListView(
-                controller: _scrollController,
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-=======
       body: Stack(
         children: [
           const Padding(
@@ -301,7 +287,6 @@ class _RecentPage extends State<RecentPage> {
                     onTapLongPressOne(context, index);
                   },
                   child: Column(
->>>>>>> 9f1b6395c6208a2f11f793c1103df226bee9b9fc
                     children: [
                       if (images[index].imageBytes != null)
                         Image.memory(images[index].imageBytes!,
