@@ -1,11 +1,11 @@
 name: merlin
 description: A new Flutter project.
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 flutter_svg: ^2.0.7
 
 environment:
-  sdk: '>=3.1.2 <4.0.0'
+  sdk: ">=3.1.2 <4.0.0"
 dependencies:
   flutter:
     sdk: flutter
@@ -29,6 +29,7 @@ dependencies:
   go_router: ^12.0.0
   dynamic_height_grid_view: ^0.0.4
   fluttertoast: ^8.2.2
+  http: ^0.13.4
 
 dev_dependencies:
   flutter_test:
@@ -36,10 +37,9 @@ dev_dependencies:
   flutter_lints: ^2.0.0
 flutter:
   uses-material-design: true
-    
-    
+
   fonts:
-    - family:  MyFlutterApp
+    - family: MyFlutterApp
       fonts:
         - asset: ./lib/UI/fonts/MyFlutterApp.ttf
     - family: Tektur
@@ -48,4 +48,3 @@ flutter:
   assets:
     - assets/images/
     - assets/stat.json
-    

@@ -2,26 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class StatTable extends StatelessWidget {
-  const StatTable({Key? key}) : super(key: key);
-
-  Future<List<dynamic>> parseJsonFile(
-      BuildContext context, String filePath) async {
-    String jsonData = await DefaultAssetBundle.of(context).loadString(filePath);
-    return json.decode(jsonData);
+  Future<List<dynamic>> fetchJson() async {
+    final url = Uri.parse(
+        'https://aipro-energy.leam.pro/statistic/annual?sortBy=totalPageCountWordMode');
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      // Обработка полученного JSON-объекта здесь
+      return jsonResponse ?? [];
+    } else {
+      print('Ошибка запроса: ${response.statusCode}');
+      return []; // Возвращаем пустой список в случае ошибки
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-        child: FutureBuilder<List<dynamic>>(
-      future: parseJsonFile(context, 'assets/stat.json'),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final dataList = snapshot.data!;
+      child: FutureBuilder<List<dynamic>>(
+        future: fetchJson(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final dataList = snapshot.data!;
 
-          return Padding(
+            return Padding(
               padding: const EdgeInsets.only(top: 8.0, right: 1),
               child: Theme(
                 // Theme для отключения divider
@@ -38,51 +45,63 @@ class StatTable extends StatelessWidget {
                   columnSpacing: 15,
                   columns: const [
                     DataColumn(
-                        label: Text11(
-                      text: 'Имя',
-                      textColor: MyColors.grey,
-                    )),
+                      label: Text11(
+                        text: 'Имя',
+                        textColor: MyColors.grey,
+                      ),
+                    ),
                     DataColumn(
-                        label: Text11(
-                      text: 'Страниц',
-                      textColor: MyColors.grey,
-                    )),
+                      label: Text11(
+                        text: 'Страниц',
+                        textColor: MyColors.grey,
+                      ),
+                    ),
                     DataColumn(
-                        label: Text11(
-                      text: 'Страниц в \nрежиме слова',
-                      textColor: MyColors.grey,
-                    )),
-                  ],
-                  rows: [
-                    ...List.generate(
-                      dataList.length,
-                      (index) => DataRow(
-                        cells: [
-                          DataCell(Text11Bold(
-                            text: dataList[index]['firstName'],
-                            textColor: MyColors.black,
-                          )),
-                          DataCell(Text11Bold(
-                            text: dataList[index]['totalPageCount'].toString(),
-                            textColor: MyColors.black,
-                          )),
-                          DataCell(Text11Bold(
-                            text: dataList[index]['totalPageCountMode']
-                                .toString(),
-                            textColor: MyColors.black,
-                          )),
-                        ],
+                      label: Text11(
+                        text: 'Страниц в \nрежиме слова',
+                        textColor: MyColors.grey,
                       ),
                     ),
                   ],
+                  rows: List.generate(
+                    dataList.length,
+                    (index) => DataRow(
+                      cells: [
+                        DataCell(
+                          Text11Bold(
+                            text: dataList[index]['firstName'] ?? '',
+                            textColor: MyColors.black,
+                          ),
+                        ),
+                        DataCell(
+                          Text11Bold(
+                            text: dataList[index]['totalPageCountSimpleMode']
+                                    ?.toString() ??
+                                '',
+                            textColor: MyColors.black,
+                          ),
+                        ),
+                        DataCell(
+                          Text11Bold(
+                            text: dataList[index]['totalPageCountWordMode']
+                                    ?.toString() ??
+                                '',
+                            textColor: MyColors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ));
-        } else if (snapshot.hasError) {
-          return Text('Ошибка: ${snapshot.error}');
-        } else {
-          return const CircularProgressIndicator();
-        }
-      },
-    ));
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Text('Ошибка: ${snapshot.error}');
+          } else {
+            return const CircularProgressIndicator();
+          }
+        },
+      ),
+    );
   }
 }

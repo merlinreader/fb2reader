@@ -221,7 +221,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
         Expanded(
             child: TabBarView(
           controller: tabController,
-          children: const [
+          children: [
             StatTable(),
             StatTable(),
             StatTable(),
