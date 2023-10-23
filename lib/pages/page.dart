@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
-
 import 'package:merlin/pages/profile/profile.dart';
-import 'package:merlin/pages/settings.dart';
-import 'package:merlin/components/svg/svg_widget.dart';
+import 'package:merlin/pages/achievements.dart';
 import 'package:merlin/style/text.dart';
-
 import 'package:merlin/functions/pickfile.dart';
+import 'package:merlin/pages/statistic/statistic.dart';
+
+import 'package:merlin/pages/recent/recent.dart';
+import 'package:merlin/components/svg/svg_asset.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({Key? key}) : super(key: key);
 
   @override
-  _Page createState() => _Page();
+  Page createState() => Page();
 }
 
-class _Page extends State {
+class Page extends State {
   int _selectedPage = 1;
   static const List<Widget> _widgetOptions = <Widget>[
-    MySettings(),
     Profile(),
-    MySettings()
+    Recent(),
+    AchievementsPage(),
+    StatisticPage()
   ];
 
   void onSelectTab(int index) {
@@ -39,13 +43,28 @@ class _Page extends State {
         appBar: AppBar(
           backgroundColor: MyColors.white,
           elevation: 0.5,
-          title: const Row(
-            //crossAxisAlignment: CrossAxisAlignment.center,
+          title: Row(
             children: [
-              LogoWidget(),
-              Text24(
-                text: 'Merlin',
-                textColor: MyColors.black,
+              Padding(
+                padding: const EdgeInsets.only(left: 24, right: 16),
+                child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedPage = 0;
+                      });
+                    },
+                    child: SvgPicture.asset(SvgAsset.merlinLogo)),
+              ),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _selectedPage = 0;
+                  });
+                },
+                child: const Text24(
+                  text: 'Merlin',
+                  textColor: MyColors.black,
+                ),
               )
             ],
           ),
@@ -78,7 +97,7 @@ class _Page extends State {
             }
             onSelectTab(index);
           },
-          selectedItemColor: MyColors.puple,
+          selectedItemColor: MyColors.purple,
           unselectedItemColor: MyColors.grey,
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(

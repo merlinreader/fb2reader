@@ -1,13 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 
 import 'package:merlin/pages/profile/profile.dart';
-import 'package:merlin/pages/settings.dart';
-
-import 'package:merlin/functions/pickfile.dart';
+import 'package:merlin/pages/settings/settings.dart';
 
 class CustomNavBar extends StatefulWidget {
   const CustomNavBar({super.key});
@@ -19,7 +15,7 @@ class CustomNavBar extends StatefulWidget {
 class CustomNavBarState extends State<CustomNavBar> {
   int selectedPage = 0;
   final List screen = [Profile, MySettings];
-  
+
   void onItemTapped(int index) {
     setState(() {
       selectedPage = index;
@@ -33,7 +29,6 @@ class CustomNavBarState extends State<CustomNavBar> {
       backgroundColor: MyColors.white,
       type: BottomNavigationBarType.fixed,
       elevation: 1,
-      
       items: const [
         BottomNavigationBarItem(
           icon: Icon(CustomIcons.bookOpen),
@@ -50,11 +45,9 @@ class CustomNavBarState extends State<CustomNavBar> {
             label: 'Статистика'),
       ],
       onTap: (index) {
-       
-        onItemTapped(index); 
+        onItemTapped(index);
       },
-
-      selectedItemColor: MyColors.puple,
+      selectedItemColor: MyColors.purple,
       unselectedItemColor: MyColors.grey,
       showUnselectedLabels: true,
       selectedLabelStyle: const TextStyle(

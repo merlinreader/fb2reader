@@ -1,0 +1,22 @@
+[
+    {
+        "_id": "652fcc47ad4f8a7222a538ea",
+        "firstName": "Дон Карлеоне",
+        "totalPageCount": 200,
+        "totalPageCountMode": 100,
+        "telegramId": "346545767",
+        "country": "sdfsdf",
+        "area": "dsfghfdjhfykug",
+        "city": "fsddfghfgjhjk"
+    },
+    {
+        "_id": "652f8d23a46e9ed36754539d",
+        "firstName": "Miron44",
+        "totalPageCount": 50,
+        "totalPageCountMode": 10,
+        "telegramId": "3465767",
+        "country": "MOSCOW",
+        "area": "dsfghfdjhfykug",
+        "city": "fsddfghfgjhjk"
+    }
+]

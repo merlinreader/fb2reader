@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+//import 'package:merlin/components/appbar/appbar.dart';
+//import 'package:merlin/components/navbar/navbar.dart';
 
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/colors.dart';
@@ -32,6 +33,8 @@ class _ProfilePage extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        //appBar: CustomAppBar(),
+        //bottomNavigationBar: CustomNavBar(),
         body: Column(children: [
       Container(
           padding: const EdgeInsets.only(left: 24, top: 24),
@@ -67,15 +70,17 @@ class _ProfilePage extends State<ProfilePage> {
         child: Column(
           children: [
             Button(
-                text: 'Авторизоваться',
-                width: 312,
-                height: 48,
-                horizontalPadding: 97,
-                verticalPadding: 12,
-                buttonColor: MyColors.puple,
-                textColor: MyColors.white,
-                fontSize: 14,
-                onPressed: pres),
+              text: 'Авторизоваться',
+              width: 312,
+              height: 48,
+              horizontalPadding: 97,
+              verticalPadding: 12,
+              buttonColor: MyColors.purple,
+              textColor: MyColors.white,
+              fontSize: 14,
+              onPressed: sendEmail,
+              fontWeight: FontWeight.bold,
+            ),
             SizedBox(
               height: 10,
             ),
@@ -91,6 +96,7 @@ class _ProfilePage extends State<ProfilePage> {
                     buttonColor: MyColors.white,
                     textColor: MyColors.black,
                     fontSize: 14,
+                    fontWeight: FontWeight.bold,
                     onPressed: sendEmail),
               ),
             ),
@@ -106,15 +112,4 @@ void pres() {
   // ignore: avoid_print
   // ignore: avoid_print
   print('стас крутой');
-}
-
-void sendEmail() async {
-  final Uri _emailLaunchUri = Uri(
-    scheme: 'mailto',
-    path: 'example@example.com',
-    queryParameters: {'subject': 'Тема письма', 'body': 'Текст письма'},
-  );
-  if (await canLaunch(_emailLaunchUri.toString())) {
-    await launch(_emailLaunchUri.toString());
-  }
 }
