@@ -434,7 +434,7 @@ class _RecentPage extends State<RecentPage> {
         opacity: _isVisible ? 1.0 : 0.0,
         child: FloatingActionButton(
           onPressed: pickAndDisplayFile,
-          backgroundColor: MyColors.puple,
+          backgroundColor: MyColors.purple,
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.zero)),
           autofocus: true,

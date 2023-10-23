@@ -316,7 +316,7 @@ class _RecentPage extends State<RecentPage> {
         duration: const Duration(milliseconds: 150),
         opacity: _isVisible ? 0.0 : 1.0,
         child: FloatingActionButton(
-          onPressed: pickAndDisplayFile,
+          onPressed: loadImage,
           backgroundColor: MyColors.purple,
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.zero)),
