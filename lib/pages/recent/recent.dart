@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -49,12 +50,32 @@ Future<void> requestPermission() async {
 }
 
 class _RecentPage extends State<RecentPage> {
+  final ScrollController _scrollController = ScrollController();
+  bool _isVisible = false;
   Uint8List? imageBytes;
   List<ImageInfo> images = [];
   String? firstName;
   String? lastName;
   String? name;
   String? title;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _scrollController.addListener(() {
+      setState(() {
+        _isVisible = _scrollController.position.userScrollDirection ==
+            ScrollDirection.reverse;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Future<void> loadImage() async {
     await requestPermission();
@@ -176,19 +197,23 @@ class _RecentPage extends State<RecentPage> {
             children: [
               TextButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   showInputDialog(context, 'authorInput', index);
                 },
                 child: const Text("Изменить автора"),
               ),
               TextButton(
                 onPressed: () {
+                  Navigator.of(context).pop();
                   showInputDialog(context, 'bookNameInput', index);
                 },
                 child: const Text("Изменить название"),
               ),
               TextButton(
                 onPressed: () {
-                  // Действие при нажатии на кнопку "О книге"
+                  images.removeAt(index);
+                  setState(() {});
+                  Navigator.of(context).pop();
                 },
                 child: const Text(
                   "Удалить",
@@ -220,6 +245,7 @@ class _RecentPage extends State<RecentPage> {
             padding: const EdgeInsets.only(
                 top: 100), // Верхний отступ для DynamicHeightGridView
             child: DynamicHeightGridView(
+              controller: _scrollController,
               itemCount: images.length,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
@@ -255,14 +281,17 @@ class _RecentPage extends State<RecentPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: loadImage,
-        backgroundColor: MyColors.puple,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.zero),
+      floatingActionButton: AnimatedOpacity(
+        duration: const Duration(milliseconds: 150),
+        opacity: _isVisible ? 0.0 : 1.0,
+        child: FloatingActionButton(
+          onPressed: loadImage,
+          backgroundColor: MyColors.puple,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.zero)),
+          autofocus: true,
+          child: const Icon(CustomIcons.bookOpen),
         ),
-        autofocus: true,
-        child: const Icon(CustomIcons.bookOpen),
       ),
     );
   }
