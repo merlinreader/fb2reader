@@ -126,12 +126,6 @@ Widget _buildBody() {
                 picture: SvgAsset.blood1,
                 isLocked: false),
             SizedBox(height: 8),
-            AchievementCard(
-                name: '3 место за что-то там',
-                dataText: 'Март 2022',
-                picture: SvgAsset.blood1,
-                isLocked: false),
-            SizedBox(height: 8),
           ]),
         ),
       ])
