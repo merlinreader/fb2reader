@@ -211,9 +211,39 @@ class _RecentPage extends State<RecentPage> {
               ),
               TextButton(
                 onPressed: () {
-                  images.removeAt(index);
-                  setState(() {});
                   Navigator.of(context).pop();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text(images[index].bookName),
+                        content:
+                            const Text("Вы уверены, что хотите удалить книгу?"),
+                        actions: <Widget>[
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .pop(); // Закрыть диалоговое окно
+                            },
+                            child: const Text("Отмена"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              // Выполните удаление элемента
+                              images.removeAt(index);
+                              setState(() {});
+                              Navigator.of(context)
+                                  .pop(); // Закрыть диалоговое окно
+                            },
+                            child: const Text(
+                              "Удалить",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 child: const Text(
                   "Удалить",
