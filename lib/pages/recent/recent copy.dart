@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:merlin/components/appbar/appbar.dart';
-import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -221,7 +220,7 @@ class _RecentPage extends State<RecentPage> {
                 ],
               ))),
       appBar: const CustomAppBar(),
-      bottomNavigationBar: const CustomNavBar(),
+      //bottomNavigationBar: const CustomNavBar(),
       floatingActionButton: AnimatedOpacity(
         duration: const Duration(milliseconds: 150),
         opacity: _isVisible ? 0.0 : 1.0,

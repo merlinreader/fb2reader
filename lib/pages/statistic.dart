@@ -15,6 +15,7 @@ class StatisticPage extends StatelessWidget {
       home: Scaffold(
         backgroundColor: Colors.white,
         body: _buildBody(),
+        //bottomNavigationBar: CustomNavBar(),
       ),
     );
   }

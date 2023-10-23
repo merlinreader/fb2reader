@@ -25,6 +25,8 @@ dependencies:
   xml: ^6.3.0
   shared_preferences: ^2.2.2
   permission_handler: ^11.0.1
+  routemaster: ^1.0.1
+  go_router: ^12.0.0
 
 dev_dependencies:
   flutter_test:

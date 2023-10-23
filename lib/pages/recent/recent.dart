@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+//import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -346,6 +347,7 @@ class _RecentPage extends State<RecentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //bottomNavigationBar: CustomNavBar(),
       body: Padding(
           padding: const EdgeInsetsDirectional.fromSTEB(24, 28, 24, 24),
           child: MediaQuery.removePadding(

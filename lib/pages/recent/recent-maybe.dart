@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:merlin/components/appbar/appbar.dart';
-import 'package:merlin/components/navbar/navbar.dart';
+//import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:file_picker/file_picker.dart';
@@ -114,7 +114,7 @@ class _RecentPage extends State<RecentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(),
-      bottomNavigationBar: const CustomNavBar(),
+      //bottomNavigationBar: const CustomNavBar(),
       body: Container(
         padding: const EdgeInsets.all(20),
         child: Column(

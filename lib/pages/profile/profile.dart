@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+//import 'package:merlin/components/appbar/appbar.dart';
+//import 'package:merlin/components/navbar/navbar.dart';
 
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/colors.dart';
@@ -31,6 +33,8 @@ class _ProfilePage extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        //appBar: CustomAppBar(),
+        //bottomNavigationBar: CustomNavBar(),
         body: Column(children: [
       Container(
           padding: const EdgeInsets.only(left: 24, top: 24),
@@ -108,5 +112,3 @@ void pres() {
   // ignore: avoid_print
   print('стас крутой');
 }
-
-

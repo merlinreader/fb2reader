@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//import 'package:merlin/components/navbar/navbar.dart';
 //import 'package:merlin/components/appbar/appbar.dart';
 //import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/style/colors.dart';
@@ -17,6 +18,7 @@ class AchievementsPage extends StatelessWidget {
       home: Scaffold(
         backgroundColor: MyColors.bgWhite,
         body: _buildBody(),
+        //bottomNavigationBar: const CustomNavBar(),
       ),
     );
   }
