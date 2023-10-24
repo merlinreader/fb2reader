@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -13,16 +11,6 @@ import 'package:merlin/pages/statistic/statistic.dart';
 
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
-
-import 'package:merlin/pages/recent/imageloader.dart';
-
-class ImageInfo {
-  Uint8List? imageBytes;
-  String bookName;
-  String author;
-
-  ImageInfo({this.imageBytes, required this.bookName, required this.author});
-}
 
 class AppPage extends StatefulWidget {
   const AppPage({Key? key}) : super(key: key);
@@ -46,16 +34,6 @@ class Page extends State {
       _selectedPage = index;
     });
   }
-
-  final ImageLoader imageLoader = ImageLoader();
-  List<ImageInfo> images = [];
-
-  // final GlobalKey<RecentPageState> recentPageKey = GlobalKey();
-
-  // void _loadImage() {
-  //   // Вызов метода showImage из RecentPage
-  //   recentPageKey.currentState?.showImage(imageBytes, bookName, author);
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +92,7 @@ class Page extends State {
           ],
           onTap: (index) {
             if (index == 0) {
-              ImageLoader().loadImage();
+              pickFile();
               return;
             }
             onSelectTab(index);

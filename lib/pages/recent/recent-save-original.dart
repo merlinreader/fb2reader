@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -10,7 +9,6 @@ import 'package:flutter/rendering.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
-import 'package:merlin/pages/recent/imageloader.dart';
 
 // для получаения картинки из файла книги
 import 'package:xml/xml.dart';
@@ -20,7 +18,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class Recent extends StatelessWidget {
   const Recent({super.key});
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
@@ -32,7 +29,7 @@ class Recent extends StatelessWidget {
 class RecentPage extends StatefulWidget {
   const RecentPage({super.key});
   @override
-  State<RecentPage> createState() => RecentPageState();
+  State<RecentPage> createState() => _RecentPage();
 }
 
 class ImageInfo {
@@ -53,8 +50,7 @@ Future<void> requestPermission() async {
   }
 }
 
-class RecentPageState extends State<RecentPage> {
-  final ImageLoader imageLoader = ImageLoader();
+class _RecentPage extends State<RecentPage> {
   final ScrollController _scrollController = ScrollController();
   bool _isVisible = false;
   Uint8List? imageBytes;
@@ -64,41 +60,9 @@ class RecentPageState extends State<RecentPage> {
   String? name;
   String? title;
 
-  void showImage(Uint8List? imageBytes, String bookName, String author) {
-    print("recent: showImage started");
-    setState(() {
-      images.add(ImageInfo(
-          imageBytes: imageBytes, bookName: bookName, author: author));
-    });
-    print("recent: showImage done");
-    print(images);
-  }
-
   @override
   void initState() {
     super.initState();
-
-    // print("recent: stream started");
-    // imageLoader.imageStream.listen(
-    //   (imageData) {
-    //     // showImage(imageData.imageBytes, imageData.title, imageData.author);
-    //     setState(() {
-    //       print("recent: stream works");
-    //       showImage(imageData.imageBytes, imageData.title, imageData.author);
-    //     });
-    //   },
-    //   onDone: () => print("Stream done"),
-    //   onError: (error) => print(error),
-    // );
-
-    print("recent: test stream started");
-    imageLoader.testStream.listen(
-      (data) {
-        print('recent: test stream works $data');
-      },
-      onDone: () => print("testStream done"),
-      onError: (error) => print(error),
-    );
 
     _scrollController.addListener(() {
       setState(() {
