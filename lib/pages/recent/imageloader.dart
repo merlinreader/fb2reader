@@ -4,10 +4,12 @@ import 'dart:typed_data';
 import 'dart:async';
 
 // для получаения картинки из файла книги
+import 'package:merlin/pages/recent/recent.dart';
 import 'package:xml/xml.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:merlin/pages/page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageData {
   final Uint8List imageBytes;
@@ -15,19 +17,36 @@ class ImageData {
   final String author;
 
   ImageData(this.imageBytes, this.title, this.author);
+
+  Map<String, dynamic> toJson() {
+    return {
+      'imageBytes': imageBytes,
+      'title': title,
+      'author': author,
+    };
+  }
+
+  factory ImageData.fromJson(Map<String, dynamic> json) {
+    return ImageData(
+      json['imageBytes'],
+      json['title'],
+      json['author'],
+    );
+  }
 }
 
 class ImageLoader {
-  final imageController = StreamController<ImageData>();
-  Stream<ImageData> get imageStream => imageController.stream;
-
-  final testContoller = StreamController<String>();
-  Stream<String> get testStream => testContoller.stream;
-
   String title = "Название не найдено";
   String firstName = "";
   String lastName = "";
   String name = "Автор не найден";
+
+  late Uint8List decodedBytes;
+
+  // Future<void> saveDataToLocalStorage(String key, String value) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.setString(key, value);
+  // }
 
   Future<void> loadImage() async {
     await requestPermission();
@@ -42,7 +61,7 @@ class ImageLoader {
       final XmlElement binaryInfo = document.findAllElements('binary').first;
       final String binary = binaryInfo.text;
       final String cleanedBinary = binary.replaceAll(RegExp(r"\s+"), "");
-      Uint8List decodedBytes = base64.decode(cleanedBinary);
+      decodedBytes = base64.decode(cleanedBinary);
 
       try {
         final XmlElement titleInfo =
@@ -71,10 +90,18 @@ class ImageLoader {
         print('Произошла ошибка: нет автора: $e');
       }
 
-      imageController.add(ImageData(decodedBytes, title, name));
-      testContoller.add("Hello");
       print("imageloader done");
     }
+    // await saveDataToLocalStorage('booksKey', 'Hello, World!');
+    ImageData imageData = ImageData(decodedBytes, title, name);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('booksKey', json.encode(imageData.toJson()));
+    print(
+        'imageLoader imageData.imageBytes.length ${imageData.imageBytes.length} symbols');
+    print('imageLoader imageData.author "${imageData.author}"');
+    print('imageLoader imageData.title "${imageData.title}"');
+
+    RecentPageState().initState();
   }
 }
 

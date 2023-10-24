@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -11,6 +10,7 @@ import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // для получаения картинки из файла книги
 import 'package:xml/xml.dart';
@@ -35,12 +35,36 @@ class RecentPage extends StatefulWidget {
   State<RecentPage> createState() => RecentPageState();
 }
 
+// class ImageInfo {
+//   Uint8List? imageBytes;
+//   String title;
+//   String author;
+
+//   ImageInfo({this.imageBytes, required this.title, required this.author});
+// }
+
 class ImageInfo {
   Uint8List? imageBytes;
-  String bookName;
+  String title;
   String author;
 
-  ImageInfo({this.imageBytes, required this.bookName, required this.author});
+  ImageInfo({this.imageBytes, required this.title, required this.author});
+
+  Map<String, dynamic> toJson() {
+    return {
+      'imageBytes': imageBytes,
+      'title': title,
+      'author': author,
+    };
+  }
+
+  factory ImageInfo.fromJson(Map<String, dynamic> json) {
+    return ImageInfo(
+      imageBytes: Uint8List.fromList(List<int>.from(json['imageBytes'])),
+      title: json['title'],
+      author: json['author'],
+    );
+  }
 }
 
 Future<void> requestPermission() async {
@@ -64,12 +88,12 @@ class RecentPageState extends State<RecentPage> {
   String? name;
   String? title;
 
-  void showImage(Uint8List? imageBytes, String bookName, String author) {
+  void showImage(Uint8List? imageBytes, String title, String author) {
     print("recent: showImage started");
-    setState(() {
-      images.add(ImageInfo(
-          imageBytes: imageBytes, bookName: bookName, author: author));
-    });
+    // setState(() {
+    //   images
+    //       .add(ImageInfo(imageBytes: imageBytes, title: title, author: author));
+    // });
     print("recent: showImage done");
     print(images);
   }
@@ -78,27 +102,7 @@ class RecentPageState extends State<RecentPage> {
   void initState() {
     super.initState();
 
-    // print("recent: stream started");
-    // imageLoader.imageStream.listen(
-    //   (imageData) {
-    //     // showImage(imageData.imageBytes, imageData.title, imageData.author);
-    //     setState(() {
-    //       print("recent: stream works");
-    //       showImage(imageData.imageBytes, imageData.title, imageData.author);
-    //     });
-    //   },
-    //   onDone: () => print("Stream done"),
-    //   onError: (error) => print(error),
-    // );
-
-    print("recent: test stream started");
-    imageLoader.testStream.listen(
-      (data) {
-        print('recent: test stream works $data');
-      },
-      onDone: () => print("testStream done"),
-      onError: (error) => print(error),
-    );
+    getDataFromLocalStorage('booksKey');
 
     _scrollController.addListener(() {
       setState(() {
@@ -112,6 +116,29 @@ class RecentPageState extends State<RecentPage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  // void testStorage() async {
+  //   String data = await getDataFromLocalStorage('booksKey');
+  //   print(data); // Выведет "Hello, World!"
+  // }
+
+  Future<void> getDataFromLocalStorage(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? imageDataJson = prefs.getString(key);
+    if (imageDataJson != null) {
+      ImageInfo imageData = ImageInfo.fromJson(json.decode(imageDataJson));
+      print(
+          'recent: imageData.imageBytes.length: ${imageData.imageBytes?.length}');
+      print('recent: imageData.author: "${imageData.author}"');
+      print('recent: imageData.title: "${imageData.title}"');
+
+      images.add(ImageInfo(
+          imageBytes: imageData.imageBytes,
+          title: imageData.title,
+          author: imageData.author));
+      setState(() {});
+    }
   }
 
   Future<void> loadImage() async {
@@ -164,7 +191,7 @@ class RecentPageState extends State<RecentPage> {
       setState(() {
         images.add(ImageInfo(
             imageBytes: decodedBytes,
-            bookName: title as String,
+            title: title as String,
             author: name as String));
       });
     }
@@ -206,9 +233,9 @@ class RecentPageState extends State<RecentPage> {
                       images[index].author = updatedValue;
                     });
                   } else if (yourVariable == 'bookNameInput') {
-                    images[index].bookName = updatedValue;
+                    images[index].title = updatedValue;
                     setState(() {
-                      images[index].bookName = updatedValue;
+                      images[index].title = updatedValue;
                     });
                   }
                   Navigator.of(context).pop();
@@ -253,7 +280,7 @@ class RecentPageState extends State<RecentPage> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: Text(images[index].bookName),
+                        title: Text(images[index].title),
                         content:
                             const Text("Вы уверены, что хотите удалить книгу?"),
                         actions: <Widget>[
@@ -333,9 +360,9 @@ class RecentPageState extends State<RecentPage> {
                           ? '${images[index].author.substring(0, 20)}...'
                           : images[index].author),
                       Text(
-                        images[index].bookName.length > 20
-                            ? '${images[index].bookName.substring(0, 20)}...'
-                            : images[index].bookName,
+                        images[index].title.length > 20
+                            ? '${images[index].title.substring(0, 20)}...'
+                            : images[index].title,
                         maxLines: 1,
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
