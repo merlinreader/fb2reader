@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 //import 'package:merlin/components/navbar/navbar.dart';
@@ -13,7 +11,6 @@ import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // для получаения картинки из файла книги
-import 'package:xml/xml.dart';
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -35,26 +32,24 @@ class RecentPage extends StatefulWidget {
   State<RecentPage> createState() => RecentPageState();
 }
 
-// class ImageInfo {
-//   Uint8List? imageBytes;
-//   String title;
-//   String author;
-
-//   ImageInfo({this.imageBytes, required this.title, required this.author});
-// }
-
 class ImageInfo {
   Uint8List? imageBytes;
   String title;
   String author;
+  String fileName;
 
-  ImageInfo({this.imageBytes, required this.title, required this.author});
+  ImageInfo(
+      {this.imageBytes,
+      required this.title,
+      required this.author,
+      required this.fileName});
 
   Map<String, dynamic> toJson() {
     return {
       'imageBytes': imageBytes,
       'title': title,
       'author': author,
+      'fileName': fileName,
     };
   }
 
@@ -63,6 +58,7 @@ class ImageInfo {
       imageBytes: Uint8List.fromList(List<int>.from(json['imageBytes'])),
       title: json['title'],
       author: json['author'],
+      fileName: json['fileName'],
     );
   }
 }
@@ -90,10 +86,6 @@ class RecentPageState extends State<RecentPage> {
 
   void showImage(Uint8List? imageBytes, String title, String author) {
     print("recent: showImage started");
-    // setState(() {
-    //   images
-    //       .add(ImageInfo(imageBytes: imageBytes, title: title, author: author));
-    // });
     print("recent: showImage done");
     print(images);
   }
@@ -118,82 +110,53 @@ class RecentPageState extends State<RecentPage> {
     super.dispose();
   }
 
-  // void testStorage() async {
-  //   String data = await getDataFromLocalStorage('booksKey');
-  //   print(data); // Выведет "Hello, World!"
-  // }
-
   Future<void> getDataFromLocalStorage(String key) async {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataJson = prefs.getString(key);
+    print('recent: $imageDataJson');
     if (imageDataJson != null) {
-      ImageInfo imageData = ImageInfo.fromJson(json.decode(imageDataJson));
-      print(
-          'recent: imageData.imageBytes.length: ${imageData.imageBytes?.length}');
-      print('recent: imageData.author: "${imageData.author}"');
-      print('recent: imageData.title: "${imageData.title}"');
-
-      images.add(ImageInfo(
-          imageBytes: imageData.imageBytes,
-          title: imageData.title,
-          author: imageData.author));
+      images = (jsonDecode(imageDataJson) as List)
+          .map((item) => ImageInfo.fromJson(item))
+          .toList();
       setState(() {});
     }
   }
 
-  Future<void> loadImage() async {
-    await requestPermission();
-    // Выбор файла fb2
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
-    if (result != null) {
-      // Получение пути к файлу и чтение его содержимого
-      String path = result.files.single.path!;
-      String fileContent = await File(path).readAsString();
+  Future<void> delDataFromLocalStorage(String key, String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? imageDataToAdd = prefs.getString('booksKey');
+    List<ImageInfo> imageDatas = [];
+    if (imageDataToAdd != null) {
+      imageDatas = (jsonDecode(imageDataToAdd) as List)
+          .map((item) => ImageInfo.fromJson(item))
+          .toList();
+      imageDatas.removeWhere((element) => element.fileName == path);
+      String imageDatasString = jsonEncode(imageDatas);
+      await prefs.setString('booksKey', imageDatasString);
+      setState(() {});
+    }
+  }
 
-      // Парсинг файла и поиск тегов <binary>
-      XmlDocument document = XmlDocument.parse(fileContent);
-      final XmlElement binaryInfo = document.findAllElements('binary').first;
-      final String binary = binaryInfo.text;
-      final String cleanedBinary = binary.replaceAll(RegExp(r"\s+"), "");
-
-      // Декодирование base64 в байты изображения
-      Uint8List decodedBytes = base64.decode(cleanedBinary);
-
-      try {
-        final XmlElement titleInfo =
-            document.findAllElements('title-info').first;
-        final XmlElement titleInfoTag =
-            titleInfo.findElements('book-title').first;
-        final String titleFromInfo = titleInfoTag.text;
-        title = titleFromInfo;
-      } catch (e) {
-        print('Произошла ошибка: нет названия: $e');
-        title = "Название не найдено";
+  Future<void> changeDataFromLocalStorage(
+      String key, String path, String changeField, String updatedValue) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? imageDataToAdd = prefs.getString('booksKey');
+    List<ImageInfo> imageDatas = [];
+    if (imageDataToAdd != null) {
+      imageDatas = (jsonDecode(imageDataToAdd) as List)
+          .map((item) => ImageInfo.fromJson(item))
+          .toList();
+      var index =
+          imageDatas.indexWhere((element) => element.fileName.startsWith(path));
+      if (changeField == 'author') {
+        imageDatas[index].author = updatedValue;
+      } else if (changeField == 'title') {
+        imageDatas[index].title = updatedValue;
       }
 
-      try {
-        final XmlElement authorInfo = document.findAllElements('author').first;
-        final XmlElement firstNameInfo =
-            authorInfo.findElements('first-name').first;
-        final String firstNameFromInfo = firstNameInfo.text;
-
-        final XmlElement lastNameInfo =
-            authorInfo.findElements('last-name').first;
-        final String lastNameFromInfo = lastNameInfo.text;
-        firstName = firstNameFromInfo;
-        lastName = lastNameFromInfo;
-        name = '$firstNameFromInfo $lastNameFromInfo';
-      } catch (e) {
-        print('Произошла ошибка: нет автора: $e');
-        name = "Автор не найден";
-      }
-
-      setState(() {
-        images.add(ImageInfo(
-            imageBytes: decodedBytes,
-            title: title as String,
-            author: name as String));
-      });
+      String imageDatasString = jsonEncode(imageDatas);
+      await prefs.setString('booksKey', imageDatasString);
+      setState(() {});
     }
   }
 
@@ -228,11 +191,15 @@ class RecentPageState extends State<RecentPage> {
                   );
                 } else {
                   if (yourVariable == 'authorInput') {
+                    changeDataFromLocalStorage('booksKey',
+                        images[index].fileName, 'author', updatedValue);
                     images[index].author = updatedValue;
                     setState(() {
                       images[index].author = updatedValue;
                     });
                   } else if (yourVariable == 'bookNameInput') {
+                    changeDataFromLocalStorage('booksKey',
+                        images[index].fileName, 'title', updatedValue);
                     images[index].title = updatedValue;
                     setState(() {
                       images[index].title = updatedValue;
@@ -294,6 +261,8 @@ class RecentPageState extends State<RecentPage> {
                           TextButton(
                             onPressed: () {
                               // Выполните удаление элемента
+                              delDataFromLocalStorage(
+                                  'booksKey', images[index].fileName);
                               images.removeAt(index);
                               setState(() {});
                               Navigator.of(context)
@@ -378,15 +347,23 @@ class RecentPageState extends State<RecentPage> {
       floatingActionButton: AnimatedOpacity(
         duration: const Duration(milliseconds: 150),
         opacity: _isVisible ? 0.0 : 1.0,
-        child: FloatingActionButton(
-          onPressed: loadImage,
+        child: const FloatingActionButton(
+          onPressed: openBook,
           backgroundColor: MyColors.purple,
-          shape: const RoundedRectangleBorder(
+          shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.zero)),
           autofocus: true,
-          child: const Icon(CustomIcons.bookOpen),
+          child: Icon(CustomIcons.bookOpen),
         ),
       ),
     );
   }
+}
+
+void openBook() {
+  Fluttertoast.showToast(
+    msg: 'Типа книжка открыласьヽ(°□° )ノ',
+    toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+    gravity: ToastGravity.BOTTOM, // Расположение уведомления
+  );
 }
