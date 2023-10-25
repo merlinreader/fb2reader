@@ -6,15 +6,21 @@ import 'package:http/http.dart' as http;
 
 class StatTable extends StatelessWidget {
   final String path;
+  final String country;
+  final String area;
+  final String city;
 
   const StatTable({
     required this.path,
+    required this.country,
+    required this.area,
+    required this.city,
     Key? key,
   }) : super(key: key);
 
   Future<List<dynamic>> fetchJson() async {
     final url = Uri.parse(
-        'https://fb2.cloud.leam.pro/api/statistic/$path?sortBy=totalPageCountWordMode');
+        'https://fb2.cloud.leam.pro/api/statistic/$path?sortBy=totalPageCountWordMode&country=$country&area=$area&city=$city');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -104,7 +110,15 @@ class StatTable extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Text('Ошибка: ${snapshot.error}');
           } else {
-            return const CircularProgressIndicator();
+            return const Center(
+                child: Column(children: [
+              SizedBox(height: 20),
+              SizedBox(
+                width: 30, // Задайте желаемую ширину
+                height: 30, // Задайте желаемую высоту
+                child: CircularProgressIndicator(),
+              ),
+            ]));
           }
         },
       ),
