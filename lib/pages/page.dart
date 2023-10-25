@@ -13,9 +13,20 @@ import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
 
 import 'package:merlin/pages/recent/imageloader.dart';
+import 'package:merlin/pages/reader/reader.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({Key? key}) : super(key: key);
+
+  void openReader(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return const ReaderPage();
+        },
+      ),
+    );
+  }
 
   @override
   Page createState() => Page();
