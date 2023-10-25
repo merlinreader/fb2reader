@@ -150,19 +150,34 @@ class Country extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Swipe(
         statDay: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statWeek: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statMonth: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statSemiAnnual: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statAnnual: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ));
   }
 }
@@ -172,19 +187,34 @@ class Region extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Swipe(
         statDay: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statWeek: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statMonth: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statSemiAnnual: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statAnnual: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ));
   }
 }
@@ -194,19 +224,34 @@ class City extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Swipe(
         statDay: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statWeek: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statMonth: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statSemiAnnual: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ),
         statAnnual: StatTable(
-          path: 'annual',
+          path: 'daily',
+          country: 'Russia',
+          area: 'obl',
+          city: 'YURGA',
         ));
   }
 }
@@ -289,11 +334,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
               width: currentIndex == 0
                   ? 56
                   : currentIndex == 1
-                      ? 57
+                      ? 64
                       : currentIndex == 2
-                          ? 56
+                          ? 59
                           : currentIndex == 3
-                              ? 62
+                              ? 70
                               : currentIndex == 4
                                   ? 56
                                   : 0,
@@ -317,8 +362,9 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
     return Column(
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const SizedBox(width: 24),
+            const SizedBox(width: 20),
             Expanded(
               child: buildTab(
                 TextButton(
