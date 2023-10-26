@@ -152,32 +152,32 @@ class Country extends StatelessWidget {
         statDay: StatTable(
           path: 'daily',
           country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          area: '',
+          city: '',
         ),
         statWeek: StatTable(
-          path: 'daily',
+          path: 'weekly',
           country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          area: '',
+          city: '',
         ),
         statMonth: StatTable(
-          path: 'daily',
+          path: 'monthly',
           country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          area: '',
+          city: '',
         ),
         statSemiAnnual: StatTable(
-          path: 'daily',
+          path: 'semi-annual',
           country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          area: '',
+          city: '',
         ),
         statAnnual: StatTable(
-          path: 'daily',
+          path: 'annual',
           country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          area: '',
+          city: '',
         ));
   }
 }
@@ -188,33 +188,33 @@ class Region extends StatelessWidget {
     return const Swipe(
         statDay: StatTable(
           path: 'daily',
-          country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          country: '',
+          area: '',
+          city: '',
         ),
         statWeek: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          path: 'weekly',
+          country: '',
+          area: '',
+          city: '',
         ),
         statMonth: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          path: 'monthly',
+          country: '',
+          area: '',
+          city: '',
         ),
         statSemiAnnual: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          path: 'semi-annual',
+          country: '',
+          area: '',
+          city: '',
         ),
         statAnnual: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: 'obl',
-          city: 'YURGA',
+          path: 'annual',
+          country: '',
+          area: '',
+          city: '',
         ));
   }
 }
@@ -225,32 +225,32 @@ class City extends StatelessWidget {
     return const Swipe(
         statDay: StatTable(
           path: 'daily',
-          country: 'Russia',
-          area: 'obl',
+          country: '',
+          area: '',
           city: 'YURGA',
         ),
         statWeek: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: 'obl',
+          path: 'weekly',
+          country: '',
+          area: '',
           city: 'YURGA',
         ),
         statMonth: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: 'obl',
+          path: 'monthly',
+          country: '',
+          area: '',
           city: 'YURGA',
         ),
         statSemiAnnual: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: 'obl',
+          path: 'semi-annual',
+          country: '',
+          area: '',
           city: 'YURGA',
         ),
         statAnnual: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: 'obl',
+          path: 'annual',
+          country: '',
+          area: '',
           city: 'YURGA',
         ));
   }
@@ -321,38 +321,29 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
     });
   }
 
-  Widget buildTab(TextButton tabButton, bool isActive) {
+  Widget buildTab(Container tabButton, bool isActive) {
+    final mediaQuery = MediaQuery.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         tabButton,
-        SizedBox(
-          height: 2,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              width: currentIndex == 0
-                  ? 56
-                  : currentIndex == 1
-                      ? 64
-                      : currentIndex == 2
-                          ? 59
-                          : currentIndex == 3
-                              ? 70
-                              : currentIndex == 4
-                                  ? 56
-                                  : 0,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: isActive ? MyColors.purple : Colors.transparent,
-                    width: 2,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
+        isActive
+            ? Container(
+                height: 2,
+                color: MyColors.purple,
+                width: currentIndex == 0
+                    ? 30
+                    : currentIndex == 1
+                        ? 43
+                        : currentIndex == 2
+                            ? 37
+                            : currentIndex == 3
+                                ? 48
+                                : currentIndex == 4
+                                    ? 20
+                                    : 0,
+              )
+            : Container(),
       ],
     );
   }
@@ -367,17 +358,21 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
             const SizedBox(width: 20),
             Expanded(
               child: buildTab(
-                TextButton(
-                  onPressed: () {
-                    tabController.animateTo(0);
-                    setState(() {
-                      currentIndex = 0;
-                    });
-                  },
-                  child: Text14Bold(
-                    text: 'День',
-                    textColor:
-                        currentIndex == 0 ? MyColors.black : MyColors.grey,
+                Container(
+                  width: 30, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(0);
+                      setState(() {
+                        currentIndex = 0;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'День',
+                      textColor:
+                          currentIndex == 0 ? MyColors.black : MyColors.grey,
+                    ),
                   ),
                 ),
                 currentIndex == 0,
@@ -385,17 +380,21 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
             ),
             Expanded(
               child: buildTab(
-                TextButton(
-                  onPressed: () {
-                    tabController.animateTo(1);
-                    setState(() {
-                      currentIndex = 1;
-                    });
-                  },
-                  child: Text14Bold(
-                    text: 'Неделя',
-                    textColor:
-                        currentIndex == 1 ? MyColors.black : MyColors.grey,
+                Container(
+                  width: 43, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(1);
+                      setState(() {
+                        currentIndex = 1;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'Неделя',
+                      textColor:
+                          currentIndex == 1 ? MyColors.black : MyColors.grey,
+                    ),
                   ),
                 ),
                 currentIndex == 1,
@@ -403,17 +402,21 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
             ),
             Expanded(
               child: buildTab(
-                TextButton(
-                  onPressed: () {
-                    tabController.animateTo(2);
-                    setState(() {
-                      currentIndex = 2;
-                    });
-                  },
-                  child: Text14Bold(
-                    text: 'Месяц',
-                    textColor:
-                        currentIndex == 2 ? MyColors.black : MyColors.grey,
+                Container(
+                  width: 37, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(2);
+                      setState(() {
+                        currentIndex = 2;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'Месяц',
+                      textColor:
+                          currentIndex == 2 ? MyColors.black : MyColors.grey,
+                    ),
                   ),
                 ),
                 currentIndex == 2,
@@ -421,17 +424,21 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
             ),
             Expanded(
               child: buildTab(
-                TextButton(
-                  onPressed: () {
-                    tabController.animateTo(3);
-                    setState(() {
-                      currentIndex = 3;
-                    });
-                  },
-                  child: Text14Bold(
-                    text: 'Полгода',
-                    textColor:
-                        currentIndex == 3 ? MyColors.black : MyColors.grey,
+                Container(
+                  width: 48, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(3);
+                      setState(() {
+                        currentIndex = 3;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'Полгода',
+                      textColor:
+                          currentIndex == 3 ? MyColors.black : MyColors.grey,
+                    ),
                   ),
                 ),
                 currentIndex == 3,
@@ -439,17 +446,21 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
             ),
             Expanded(
               child: buildTab(
-                TextButton(
-                  onPressed: () {
-                    tabController.animateTo(4);
-                    setState(() {
-                      currentIndex = 4;
-                    });
-                  },
-                  child: Text14Bold(
-                    text: 'Год',
-                    textColor:
-                        currentIndex == 4 ? MyColors.black : MyColors.grey,
+                Container(
+                  width: 20, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(4);
+                      setState(() {
+                        currentIndex = 4;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'Год',
+                      textColor:
+                          currentIndex == 4 ? MyColors.black : MyColors.grey,
+                    ),
                   ),
                 ),
                 currentIndex == 4,
