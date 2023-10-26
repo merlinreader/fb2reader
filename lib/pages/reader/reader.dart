@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:merlin/style/colors.dart';
 
 import 'dart:async';
 
@@ -71,7 +73,11 @@ class Reader extends State {
           .toList();
       setState(() {});
     }
-    getText = textes[0].fileText.toString();
+    getText = textes[0]
+        .fileText
+        .toString()
+        .replaceAll(RegExp(r'\['), '')
+        .replaceAll(RegExp(r'\]'), '');
     print('reader textes[0].fileText: ${textes[0].fileText.toString()}');
     print('reader getText: $getText');
   }
@@ -95,7 +101,8 @@ class Reader extends State {
 
   @override
   Widget build(BuildContext context) {
-    double pageSize = MediaQuery.of(context).size.width * 2.7;
+    double pageSize = MediaQuery.of(context).size.height * 1.3;
+    // double pageSize = MediaQuery.of(context).size.width * 2.45;
     // double pageHeight = MediaQuery.of(context).size.height;
 
     List<String> textPages = getPages(getText, pageSize.toInt());
@@ -108,29 +115,34 @@ class Reader extends State {
               100.0);
       setState(() {});
     });
+
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
-        body: PageView.builder(
-          controller: _pageController,
-          itemCount: textPages.length,
-          itemBuilder: (context, index) {
-            return ListView.builder(
-              itemCount: 1, // Один элемент на страницу
-              itemBuilder: (context, subIndex) {
-                currentPage = index;
-                return Center(
-                    child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    textPages[index],
-                    softWrap: true,
-                    style: const TextStyle(fontSize: 18.0),
-                  ),
-                ));
+        body: SafeArea(
+            left: false,
+            top: false,
+            right: false,
+            bottom: false,
+            minimum: const EdgeInsets.all(16.0),
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: textPages.length,
+              itemBuilder: (context, index) {
+                return ListView.builder(
+                  itemCount: 1, // Один элемент на страницу
+                  itemBuilder: (context, subIndex) {
+                    currentPage = index;
+                    return Center(
+                        child: Text(
+                      textPages[index],
+                      softWrap: true,
+                      style: const TextStyle(fontSize: 18.0),
+                    ));
+                  },
+                );
               },
-            );
-          },
-        ),
+            )),
         bottomNavigationBar: BottomAppBar(
           child: SizedBox(
             height: 25.0, // Высота вашей навигационной панели

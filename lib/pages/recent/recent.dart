@@ -142,6 +142,22 @@ class RecentPageState extends State<RecentPage> {
     }
   }
 
+  Future<void> delTextFromLocalStorage(String key, String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? imageDataToAdd = prefs.getString(key);
+    List<BookInfo> imageDatas = [];
+    if (imageDataToAdd != null) {
+      imageDatas = (jsonDecode(imageDataToAdd) as List)
+          .map((item) => BookInfo.fromJson(item))
+          .toList();
+      imageDatas.removeWhere((element) => element.filePath == path);
+      String imageDatasString = jsonEncode(imageDatas);
+      bool success = await prefs.setString(key, imageDatasString);
+      print('recent delete text: $success');
+      setState(() {});
+    }
+  }
+
   Future<void> sendDataFromLocalStorage(String key, int index) async {
     List text = [];
     List<BookInfo> bookDatas = [];
@@ -149,7 +165,7 @@ class RecentPageState extends State<RecentPage> {
     XmlDocument document = XmlDocument.parse(fileContent);
     final Iterable<XmlElement> textInfo = document.findAllElements('body');
     for (var element in textInfo) {
-      text.add(element.innerText.replaceAll(RegExp(r'<.*?>'), ''));
+      text.add(element.innerText.replaceAll(RegExp(r'\[.*?\]'), ''));
     }
     BookInfo bookData = BookInfo(
         filePath: images[index].fileName,
@@ -289,6 +305,8 @@ class RecentPageState extends State<RecentPage> {
                               // Выполните удаление элемента
                               delDataFromLocalStorage(
                                   'booksKey', images[index].fileName);
+                              delTextFromLocalStorage(
+                                  'textKey', images[index].fileName);
                               images.removeAt(index);
                               setState(() {});
                               Navigator.of(context)
@@ -348,16 +366,9 @@ class RecentPageState extends State<RecentPage> {
                     children: [
                       if (images[index].imageBytes != null)
                         GestureDetector(
-                            onTap: () {
-                              sendDataFromLocalStorage('textKey', index);
-                              Fluttertoast.showToast(
-                                msg:
-                                    'Типа открылась книга ${images[index].title}',
-                                toastLength: Toast
-                                    .LENGTH_SHORT, // Длительность отображения
-                                gravity: ToastGravity
-                                    .BOTTOM, // Расположение уведомления
-                              );
+                            onTap: () async {
+                              await sendDataFromLocalStorage('textKey', index);
+                              const AppPage().openReader(context);
                             },
                             child: Image.memory(images[index].imageBytes!,
                                 width: MediaQuery.of(context).size.width / 2.5,

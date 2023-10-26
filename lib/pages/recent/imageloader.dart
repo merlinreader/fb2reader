@@ -88,7 +88,7 @@ class ImageLoader {
 
     final Iterable<XmlElement> textInfo = document.findAllElements('body');
     for (var element in textInfo) {
-      text.add(element.innerText.replaceAll(RegExp(r'<.*?>'), ''));
+      text.add(element.innerText.replaceAll(RegExp(r'\[.*?\]'), ''));
     }
 
     for (var element in text) {
