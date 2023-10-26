@@ -108,7 +108,13 @@ class StatTable extends StatelessWidget {
               ),
             );
           } else if (snapshot.hasError) {
-            return Text('Ошибка: ${snapshot.error}');
+            return const Row(
+              children: [
+                SizedBox(width: 20),
+                Text('Наш сервер сейчас отдыхает, извините за неудобства'),
+              ],
+            );
+            // return Text('Ошибка: ${snapshot.error}');
           } else {
             return const Center(
                 child: Column(children: [
