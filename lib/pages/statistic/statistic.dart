@@ -1,7 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/table.dart';
+import 'package:merlin/functions/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({Key? key}) : super(key: key);
@@ -19,7 +23,7 @@ class _StatisticPageState extends State<StatisticPage> {
       child: Column(
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Column(
               children: <Widget>[
                 const Row(
@@ -28,14 +32,14 @@ class _StatisticPageState extends State<StatisticPage> {
                       'Статистика',
                       textAlign: TextAlign.left,
                       style: TextStyle(
-                          fontSize: 24,
-                          fontFamily: 'Tektur',
-                          fontWeight: FontWeight.bold),
+                        fontSize: 24,
+                        fontFamily: 'Tektur',
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                SizedBox(height: 10),
+                const SizedBox(height: 24),
                 Row(
                   children: [
                     ElevatedButton(
@@ -47,7 +51,10 @@ class _StatisticPageState extends State<StatisticPage> {
                             ? MyColors.white
                             : MyColors.black,
                         shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero),
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        minimumSize: const Size(76, 40),
+                        elevation: 0,
                       ),
                       onPressed: () {
                         setState(() {
@@ -57,9 +64,10 @@ class _StatisticPageState extends State<StatisticPage> {
                       child: const Text(
                         'Страна',
                         style: TextStyle(
-                            fontFamily: 'Tektur',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
+                          fontFamily: 'Tektur',
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     ElevatedButton(
@@ -71,7 +79,10 @@ class _StatisticPageState extends State<StatisticPage> {
                             ? MyColors.white
                             : MyColors.black,
                         shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero),
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        minimumSize: const Size(76, 40),
+                        elevation: 0,
                       ),
                       onPressed: () {
                         setState(() {
@@ -81,9 +92,10 @@ class _StatisticPageState extends State<StatisticPage> {
                       child: const Text(
                         'Регион',
                         style: TextStyle(
-                            fontFamily: 'Tektur',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
+                          fontFamily: 'Tektur',
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     ElevatedButton(
@@ -95,7 +107,10 @@ class _StatisticPageState extends State<StatisticPage> {
                             ? MyColors.white
                             : MyColors.black,
                         shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero),
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        minimumSize: const Size(76, 40),
+                        elevation: 0,
                       ),
                       onPressed: () {
                         setState(() {
@@ -105,9 +120,10 @@ class _StatisticPageState extends State<StatisticPage> {
                       child: const Text(
                         'Город',
                         style: TextStyle(
-                            fontFamily: 'Tektur',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold),
+                          fontFamily: 'Tektur',
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],
@@ -119,7 +135,7 @@ class _StatisticPageState extends State<StatisticPage> {
             child: IndexedStack(
               index: _currentPageIndex,
               children: [
-                Swipe(), // Страница "Страна"
+                Country(), // Страница "Страна"
                 Region(), // Страница "Регион"
                 City(), // Страница "Город"
               ],
@@ -134,95 +150,390 @@ class _StatisticPageState extends State<StatisticPage> {
 class Country extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Swipe();
+    return FutureBuilder<String>(
+      future: getSavedLocation(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            final locationData = snapshot.data!.split(', ');
+            if (locationData.length >= 3) {
+              final country = locationData[0];
+              return Swipe(
+                statDay: StatTable(
+                  path: 'daily',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+                statWeek: StatTable(
+                  path: 'weekly',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+                statMonth: StatTable(
+                  path: 'monthly',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+                statSemiAnnual: StatTable(
+                  path: 'semi-annual',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+                statAnnual: StatTable(
+                  path: 'annual',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+              );
+            }
+          }
+          return const Text('Местоположение не найдено');
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 }
 
 class Region extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Swipe();
+    return FutureBuilder<String>(
+      future: getSavedLocation(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            final locationData = snapshot.data!.split(', ');
+            if (locationData.length >= 3) {
+              final country = locationData[0];
+              final area = locationData[1];
+              return Swipe(
+                statDay: StatTable(
+                  path: 'daily',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+                statWeek: StatTable(
+                  path: 'weekly',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+                statMonth: StatTable(
+                  path: 'monthly',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+                statSemiAnnual: StatTable(
+                  path: 'semi-annual',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+                statAnnual: StatTable(
+                  path: 'annual',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+              );
+            }
+          }
+          return const Text('Местоположение не найдено');
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 }
 
 class City extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Swipe();
+    return FutureBuilder<String>(
+      future: getSavedLocation(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            final locationData = snapshot.data!.split(', ');
+            if (locationData.length >= 3) {
+              final country = locationData[0];
+              final area = locationData[1];
+              final city = locationData[2];
+              return Swipe(
+                statDay: StatTable(
+                  path: 'daily',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+                statWeek: StatTable(
+                  path: 'weekly',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+                statMonth: StatTable(
+                  path: 'monthly',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+                statSemiAnnual: StatTable(
+                  path: 'semi-annual',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+                statAnnual: StatTable(
+                  path: 'annual',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+              );
+            }
+          }
+          return const Text('Местоположение не найдено');
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 }
 
 class Swipe extends StatefulWidget {
-  const Swipe({super.key});
+  final StatTable statDay;
+  final StatTable statWeek;
+  final StatTable statMonth;
+  final StatTable statSemiAnnual;
+  final StatTable statAnnual;
+
+  const Swipe({
+    super.key,
+    required this.statDay,
+    required this.statWeek,
+    required this.statMonth,
+    required this.statSemiAnnual,
+    required this.statAnnual,
+  });
 
   @override
-  SwipeState createState() => SwipeState();
+  // ignore: no_logic_in_create_state
+  SwipeState createState() => SwipeState(
+      statDay: statDay,
+      statWeek: statWeek,
+      statMonth: statMonth,
+      statSemiAnnual: statSemiAnnual,
+      statAnnual: statAnnual);
 }
 
 class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
+  final StatTable statDay;
+  final StatTable statWeek;
+  final StatTable statMonth;
+  final StatTable statSemiAnnual;
+  final StatTable statAnnual;
+
+  SwipeState({
+    required this.statDay,
+    required this.statWeek,
+    required this.statMonth,
+    required this.statSemiAnnual,
+    required this.statAnnual,
+    Key? key,
+  }) : super();
+
   late TabController tabController;
+  int currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    tabController = TabController(length: 4, vsync: this);
+    tabController = TabController(length: 5, vsync: this);
+    tabController.addListener(updateIndex);
   }
 
   @override
   void dispose() {
+    tabController.removeListener(updateIndex);
     tabController.dispose();
     super.dispose();
+  }
+
+  void updateIndex() {
+    setState(() {
+      currentIndex = tabController.index;
+    });
+  }
+
+  Widget buildTab(Container tabButton, bool isActive) {
+    final mediaQuery = MediaQuery.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        tabButton,
+        isActive
+            ? Container(
+                height: 2,
+                color: MyColors.purple,
+                width: currentIndex == 0
+                    ? 30
+                    : currentIndex == 1
+                        ? 43
+                        : currentIndex == 2
+                            ? 37
+                            : currentIndex == 3
+                                ? 48
+                                : currentIndex == 4
+                                    ? 20
+                                    : 0,
+              )
+            : Container(),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-          const SizedBox(width: 24),
-          TextButton(
-              onPressed: () => tabController.animateTo(0),
-              child: const Text14Bold(
-                text: 'День',
-                textColor: MyColors.black,
-              )),
-          const SizedBox(width: 16),
-          TextButton(
-              onPressed: () => tabController.animateTo(1),
-              child: const Text14Bold(
-                text: 'Неделя',
-                textColor: MyColors.black,
-              )),
-          const SizedBox(width: 16),
-          TextButton(
-              onPressed: () => tabController.animateTo(2),
-              child: const Text14Bold(
-                text: 'Месяц',
-                textColor: MyColors.black,
-              )),
-          const SizedBox(width: 16),
-          TextButton(
-              onPressed: () => tabController.animateTo(3),
-              child: const Text14Bold(
-                text: 'Год',
-                textColor: MyColors.black,
-              )),
-        ]),
-        Expanded(
-            child: TabBarView(
-          controller: tabController,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            StatTable(),
-            StatTable(),
-            StatTable(),
-            StatTable(),
+            const SizedBox(width: 20),
+            Expanded(
+              child: buildTab(
+                Container(
+                  width: 30, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(0);
+                      setState(() {
+                        currentIndex = 0;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'День',
+                      textColor:
+                          currentIndex == 0 ? MyColors.black : MyColors.grey,
+                    ),
+                  ),
+                ),
+                currentIndex == 0,
+              ),
+            ),
+            Expanded(
+              child: buildTab(
+                Container(
+                  width: 43, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(1);
+                      setState(() {
+                        currentIndex = 1;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'Неделя',
+                      textColor:
+                          currentIndex == 1 ? MyColors.black : MyColors.grey,
+                    ),
+                  ),
+                ),
+                currentIndex == 1,
+              ),
+            ),
+            Expanded(
+              child: buildTab(
+                Container(
+                  width: 37, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(2);
+                      setState(() {
+                        currentIndex = 2;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'Месяц',
+                      textColor:
+                          currentIndex == 2 ? MyColors.black : MyColors.grey,
+                    ),
+                  ),
+                ),
+                currentIndex == 2,
+              ),
+            ),
+            Expanded(
+              child: buildTab(
+                Container(
+                  width: 48, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(3);
+                      setState(() {
+                        currentIndex = 3;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'Полгода',
+                      textColor:
+                          currentIndex == 3 ? MyColors.black : MyColors.grey,
+                    ),
+                  ),
+                ),
+                currentIndex == 3,
+              ),
+            ),
+            Expanded(
+              child: buildTab(
+                Container(
+                  width: 20, // Установите нужную ширину
+                  height: 24,
+                  child: InkWell(
+                    onTap: () {
+                      tabController.animateTo(4);
+                      setState(() {
+                        currentIndex = 4;
+                      });
+                    },
+                    child: Text14Bold(
+                      text: 'Год',
+                      textColor:
+                          currentIndex == 4 ? MyColors.black : MyColors.grey,
+                    ),
+                  ),
+                ),
+                currentIndex == 4,
+              ),
+            ),
           ],
-        ))
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: tabController,
+            children: [
+              statDay,
+              statWeek,
+              statMonth,
+              statSemiAnnual,
+              statAnnual,
+            ],
+          ),
+        ),
       ],
     );
   }
-}
-
-void printFunc() {
-  print("Stas STAS STAS I CHE LOL STAS?");
 }

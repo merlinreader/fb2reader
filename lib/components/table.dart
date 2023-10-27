@@ -5,9 +5,22 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class StatTable extends StatelessWidget {
+  final String path;
+  final String country;
+  final String area;
+  final String city;
+
+  const StatTable({
+    required this.path,
+    required this.country,
+    required this.area,
+    required this.city,
+    Key? key,
+  }) : super(key: key);
+
   Future<List<dynamic>> fetchJson() async {
     final url = Uri.parse(
-        'https://aipro-energy.leam.pro/statistic/annual?sortBy=totalPageCountWordMode');
+        'https://fb2.cloud.leam.pro/api/statistic/$path?sortBy=totalPageCountWordMode&country=$country&area=$area&city=$city');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -27,7 +40,6 @@ class StatTable extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final dataList = snapshot.data!;
-
             return Padding(
               padding: const EdgeInsets.only(top: 8.0, right: 1),
               child: Theme(
@@ -45,20 +57,20 @@ class StatTable extends StatelessWidget {
                   columnSpacing: 15,
                   columns: const [
                     DataColumn(
-                      label: Text11(
+                      label: Text11Bold(
                         text: 'Имя',
                         textColor: MyColors.grey,
                       ),
                     ),
                     DataColumn(
-                      label: Text11(
+                      label: Text11Bold(
                         text: 'Страниц',
                         textColor: MyColors.grey,
                       ),
                     ),
                     DataColumn(
-                      label: Text11(
-                        text: 'Страниц в \nрежиме слова',
+                      label: Text11Bold(
+                        text: 'Страниц в\nрежиме слова',
                         textColor: MyColors.grey,
                       ),
                     ),
@@ -69,7 +81,9 @@ class StatTable extends StatelessWidget {
                       cells: [
                         DataCell(
                           Text11Bold(
-                            text: dataList[index]['firstName'] ?? '',
+                            text: dataList[index]['firstName']?.length > 10
+                                ? '${dataList[index]['firstName']?.substring(0, 10)}...'
+                                : dataList[index]['firstName'] ?? '',
                             textColor: MyColors.black,
                           ),
                         ),
@@ -96,9 +110,23 @@ class StatTable extends StatelessWidget {
               ),
             );
           } else if (snapshot.hasError) {
-            return Text('Ошибка: ${snapshot.error}');
+            return const Row(
+              children: [
+                SizedBox(width: 20),
+                Text('Наш сервер сейчас отдыхает, извините за неудобства'),
+              ],
+            );
+            // return Text('Ошибка: ${snapshot.error}');
           } else {
-            return const CircularProgressIndicator();
+            return const Center(
+                child: Column(children: [
+              SizedBox(height: 20),
+              SizedBox(
+                width: 30, // Задайте желаемую ширину
+                height: 30, // Задайте желаемую высоту
+                child: CircularProgressIndicator(),
+              ),
+            ]));
           }
         },
       ),
