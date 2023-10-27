@@ -5,7 +5,6 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/table.dart';
 import 'package:merlin/functions/location.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({Key? key}) : super(key: key);
@@ -134,7 +133,7 @@ class _StatisticPageState extends State<StatisticPage> {
           Expanded(
             child: IndexedStack(
               index: _currentPageIndex,
-              children: [
+              children: const [
                 Country(), // Страница "Страна"
                 Region(), // Страница "Регион"
                 City(), // Страница "Город"
@@ -148,6 +147,8 @@ class _StatisticPageState extends State<StatisticPage> {
 }
 
 class Country extends StatelessWidget {
+  const Country({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -201,6 +202,8 @@ class Country extends StatelessWidget {
 }
 
 class Region extends StatelessWidget {
+  const Region({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -255,6 +258,8 @@ class Region extends StatelessWidget {
 }
 
 class City extends StatelessWidget {
+  const City({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -375,7 +380,6 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
   }
 
   Widget buildTab(Container tabButton, bool isActive) {
-    final mediaQuery = MediaQuery.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
