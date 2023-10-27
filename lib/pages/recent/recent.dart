@@ -339,6 +339,18 @@ class RecentPageState extends State<RecentPage> {
               fontWeight: FontWeight.w500,
             ),
           ),
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (images.isEmpty)
+                  TextTektur(
+                      text: "Пока вы не добавили никакаих книг",
+                      fontsize: 16,
+                      textColor: MyColors.grey)
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(
                 top: 100), // Верхний отступ для DynamicHeightGridView
