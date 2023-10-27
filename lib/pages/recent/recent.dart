@@ -1,30 +1,22 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-//import 'package:merlin/components/navbar/navbar.dart';
+import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xml/xml.dart';
 
 // для получаения картинки из файла книги
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
-class Recent extends StatelessWidget {
-  const Recent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RecentPage(),
-    );
-  }
-}
+import 'package:merlin/pages/reader/reader.dart';
 
 class RecentPage extends StatefulWidget {
   const RecentPage({super.key});
@@ -79,6 +71,7 @@ class RecentPageState extends State<RecentPage> {
   bool _isVisible = false;
   Uint8List? imageBytes;
   List<ImageInfo> images = [];
+  List<BookInfo> textes = [];
   String? firstName;
   String? lastName;
   String? name;
@@ -124,7 +117,7 @@ class RecentPageState extends State<RecentPage> {
 
   Future<void> delDataFromLocalStorage(String key, String path) async {
     final prefs = await SharedPreferences.getInstance();
-    String? imageDataToAdd = prefs.getString('booksKey');
+    String? imageDataToAdd = prefs.getString(key);
     List<ImageInfo> imageDatas = [];
     if (imageDataToAdd != null) {
       imageDatas = (jsonDecode(imageDataToAdd) as List)
@@ -132,9 +125,47 @@ class RecentPageState extends State<RecentPage> {
           .toList();
       imageDatas.removeWhere((element) => element.fileName == path);
       String imageDatasString = jsonEncode(imageDatas);
-      await prefs.setString('booksKey', imageDatasString);
+      await prefs.setString(key, imageDatasString);
       setState(() {});
     }
+  }
+
+  Future<void> delTextFromLocalStorage(String key, String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? imageDataToAdd = prefs.getString(key);
+    List<BookInfo> imageDatas = [];
+    if (imageDataToAdd != null) {
+      imageDatas = (jsonDecode(imageDataToAdd) as List)
+          .map((item) => BookInfo.fromJson(item))
+          .toList();
+      imageDatas.removeWhere((element) => element.filePath == path);
+      String imageDatasString = jsonEncode(imageDatas);
+      bool success = await prefs.setString(key, imageDatasString);
+      print('recent delete text: $success');
+      setState(() {});
+    }
+  }
+
+  Future<void> sendDataFromLocalStorage(String key, int index) async {
+    List text = [];
+    List<BookInfo> bookDatas = [];
+    String fileContent = await File(images[index].fileName).readAsString();
+    XmlDocument document = XmlDocument.parse(fileContent);
+    final Iterable<XmlElement> textInfo = document.findAllElements('body');
+    for (var element in textInfo) {
+      text.add(element.innerText.replaceAll(RegExp(r'\[.*?\]'), ''));
+    }
+    BookInfo bookData = BookInfo(
+        filePath: images[index].fileName,
+        fileText: text.toString(),
+        title: images[index].title,
+        lastPosition: 0);
+    bookDatas.add(bookData);
+    String textDataString = jsonEncode(bookDatas);
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('textKey', textDataString);
+    print(textDataString);
   }
 
   Future<void> changeDataFromLocalStorage(
@@ -263,6 +294,8 @@ class RecentPageState extends State<RecentPage> {
                               // Выполните удаление элемента
                               delDataFromLocalStorage(
                                   'booksKey', images[index].fileName);
+                              delTextFromLocalStorage(
+                                  'textKey', images[index].fileName);
                               images.removeAt(index);
                               setState(() {});
                               Navigator.of(context)
@@ -321,9 +354,14 @@ class RecentPageState extends State<RecentPage> {
                   child: Column(
                     children: [
                       if (images[index].imageBytes != null)
-                        Image.memory(images[index].imageBytes!,
-                            width: MediaQuery.of(context).size.width / 2.5,
-                            fit: BoxFit.fitHeight),
+                        GestureDetector(
+                            onTap: () {
+                              sendDataFromLocalStorage('textKey', index);
+                              Navigator.pushNamed(context, RouteNames.reader);
+                            },
+                            child: Image.memory(images[index].imageBytes!,
+                                width: MediaQuery.of(context).size.width / 2.5,
+                                fit: BoxFit.fitHeight)),
                       const SizedBox(height: 4),
                       Text(images[index].author.length > 20
                           ? '${images[index].author.substring(0, 20)}...'
@@ -347,23 +385,17 @@ class RecentPageState extends State<RecentPage> {
       floatingActionButton: AnimatedOpacity(
         duration: const Duration(milliseconds: 150),
         opacity: _isVisible ? 0.0 : 1.0,
-        child: const FloatingActionButton(
-          onPressed: openBook,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.pushNamed(context, RouteNames.reader);
+          },
           backgroundColor: MyColors.purple,
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.zero)),
           autofocus: true,
-          child: Icon(CustomIcons.bookOpen),
+          child: const Icon(CustomIcons.bookOpen),
         ),
       ),
     );
   }
-}
-
-void openBook() {
-  Fluttertoast.showToast(
-    msg: 'Типа книжка открыласьヽ(°□° )ノ',
-    toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-    gravity: ToastGravity.BOTTOM, // Расположение уведомления
-  );
 }

@@ -10,12 +10,14 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:merlin/pages/reader/reader.dart';
 
 class ImageLoader {
   String title = "Название не найдено";
   String firstName = "";
   String lastName = "";
   String name = "Автор не найден";
+  List text = [];
 
   late Uint8List decodedBytes;
 
@@ -34,6 +36,8 @@ class ImageLoader {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataToAdd = prefs.getString('booksKey');
     List<ImageInfo> imageDatas = [];
+    List<BookInfo> bookDatas = [];
+
     if (imageDataToAdd != null) {
       imageDatas = (jsonDecode(imageDataToAdd) as List)
           .map((item) => ImageInfo.fromJson(item))
@@ -82,12 +86,29 @@ class ImageLoader {
       print('Произошла ошибка: нет автора: $e');
     }
 
-    print("imageloader done");
+    final Iterable<XmlElement> textInfo = document.findAllElements('body');
+    for (var element in textInfo) {
+      text.add(element.innerText.replaceAll(RegExp(r'\[.*?\]'), ''));
+    }
+
+    for (var element in text) {
+      print(element);
+    }
+
+    print('imageloader done');
     ImageInfo imageData = ImageInfo(
         imageBytes: decodedBytes, title: title, author: name, fileName: path);
-
     imageDatas.add(imageData);
+
+    BookInfo bookData = BookInfo(
+        filePath: path,
+        fileText: text.toString(),
+        title: title,
+        lastPosition: 0);
+    bookDatas.add(bookData);
     String imageDatasString = jsonEncode(imageDatas);
+    String textDataString = jsonEncode(bookDatas);
+    await prefs.setString('textKey', textDataString);
 
     bool success = await prefs.setString('booksKey', imageDatasString);
     print(success);
