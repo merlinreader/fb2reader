@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:merlin/UI/router.dart';
+import 'package:merlin/pages/settings/settings.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 
@@ -77,6 +78,24 @@ class Reader extends State {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  late Color getTextColor;
+  late Color getBgcColor;
+  List<ReaderStyle> styles = [];
+
+  Future<void> getStyleFromLocalStorage(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? textDataJson = prefs.getString(key);
+    print('recent textDataJson: $textDataJson');
+    if (textDataJson != null) {
+      styles = (jsonDecode(textDataJson) as List)
+          .map((item) => ReaderStyle.fromJson(item))
+          .toList();
+      setState(() {});
+    }
+    getTextColor = styles[0].textColor;
+    getBgcColor = styles[0].bgcColor;
   }
 
   String getText = "";
@@ -192,24 +211,27 @@ class Reader extends State {
           ],
         ),
       ),
-      body: SafeArea(
-          left: false,
-          top: false,
-          right: false,
-          bottom: false,
-          minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          child: ListView.builder(
-              controller: _pageController,
-              itemCount: textPages.length,
-              itemBuilder: (context, index) {
-                currentPage = index;
-                return Center(
-                    child: Text(
-                  textPages[index],
-                  softWrap: true,
-                  style: const TextStyle(fontSize: 18.0),
-                ));
-              })),
+      body: Container(
+          color: MyColors.white,
+          child: SafeArea(
+              left: false,
+              top: false,
+              right: false,
+              bottom: false,
+              minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: ListView.builder(
+                  controller: _pageController,
+                  itemCount: textPages.length,
+                  itemBuilder: (context, index) {
+                    currentPage = index;
+                    return Center(
+                        child: Text(
+                      textPages[index],
+                      softWrap: true,
+                      style: const TextStyle(
+                          fontSize: 18.0, color: MyColors.black),
+                    ));
+                  }))),
       bottomNavigationBar: BottomAppBar(
         child: SizedBox(
           height: 30.0, // Высота вашей навигационной панели

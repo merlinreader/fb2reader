@@ -1,10 +1,31 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/checkbox.dart';
-//import 'package:merlin/style/text.dart';
-//import 'package:merlin/components/checkbox.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class ReaderStyle {
+  Color textColor;
+  Color bgcColor;
+
+  ReaderStyle({required this.textColor, required this.bgcColor});
+  Map<String, dynamic> toJson() {
+    return {
+      'textColor': textColor,
+      'bgcColor': bgcColor,
+    };
+  }
+
+  factory ReaderStyle.fromJson(Map<String, dynamic> json) {
+    return ReaderStyle(
+      textColor: json['textColor'],
+      bgcColor: json['bgcColor'],
+    );
+  }
+}
 
 class MySettings extends StatelessWidget {
   const MySettings({super.key});
@@ -49,6 +70,24 @@ class _SettingsPageState extends State<SettingsPage> {
   bool textColorMint = false;
   bool textColorBeige = false;
   Color textColorPreview = MyColors.black;
+
+  late Color getTextColor;
+  late Color getBgcColor;
+  List<ReaderStyle> styles = [];
+
+  Future<void> sendStyleToLocalStorage(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? textDataJson = prefs.getString(key);
+    print('recent textDataJson: $textDataJson');
+    if (textDataJson != null) {
+      styles = (jsonDecode(textDataJson) as List)
+          .map((item) => ReaderStyle.fromJson(item))
+          .toList();
+      setState(() {});
+    }
+    getTextColor = styles[0].textColor;
+    getBgcColor = styles[0].bgcColor;
+  }
 
   void updateBackgroundColor(Color newColor) {
     backgroundColorPreview = newColor;
