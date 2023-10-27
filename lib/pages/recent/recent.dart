@@ -159,6 +159,7 @@ class RecentPageState extends State<RecentPage> {
         filePath: images[index].fileName,
         fileText: text.toString(),
         title: images[index].title,
+        author: images[index].author,
         lastPosition: 0);
     bookDatas.add(bookData);
     String textDataString = jsonEncode(bookDatas);
@@ -328,13 +329,26 @@ class RecentPageState extends State<RecentPage> {
     return Scaffold(
       body: Stack(
         children: [
-          const Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
                 24, 28, 24, 0), // Верхний отступ 0
             child: TextTektur(
               text: "Последнее",
               fontsize: 32,
               textColor: MyColors.black,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (images.isEmpty)
+                  TextTektur(
+                      text: "Пока вы не добавили никакаих книг",
+                      fontsize: 16,
+                      textColor: MyColors.grey)
+              ],
             ),
           ),
           Padding(

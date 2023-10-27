@@ -1,6 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:merlin/UI/router.dart';
+import 'package:merlin/pages/settings/settings.dart';
+import 'package:merlin/style/colors.dart';
+import 'package:merlin/style/text.dart';
 
 import 'dart:async';
 
@@ -11,6 +17,7 @@ class BookInfo {
   String filePath;
   String fileText;
   String title;
+  String author;
 
   double lastPosition = 0;
 
@@ -18,12 +25,14 @@ class BookInfo {
       {required this.filePath,
       required this.fileText,
       required this.title,
+      required this.author,
       required this.lastPosition});
   Map<String, dynamic> toJson() {
     return {
       'filePath': filePath,
       'fileText': fileText,
       'title': title,
+      'author': author,
       'lastPosition': lastPosition,
     };
   }
@@ -33,6 +42,7 @@ class BookInfo {
       filePath: json['filePath'],
       fileText: json['fileText'],
       title: json['title'],
+      author: json['author'],
       lastPosition: json['lastPosition'],
     );
   }
@@ -63,6 +73,29 @@ class Reader extends State {
     getDataFromLocalStorage('textKey');
     _getBatteryLevel();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  late Color getTextColor;
+  late Color getBgcColor;
+  List<ReaderStyle> styles = [];
+
+  Future<void> getStyleFromLocalStorage(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? textDataJson = prefs.getString(key);
+    print('recent textDataJson: $textDataJson');
+    if (textDataJson != null) {
+      styles = (jsonDecode(textDataJson) as List)
+          .map((item) => ReaderStyle.fromJson(item))
+          .toList();
+      setState(() {});
+    }
+    getTextColor = styles[0].textColor;
+    getBgcColor = styles[0].bgcColor;
   }
 
   String getText = "";
@@ -127,26 +160,119 @@ class Reader extends State {
               100.0);
       setState(() {});
     });
+    // TextTektur(
+    //   text: textes[0].author.toString().length +
+    //               textes[0].title.toString().length >
+    //           22
+    //       ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 10)}...'
+    //       : textes[0].title.toString(),
+    //   fontsize: 18,
+    //   textColor: MyColors.black,
+    //   fontWeight: FontWeight.w600,
+    // ),
 
     return Scaffold(
-      body: SafeArea(
-          left: false,
-          top: false,
-          right: false,
-          bottom: false,
-          minimum: const EdgeInsets.all(16.0),
-          child: ListView.builder(
-              controller: _pageController,
-              itemCount: textPages.length,
-              itemBuilder: (context, index) {
-                currentPage = index;
-                return Center(
-                    child: Text(
-                  textPages[index],
-                  softWrap: true,
-                  style: const TextStyle(fontSize: 18.0),
-                ));
-              })),
+      appBar: AppBar(
+        iconTheme: const IconThemeData(color: MyColors.black),
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: SvgPicture.asset(
+            'assets/images/chevron-left.svg',
+            width: 16,
+            height: 16,
+          ),
+        ),
+        backgroundColor: MyColors.white,
+        shadowColor: Colors.transparent,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            TextTektur(
+              text: textes[0].author.toString().length +
+                          textes[0].title.toString().length >
+                      22
+                  ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 10)}...'
+                  : textes[0].title.toString(),
+              fontsize: 18,
+              textColor: MyColors.black,
+              fontWeight: FontWeight.w600,
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, RouteNames.readerSettings);
+              },
+              child: const Icon(
+                Icons.settings,
+                color: MyColors.black,
+              ),
+            )
+          ],
+        ),
+      ),
+      body: Container(
+          color: MyColors.white,
+          child: SafeArea(
+              left: false,
+              top: false,
+              right: false,
+              bottom: false,
+              minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: ListView.builder(
+                  controller: _pageController,
+                  itemCount: textPages.length,
+                  itemBuilder: (context, index) {
+                    currentPage = index;
+                    return Center(
+                        child: Text(
+                      textPages[index],
+                      softWrap: true,
+                      style: const TextStyle(
+                          fontSize: 18.0, color: MyColors.black),
+                    ));
+                  }))),
+      bottomNavigationBar: BottomAppBar(
+        child: SizedBox(
+          height: 30.0, // Высота вашей навигационной панели
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                  child: TextTektur(
+                    text: '${_batteryLevel.toString()}%',
+                    fontsize: 12,
+                    textColor: MyColors.black,
+                    fontWeight: FontWeight.w600,
+                  )),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                child: Align(
+                    alignment: Alignment
+                        .topCenter, // Центрирование только этого элемента
+                    child: TextTektur(
+                      text: textes[0].title.toString().length > 28
+                          ? '${textes[0].title.toString().substring(0, 28)}...'
+                          : textes[0].title.toString(),
+                      fontsize: 12,
+                      textColor: MyColors.black,
+                      fontWeight: FontWeight.w600,
+                    )),
+              ),
+              Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                  child: TextTektur(
+                    text: '${pagePercent.toStringAsFixed(2)}%',
+                    fontsize: 12,
+                    textColor: MyColors.black,
+                    fontWeight: FontWeight.w600,
+                  )),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
