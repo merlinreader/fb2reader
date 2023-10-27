@@ -100,8 +100,11 @@ class ImageLoader {
         imageBytes: decodedBytes, title: title, author: name, fileName: path);
     imageDatas.add(imageData);
 
-    BookInfo bookData =
-        BookInfo(filePath: path, fileText: text.toString(), title: title);
+    BookInfo bookData = BookInfo(
+        filePath: path,
+        fileText: text.toString(),
+        title: title,
+        lastPosition: 0);
     bookDatas.add(bookData);
     String imageDatasString = jsonEncode(imageDatas);
     String textDataString = jsonEncode(bookDatas);

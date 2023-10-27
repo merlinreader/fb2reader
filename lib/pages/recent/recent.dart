@@ -170,7 +170,8 @@ class RecentPageState extends State<RecentPage> {
     BookInfo bookData = BookInfo(
         filePath: images[index].fileName,
         fileText: text.toString(),
-        title: images[index].title);
+        title: images[index].title,
+        lastPosition: 0);
     bookDatas.add(bookData);
     String textDataString = jsonEncode(bookDatas);
 

@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:merlin/style/colors.dart';
 
 import 'dart:async';
 
@@ -14,13 +12,19 @@ class BookInfo {
   String fileText;
   String title;
 
+  double lastPosition = 0;
+
   BookInfo(
-      {required this.filePath, required this.fileText, required this.title});
+      {required this.filePath,
+      required this.fileText,
+      required this.title,
+      required this.lastPosition});
   Map<String, dynamic> toJson() {
     return {
       'filePath': filePath,
       'fileText': fileText,
       'title': title,
+      'lastPosition': lastPosition,
     };
   }
 
@@ -29,6 +33,7 @@ class BookInfo {
       filePath: json['filePath'],
       fileText: json['fileText'],
       title: json['title'],
+      lastPosition: json['lastPosition'],
     );
   }
 }
@@ -43,6 +48,7 @@ class ReaderPage extends StatefulWidget {
 class Reader extends State {
   final Battery _battery = Battery();
   int _batteryLevel = 0;
+  final PageController _pageController = PageController();
 
   void _getBatteryLevel() async {
     final batteryLevel = await _battery.batteryLevel;
@@ -54,9 +60,9 @@ class Reader extends State {
 
   @override
   void initState() {
-    super.initState();
     getDataFromLocalStorage('textKey');
     _getBatteryLevel();
+    super.initState();
   }
 
   String getText = "";
@@ -85,24 +91,30 @@ class Reader extends State {
   List<String> getPages(String text, int pageSize) {
     List<String> pages = [];
     int textLength = text.length;
-    for (int i = 0; i < textLength; i += pageSize) {
+    int i = 0;
+
+    while (i < textLength) {
       int endIndex = i + pageSize;
       if (endIndex > textLength) {
         endIndex = textLength;
+      } else {
+        while (endIndex > i && !text[endIndex - 1].contains(RegExp(r'\s'))) {
+          endIndex--;
+        }
       }
       pages.add(text.substring(i, endIndex));
+      i = endIndex;
     }
     return pages;
   }
 
-  final PageController _pageController = PageController();
   int currentPage = 0;
   double pagePercent = 0;
 
   @override
   Widget build(BuildContext context) {
-    double pageSize = MediaQuery.of(context).size.height * 1.3;
-    // double pageSize = MediaQuery.of(context).size.width * 2.45;
+    double pageSize = MediaQuery.of(context).size.height * 1;
+    // double pageSize = MediaQuery.of(context).size.width * 2.7;
     // double pageHeight = MediaQuery.of(context).size.height;
 
     List<String> textPages = getPages(getText, pageSize.toInt());
@@ -125,24 +137,18 @@ class Reader extends State {
             right: false,
             bottom: false,
             minimum: const EdgeInsets.all(16.0),
-            child: PageView.builder(
-              controller: _pageController,
-              itemCount: textPages.length,
-              itemBuilder: (context, index) {
-                return ListView.builder(
-                  itemCount: 1, // Один элемент на страницу
-                  itemBuilder: (context, subIndex) {
-                    currentPage = index;
-                    return Center(
-                        child: Text(
-                      textPages[index],
-                      softWrap: true,
-                      style: const TextStyle(fontSize: 18.0),
-                    ));
-                  },
-                );
-              },
-            )),
+            child: ListView.builder(
+                controller: _pageController,
+                itemCount: textPages.length,
+                itemBuilder: (context, index) {
+                  currentPage = index;
+                  return Center(
+                      child: Text(
+                    textPages[index],
+                    softWrap: true,
+                    style: const TextStyle(fontSize: 18.0),
+                  ));
+                })),
         bottomNavigationBar: BottomAppBar(
           child: SizedBox(
             height: 25.0, // Высота вашей навигационной панели

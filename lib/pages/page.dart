@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
-import 'package:merlin/pages/profile/profile.dart';
 import 'package:merlin/pages/achievements/achievements.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/pages/statistic/statistic.dart';
