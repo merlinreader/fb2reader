@@ -67,19 +67,25 @@ class Text14Bold extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class TextTektur extends StatelessWidget {
   final String text;
   final Color textColor;
   final double fontsize;
-  const TextTektur(
+  FontWeight? fontWeight;
+  TextTektur(
       {super.key,
       required this.text,
       required this.fontsize,
-      required this.textColor});
+      required this.textColor,
+      this.fontWeight});
   @override
   Widget build(BuildContext context) {
     return Text(text,
         style: TextStyle(
-            fontFamily: 'Tektur', color: textColor, fontSize: fontsize));
+            fontFamily: 'Tektur',
+            color: textColor,
+            fontSize: fontsize,
+            fontWeight: fontWeight));
   }
 }

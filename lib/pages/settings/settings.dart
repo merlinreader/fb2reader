@@ -93,12 +93,17 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: darkThemeBackground ? themeBackground : themeBackground,
       appBar: AppBar(
-        elevation: 0,
         backgroundColor: themeAppBackground,
-        leading: SvgPicture.asset(
-          'assets/images/chevron-left.svg',
-          width: 16,
-          height: 16,
+        shadowColor: Colors.transparent,
+        leading: GestureDetector(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: SvgPicture.asset(
+            'assets/images/chevron-left.svg',
+            width: 16,
+            height: 16,
+          ),
         ),
         title: Text(
           'Настройки',

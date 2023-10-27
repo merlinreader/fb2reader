@@ -104,6 +104,7 @@ class ImageLoader {
         filePath: path,
         fileText: text.toString(),
         title: title,
+        author: name,
         lastPosition: 0);
     bookDatas.add(bookData);
     String imageDatasString = jsonEncode(imageDatas);

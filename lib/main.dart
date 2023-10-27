@@ -21,6 +21,7 @@ class MerlinApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Merlin',
       initialRoute: RouteNames.main,
       routes: _router.routes,
