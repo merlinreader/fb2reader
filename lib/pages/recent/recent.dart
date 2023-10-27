@@ -4,13 +4,12 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-//import 'package:merlin/components/navbar/navbar.dart';
+import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:merlin/pages/page.dart';
 import 'package:xml/xml.dart';
 
 // для получаения картинки из файла книги
@@ -18,17 +17,6 @@ import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/pages/reader/reader.dart';
-
-class Recent extends StatelessWidget {
-  const Recent({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: RecentPage(),
-    );
-  }
-}
 
 class RecentPage extends StatefulWidget {
   const RecentPage({super.key});
@@ -367,9 +355,9 @@ class RecentPageState extends State<RecentPage> {
                     children: [
                       if (images[index].imageBytes != null)
                         GestureDetector(
-                            onTap: () async {
-                              await sendDataFromLocalStorage('textKey', index);
-                              const AppPage().openReader(context);
+                            onTap: () {
+                              sendDataFromLocalStorage('textKey', index);
+                              Navigator.pushNamed(context, RouteNames.reader);
                             },
                             child: Image.memory(images[index].imageBytes!,
                                 width: MediaQuery.of(context).size.width / 2.5,
@@ -399,8 +387,7 @@ class RecentPageState extends State<RecentPage> {
         opacity: _isVisible ? 0.0 : 1.0,
         child: FloatingActionButton(
           onPressed: () {
-            const AppPage()
-                .openReader(context); // Вызываем openReader только при нажатии
+            Navigator.pushNamed(context, RouteNames.reader);
           },
           backgroundColor: MyColors.purple,
           shape: const RoundedRectangleBorder(

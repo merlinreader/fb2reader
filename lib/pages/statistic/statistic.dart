@@ -15,16 +15,6 @@ class _StatisticPageState extends State<StatisticPage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        backgroundColor: MyColors.bgWhite,
-        body: _buildBody(),
-      ),
-    );
-  }
-
-  Widget _buildBody() {
     return SafeArea(
       child: Column(
         children: <Widget>[

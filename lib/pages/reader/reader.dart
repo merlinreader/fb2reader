@@ -128,65 +128,25 @@ class Reader extends State {
       setState(() {});
     });
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: SafeArea(
-            left: false,
-            top: false,
-            right: false,
-            bottom: false,
-            minimum: const EdgeInsets.all(16.0),
-            child: ListView.builder(
-                controller: _pageController,
-                itemCount: textPages.length,
-                itemBuilder: (context, index) {
-                  currentPage = index;
-                  return Center(
-                      child: Text(
-                    textPages[index],
-                    softWrap: true,
-                    style: const TextStyle(fontSize: 18.0),
-                  ));
-                })),
-        bottomNavigationBar: BottomAppBar(
-          child: SizedBox(
-            height: 25.0, // Высота вашей навигационной панели
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                  child: Text(
-                    '${_batteryLevel.toString()}%',
-                    style: const TextStyle(
-                        fontSize: 14.0, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Align(
-                  alignment:
-                      Alignment.center, // Центрирование только этого элемента
-                  child: Text(
-                    textes[0].title.toString().length > 28
-                        ? '${textes[0].title.toString().substring(0, 28)}...'
-                        : textes[0].title.toString(),
-                    style: const TextStyle(
-                        fontSize: 14.0, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                  child: Text(
-                    '${pagePercent.toStringAsFixed(2)}%', // Отображение счетчика страниц
-                    style: const TextStyle(
-                        fontSize: 14.0, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+    return Scaffold(
+      body: SafeArea(
+          left: false,
+          top: false,
+          right: false,
+          bottom: false,
+          minimum: const EdgeInsets.all(16.0),
+          child: ListView.builder(
+              controller: _pageController,
+              itemCount: textPages.length,
+              itemBuilder: (context, index) {
+                currentPage = index;
+                return Center(
+                    child: Text(
+                  textPages[index],
+                  softWrap: true,
+                  style: const TextStyle(fontSize: 18.0),
+                ));
+              })),
     );
   }
 }
