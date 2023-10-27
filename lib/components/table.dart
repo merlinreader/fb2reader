@@ -70,7 +70,7 @@ class StatTable extends StatelessWidget {
                     ),
                     DataColumn(
                       label: Text11Bold(
-                        text: 'Страниц в \nрежиме слова',
+                        text: 'Страниц в\nрежиме слова',
                         textColor: MyColors.grey,
                       ),
                     ),
@@ -81,7 +81,9 @@ class StatTable extends StatelessWidget {
                       cells: [
                         DataCell(
                           Text11Bold(
-                            text: dataList[index]['firstName'] ?? '',
+                            text: dataList[index]['firstName']?.length > 10
+                                ? '${dataList[index]['firstName']?.substring(0, 10)}...'
+                                : dataList[index]['firstName'] ?? '',
                             textColor: MyColors.black,
                           ),
                         ),

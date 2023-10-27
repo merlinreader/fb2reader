@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/table.dart';
+import 'package:merlin/functions/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({Key? key}) : super(key: key);
@@ -148,111 +150,162 @@ class _StatisticPageState extends State<StatisticPage> {
 class Country extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Swipe(
-        statDay: StatTable(
-          path: 'daily',
-          country: 'Russia',
-          area: '',
-          city: '',
-        ),
-        statWeek: StatTable(
-          path: 'weekly',
-          country: 'Russia',
-          area: '',
-          city: '',
-        ),
-        statMonth: StatTable(
-          path: 'monthly',
-          country: 'Russia',
-          area: '',
-          city: '',
-        ),
-        statSemiAnnual: StatTable(
-          path: 'semi-annual',
-          country: 'Russia',
-          area: '',
-          city: '',
-        ),
-        statAnnual: StatTable(
-          path: 'annual',
-          country: 'Russia',
-          area: '',
-          city: '',
-        ));
+    return FutureBuilder<String>(
+      future: getSavedLocation(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            final locationData = snapshot.data!.split(', ');
+            if (locationData.length >= 3) {
+              final country = locationData[0];
+              return Swipe(
+                statDay: StatTable(
+                  path: 'daily',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+                statWeek: StatTable(
+                  path: 'weekly',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+                statMonth: StatTable(
+                  path: 'monthly',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+                statSemiAnnual: StatTable(
+                  path: 'semi-annual',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+                statAnnual: StatTable(
+                  path: 'annual',
+                  country: country,
+                  area: '',
+                  city: '',
+                ),
+              );
+            }
+          }
+          return const Text('Местоположение не найдено');
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 }
 
 class Region extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Swipe(
-        statDay: StatTable(
-          path: 'daily',
-          country: '',
-          area: '',
-          city: '',
-        ),
-        statWeek: StatTable(
-          path: 'weekly',
-          country: '',
-          area: '',
-          city: '',
-        ),
-        statMonth: StatTable(
-          path: 'monthly',
-          country: '',
-          area: '',
-          city: '',
-        ),
-        statSemiAnnual: StatTable(
-          path: 'semi-annual',
-          country: '',
-          area: '',
-          city: '',
-        ),
-        statAnnual: StatTable(
-          path: 'annual',
-          country: '',
-          area: '',
-          city: '',
-        ));
+    return FutureBuilder<String>(
+      future: getSavedLocation(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            final locationData = snapshot.data!.split(', ');
+            if (locationData.length >= 3) {
+              final country = locationData[0];
+              final area = locationData[1];
+              return Swipe(
+                statDay: StatTable(
+                  path: 'daily',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+                statWeek: StatTable(
+                  path: 'weekly',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+                statMonth: StatTable(
+                  path: 'monthly',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+                statSemiAnnual: StatTable(
+                  path: 'semi-annual',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+                statAnnual: StatTable(
+                  path: 'annual',
+                  country: country,
+                  area: area,
+                  city: '',
+                ),
+              );
+            }
+          }
+          return const Text('Местоположение не найдено');
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 }
 
 class City extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Swipe(
-        statDay: StatTable(
-          path: 'daily',
-          country: '',
-          area: '',
-          city: 'YURGA',
-        ),
-        statWeek: StatTable(
-          path: 'weekly',
-          country: '',
-          area: '',
-          city: 'YURGA',
-        ),
-        statMonth: StatTable(
-          path: 'monthly',
-          country: '',
-          area: '',
-          city: 'YURGA',
-        ),
-        statSemiAnnual: StatTable(
-          path: 'semi-annual',
-          country: '',
-          area: '',
-          city: 'YURGA',
-        ),
-        statAnnual: StatTable(
-          path: 'annual',
-          country: '',
-          area: '',
-          city: 'YURGA',
-        ));
+    return FutureBuilder<String>(
+      future: getSavedLocation(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            final locationData = snapshot.data!.split(', ');
+            if (locationData.length >= 3) {
+              final country = locationData[0];
+              final area = locationData[1];
+              final city = locationData[2];
+              return Swipe(
+                statDay: StatTable(
+                  path: 'daily',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+                statWeek: StatTable(
+                  path: 'weekly',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+                statMonth: StatTable(
+                  path: 'monthly',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+                statSemiAnnual: StatTable(
+                  path: 'semi-annual',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+                statAnnual: StatTable(
+                  path: 'annual',
+                  country: country,
+                  area: area,
+                  city: city,
+                ),
+              );
+            }
+          }
+          return const Text('Местоположение не найдено');
+        }
+        return const CircularProgressIndicator();
+      },
+    );
   }
 }
 

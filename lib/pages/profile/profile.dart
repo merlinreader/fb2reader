@@ -7,7 +7,9 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
+import 'package:merlin/functions/auth.dart';
 import 'package:merlin/functions/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -54,15 +56,17 @@ class _ProfilePage extends State<ProfilePage> {
               textColor: MyColors.black,
             ),
             FutureBuilder(
-                future: getLocation(),
-                builder:
-                    (BuildContext context, AsyncSnapshot<String> snapshot) {
-                  if (snapshot.data == null) {
-                    return const Text('Мы тебя не видим, включи геолокацию');
-                  } else {
-                    return Text('${snapshot.data}');
-                  }
-                }),
+              future: getSavedLocation(),
+              builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                if (!snapshot.hasData) {
+                  return const Text('Мы тебя не видим, включи геолокацию');
+                } else {
+                  final locationData =
+                      snapshot.data ?? 'Нет данных о местоположении';
+                  return Text(locationData);
+                }
+              },
+            )
           ])),
           const SizedBox(height: 81),
           const Expanded(
@@ -107,10 +111,4 @@ class _ProfilePage extends State<ProfilePage> {
       ),
     );
   }
-}
-
-void pres() {
-  // ignore: avoid_print
-  // ignore: avoid_print
-  print('стас крутой');
 }
