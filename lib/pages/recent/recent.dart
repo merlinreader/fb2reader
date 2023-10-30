@@ -332,11 +332,9 @@ class RecentPageState extends State<RecentPage> {
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(
                 24, 28, 24, 0), // Верхний отступ 0
-            child: TextTektur(
+            child: Text24(
               text: "Последнее",
-              fontsize: 32,
               textColor: MyColors.black,
-              fontWeight: FontWeight.w500,
             ),
           ),
           Center(

@@ -5,9 +5,11 @@ import 'package:merlin/functions/location.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
 
+import 'package:merlin/UI/theme/theme.dart';
+
 void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    systemNavigationBarColor: MyColors.white,
+    systemNavigationBarColor: MyColors.bgWhite,
   ));
   runApp(MerlinApp());
   getLocation();
@@ -23,6 +25,7 @@ class MerlinApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Merlin',
+      //theme: darkTheme(),
       initialRoute: RouteNames.main,
       routes: _router.routes,
     );

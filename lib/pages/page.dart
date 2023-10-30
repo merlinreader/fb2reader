@@ -49,7 +49,7 @@ class Page extends State {
     return Scaffold(
       //верхний бар
       appBar: AppBar(
-          backgroundColor: MyColors.white,
+          backgroundColor: Theme.of(context).primaryColor,
           elevation: 0.5,
           title: GestureDetector(
             onTap: () {
@@ -67,9 +67,9 @@ class Page extends State {
       //Нижний бар
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedPage,
-        backgroundColor: MyColors.white,
+        backgroundColor: Theme.of(context).primaryColor,
         //type: BottomNavigationBarType.fixed,
-        elevation: 1,
+        //elevation: 5,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(CustomIcons.bookOpen),

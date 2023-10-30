@@ -1,9 +1,9 @@
 import 'package:url_launcher/url_launcher.dart';
 
 void launchTelegram() async {
-  const url =
-      'https://oauth.telegram.org/auth?bot_id=6409671267&origin=https%3A%2F%2Ffb2.cloud.leam.pro&embed=1&request_access=write&return_to=https%3A%2F%2Ffb2.cloud.leam.pro%2Fapi%2Faccount%2Fwidget';
-  await launch(url);
+  final tgUrl = Uri.parse(
+      'https://oauth.telegram.org/auth?bot_id=6409671267&origin=https%3A%2F%2Ffb2.cloud.leam.pro&embed=1&request_access=write&return_to=https%3A%2F%2Ffb2.cloud.leam.pro%2Fapi%2Faccount%2Fwidget');
+  await launchUrl(tgUrl, mode: LaunchMode.externalApplication);
 }
 
 // https://fb2.cloud.leam.pro/api/account/login?id=702336469&first_name=%3E%20cls&username=bboy55&
