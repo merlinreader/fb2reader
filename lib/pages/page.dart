@@ -49,7 +49,8 @@ class Page extends State {
     return Scaffold(
       //верхний бар
       appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: MyColors.white,
+          // Theme.of(context).primaryColor,
           elevation: 0.5,
           title: GestureDetector(
             onTap: () {
@@ -67,8 +68,8 @@ class Page extends State {
       //Нижний бар
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedPage,
-        backgroundColor: Theme.of(context).primaryColor,
-        //type: BottomNavigationBarType.fixed,
+        backgroundColor: MyColors.white,
+        type: BottomNavigationBarType.fixed,
         //elevation: 5,
         items: const [
           BottomNavigationBarItem(
