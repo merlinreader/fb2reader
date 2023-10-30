@@ -77,12 +77,6 @@ class RecentPageState extends State<RecentPage> {
   String? name;
   String? title;
 
-  void showImage(Uint8List? imageBytes, String title, String author) {
-    print("recent: showImage started");
-    print("recent: showImage done");
-    print(images);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -106,7 +100,7 @@ class RecentPageState extends State<RecentPage> {
   Future<void> getDataFromLocalStorage(String key) async {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataJson = prefs.getString(key);
-    print('recent: $imageDataJson');
+    // print('recent: $imageDataJson');
     if (imageDataJson != null) {
       images = (jsonDecode(imageDataJson) as List)
           .map((item) => ImageInfo.fromJson(item))
@@ -140,8 +134,7 @@ class RecentPageState extends State<RecentPage> {
           .toList();
       imageDatas.removeWhere((element) => element.filePath == path);
       String imageDatasString = jsonEncode(imageDatas);
-      bool success = await prefs.setString(key, imageDatasString);
-      print('recent delete text: $success');
+      await prefs.setString(key, imageDatasString);
       setState(() {});
     }
   }
@@ -165,8 +158,8 @@ class RecentPageState extends State<RecentPage> {
     String textDataString = jsonEncode(bookDatas);
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('textKey', textDataString);
-    print(textDataString);
+    await prefs.setString(key, textDataString);
+    // print(textDataString);
   }
 
   Future<void> changeDataFromLocalStorage(
@@ -332,9 +325,11 @@ class RecentPageState extends State<RecentPage> {
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(
                 24, 28, 24, 0), // Верхний отступ 0
-            child: Text24(
+            child: TextTektur(
               text: "Последнее",
+              fontsize: 24,
               textColor: MyColors.black,
+              fontWeight: FontWeight.w600,
             ),
           ),
           Center(
@@ -399,6 +394,14 @@ class RecentPageState extends State<RecentPage> {
         opacity: _isVisible ? 0.0 : 1.0,
         child: FloatingActionButton(
           onPressed: () {
+            if (images.isEmpty) {
+              Fluttertoast.showToast(
+                msg: 'Нет последней книги',
+                toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                gravity: ToastGravity.BOTTOM, // Расположение уведомления
+              );
+              return;
+            }
             Navigator.pushNamed(context, RouteNames.reader);
           },
           backgroundColor: MyColors.purple,

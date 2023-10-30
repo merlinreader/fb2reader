@@ -1,6 +1,7 @@
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/style/text.dart';
@@ -8,10 +9,11 @@ import 'package:merlin/components/checkbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ReaderStyle {
-  Color textColor;
-  Color bgcColor;
+  int textColor;
+  int bgcColor;
 
   ReaderStyle({required this.textColor, required this.bgcColor});
+
   Map<String, dynamic> toJson() {
     return {
       'textColor': textColor,
@@ -71,30 +73,122 @@ class _SettingsPageState extends State<SettingsPage> {
   bool textColorBeige = false;
   Color textColorPreview = MyColors.black;
 
-  late Color getTextColor;
-  late Color getBgcColor;
-  List<ReaderStyle> styles = [];
+  @override
+  void initState() {
+    loadCheckboxes();
+    super.initState();
+  }
 
-  Future<void> sendStyleToLocalStorage(String key) async {
+  void saveStylePreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    String? textDataJson = prefs.getString(key);
-    print('recent textDataJson: $textDataJson');
-    if (textDataJson != null) {
-      styles = (jsonDecode(textDataJson) as List)
-          .map((item) => ReaderStyle.fromJson(item))
-          .toList();
-      setState(() {});
+    await prefs.setInt('backgroundColor', backgroundColorPreview.value);
+    await prefs.setInt('textColor', textColorPreview.value);
+  }
+
+  void saveCheckboxes() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (textColorBlack == true) {
+      await prefs.setBool('textColorBlack', true);
+    } else if (textColorBlack == false) {
+      await prefs.setBool('textColorBlack', false);
     }
-    getTextColor = styles[0].textColor;
-    getBgcColor = styles[0].bgcColor;
+    if (textColorWhite == true) {
+      await prefs.setBool('textColorWhite', true);
+    } else if (textColorWhite == false) {
+      await prefs.setBool('textColorWhite', false);
+    }
+    if (textColorMint == true) {
+      await prefs.setBool('textColorMint', true);
+    } else if (textColorMint == false) {
+      await prefs.setBool('textColorMint', false);
+    }
+    if (textColorBeige == true) {
+      await prefs.setBool('textColorBeige', true);
+    } else if (textColorBeige == false) {
+      await prefs.setBool('textColorBeige', false);
+    }
+    if (backgroundColorBlack == true) {
+      await prefs.setBool('backgroundColorBlack', true);
+    } else if (backgroundColorBlack == false) {
+      await prefs.setBool('backgroundColorBlack', false);
+    }
+    if (backgroundColorWhite == true) {
+      await prefs.setBool('backgroundColorWhite', true);
+    } else if (backgroundColorWhite == false) {
+      await prefs.setBool('backgroundColorWhite', false);
+    }
+    if (backgroundColorMint == true) {
+      await prefs.setBool('backgroundColorMint', true);
+    } else if (backgroundColorMint == false) {
+      await prefs.setBool('backgroundColorMint', false);
+    }
+    if (backgroundColorBeige == true) {
+      await prefs.setBool('backgroundColorBeige', true);
+    } else if (backgroundColorBeige == false) {
+      await prefs.setBool('backgroundColorBeige', false);
+    }
+  }
+
+  void loadCheckboxes() async {
+    final prefs = await SharedPreferences.getInstance();
+    final textColorBlackCheck = prefs.getBool('textColorBlack');
+    if (textColorBlackCheck != null) {
+      setState(() {
+        textColorBlack = textColorBlackCheck;
+      });
+    }
+    final textColorWhiteCheck = prefs.getBool('textColorWhite');
+    if (textColorWhiteCheck != null) {
+      setState(() {
+        textColorWhite = textColorWhiteCheck;
+      });
+    }
+    final textColorMintCheck = prefs.getBool('textColorMint');
+    if (textColorMintCheck != null) {
+      setState(() {
+        textColorMint = textColorMintCheck;
+      });
+    }
+    final textColorBeigeCheck = prefs.getBool('textColorBeige');
+    if (textColorBeigeCheck != null) {
+      setState(() {
+        textColorBeige = textColorBeigeCheck;
+      });
+    }
+    final backgroundColorBlackCheck = prefs.getBool('backgroundColorBlack');
+    if (backgroundColorBlackCheck != null) {
+      setState(() {
+        backgroundColorBlack = backgroundColorBlackCheck;
+      });
+    }
+    final backgroundColorWhiteCheck = prefs.getBool('backgroundColorWhite');
+    if (backgroundColorWhiteCheck != null) {
+      setState(() {
+        backgroundColorWhite = backgroundColorWhiteCheck;
+      });
+    }
+    final backgroundColorMintCheck = prefs.getBool('backgroundColorMint');
+    if (backgroundColorMintCheck != null) {
+      setState(() {
+        backgroundColorMint = backgroundColorMintCheck;
+      });
+    }
+    final backgroundColorBeigeCheck = prefs.getBool('backgroundColorBeige');
+    if (backgroundColorBeigeCheck != null) {
+      setState(() {
+        backgroundColorBeige = backgroundColorBeigeCheck;
+      });
+    }
   }
 
   void updateBackgroundColor(Color newColor) {
     backgroundColorPreview = newColor;
+    saveStylePreferences();
   }
 
   void updateTextColor(Color newColor) {
     textColorPreview = newColor;
+    saveStylePreferences();
   }
 
   void updateTheme() {
@@ -136,7 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
         shadowColor: Colors.transparent,
         leading: GestureDetector(
           onTap: () {
-            Navigator.pop(context);
+            Navigator.pushNamed(context, RouteNames.reader);
           },
           child: SvgPicture.asset(
             'assets/images/chevron-left.svg',
@@ -243,12 +337,22 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.white,
                               onChanged: (newValue) {
                                 setState(() {
-                                  if (!textColorBlack) {
+                                  if (!textColorBlack &&
+                                      !backgroundColorBlack) {
                                     textColorBlack = newValue;
                                     textColorWhite = false;
                                     textColorMint = false;
                                     textColorBeige = false;
                                     updateTextColor(MyColors.black);
+                                    saveCheckboxes();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Цвета совпадают',
+                                      toastLength: Toast
+                                          .LENGTH_SHORT, // Длительность отображения
+                                      gravity: ToastGravity
+                                          .BOTTOM, // Расположение уведомления
+                                    );
                                   }
                                 });
                               },
@@ -260,12 +364,22 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  if (!textColorWhite) {
+                                  if (!textColorWhite &&
+                                      !backgroundColorWhite) {
                                     textColorBlack = false;
                                     textColorWhite = newValue;
                                     textColorMint = false;
                                     textColorBeige = false;
                                     updateTextColor(MyColors.white);
+                                    saveCheckboxes();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Цвета совпадают',
+                                      toastLength: Toast
+                                          .LENGTH_SHORT, // Длительность отображения
+                                      gravity: ToastGravity
+                                          .BOTTOM, // Расположение уведомления
+                                    );
                                   }
                                 });
                               },
@@ -277,12 +391,21 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  if (!textColorMint) {
+                                  if (!textColorMint && !backgroundColorMint) {
                                     textColorBlack = false;
                                     textColorWhite = false;
                                     textColorMint = newValue;
                                     textColorBeige = false;
                                     updateTextColor(MyColors.mint);
+                                    saveCheckboxes();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Цвета совпадают',
+                                      toastLength: Toast
+                                          .LENGTH_SHORT, // Длительность отображения
+                                      gravity: ToastGravity
+                                          .BOTTOM, // Расположение уведомления
+                                    );
                                   }
                                 });
                               },
@@ -294,12 +417,22 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  if (!textColorBeige) {
+                                  if (!textColorBeige &&
+                                      !backgroundColorBeige) {
                                     textColorBlack = false;
                                     textColorWhite = false;
                                     textColorMint = false;
                                     textColorBeige = newValue;
                                     updateTextColor(MyColors.beige);
+                                    saveCheckboxes();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Цвета совпадают',
+                                      toastLength: Toast
+                                          .LENGTH_SHORT, // Длительность отображения
+                                      gravity: ToastGravity
+                                          .BOTTOM, // Расположение уведомления
+                                    );
                                   }
                                 });
                               },
@@ -325,12 +458,22 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.white,
                               onChanged: (newValue) {
                                 setState(() {
-                                  if (!backgroundColorBlack) {
+                                  if (!backgroundColorBlack &&
+                                      !textColorBlack) {
                                     backgroundColorBlack = newValue;
                                     backgroundColorWhite = false;
                                     backgroundColorMint = false;
                                     backgroundColorBeige = false;
                                     updateBackgroundColor(MyColors.black);
+                                    saveCheckboxes();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Цвета совпадают',
+                                      toastLength: Toast
+                                          .LENGTH_SHORT, // Длительность отображения
+                                      gravity: ToastGravity
+                                          .BOTTOM, // Расположение уведомления
+                                    );
                                   }
                                 });
                               },
@@ -342,12 +485,22 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  if (!backgroundColorWhite) {
+                                  if (!backgroundColorWhite &&
+                                      !textColorWhite) {
                                     backgroundColorBlack = false;
                                     backgroundColorWhite = newValue;
                                     backgroundColorMint = false;
                                     backgroundColorBeige = false;
                                     updateBackgroundColor(MyColors.white);
+                                    saveCheckboxes();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Цвета совпадают',
+                                      toastLength: Toast
+                                          .LENGTH_SHORT, // Длительность отображения
+                                      gravity: ToastGravity
+                                          .BOTTOM, // Расположение уведомления
+                                    );
                                   }
                                 });
                               },
@@ -359,12 +512,21 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  if (!backgroundColorMint) {
+                                  if (!backgroundColorMint && !textColorMint) {
                                     backgroundColorBlack = false;
                                     backgroundColorWhite = false;
                                     backgroundColorMint = newValue;
                                     backgroundColorBeige = false;
                                     updateBackgroundColor(MyColors.mint);
+                                    saveCheckboxes();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Цвета совпадают',
+                                      toastLength: Toast
+                                          .LENGTH_SHORT, // Длительность отображения
+                                      gravity: ToastGravity
+                                          .BOTTOM, // Расположение уведомления
+                                    );
                                   }
                                 });
                               },
@@ -376,12 +538,21 @@ class _SettingsPageState extends State<SettingsPage> {
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
-                                  if (!backgroundColorBeige) {
+                                  if (!backgroundColorBeige & !textColorBeige) {
                                     backgroundColorBlack = false;
                                     backgroundColorWhite = false;
                                     backgroundColorMint = false;
                                     backgroundColorBeige = newValue;
                                     updateBackgroundColor(MyColors.beige);
+                                    saveCheckboxes();
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg: 'Цвета совпадают',
+                                      toastLength: Toast
+                                          .LENGTH_SHORT, // Длительность отображения
+                                      gravity: ToastGravity
+                                          .BOTTOM, // Расположение уведомления
+                                    );
                                   }
                                 });
                               },
@@ -422,9 +593,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ],
             ),
           ),
-          // _buildColorSettingsSection(),
-          // const Divider(),
-          // _buildReaderExample(),
         ],
       ),
     );

@@ -27,7 +27,6 @@ class StatTable extends StatelessWidget {
       // Обработка полученного JSON-объекта здесь
       return jsonResponse ?? [];
     } else {
-      print('Ошибка запроса: ${response.statusCode}');
       return []; // Возвращаем пустой список в случае ошибки
     }
   }

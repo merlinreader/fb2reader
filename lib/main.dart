@@ -5,7 +5,6 @@ import 'package:merlin/functions/location.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
 
-import 'package:merlin/UI/theme/theme.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(

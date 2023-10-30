@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';

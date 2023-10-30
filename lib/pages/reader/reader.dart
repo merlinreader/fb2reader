@@ -1,10 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:merlin/UI/router.dart';
-import 'package:merlin/pages/settings/settings.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 
@@ -62,7 +60,7 @@ class Reader extends State {
 
   void _getBatteryLevel() async {
     final batteryLevel = await _battery.batteryLevel;
-    print(batteryLevel);
+    // print(batteryLevel);
     setState(() {
       _batteryLevel = batteryLevel;
     });
@@ -76,26 +74,26 @@ class Reader extends State {
   }
 
   @override
+  void didChangeDependencies() {
+    loadStylePreferences();
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     super.dispose();
   }
 
-  late Color getTextColor;
-  late Color getBgcColor;
-  List<ReaderStyle> styles = [];
+  Color getTextColor = MyColors.black;
+  Color getBgcColor = MyColors.white;
 
-  Future<void> getStyleFromLocalStorage(String key) async {
+  Future<void> loadStylePreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    String? textDataJson = prefs.getString(key);
-    print('recent textDataJson: $textDataJson');
-    if (textDataJson != null) {
-      styles = (jsonDecode(textDataJson) as List)
-          .map((item) => ReaderStyle.fromJson(item))
-          .toList();
-      setState(() {});
-    }
-    getTextColor = styles[0].textColor;
-    getBgcColor = styles[0].bgcColor;
+    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.mint.value;
+    final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
+    getBgcColor = Color(bgColor);
+    getTextColor = Color(textColor);
+
   }
 
   String getText = "";
@@ -105,7 +103,7 @@ class Reader extends State {
     getText = "";
     final prefs = await SharedPreferences.getInstance();
     String? textDataJson = prefs.getString(key);
-    print('recent textDataJson: $textDataJson');
+    // print('recent textDataJson: $textDataJson');
     if (textDataJson != null) {
       textes = (jsonDecode(textDataJson) as List)
           .map((item) => BookInfo.fromJson(item))
@@ -117,8 +115,8 @@ class Reader extends State {
         .toString()
         .replaceAll(RegExp(r'\['), '')
         .replaceAll(RegExp(r'\]'), '');
-    print('reader textes[0].fileText: ${textes[0].fileText.toString()}');
-    print('reader getText: $getText');
+    // print('reader textes[0].fileText: ${textes[0].fileText.toString()}');
+    // print('reader getText: $getText');
   }
 
   List<String> getPages(String text, int pageSize) {
@@ -160,16 +158,6 @@ class Reader extends State {
               100.0);
       setState(() {});
     });
-    // TextTektur(
-    //   text: textes[0].author.toString().length +
-    //               textes[0].title.toString().length >
-    //           22
-    //       ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 10)}...'
-    //       : textes[0].title.toString(),
-    //   fontsize: 18,
-    //   textColor: MyColors.black,
-    //   fontWeight: FontWeight.w600,
-    // ),
 
     return Scaffold(
       appBar: AppBar(
@@ -190,7 +178,7 @@ class Reader extends State {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextTektur(
-              text: textes[0].author.toString().length +
+              text: textes.first.author.toString().length +
                           textes[0].title.toString().length >
                       22
                   ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 10)}...'
@@ -212,7 +200,7 @@ class Reader extends State {
         ),
       ),
       body: Container(
-          color: MyColors.white,
+          color: getBgcColor,
           child: SafeArea(
               left: false,
               top: false,
@@ -228,8 +216,7 @@ class Reader extends State {
                         child: Text(
                       textPages[index],
                       softWrap: true,
-                      style: const TextStyle(
-                          fontSize: 18.0, color: MyColors.black),
+                      style: TextStyle(fontSize: 18.0, color: getTextColor),
                     ));
                   }))),
       bottomNavigationBar: BottomAppBar(
