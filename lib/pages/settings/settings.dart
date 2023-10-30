@@ -1,7 +1,5 @@
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/style/text.dart';
@@ -231,6 +229,7 @@ class _SettingsPageState extends State<SettingsPage> {
         leading: GestureDetector(
           onTap: () {
             Navigator.pop(context);
+            // Navigator.popAndPushNamed(context, RouteNames.reader);
           },
           child: SvgPicture.asset(
             'assets/images/chevron-left.svg',

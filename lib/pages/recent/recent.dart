@@ -65,6 +65,8 @@ Future<void> requestPermission() async {
   }
 }
 
+
+
 class RecentPageState extends State<RecentPage> {
   final ImageLoader imageLoader = ImageLoader();
   final ScrollController _scrollController = ScrollController();
@@ -100,7 +102,6 @@ class RecentPageState extends State<RecentPage> {
   Future<void> getDataFromLocalStorage(String key) async {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataJson = prefs.getString(key);
-    // print('recent: $imageDataJson');
     if (imageDataJson != null) {
       images = (jsonDecode(imageDataJson) as List)
           .map((item) => ImageInfo.fromJson(item))
@@ -164,7 +165,6 @@ class RecentPageState extends State<RecentPage> {
     if (success == true) {
       isSended = true;
     }
-    // print(textDataString);
   }
 
   Future<void> changeDataFromLocalStorage(

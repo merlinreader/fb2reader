@@ -46,6 +46,39 @@ class BookInfo {
   }
 }
 
+class TranslationDialog extends StatelessWidget {
+  final String translatedText;
+
+  const TranslationDialog(this.translatedText, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      content: SimpleDialog(
+        title: const Text('Перевод'),
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              translatedText,
+              style: const TextStyle(
+                  fontSize: 24.0), // настройте стиль по своему усмотрению
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          child: const Text('ОК'),
+          onPressed: () {
+            Navigator.of(context).pop(); // Закрыть диалоговое окно
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class ReaderPage extends StatefulWidget {
   const ReaderPage({Key? key}) : super(key: key);
 
@@ -56,11 +89,12 @@ class ReaderPage extends StatefulWidget {
 class Reader extends State {
   final Battery _battery = Battery();
   int _batteryLevel = 0;
-  final PageController _pageController = PageController();
+  final ScrollController _scrollController = ScrollController();
+
+  double _scrollPosition = 0.0;
 
   void _getBatteryLevel() async {
     final batteryLevel = await _battery.batteryLevel;
-    // print(batteryLevel);
     setState(() {
       _batteryLevel = batteryLevel;
     });
@@ -70,18 +104,55 @@ class Reader extends State {
   void initState() {
     getDataFromLocalStorage('textKey');
     _getBatteryLevel();
+    _scrollController.addListener(_updateScrollPercentage);
+
     super.initState();
   }
 
   @override
-  void didChangeDependencies() {
-    loadStylePreferences();
+  Future<void> didChangeDependencies() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.mint.value;
+    final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
+    getBgcColor = Color(bgColor);
+    getTextColor = Color(textColor);
     super.didChangeDependencies();
   }
 
   @override
   void dispose() {
+    saveReadingPosition(_scrollPosition);
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    saveReadingPosition(_scrollPosition);
+    super.deactivate();
+  }
+
+  void saveReadingPosition(double position) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('readingPosition', position);
+  }
+
+  Future<double?> getReadingPosition() async {
+    final prefs = await SharedPreferences.getInstance();
+    final position = prefs.getDouble('readingPosition');
+    return position;
+  }
+
+  void _updateScrollPercentage() {
+    if (_scrollController.position.maxScrollExtent == 0) {
+      return;
+    }
+    double percentage = (_scrollController.position.pixels /
+            _scrollController.position.maxScrollExtent) *
+        100;
+    setState(() {
+      _scrollPosition = percentage;
+    });
+    saveReadingPosition(_scrollController.position.pixels);
   }
 
   Color getTextColor = MyColors.black;
@@ -91,8 +162,10 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     final bgColor = prefs.getInt('backgroundColor') ?? MyColors.mint.value;
     final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
-    getBgcColor = Color(bgColor);
-    getTextColor = Color(textColor);
+    setState(() {
+      getBgcColor = Color(bgColor);
+      getTextColor = Color(textColor);
+    });
   }
 
   String getText = "";
@@ -102,7 +175,6 @@ class Reader extends State {
     getText = "";
     final prefs = await SharedPreferences.getInstance();
     String? textDataJson = prefs.getString(key);
-    // print('recent textDataJson: $textDataJson');
     if (textDataJson != null) {
       textes = (jsonDecode(textDataJson) as List)
           .map((item) => BookInfo.fromJson(item))
@@ -114,8 +186,6 @@ class Reader extends State {
         .toString()
         .replaceAll(RegExp(r'\['), '')
         .replaceAll(RegExp(r'\]'), '');
-    // print('reader textes[0].fileText: ${textes[0].fileText.toString()}');
-    // print('reader getText: $getText');
   }
 
   List<String> getPages(String text, int pageSize) {
@@ -143,21 +213,11 @@ class Reader extends State {
 
   @override
   Widget build(BuildContext context) {
-    double pageSize = MediaQuery.of(context).size.height * 1;
+    double pageSize = MediaQuery.of(context).size.height * 3;
     // double pageSize = MediaQuery.of(context).size.width * 2.7;
     // double pageHeight = MediaQuery.of(context).size.height;
 
     List<String> textPages = getPages(getText, pageSize.toInt());
-
-    _pageController.addListener(() {
-      setState(() {});
-      currentPage = _pageController.page!.toInt();
-      pagePercent =
-          (((currentPage.toDouble() + 1.0) / textPages.length.toDouble()) *
-              100.0);
-      setState(() {});
-    });
-
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: MyColors.black),
@@ -186,7 +246,8 @@ class Reader extends State {
             ),
             GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, RouteNames.readerSettings);
+                Navigator.pushNamed(context, RouteNames.readerSettings)
+                    .then((value) => loadStylePreferences());
               },
               child: const Icon(
                 Icons.settings,
@@ -205,16 +266,16 @@ class Reader extends State {
               bottom: false,
               minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: ListView.builder(
-                  controller: _pageController,
+                  controller: _scrollController,
                   itemCount: textPages.length,
                   itemBuilder: (context, index) {
                     currentPage = index;
                     return Center(
-                        child: Text(
-                      textPages[index],
-                      softWrap: true,
-                      style: TextStyle(fontSize: 18.0, color: getTextColor),
-                    ));
+                        child: SelectableText(getText,
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              color: getTextColor,
+                            )));
                   }))),
       bottomNavigationBar: BottomAppBar(
         child: SizedBox(
@@ -248,7 +309,7 @@ class Reader extends State {
               Padding(
                   padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
                   child: TextTektur(
-                    text: '${pagePercent.toStringAsFixed(2)}%',
+                    text: '${_scrollPosition.toStringAsFixed(2)}%',
                     fontsize: 12,
                     textColor: MyColors.black,
                     fontWeight: FontWeight.w600,
