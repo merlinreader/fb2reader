@@ -74,7 +74,7 @@ class Page extends State {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(CustomIcons.bookOpen),
-            label: 'Книги',
+            label: 'Проводник',
           ),
           BottomNavigationBarItem(
               icon: Icon(CustomIcons.clock), label: 'Последнее'),
