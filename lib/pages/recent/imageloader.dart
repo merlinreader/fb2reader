@@ -26,13 +26,21 @@ class ImageLoader {
   Future<void> loadImage() async {
     await requestPermission();
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: "Выберите книгу fb2",
+      allowMultiple: false,
+    );
 
-    if (result == null) {
+    if (result?.files.first.extension != 'fb2') {
+      Fluttertoast.showToast(
+        msg: 'Формат книги должен быть fb2',
+        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        gravity: ToastGravity.BOTTOM, // Расположение уведомления
+      );
       return;
-    }
+    } 
 
-    String path = result.files.single.path!;
+    String path = result!.files.single.path!;
 
     final prefs = await SharedPreferences.getInstance();
     String? imageDataToAdd = prefs.getString('booksKey');
@@ -68,7 +76,7 @@ class ImageLoader {
       final String titleFromInfo = titleInfoTag.text;
       title = titleFromInfo;
     } catch (e) {
-      return;
+      title = "Название не найдено";
     }
 
     try {
@@ -84,7 +92,7 @@ class ImageLoader {
       lastName = lastNameFromInfo;
       name = '$firstNameFromInfo $lastNameFromInfo';
     } catch (e) {
-      return;
+      name = "Автор не найден";
     }
 
     final Iterable<XmlElement> textInfo = document.findAllElements('body');

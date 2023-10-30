@@ -230,7 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
         shadowColor: Colors.transparent,
         leading: GestureDetector(
           onTap: () {
-            Navigator.pushNamed(context, RouteNames.reader);
+            Navigator.pop(context);
           },
           child: SvgPicture.asset(
             'assets/images/chevron-left.svg',

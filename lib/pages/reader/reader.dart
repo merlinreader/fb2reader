@@ -93,7 +93,6 @@ class Reader extends State {
     final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
     getBgcColor = Color(bgColor);
     getTextColor = Color(textColor);
-
   }
 
   String getText = "";
@@ -178,10 +177,8 @@ class Reader extends State {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextTektur(
-              text: textes.first.author.toString().length +
-                          textes[0].title.toString().length >
-                      22
-                  ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 10)}...'
+              text: textes.first.author.toString().length > 18
+                  ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
                   : textes[0].title.toString(),
               fontsize: 18,
               textColor: MyColors.black,

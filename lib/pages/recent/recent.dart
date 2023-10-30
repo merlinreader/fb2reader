@@ -139,6 +139,8 @@ class RecentPageState extends State<RecentPage> {
     }
   }
 
+  bool isSended = false;
+
   Future<void> sendDataFromLocalStorage(String key, int index) async {
     List text = [];
     List<BookInfo> bookDatas = [];
@@ -158,7 +160,10 @@ class RecentPageState extends State<RecentPage> {
     String textDataString = jsonEncode(bookDatas);
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, textDataString);
+    bool success = await prefs.setString(key, textDataString);
+    if (success == true) {
+      isSended = true;
+    }
     // print(textDataString);
   }
 
@@ -362,9 +367,22 @@ class RecentPageState extends State<RecentPage> {
                     children: [
                       if (images[index].imageBytes != null)
                         GestureDetector(
-                            onTap: () {
-                              sendDataFromLocalStorage('textKey', index);
-                              Navigator.pushNamed(context, RouteNames.reader);
+                            onTap: () async {
+                              await sendDataFromLocalStorage('textKey', index);
+                              if (isSended) {
+                                // ignore: use_build_context_synchronously
+                                Navigator.pushNamed(context, RouteNames.reader);
+                                isSended = false;
+                              } else {
+                                Fluttertoast.showToast(
+                                  msg: 'Ошибка загрузки книги',
+                                  toastLength: Toast
+                                      .LENGTH_SHORT, // Длительность отображения
+                                  gravity: ToastGravity
+                                      .BOTTOM, // Расположение уведомления
+                                );
+                                return;
+                              }
                             },
                             child: Image.memory(images[index].imageBytes!,
                                 width: MediaQuery.of(context).size.width / 2.5,
