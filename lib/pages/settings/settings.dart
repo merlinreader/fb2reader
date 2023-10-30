@@ -64,7 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool backgroundColorWhite = false;
   bool backgroundColorMint = false;
   bool backgroundColorBeige = false;
-  Color backgroundColorPreview = MyColors.mint;
+  Color backgroundColorPreview = MyColors.white;
   bool textColorBlack = false;
   bool textColorWhite = false;
   bool textColorMint = false;
@@ -572,8 +572,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           Center(
                               child: Container(
                                   width: MediaQuery.of(context).size.width,
-                                  height: 56,
+                                  height: 64,
                                   decoration: BoxDecoration(
+                                    border: Border.all(color: MyColors.black),
                                     color: backgroundColorPreview,
                                   ))),
                           Center(

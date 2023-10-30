@@ -105,7 +105,6 @@ class Reader extends State {
     getDataFromLocalStorage('textKey');
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
-
     super.initState();
   }
 
@@ -136,10 +135,15 @@ class Reader extends State {
     await prefs.setDouble('readingPosition', position);
   }
 
-  Future<double?> getReadingPosition() async {
+  Future<void> getReadingPosition() async {
     final prefs = await SharedPreferences.getInstance();
     final position = prefs.getDouble('readingPosition');
-    return position;
+    if (position != null) {
+      setState(() {
+        _scrollController.animateTo(position,
+            duration: const Duration(milliseconds: 250), curve: Curves.ease);
+      });
+    }
   }
 
   void _updateScrollPercentage() {
@@ -208,7 +212,6 @@ class Reader extends State {
     return pages;
   }
 
-  int currentPage = 0;
   double pagePercent = 0;
 
   @override
@@ -269,7 +272,6 @@ class Reader extends State {
                   controller: _scrollController,
                   itemCount: textPages.length,
                   itemBuilder: (context, index) {
-                    currentPage = index;
                     return Center(
                         child: SelectableText(getText,
                             style: TextStyle(
