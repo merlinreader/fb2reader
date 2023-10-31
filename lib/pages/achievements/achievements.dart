@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
 import 'package:merlin/components/achievement.dart';
+import 'package:merlin/style/colors.dart';
+import 'package:merlin/style/text.dart';
 
 class AchievementsPage extends StatelessWidget {
   const AchievementsPage({super.key});
@@ -16,14 +18,15 @@ class AchievementsPage extends StatelessWidget {
             child: Column(children: <Widget>[
               Row(
                 children: [
-                  Text(
-                    'Достижения',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontFamily: 'Tektur',
-                        fontWeight: FontWeight.bold),
-                  ),
+                  Text24(text: 'Достижения', textColor: MyColors.black)
+                  //Text(
+                  //'Достижения',
+                  //textAlign: TextAlign.left,
+                  //style: TextStyle(
+                  //fontSize: 24,
+                  //fontFamily: 'Tektur',
+                  //fontWeight: FontWeight.bold),
+                  //),
                 ],
               ),
               AchievementCard(

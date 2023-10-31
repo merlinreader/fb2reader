@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:merlin/style/colors.dart';
+import 'package:merlin/style/text.dart';
 
 class AchievementCard extends StatelessWidget {
   final String name;
@@ -44,18 +46,18 @@ class AchievementCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Flexible(
-                child: Text(
-                  name,
-                  style: TextStyle(
-                    fontFamily: 'Tektur',
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        isLocked ? Colors.black.withOpacity(0.2) : Colors.black,
+              Flexible(child: Text11(text: name, textColor: MyColors.black)
+                  //Text(
+                  //name,
+                  //style: TextStyle(
+                  //fontFamily: 'Tektur',
+                  //fontSize: 11,
+                  //fontWeight: FontWeight.bold,
+                  //color:
+                  //isLocked ? Colors.black.withOpacity(0.2) : Colors.black,
+                  //),
+                  //),
                   ),
-                ),
-              ),
               Text(
                 dataText,
                 style: TextStyle(

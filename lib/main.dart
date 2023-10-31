@@ -6,6 +6,9 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
 
 
+
+//В ФАЙЛЕ BUTTON ПРИМЕР ИСПОЛЬЗОВАНИЯ КНОПОК 
+
 void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: MyColors.bgWhite,
@@ -24,7 +27,7 @@ class MerlinApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Merlin',
-      //theme: darkTheme(),
+      theme: lightTheme(),
       initialRoute: RouteNames.main,
       routes: _router.routes,
     );

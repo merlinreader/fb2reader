@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'dart:convert';
@@ -43,32 +44,31 @@ class StatTable extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8.0, right: 1),
               child: Theme(
                 // Theme для отключения divider
-                data: Theme.of(context)
-                    .copyWith(dividerColor: Colors.transparent),
+                data: darkTheme(),
                 child: DataTable(
                   dividerThickness: 0.0,
                   // ignore: deprecated_member_use
                   dataRowHeight: 38,
-                  headingRowColor: MaterialStateColor.resolveWith(
-                      (states) => MyColors.white),
-                  dataRowColor: MaterialStateColor.resolveWith(
-                      (states) => MyColors.white),
+                  //headingRowColor: MaterialStateColor.resolveWith(
+                  //  (states) => MyColors.white),
+                  //dataRowColor: MaterialStateColor.resolveWith(
+                  //(states) => MyColors.white),
                   columnSpacing: 15,
                   columns: const [
                     DataColumn(
-                      label: Text11Bold(
+                      label: Text11(
                         text: 'Имя',
                         textColor: MyColors.grey,
                       ),
                     ),
                     DataColumn(
-                      label: Text11Bold(
+                      label: Text11(
                         text: 'Страниц',
                         textColor: MyColors.grey,
                       ),
                     ),
                     DataColumn(
-                      label: Text11Bold(
+                      label: Text11(
                         text: 'Страниц в\nрежиме слова',
                         textColor: MyColors.grey,
                       ),
@@ -79,7 +79,7 @@ class StatTable extends StatelessWidget {
                     (index) => DataRow(
                       cells: [
                         DataCell(
-                          Text11Bold(
+                          Text11(
                             text: dataList[index]['firstName']?.length > 10
                                 ? '${dataList[index]['firstName']?.substring(0, 10)}...'
                                 : dataList[index]['firstName'] ?? '',
@@ -87,7 +87,7 @@ class StatTable extends StatelessWidget {
                           ),
                         ),
                         DataCell(
-                          Text11Bold(
+                          Text11(
                             text: dataList[index]['totalPageCountSimpleMode']
                                     ?.toString() ??
                                 '',
@@ -95,7 +95,7 @@ class StatTable extends StatelessWidget {
                           ),
                         ),
                         DataCell(
-                          Text11Bold(
+                          Text11(
                             text: dataList[index]['totalPageCountWordMode']
                                     ?.toString() ??
                                 '',

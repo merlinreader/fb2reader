@@ -327,8 +327,8 @@ class RecentPageState extends State<RecentPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
+          const Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
                 24, 28, 24, 0), // Верхний отступ 0
             child: TextTektur(
               text: "Последнее",
@@ -343,7 +343,7 @@ class RecentPageState extends State<RecentPage> {
               children: [
                 if (images.isEmpty)
                   TextTektur(
-                      text: "Пока вы не добавили никакаих книг",
+                      text: "Пока вы не добавили никаких книг",
                       fontsize: 16,
                       textColor: MyColors.grey)
               ],

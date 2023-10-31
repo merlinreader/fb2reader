@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merlin/UI/theme/theme.dart';
 //import 'package:merlin/components/appbar/appbar.dart';
 //import 'package:merlin/components/navbar/navbar.dart';
 
@@ -68,41 +69,46 @@ class _ProfilePage extends State<ProfilePage> {
             )
           ])),
           const SizedBox(height: 81),
-          const Expanded(
+          Expanded(
             child: Column(
               children: [
-                Button(
-                  text: 'Авторизоваться',
-                  width: 312,
-                  height: 48,
-                  horizontalPadding: 97,
-                  verticalPadding: 12,
-                  buttonColor: MyColors.purple,
-                  textColor: MyColors.white,
-                  fontSize: 14,
-                  onPressed: launchTelegram,
-                  fontWeight: FontWeight.bold,
+                Theme(
+                  data: purpleButton(),
+                  child: const Button(
+                    text: 'Авторизоваться',
+                    width: 312,
+                    height: 48,
+                    horizontalPadding: 97,
+                    verticalPadding: 12,
+                    //buttonColor: MyColors.purple,
+                    textColor: MyColors.white,
+                    fontSize: 14,
+                    onPressed: launchTelegram,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Expanded(
                   child: Align(
-                    alignment: AlignmentDirectional.bottomCenter,
-                    child: Button(
-                        text: 'Написать нам',
-                        width: 312,
-                        height: 48,
-                        horizontalPadding: 97,
-                        verticalPadding: 12,
-                        buttonColor: MyColors.white,
-                        textColor: MyColors.black,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        onPressed: sendEmail),
-                  ),
+                      alignment: AlignmentDirectional.bottomCenter,
+                      child: Theme(
+                        data: lightTheme(),
+                        child: const Button(
+                            text: 'Написать нам',
+                            width: 312,
+                            height: 48,
+                            horizontalPadding: 97,
+                            verticalPadding: 12,
+                            //buttonColor: MyColors.white,
+                            textColor: MyColors.black,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            onPressed: sendEmail),
+                      )),
                 ),
-                SizedBox(height: 24)
+                const SizedBox(height: 24)
               ],
             ),
           ),

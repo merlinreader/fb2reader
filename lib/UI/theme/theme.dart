@@ -4,6 +4,7 @@ import 'package:merlin/style/colors.dart';
 ThemeData darkTheme() => ThemeData(
     brightness: Brightness.dark,
     primaryColor: MyColors.black,
+    //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
         //text24
         titleLarge: TextStyle(
@@ -11,16 +12,80 @@ ThemeData darkTheme() => ThemeData(
             fontFamily: 'Tektur',
             fontSize: 24,
             fontWeight: FontWeight.bold),
-        //Text14
+        //Text11
         bodySmall: TextStyle(
             fontFamily: 'Tektur',
             color: MyColors.bgWhite,
-            fontSize: 14,
+            fontSize: 11,
             fontWeight: FontWeight.bold),
-        //Text14bold
+        //Text14
         bodyLarge: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.bgWhite,
-          fontSize: 14,
-          fontWeight: FontWeight.normal
-        )));
+            fontFamily: 'Tektur',
+            color: MyColors.bgWhite,
+            fontSize: 14,
+            fontWeight: FontWeight.normal)),
+    elevatedButtonTheme: const ElevatedButtonThemeData(
+      style: ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(MyColors.blackBt),
+          textStyle: MaterialStatePropertyAll(
+              TextStyle(color: Color.fromARGB(255, 255, 0, 0)))),
+    ),
+    //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
+    dataTableTheme: DataTableThemeData(
+      headingRowColor:
+          MaterialStateColor.resolveWith((states) => MyColors.darkGray),
+      dataRowColor:
+          MaterialStateColor.resolveWith((states) => MyColors.darkGray),
+    ));
+
+ThemeData purpleButton() => ThemeData(
+        elevatedButtonTheme: const ElevatedButtonThemeData(
+      style: ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(MyColors.purple),
+          textStyle:
+              MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+    ));
+
+ThemeData whiteButton() => ThemeData(
+        elevatedButtonTheme: const ElevatedButtonThemeData(
+      style: ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(MyColors.white),
+          textStyle:
+              MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+    ));
+
+ThemeData lightTheme() => ThemeData(
+    brightness: Brightness.light,
+    primaryColor: MyColors.white,
+    //primarySwatch: Colors.blue,
+    textTheme: const TextTheme(
+        //text24
+        titleLarge: TextStyle(
+            color: MyColors.black,
+            fontFamily: 'Tektur',
+            fontSize: 24,
+            fontWeight: FontWeight.bold),
+        //Text11
+        bodySmall: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.black,
+            fontSize: 11,
+            fontWeight: FontWeight.bold),
+        //Text14
+        bodyLarge: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.black,
+            fontSize: 14,
+            fontWeight: FontWeight.normal)),
+    elevatedButtonTheme: const ElevatedButtonThemeData(
+      style: ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(MyColors.bgWhite),
+          textStyle:
+              MaterialStatePropertyAll(TextStyle(color: MyColors.black))),
+    ),
+    //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
+    dataTableTheme: DataTableThemeData(
+      headingRowColor:
+          MaterialStateColor.resolveWith((states) => MyColors.white),
+      dataRowColor: MaterialStateColor.resolveWith((states) => MyColors.white),
+    ));

@@ -34,8 +34,9 @@ class Text11 extends StatelessWidget {
   const Text11({super.key, required this.text, required this.textColor});
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 11));
+    return Text(text, style: Theme.of(context).textTheme.bodySmall
+        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 11)
+        );
   }
 }
 
