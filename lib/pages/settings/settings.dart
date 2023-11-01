@@ -370,8 +370,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               color: textColorPreview,
                               fontFamily: 'Roboto',
                               fontSize: 14,
-                              fontWeight:
-                                  FontWeight.normal,
+                              fontWeight: FontWeight.normal,
                             ),
                           )),
                         ])))

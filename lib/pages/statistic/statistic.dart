@@ -43,19 +43,10 @@ class _StatisticPageState extends State<StatisticPage> {
                 Row(
                   children: [
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: _currentPageIndex == 0
-                            ? MyColors.purple
-                            : MyColors.white,
-                        onPrimary: _currentPageIndex == 0
-                            ? MyColors.white
-                            : MyColors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        minimumSize: const Size(76, 40),
-                        elevation: 0,
-                      ).merge(getButtonStyle(context)),
+                      style: getButtonStyle(
+                        context,
+                        isPressed: _currentPageIndex == 0,
+                      ),
                       onPressed: () {
                         setState(() {
                           _currentPageIndex = 0;
@@ -71,19 +62,10 @@ class _StatisticPageState extends State<StatisticPage> {
                       ),
                     ),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: _currentPageIndex == 1
-                            ? MyColors.purple
-                            : MyColors.white,
-                        onPrimary: _currentPageIndex == 1
-                            ? MyColors.white
-                            : MyColors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        minimumSize: const Size(76, 40),
-                        elevation: 0,
-                      ).merge(getButtonStyle(context)),
+                      style: getButtonStyle(
+                        context,
+                        isPressed: _currentPageIndex == 1,
+                      ),
                       onPressed: () {
                         setState(() {
                           _currentPageIndex = 1;
@@ -99,19 +81,10 @@ class _StatisticPageState extends State<StatisticPage> {
                       ),
                     ),
                     ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: _currentPageIndex == 2
-                            ? MyColors.purple
-                            : MyColors.white,
-                        onPrimary: _currentPageIndex == 2
-                            ? MyColors.white
-                            : MyColors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        minimumSize: const Size(76, 40),
-                        elevation: 0,
-                      ).merge(getButtonStyle(context)),
+                      style: getButtonStyle(
+                        context,
+                        isPressed: _currentPageIndex == 2,
+                      ),
                       onPressed: () {
                         setState(() {
                           _currentPageIndex = 2;

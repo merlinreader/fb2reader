@@ -115,29 +115,27 @@ ThemeData lightTheme() => ThemeData(
       dataRowColor: MaterialStateColor.resolveWith((states) => MyColors.white),
     ));
 
-ButtonStyle getButtonStyle(BuildContext context) {
+ButtonStyle getButtonStyle(BuildContext context, {bool isPressed = false}) {
   final currentTheme = Theme.of(context);
+  Color backgroundColor;
+  Color textColor;
+
   if (currentTheme.brightness == Brightness.light) {
-    return ButtonStyle(
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
-      ),
-      elevation: null,
-      backgroundColor: MaterialStateProperty.all(MyColors.white),
-      textStyle: MaterialStateProperty.all(TextStyle(color: MyColors.black)),
-    );
+    backgroundColor = isPressed ? MyColors.purple : MyColors.white;
+    textColor = isPressed ? MyColors.white : MyColors.black;
   } else {
-    return ButtonStyle(
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-        RoundedRectangleBorder(
-          borderRadius: BorderRadius.zero,
-        ),
-      ),
-      elevation: null,
-      backgroundColor: MaterialStateProperty.all(MyColors.black),
-      textStyle: MaterialStateProperty.all(TextStyle(color: MyColors.white)),
-    );
+    backgroundColor = isPressed ? MyColors.purple : MyColors.black;
+    textColor = isPressed ? MyColors.white : MyColors.black;
   }
+
+  return ButtonStyle(
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    ),
+    elevation: MaterialStateProperty.all(0),
+    backgroundColor: MaterialStateProperty.all(backgroundColor),
+    textStyle: MaterialStateProperty.all(TextStyle(color: textColor)),
+  );
 }

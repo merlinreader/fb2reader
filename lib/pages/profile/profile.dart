@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merlin/UI/theme/theme.dart';
 //import 'package:merlin/components/appbar/appbar.dart';
 //import 'package:merlin/components/navbar/navbar.dart';
-
+import 'package:country_provider/country_provider.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
@@ -123,3 +123,4 @@ class _ProfilePage extends State<ProfilePage> {
     );
   }
 }
+
