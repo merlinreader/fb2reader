@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/checkbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -231,10 +231,10 @@ class _SettingsPageState extends State<SettingsPage> {
             Navigator.pop(context);
             // Navigator.popAndPushNamed(context, RouteNames.reader);
           },
-          child: SvgPicture.asset(
-            'assets/images/chevron-left.svg',
-            width: 16,
-            height: 16,
+          child: const Icon(
+            CustomIcons.chevronLeft,
+            size: 40,
+            color: MyColors.black,
           ),
         ),
         title: Text(

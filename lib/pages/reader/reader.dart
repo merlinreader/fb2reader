@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
@@ -31,6 +33,10 @@ class BookInfo {
       'author': author,
       'lastPosition': lastPosition,
     };
+  }
+
+  void setPosZero() {
+    lastPosition = 0;
   }
 
   factory BookInfo.fromJson(Map<String, dynamic> json) {
@@ -75,8 +81,9 @@ class Reader extends State {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
+      print('12312321312 $prefs');
       final filePath =
-          textes.first.filePath; // Используйте путь из текущей книги
+          textes.first.filePath;
       // ignore: unnecessary_null_comparison
       if (filePath != null) {
         final readingPositionsJson = prefs.getString('readingPositions');
@@ -103,11 +110,28 @@ class Reader extends State {
   @override
   Future<void> didChangeDependencies() async {
     final prefs = await SharedPreferences.getInstance();
-    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.mint.value;
+    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.white.value;
     final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
     getBgcColor = Color(bgColor);
     getTextColor = Color(textColor);
     super.didChangeDependencies();
+  }
+
+  Future<void> resetPositionForBook(String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    final readingPositionsJson = prefs.getString('readingPositions');
+    Map<String, double> readingPositions = {};
+
+    if (readingPositionsJson != null) {
+      final readingPositionsMap = jsonDecode(readingPositionsJson);
+      if (readingPositionsMap is Map<String, dynamic>) {
+        readingPositions = readingPositionsMap.cast<String, double>();
+      }
+    }
+
+    readingPositions[filePath] = 0;
+    await prefs.setString('readingPositions', jsonEncode(readingPositions));
+    print('Position reset to 0 for $filePath');
   }
 
   Future<void> saveReadingPosition(double position, String filePath) async {
@@ -124,7 +148,7 @@ class Reader extends State {
 
     readingPositions[filePath] = position;
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
-    print('saveReadingPosition $position for $filePath');
+    // print('saveReadingPosition $position for $filePath');
   }
 
   Future<void> getReadingPosition(String filePath) async {
@@ -184,6 +208,15 @@ class Reader extends State {
           .toList();
       setState(() {});
     }
+    if (textes.isEmpty) {
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+      Fluttertoast.showToast(
+        msg: 'Нет последней книги',
+        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        gravity: ToastGravity.BOTTOM,
+      );
+    }
     getText = textes[0]
         .fileText
         .toString()
@@ -216,8 +249,8 @@ class Reader extends State {
   @override
   Widget build(BuildContext context) {
     double pageSize = MediaQuery.of(context).size.height * 3;
-
     List<String> textPages = getPages(getText, pageSize.toInt());
+    
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
@@ -240,8 +273,8 @@ class Reader extends State {
               text: textes.isNotEmpty
                   ? (textes.first.author.toString().length > 8
                       ? (textes.first.title.toString().length > 8
-                          ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 5)}...'
-                          : '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 5)}...')
+                          ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
+                          : '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 6)}...')
                       : textes[0].title.toString())
                   : 'Нет автора',
               fontsize: 18,
