@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
@@ -81,7 +82,7 @@ class Reader extends State {
       final prefs = await SharedPreferences.getInstance();
       print('12312321312 $prefs');
       final filePath =
-          textes.first.filePath; // Используйте путь из текущей книги
+          textes.first.filePath;
       // ignore: unnecessary_null_comparison
       if (filePath != null) {
         final readingPositionsJson = prefs.getString('readingPositions');
@@ -247,8 +248,8 @@ class Reader extends State {
   @override
   Widget build(BuildContext context) {
     double pageSize = MediaQuery.of(context).size.height * 3;
-
     List<String> textPages = getPages(getText, pageSize.toInt());
+    
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
