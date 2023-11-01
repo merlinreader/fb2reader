@@ -327,8 +327,8 @@ class RecentPageState extends State<RecentPage> {
     return Scaffold(
       body: Stack(
         children: [
-          const Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
                 24, 28, 24, 0), // Верхний отступ 0
             child: TextTektur(
               text: "Последнее",
