@@ -10,7 +10,7 @@ import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/location.dart';
 import 'package:merlin/UI/router.dart';
-import 'package:merlin/functions/auth.dart';
+//import 'package:merlin/functions/auth.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});

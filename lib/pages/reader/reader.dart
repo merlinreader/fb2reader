@@ -240,7 +240,8 @@ class Reader extends State {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextTektur(
-              text: textes.first.author.toString().length > 18
+              text: textes.
+              first.author.toString().length > 18
                   ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
                   : textes[0].title.toString(),
               fontsize: 18,

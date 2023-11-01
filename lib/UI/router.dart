@@ -5,7 +5,7 @@ import 'package:merlin/pages/profile/profile.dart';
 import 'package:merlin/pages/reader/reader.dart';
 import 'package:merlin/pages/settings/settings.dart';
 import 'package:merlin/pages/auth/auth.dart';
-import 'package:path/path.dart';
+//import 'package:path/path.dart';
 
 abstract class RouteNames {
   static const String main = '/main';
