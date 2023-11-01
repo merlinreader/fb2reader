@@ -9,6 +9,7 @@ import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/location.dart';
+import 'package:merlin/UI/router.dart';
 import 'package:merlin/functions/auth.dart';
 
 class Profile extends StatelessWidget {
@@ -29,6 +30,10 @@ class _ProfilePage extends State<ProfilePage> {
   late String country;
   late String adminArea;
   late String locality;
+
+  void nav() {
+    Navigator.of(context).pushNamed(RouteNames.auth);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +79,7 @@ class _ProfilePage extends State<ProfilePage> {
               children: [
                 Theme(
                   data: purpleButton(),
-                  child: const Button(
+                  child: Button(
                     text: 'Авторизоваться',
                     width: 312,
                     height: 48,
@@ -83,7 +88,8 @@ class _ProfilePage extends State<ProfilePage> {
                     //buttonColor: MyColors.purple,
                     textColor: MyColors.white,
                     fontSize: 14,
-                    onPressed: launchTelegram,
+                    //onPressed: launchTelegram,
+                    onPressed: nav,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

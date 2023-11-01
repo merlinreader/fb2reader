@@ -15,7 +15,7 @@ void main() {
     systemNavigationBarColor: MyColors.bgWhite,
   ));
   runApp(MerlinApp());
-  getLocation();
+  //getLocation();
 }
 
 class MerlinApp extends StatelessWidget {
