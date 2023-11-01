@@ -1,15 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
-
-import 'dart:async';
-
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
 
@@ -18,15 +13,16 @@ class BookInfo {
   String fileText;
   String title;
   String author;
-
   double lastPosition = 0;
 
-  BookInfo(
-      {required this.filePath,
-      required this.fileText,
-      required this.title,
-      required this.author,
-      required this.lastPosition});
+  BookInfo({
+    required this.filePath,
+    required this.fileText,
+    required this.title,
+    required this.author,
+    required this.lastPosition,
+  });
+
   Map<String, dynamic> toJson() {
     return {
       'filePath': filePath,
@@ -44,39 +40,6 @@ class BookInfo {
       title: json['title'],
       author: json['author'],
       lastPosition: json['lastPosition'],
-    );
-  }
-}
-
-class TranslationDialog extends StatelessWidget {
-  final String translatedText;
-
-  const TranslationDialog(this.translatedText, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      content: SimpleDialog(
-        title: const Text('Перевод'),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              translatedText,
-              style: const TextStyle(
-                  fontSize: 24.0), // настройте стиль по своему усмотрению
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          child: const Text('ОК'),
-          onPressed: () {
-            Navigator.of(context).pop(); // Закрыть диалоговое окно
-          },
-        ),
-      ],
     );
   }
 }
@@ -105,26 +68,38 @@ class Reader extends State {
   }
 
   @override
-  void initState() {
+void initState() {
     getDataFromLocalStorage('textKey');
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
     super.initState();
-    bool isBinding = false;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await getReadingPosition();
-      if (isLast == true && isBinding == false) {
-        print('WidgetsBinding isLast $isLast');
-        print('WidgetsBinding lastPosition $lastPosition');
-        _scrollController.animateTo(
-          lastPosition,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.ease,
-        );
-        isBinding = true;
+      final prefs = await SharedPreferences.getInstance();
+      final filePath =
+          textes.first.filePath; // Используйте путь из текущей книги
+      // ignore: unnecessary_null_comparison
+      if (filePath != null) {
+        final readingPositionsJson = prefs.getString('readingPositions');
+        if (readingPositionsJson != null) {
+          final readingPositions = jsonDecode(readingPositionsJson);
+          if (readingPositions.containsKey(filePath)) {
+            lastPosition = readingPositions[filePath];
+            if (_scrollController.hasClients) {
+              _scrollController.animateTo(
+                lastPosition,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.linear,
+              );
+            }
+            setState(() {
+              isLast = true;
+            });
+          }
+        }
       }
     });
   }
+
 
   @override
   Future<void> didChangeDependencies() async {
@@ -136,27 +111,41 @@ class Reader extends State {
     super.didChangeDependencies();
   }
 
-  void saveReadingPosition(double position) async {
+  Future<void> saveReadingPosition(double position, String filePath) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('readingPosition', position);
-    print('saveReadingPosition $position');
+    final readingPositionsJson = prefs.getString('readingPositions');
+    Map<String, double> readingPositions = {};
+
+    if (readingPositionsJson != null) {
+      final readingPositionsMap = jsonDecode(readingPositionsJson);
+      if (readingPositionsMap is Map<String, dynamic>) {
+        readingPositions = readingPositionsMap.cast<String, double>();
+      }
   }
 
-  Future<void> getReadingPosition() async {
-    final prefs = await SharedPreferences.getInstance();
-    final position = prefs.getDouble('readingPosition');
+    readingPositions[filePath] = position;
+    await prefs.setString('readingPositions', jsonEncode(readingPositions));
+    print('saveReadingPosition $position for $filePath');
+  }
 
-    if (position != null) {
-      setState(() {
-        lastPosition = position;
-        print('getReadingPosition lastPosition $lastPosition');
+  Future<void> getReadingPosition(String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    final readingPositionsJson = prefs.getString('readingPositions');
+    if (readingPositionsJson != null) {
+      final readingPositions =
+          Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
+      if (readingPositions.containsKey(filePath)) {
+        final position = readingPositions[filePath];
         print('getReadingPosition position $position');
-        isLast = true;
-      });
+        setState(() {
+          lastPosition = position;
+          isLast = true;
+        });
+      }
     }
   }
 
-  void _updateScrollPercentage() {
+  void _updateScrollPercentage() async {
     if (_scrollController.position.maxScrollExtent == 0) {
       return;
     }
@@ -166,7 +155,8 @@ class Reader extends State {
     setState(() {
       _scrollPosition = percentage;
     });
-    saveReadingPosition(_scrollController.position.pixels);
+    await saveReadingPosition(
+        _scrollController.position.pixels, textes.first.filePath);
   }
 
   Color getTextColor = MyColors.black;
@@ -227,13 +217,10 @@ class Reader extends State {
   @override
   Widget build(BuildContext context) {
     double pageSize = MediaQuery.of(context).size.height * 3;
-    // double pageSize = MediaQuery.of(context).size.width * 2.7;
-    // double pageHeight = MediaQuery.of(context).size.height;
 
     List<String> textPages = getPages(getText, pageSize.toInt());
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(color: MyColors.black),
         leading: GestureDetector(
             onTap: () {
               Navigator.pop(context);
@@ -296,14 +283,7 @@ class Reader extends State {
                       return _scrollController.hasClients
                           ? () {
                               if (!isLast) {
-                                // print('lastPosition $lastPosition');
-                                // double newPos = getReadingPosition() as double;
-                                // sleep(const Duration(milliseconds: 2000));
-                                // print('newPos after sleep $newPos');
-                                // _scrollController.animateTo(
-                                //     getReadingPosition() as double,
-                                //     duration: const Duration(milliseconds: 250),
-                                //     curve: Curves.ease);
+                                // Ваш код для скроллинга к позиции чтения
                               }
                               return Center(
                                 child: SelectableText(
@@ -317,7 +297,7 @@ class Reader extends State {
                             }()
                           : Center(
                               child: SelectableText(
-                                'Дичь',
+                                'Нет текста для отображения',
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   color: getTextColor,
@@ -329,43 +309,45 @@ class Reader extends State {
                   }))),
       bottomNavigationBar: BottomAppBar(
         child: SizedBox(
-          height: 30.0, // Высота вашей навигационной панели
+          height: 30.0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
-                  child: TextTektur(
-                    text: '${_batteryLevel.toString()}%',
-                    fontsize: 12,
-                    textColor: MyColors.black,
-                    fontWeight: FontWeight.w600,
-                  )),
+                padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                child: TextTektur(
+                  text: '${_batteryLevel.toString()}%',
+                  fontsize: 12,
+                  textColor: MyColors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
                 child: Align(
-                    alignment: Alignment
-                        .topCenter, // Центрирование только этого элемента
-                    child: TextTektur(
-                      text: textes.isNotEmpty
-                          ? (textes[0].title.toString().length > 28
-                              ? '${textes[0].title.toString().substring(0, 28)}...'
-                              : textes[0].title.toString())
-                          : 'Нет названия',
-                      fontsize: 12,
-                      textColor: MyColors.black,
-                      fontWeight: FontWeight.w600,
-                    )),
-              ),
-              Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                  alignment: Alignment.topCenter,
                   child: TextTektur(
-                    text: '${_scrollPosition.toStringAsFixed(2)}%',
+                    text: textes.isNotEmpty
+                        ? (textes[0].title.toString().length > 28
+                            ? '${textes[0].title.toString().substring(0, 28)}...'
+                            : textes[0].title.toString())
+                        : 'Нет названия',
                     fontsize: 12,
                     textColor: MyColors.black,
                     fontWeight: FontWeight.w600,
-                  )),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                child: TextTektur(
+                  text: '${_scrollPosition.toStringAsFixed(2)}%',
+                  fontsize: 12,
+                  textColor: MyColors.black,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),
