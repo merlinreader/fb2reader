@@ -4,10 +4,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
+import 'package:merlin/pages/loading/loading.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/pages/achievements/achievements.dart';
 import 'package:merlin/style/text.dart';
-import 'package:merlin/pages/loading.dart';
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
 import 'package:merlin/pages/recent/imageloader.dart';

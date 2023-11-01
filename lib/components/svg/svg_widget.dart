@@ -42,3 +42,12 @@ class Dragon1Widget extends StatelessWidget {
         alignment: Alignment.center, child: SvgPicture.asset(SvgAsset.dragon1));
   }
 }
+
+class MerlinStart extends StatelessWidget {
+  const MerlinStart({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(SvgAsset.merlinStart);
+  }
+}

@@ -28,8 +28,9 @@ ThemeData darkTheme() => ThemeData(
       style: ButtonStyle(
           backgroundColor: MaterialStatePropertyAll(MyColors.blackBt),
           textStyle: MaterialStatePropertyAll(
-              TextStyle(color: Color.fromARGB(255, 255, 0, 0)))),
+              TextStyle(color: MyColors.white))),
     ),
+    iconTheme: const IconThemeData(color: MyColors.white),
     //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
     dataTableTheme: DataTableThemeData(
       headingRowColor:
@@ -77,6 +78,7 @@ ThemeData lightTheme() => ThemeData(
             color: MyColors.black,
             fontSize: 14,
             fontWeight: FontWeight.normal)),
+    
     elevatedButtonTheme: const ElevatedButtonThemeData(
       style: ButtonStyle(
           backgroundColor: MaterialStatePropertyAll(MyColors.bgWhite),

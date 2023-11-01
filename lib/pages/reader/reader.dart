@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
+import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -223,8 +224,14 @@ class Reader extends State {
             onTap: () {
               Navigator.pop(context, true);
             },
-            child: const Icon(CustomIcons.chevronLeft, size: 40)),
-        backgroundColor: MyColors.white,
+            child: Theme(
+                data: lightTheme(),
+                child: const Icon(
+                  CustomIcons.chevronLeft,
+                  size: 40,
+                  //color: Theme.of(context).iconTheme,
+                ))),
+        backgroundColor: Theme.of(context).primaryColor,
         shadowColor: Colors.transparent,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -246,10 +253,13 @@ class Reader extends State {
                   Navigator.pushNamed(context, RouteNames.readerSettings)
                       .then((value) => loadStylePreferences());
                 },
-                child: const Icon(
-                  CustomIcons.sliders,
-                  size: 40,
-                ))
+                child: Theme(
+                    data: lightTheme(),
+                    child: const Icon(
+                      CustomIcons.sliders,
+                      size: 40,
+                      //color: Theme.of(context).iconTheme,
+                    )))
           ],
         ),
       ),

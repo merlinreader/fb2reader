@@ -31,6 +31,8 @@ class _ProfilePage extends State<ProfilePage> {
   late String adminArea;
   late String locality;
 
+  String token = '';
+
   void nav() {
     Navigator.of(context).pushNamed(RouteNames.auth);
   }
@@ -74,50 +76,114 @@ class _ProfilePage extends State<ProfilePage> {
             )
           ])),
           const SizedBox(height: 81),
-          Expanded(
-            child: Column(
-              children: [
-                Theme(
-                  data: purpleButton(),
-                  child: Button(
-                    text: 'Авторизоваться',
-                    width: 312,
-                    height: 48,
-                    horizontalPadding: 97,
-                    verticalPadding: 12,
-                    //buttonColor: MyColors.purple,
-                    textColor: MyColors.white,
-                    fontSize: 14,
-                    //onPressed: launchTelegram,
-                    onPressed: nav,
-                    fontWeight: FontWeight.bold,
+          token == ''
+              ? Expanded(
+                  child: Column(
+                    children: [
+                      Theme(
+                        data: purpleButton(),
+                        child: Button(
+                          text: 'Авторизоваться',
+                          width: 312,
+                          height: 48,
+                          horizontalPadding: 97,
+                          verticalPadding: 12,
+                          //buttonColor: MyColors.purple,
+                          textColor: MyColors.white,
+                          fontSize: 14,
+                          //onPressed: launchTelegram,
+                          onPressed: nav,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: Align(
+                            alignment: AlignmentDirectional.bottomCenter,
+                            child: Theme(
+                              data: lightTheme(),
+                              child: const Button(
+                                  text: 'Написать нам',
+                                  width: 312,
+                                  height: 48,
+                                  horizontalPadding: 97,
+                                  verticalPadding: 12,
+                                  //buttonColor: MyColors.white,
+                                  textColor: MyColors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  onPressed: sendEmail),
+                            )),
+                      ),
+                      const SizedBox(height: 24)
+                    ],
+                  ),
+                )
+              : Expanded(
+                  child: Column(
+                    children: [
+                      Theme(
+                        data: purpleButton(),
+                        child: Button(
+                          text: 'Купить слова',
+                          width: 312,
+                          height: 48,
+                          horizontalPadding: 97,
+                          verticalPadding: 12,
+                          //buttonColor: MyColors.purple,
+                          textColor: MyColors.white,
+                          fontSize: 14,
+                          //onPressed: launchTelegram,
+                          onPressed: nav,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Theme(
+                        data: purpleButton(),
+                        child: Button(
+                          text: 'Убрать рекламу',
+                          width: 312,
+                          height: 48,
+                          horizontalPadding: 97,
+                          verticalPadding: 12,
+                          //buttonColor: MyColors.purple,
+                          textColor: MyColors.white,
+                          fontSize: 14,
+                          //onPressed: launchTelegram,
+                          onPressed: nav,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: Align(
+                            alignment: AlignmentDirectional.bottomCenter,
+                            child: Theme(
+                              data: lightTheme(),
+                              child: const Button(
+                                  text: 'Написать нам',
+                                  width: 312,
+                                  height: 48,
+                                  horizontalPadding: 97,
+                                  verticalPadding: 12,
+                                  //buttonColor: MyColors.white,
+                                  textColor: MyColors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  onPressed: sendEmail),
+                            )),
+                      ),
+                      const SizedBox(height: 24)
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Expanded(
-                  child: Align(
-                      alignment: AlignmentDirectional.bottomCenter,
-                      child: Theme(
-                        data: lightTheme(),
-                        child: const Button(
-                            text: 'Написать нам',
-                            width: 312,
-                            height: 48,
-                            horizontalPadding: 97,
-                            verticalPadding: 12,
-                            //buttonColor: MyColors.white,
-                            textColor: MyColors.black,
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            onPressed: sendEmail),
-                      )),
-                ),
-                const SizedBox(height: 24)
-              ],
-            ),
-          ),
         ]),
       ),
     );
