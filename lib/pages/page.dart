@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
@@ -59,7 +60,7 @@ class Page extends State {
             child: Row(
               children: [
                 Padding(
-                    padding: const EdgeInsets.only(left: 24, right: 16),
+                    padding: const EdgeInsets.only(left: 6, right: 16),
                     child: SvgPicture.asset(SvgAsset.merlinLogo)),
                 const Text24(text: 'Merlin', textColor: MyColors.black)
               ],
@@ -98,6 +99,24 @@ class Page extends State {
             fontSize: 11, fontFamily: 'Tektur', fontWeight: FontWeight.bold),
       ),
       body: _widgetOptions[_selectedPage],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (RecentPageState().checkImages() == true) {
+            Fluttertoast.showToast(
+              msg: 'Нет последней книги',
+              toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+              gravity: ToastGravity.BOTTOM, // Расположение уведомления
+            );
+            return;
+          }
+          Navigator.pushNamed(context, RouteNames.reader);
+        },
+        backgroundColor: MyColors.purple,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.zero)),
+        autofocus: true,
+        child: const Icon(CustomIcons.bookOpen),
+      ),
     );
   }
 }

@@ -38,7 +38,7 @@ class ImageLoader {
         gravity: ToastGravity.BOTTOM, // Расположение уведомления
       );
       return;
-    } 
+    }
 
     String path = result!.files.single.path!;
 
@@ -120,10 +120,10 @@ class ImageLoader {
 }
 
 Future<void> requestPermission() async {
-  PermissionStatus status = await Permission.manageExternalStorage.status;
+  PermissionStatus status = await Permission.storage.status;
   if (!status.isGranted) {
-    status = await Permission.manageExternalStorage.request();
-    if (!status.isGranted) {
+    await Permission.storage.request();
+    if (status.isDenied || status.isPermanentlyDenied) {
       openAppSettings();
     }
   }

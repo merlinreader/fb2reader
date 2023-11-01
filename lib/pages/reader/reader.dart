@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -90,6 +91,8 @@ class Reader extends State {
   final Battery _battery = Battery();
   int _batteryLevel = 0;
   final ScrollController _scrollController = ScrollController();
+  double lastPosition = 0;
+  bool isLast = false;
 
   double _scrollPosition = 0.0;
 
@@ -106,6 +109,20 @@ class Reader extends State {
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
     super.initState();
+    bool isBinding = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await getReadingPosition();
+      if (isLast == true && isBinding == false) {
+        print('WidgetsBinding isLast $isLast');
+        print('WidgetsBinding lastPosition $lastPosition');
+        _scrollController.animateTo(
+          lastPosition,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.ease,
+        );
+        isBinding = true;
+      }
+    });
   }
 
   @override
@@ -118,30 +135,22 @@ class Reader extends State {
     super.didChangeDependencies();
   }
 
-  @override
-  void dispose() {
-    saveReadingPosition(_scrollPosition);
-    super.dispose();
-  }
-
-  @override
-  void deactivate() {
-    saveReadingPosition(_scrollPosition);
-    super.deactivate();
-  }
-
   void saveReadingPosition(double position) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble('readingPosition', position);
+    print('saveReadingPosition $position');
   }
 
   Future<void> getReadingPosition() async {
     final prefs = await SharedPreferences.getInstance();
     final position = prefs.getDouble('readingPosition');
+
     if (position != null) {
       setState(() {
-        _scrollController.animateTo(position,
-            duration: const Duration(milliseconds: 250), curve: Curves.ease);
+        lastPosition = position;
+        print('getReadingPosition lastPosition $lastPosition');
+        print('getReadingPosition position $position');
+        isLast = true;
       });
     }
   }
@@ -227,6 +236,7 @@ class Reader extends State {
         leading: GestureDetector(
           onTap: () {
             Navigator.pop(context);
+            saveReadingPosition(_scrollController.offset);
           },
           child: SvgPicture.asset(
             'assets/images/chevron-left.svg',
@@ -240,10 +250,13 @@ class Reader extends State {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextTektur(
-              text: textes.
-              first.author.toString().length > 18
-                  ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
-                  : textes[0].title.toString(),
+              text: textes.isNotEmpty
+                  ? (textes.first.author.toString().length > 8
+                      ? (textes.first.title.toString().length > 8
+                          ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 5)}...'
+                          : '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 5)}...')
+                      : textes[0].title.toString())
+                  : 'Нет автора',
               fontsize: 18,
               textColor: MyColors.black,
               fontWeight: FontWeight.w600,
@@ -273,12 +286,40 @@ class Reader extends State {
                   controller: _scrollController,
                   itemCount: textPages.length,
                   itemBuilder: (context, index) {
-                    return Center(
-                        child: SelectableText(getText,
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              color: getTextColor,
-                            )));
+                    if (textes.isNotEmpty) {
+                      return _scrollController.hasClients
+                          ? () {
+                              if (!isLast) {
+                                // print('lastPosition $lastPosition');
+                                // double newPos = getReadingPosition() as double;
+                                // sleep(const Duration(milliseconds: 2000));
+                                // print('newPos after sleep $newPos');
+                                // _scrollController.animateTo(
+                                //     getReadingPosition() as double,
+                                //     duration: const Duration(milliseconds: 250),
+                                //     curve: Curves.ease);
+                              }
+                              return Center(
+                                child: SelectableText(
+                                  getText,
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    color: getTextColor,
+                                  ),
+                                ),
+                              );
+                            }()
+                          : Center(
+                              child: SelectableText(
+                                'Дичь',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  color: getTextColor,
+                                ),
+                              ),
+                            );
+                    }
+                    return null;
                   }))),
       bottomNavigationBar: BottomAppBar(
         child: SizedBox(
@@ -301,9 +342,11 @@ class Reader extends State {
                     alignment: Alignment
                         .topCenter, // Центрирование только этого элемента
                     child: TextTektur(
-                      text: textes[0].title.toString().length > 28
-                          ? '${textes[0].title.toString().substring(0, 28)}...'
-                          : textes[0].title.toString(),
+                      text: textes.isNotEmpty
+                          ? (textes[0].title.toString().length > 28
+                              ? '${textes[0].title.toString().substring(0, 28)}...'
+                              : textes[0].title.toString())
+                          : 'Нет названия',
                       fontsize: 12,
                       textColor: MyColors.black,
                       fontWeight: FontWeight.w600,
