@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
@@ -14,7 +13,6 @@ import 'package:xml/xml.dart';
 
 // для получаения картинки из файла книги
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/pages/reader/reader.dart';
 
@@ -55,22 +53,9 @@ class ImageInfo {
   }
 }
 
-Future<void> requestPermission() async {
-  PermissionStatus status = await Permission.manageExternalStorage.status;
-  if (!status.isGranted) {
-    status = await Permission.manageExternalStorage.request();
-    if (!status.isGranted) {
-      openAppSettings();
-    }
-  }
-}
-
-
-
 class RecentPageState extends State<RecentPage> {
   final ImageLoader imageLoader = ImageLoader();
   final ScrollController _scrollController = ScrollController();
-  bool _isVisible = false;
   Uint8List? imageBytes;
   List<ImageInfo> images = [];
   List<BookInfo> textes = [];
@@ -84,13 +69,6 @@ class RecentPageState extends State<RecentPage> {
     super.initState();
 
     getDataFromLocalStorage('booksKey');
-
-    _scrollController.addListener(() {
-      setState(() {
-        _isVisible = _scrollController.position.userScrollDirection ==
-            ScrollDirection.reverse;
-      });
-    });
   }
 
   @override
@@ -322,14 +300,22 @@ class RecentPageState extends State<RecentPage> {
     );
   }
 
+  bool checkImages() {
+    if (images.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          const Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(
-                24, 28, 24, 0), // Верхний отступ 0
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+                19, 28, 24, 0), // Верхний отступ 0
             child: TextTektur(
               text: "Последнее",
               fontsize: 24,
@@ -407,27 +393,23 @@ class RecentPageState extends State<RecentPage> {
           ),
         ],
       ),
-      floatingActionButton: AnimatedOpacity(
-        duration: const Duration(milliseconds: 150),
-        opacity: _isVisible ? 0.0 : 1.0,
-        child: FloatingActionButton(
-          onPressed: () {
-            if (images.isEmpty) {
-              Fluttertoast.showToast(
-                msg: 'Нет последней книги',
-                toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-                gravity: ToastGravity.BOTTOM, // Расположение уведомления
-              );
-              return;
-            }
-            Navigator.pushNamed(context, RouteNames.reader);
-          },
-          backgroundColor: MyColors.purple,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.zero)),
-          autofocus: true,
-          child: const Icon(CustomIcons.bookOpen),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (images.isEmpty) {
+            Fluttertoast.showToast(
+              msg: 'Нет последней книги',
+              toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+              gravity: ToastGravity.BOTTOM, // Расположение уведомления
+            );
+            return;
+          }
+          Navigator.pushNamed(context, RouteNames.reader);
+        },
+        backgroundColor: MyColors.purple,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.zero)),
+        autofocus: true,
+        child: const Icon(CustomIcons.bookOpen),
       ),
     );
   }
