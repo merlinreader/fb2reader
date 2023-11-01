@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
@@ -68,7 +67,7 @@ class Reader extends State {
   }
 
   @override
-void initState() {
+  void initState() {
     getDataFromLocalStorage('textKey');
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
@@ -100,7 +99,6 @@ void initState() {
     });
   }
 
-
   @override
   Future<void> didChangeDependencies() async {
     final prefs = await SharedPreferences.getInstance();
@@ -121,7 +119,7 @@ void initState() {
       if (readingPositionsMap is Map<String, dynamic>) {
         readingPositions = readingPositionsMap.cast<String, double>();
       }
-  }
+    }
 
     readingPositions[filePath] = position;
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
@@ -222,17 +220,15 @@ void initState() {
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-              saveReadingPosition(_scrollController.offset);
-            },
-            child: const Icon(CustomIcons.chevronLeft, size: 40)
-            //SvgPicture.asset(
-            //'assets/images/chevron-left.svg',
-            //width: 16,
-            //height: 16,
-            //),
-            ),
+          onTap: () {
+            Navigator.pop(context, true);
+          },
+          child: SvgPicture.asset(
+            'assets/images/chevron-left.svg',
+            width: 16,
+            height: 16,
+          ),
+        ),
         backgroundColor: MyColors.white,
         shadowColor: Colors.transparent,
         title: Row(
@@ -251,19 +247,15 @@ void initState() {
               fontWeight: FontWeight.w600,
             ),
             GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, RouteNames.readerSettings)
-                      .then((value) => loadStylePreferences());
-                },
-                child: const Icon(
-                  CustomIcons.sliders,
-                  size: 40,
-                )
-                //const Icon(
-                //Icons.settings,
-                //color: MyColors.black,
-                //),
-                )
+              onTap: () {
+                Navigator.pushNamed(context, RouteNames.readerSettings)
+                    .then((value) => loadStylePreferences());
+              },
+              child: const Icon(
+                Icons.settings,
+                color: MyColors.black,
+              ),
+            )
           ],
         ),
       ),
