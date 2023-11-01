@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
-import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart';
@@ -107,16 +106,31 @@ class RecentPageState extends State<RecentPage> {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataToAdd = prefs.getString(key);
     List<BookInfo> imageDatas = [];
+  
     if (imageDataToAdd != null) {
       imageDatas = (jsonDecode(imageDataToAdd) as List)
           .map((item) => BookInfo.fromJson(item))
           .toList();
+    
+      // Сначала устанавливаем позицию 0 для книги, которую удаляем
+      for (var bookInfo in imageDatas) {
+        if (bookInfo.filePath == path) {
+          bookInfo.setPosZero();
+          break;
+        }
+      }
+    
       imageDatas.removeWhere((element) => element.filePath == path);
       String imageDatasString = jsonEncode(imageDatas);
       await prefs.setString(key, imageDatasString);
+    
+      // Обновляем информацию о позиции в кеше
+      await Reader().resetPositionForBook(path);
+    
       setState(() {});
     }
   }
+
 
   bool isSended = false;
 
@@ -393,24 +407,6 @@ class RecentPageState extends State<RecentPage> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (checkImages() == false) {
-            Fluttertoast.showToast(
-              msg: 'Нет последней книги RECENT',
-              toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-              gravity: ToastGravity.BOTTOM, // Расположение уведомления
-            );
-            return;
-          }
-          Navigator.pushNamed(context, RouteNames.reader);
-        },
-        backgroundColor: MyColors.purple,
-        shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.zero)),
-        autofocus: true,
-        child: const Icon(CustomIcons.bookOpen),
       ),
     );
   }

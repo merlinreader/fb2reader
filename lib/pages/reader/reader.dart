@@ -33,6 +33,10 @@ class BookInfo {
     };
   }
 
+  void setPosZero() {
+    lastPosition = 0;
+  }
+
   factory BookInfo.fromJson(Map<String, dynamic> json) {
     return BookInfo(
       filePath: json['filePath'],
@@ -111,6 +115,23 @@ class Reader extends State {
     super.didChangeDependencies();
   }
 
+  Future<void> resetPositionForBook(String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    final readingPositionsJson = prefs.getString('readingPositions');
+    Map<String, double> readingPositions = {};
+
+    if (readingPositionsJson != null) {
+      final readingPositionsMap = jsonDecode(readingPositionsJson);
+      if (readingPositionsMap is Map<String, dynamic>) {
+        readingPositions = readingPositionsMap.cast<String, double>();
+      }
+    }
+
+    readingPositions[filePath] = 0;
+    await prefs.setString('readingPositions', jsonEncode(readingPositions));
+    print('Position reset to 0 for $filePath');
+  }
+
   Future<void> saveReadingPosition(double position, String filePath) async {
     final prefs = await SharedPreferences.getInstance();
     final readingPositionsJson = prefs.getString('readingPositions');
@@ -125,7 +146,7 @@ class Reader extends State {
 
     readingPositions[filePath] = position;
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
-    print('saveReadingPosition $position for $filePath');
+    // print('saveReadingPosition $position for $filePath');
   }
 
   Future<void> getReadingPosition(String filePath) async {
@@ -189,7 +210,7 @@ class Reader extends State {
       // ignore: use_build_context_synchronously
       Navigator.pop(context);
       Fluttertoast.showToast(
-        msg: 'Нет последней книги reader',
+        msg: 'Нет последней книги',
         toastLength: Toast.LENGTH_SHORT, // Длительность отображения
         gravity: ToastGravity.BOTTOM,
       );
@@ -248,8 +269,8 @@ class Reader extends State {
               text: textes.isNotEmpty
                   ? (textes.first.author.toString().length > 8
                       ? (textes.first.title.toString().length > 8
-                          ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 5)}...'
-                          : '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 5)}...')
+                          ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
+                          : '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 6)}...')
                       : textes[0].title.toString())
                   : 'Нет автора',
               fontsize: 18,

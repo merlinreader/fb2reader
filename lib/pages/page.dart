@@ -104,7 +104,7 @@ class Page extends State {
           try {
             if (RecentPageState().checkImages() == true) {
             Fluttertoast.showToast(
-                msg: 'Нет последней книги PAGE',
+                msg: 'Нет последней книги',
                 toastLength: Toast.LENGTH_SHORT, // Длительность отображения
                 gravity: ToastGravity.BOTTOM,
               ); // Расположение уведомления
@@ -114,7 +114,7 @@ class Page extends State {
             return;
           } catch (e) {
             Fluttertoast.showToast(
-              msg: 'Нет последней книги PAGE',
+              msg: 'Нет последней книги',
               toastLength: Toast.LENGTH_SHORT, // Длительность отображения
               gravity: ToastGravity.BOTTOM, // Расположение уведомления
             );
