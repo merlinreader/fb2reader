@@ -98,7 +98,8 @@ class Page extends State {
         unselectedLabelStyle: const TextStyle(
             fontSize: 11, fontFamily: 'Tektur', fontWeight: FontWeight.bold),
       ),
-      body: _widgetOptions[_selectedPage],
+      body: SafeArea(child: _widgetOptions[_selectedPage]),
+      
     );
   }
 }

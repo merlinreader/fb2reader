@@ -19,103 +19,101 @@ class _StatisticPageState extends State<StatisticPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: <Widget>[
-                const Row(
-                  children: [
-                    Text(
-                      'Статистика',
-                      textAlign: TextAlign.left,
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: <Widget>[
+              const Row(
+                children: [
+                  Text(
+                    'Статистика',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Tektur',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  ElevatedButton(
+                    style: getButtonStyle(
+                      context,
+                      isPressed: _currentPageIndex == 0,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _currentPageIndex = 0;
+                      });
+                    },
+                    child: const Text(
+                      'Страна',
                       style: TextStyle(
-                        fontSize: 24,
                         fontFamily: 'Tektur',
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      style: getButtonStyle(
-                        context,
-                        isPressed: _currentPageIndex == 0,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _currentPageIndex = 0;
-                        });
-                      },
-                      child: const Text(
-                        'Страна',
-                        style: TextStyle(
-                          fontFamily: 'Tektur',
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  ),
+                  ElevatedButton(
+                    style: getButtonStyle(
+                      context,
+                      isPressed: _currentPageIndex == 1,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _currentPageIndex = 1;
+                      });
+                    },
+                    child: const Text(
+                      'Регион',
+                      style: TextStyle(
+                        fontFamily: 'Tektur',
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ElevatedButton(
-                      style: getButtonStyle(
-                        context,
-                        isPressed: _currentPageIndex == 1,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _currentPageIndex = 1;
-                        });
-                      },
-                      child: const Text(
-                        'Регион',
-                        style: TextStyle(
-                          fontFamily: 'Tektur',
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  ),
+                  ElevatedButton(
+                    style: getButtonStyle(
+                      context,
+                      isPressed: _currentPageIndex == 2,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _currentPageIndex = 2;
+                      });
+                    },
+                    child: const Text(
+                      'Город',
+                      style: TextStyle(
+                        fontFamily: 'Tektur',
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ElevatedButton(
-                      style: getButtonStyle(
-                        context,
-                        isPressed: _currentPageIndex == 2,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _currentPageIndex = 2;
-                        });
-                      },
-                      child: const Text(
-                        'Город',
-                        style: TextStyle(
-                          fontFamily: 'Tektur',
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          Expanded(
-            child: IndexedStack(
-              index: _currentPageIndex,
-              children: [
-                Country(), // Страница "Страна"
-                Region(), // Страница "Регион"
-                City(), // Страница "Город"
-              ],
-            ),
+        ),
+        Expanded(
+          child: IndexedStack(
+            index: _currentPageIndex,
+            children: [
+              Country(), // Страница "Страна"
+              Region(), // Страница "Регион"
+              City(), // Страница "Город"
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -65,8 +65,6 @@ Future<void> requestPermission() async {
   }
 }
 
-
-
 class RecentPageState extends State<RecentPage> {
   final ImageLoader imageLoader = ImageLoader();
   final ScrollController _scrollController = ScrollController();
@@ -324,111 +322,87 @@ class RecentPageState extends State<RecentPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-                24, 28, 24, 0), // Верхний отступ 0
-            child: TextTektur(
-              text: "Последнее",
-              fontsize: 24,
-              textColor: MyColors.black,
-              fontWeight: FontWeight.w600,
-            ),
+    return Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+              24, 28, 24, 0), // Верхний отступ 0
+          child: TextTektur(
+            text: "Последнее",
+            fontsize: 24,
+            textColor: MyColors.black,
+            fontWeight: FontWeight.w600,
           ),
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (images.isEmpty)
-                  TextTektur(
-                      text: "Пока вы не добавили никаких книг",
-                      fontsize: 16,
-                      textColor: MyColors.grey)
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-                top: 100), // Верхний отступ для DynamicHeightGridView
-            child: DynamicHeightGridView(
-              controller: _scrollController,
-              itemCount: images.length,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              crossAxisCount: 2,
-              builder: (ctx, index) {
-                return GestureDetector(
-                  onLongPress: () {
-                    onTapLongPressOne(context, index);
-                  },
-                  child: Column(
-                    children: [
-                      if (images[index].imageBytes != null)
-                        GestureDetector(
-                            onTap: () async {
-                              await sendDataFromLocalStorage('textKey', index);
-                              if (isSended) {
-                                // ignore: use_build_context_synchronously
-                                Navigator.pushNamed(context, RouteNames.reader);
-                                isSended = false;
-                              } else {
-                                Fluttertoast.showToast(
-                                  msg: 'Ошибка загрузки книги',
-                                  toastLength: Toast
-                                      .LENGTH_SHORT, // Длительность отображения
-                                  gravity: ToastGravity
-                                      .BOTTOM, // Расположение уведомления
-                                );
-                                return;
-                              }
-                            },
-                            child: Image.memory(images[index].imageBytes!,
-                                width: MediaQuery.of(context).size.width / 2.5,
-                                fit: BoxFit.fitHeight)),
-                      const SizedBox(height: 4),
-                      Text(images[index].author.length > 20
-                          ? '${images[index].author.substring(0, 20)}...'
-                          : images[index].author),
-                      Text(
-                        images[index].title.length > 20
-                            ? '${images[index].title.substring(0, 20)}...'
-                            : images[index].title,
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: AnimatedOpacity(
-        duration: const Duration(milliseconds: 150),
-        opacity: _isVisible ? 0.0 : 1.0,
-        child: FloatingActionButton(
-          onPressed: () {
-            if (images.isEmpty) {
-              Fluttertoast.showToast(
-                msg: 'Нет последней книги',
-                toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-                gravity: ToastGravity.BOTTOM, // Расположение уведомления
-              );
-              return;
-            }
-            Navigator.pushNamed(context, RouteNames.reader);
-          },
-          backgroundColor: MyColors.purple,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.zero)),
-          autofocus: true,
-          child: const Icon(CustomIcons.bookOpen),
         ),
-      ),
+        Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (images.isEmpty)
+                TextTektur(
+                    text: "Пока вы не добавили никаких книг",
+                    fontsize: 16,
+                    textColor: MyColors.grey)
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(
+              top: 100), // Верхний отступ для DynamicHeightGridView
+          child: DynamicHeightGridView(
+            controller: _scrollController,
+            itemCount: images.length,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            crossAxisCount: 2,
+            builder: (ctx, index) {
+              return GestureDetector(
+                onLongPress: () {
+                  onTapLongPressOne(context, index);
+                },
+                child: Column(
+                  children: [
+                    if (images[index].imageBytes != null)
+                      GestureDetector(
+                          onTap: () async {
+                            await sendDataFromLocalStorage('textKey', index);
+                            if (isSended) {
+                              // ignore: use_build_context_synchronously
+                              Navigator.pushNamed(context, RouteNames.reader);
+                              isSended = false;
+                            } else {
+                              Fluttertoast.showToast(
+                                msg: 'Ошибка загрузки книги',
+                                toastLength: Toast
+                                    .LENGTH_SHORT, // Длительность отображения
+                                gravity: ToastGravity
+                                    .BOTTOM, // Расположение уведомления
+                              );
+                              return;
+                            }
+                          },
+                          child: Image.memory(images[index].imageBytes!,
+                              width: MediaQuery.of(context).size.width / 2.5,
+                              fit: BoxFit.fitHeight)),
+                    const SizedBox(height: 4),
+                    Text(images[index].author.length > 20
+                        ? '${images[index].author.substring(0, 20)}...'
+                        : images[index].author),
+                    Text(
+                      images[index].title.length > 20
+                          ? '${images[index].title.substring(0, 20)}...'
+                          : images[index].title,
+                      maxLines: 1,
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

@@ -13,7 +13,7 @@ void main() {
     systemNavigationBarColor: MyColors.white,
   ));
   runApp(MerlinApp());
-  getLocation();
+  // getLocation();
 }
 
 class MerlinApp extends StatelessWidget {
