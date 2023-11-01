@@ -101,15 +101,24 @@ class Page extends State {
       body: _widgetOptions[_selectedPage],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (RecentPageState().checkImages() == true) {
+          try {
+            if (RecentPageState().checkImages() == true) {
             Fluttertoast.showToast(
-              msg: 'Нет последней книги',
+                msg: 'Нет последней книги PAGE',
+                toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                gravity: ToastGravity.BOTTOM,
+              ); // Расположение уведомления
+            } else {
+              Navigator.pushNamed(context, RouteNames.reader);
+            }
+            return;
+          } catch (e) {
+            Fluttertoast.showToast(
+              msg: 'Нет последней книги PAGE',
               toastLength: Toast.LENGTH_SHORT, // Длительность отображения
               gravity: ToastGravity.BOTTOM, // Расположение уведомления
             );
-            return;
           }
-          Navigator.pushNamed(context, RouteNames.reader);
         },
         backgroundColor: MyColors.purple,
         shape: const RoundedRectangleBorder(

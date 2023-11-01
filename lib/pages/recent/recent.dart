@@ -140,6 +140,7 @@ class RecentPageState extends State<RecentPage> {
 
     final prefs = await SharedPreferences.getInstance();
     bool success = await prefs.setString(key, textDataString);
+    print('recent $success');
     if (success == true) {
       isSended = true;
     }
@@ -356,9 +357,9 @@ class RecentPageState extends State<RecentPage> {
                             onTap: () async {
                               await sendDataFromLocalStorage('textKey', index);
                               if (isSended) {
+                                isSended = false;
                                 // ignore: use_build_context_synchronously
                                 Navigator.pushNamed(context, RouteNames.reader);
-                                isSended = false;
                               } else {
                                 Fluttertoast.showToast(
                                   msg: 'Ошибка загрузки книги',
@@ -395,9 +396,9 @@ class RecentPageState extends State<RecentPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (images.isEmpty) {
+          if (checkImages() == false) {
             Fluttertoast.showToast(
-              msg: 'Нет последней книги',
+              msg: 'Нет последней книги RECENT',
               toastLength: Toast.LENGTH_SHORT, // Длительность отображения
               gravity: ToastGravity.BOTTOM, // Расположение уведомления
             );

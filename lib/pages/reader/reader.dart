@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/colors.dart';
@@ -74,6 +75,7 @@ class Reader extends State {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
+      print('12312321312 $prefs');
       final filePath =
           textes.first.filePath; // Используйте путь из текущей книги
       // ignore: unnecessary_null_comparison
@@ -102,7 +104,7 @@ class Reader extends State {
   @override
   Future<void> didChangeDependencies() async {
     final prefs = await SharedPreferences.getInstance();
-    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.mint.value;
+    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.white.value;
     final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
     getBgcColor = Color(bgColor);
     getTextColor = Color(textColor);
@@ -183,6 +185,15 @@ class Reader extends State {
           .toList();
       setState(() {});
     }
+    if (textes.isEmpty) {
+      // ignore: use_build_context_synchronously
+      Navigator.pop(context);
+      Fluttertoast.showToast(
+        msg: 'Нет последней книги reader',
+        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        gravity: ToastGravity.BOTTOM,
+      );
+    }
     getText = textes[0]
         .fileText
         .toString()
@@ -223,7 +234,11 @@ class Reader extends State {
             onTap: () {
               Navigator.pop(context, true);
             },
-            child: const Icon(CustomIcons.chevronLeft, size: 40)),
+            child: const Icon(
+              CustomIcons.chevronLeft,
+              size: 40,
+              color: MyColors.black,
+            )),
         backgroundColor: MyColors.white,
         shadowColor: Colors.transparent,
         title: Row(
@@ -249,6 +264,7 @@ class Reader extends State {
                 child: const Icon(
                   CustomIcons.sliders,
                   size: 40,
+                  color: MyColors.black,
                 ))
           ],
         ),
