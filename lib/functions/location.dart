@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,8 +48,12 @@ Future<void> sendLocationDataToServer(Map<String, String> locationData) async {
 
 Future<String> getSavedLocation() async {
   final prefs = await SharedPreferences.getInstance();
-  final country = prefs.getString('country') ?? '';
+  final country = prefs.getString('country') ?? 'Russia';
   final area = prefs.getString('adminArea') ?? '';
   final locality = prefs.getString('locality') ?? '';
-  return '$country, $area, $locality';
+  if (country.isNotEmpty && area.isNotEmpty && locality.isNotEmpty) {
+    return '$country, $area, $locality';
+  } else {
+    return 'Нет данных о местоположении';
+  }
 }

@@ -1,118 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
 import 'package:merlin/components/achievement.dart';
-import 'package:merlin/style/colors.dart';
-import 'package:merlin/style/text.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class AchievementsPage extends StatelessWidget {
-  const AchievementsPage({super.key});
+  final String token;
+  const AchievementsPage({
+    required this.token,
+    Key? key,
+  }) : super(key: key);
+
+  Future<List<dynamic>> fetchJson() async {
+    final url =
+        Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      // Обработка полученного JSON-объекта здесь
+      return jsonResponse ?? [];
+    } else {
+      print('Ошибка запроса достижений: ${response.statusCode}');
+      return []; // Возвращаем пустой список в случае ошибки
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Expanded(
-      child: ListView(children: const [
+      child: ListView(children: [
         Column(children: <Widget>[
           Padding(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             child: Column(children: <Widget>[
-              Row(
+              const Row(
                 children: [
-                  Text24(text: 'Достижения', textColor: MyColors.black)
-                  //Text(
-                  //'Достижения',
-                  //textAlign: TextAlign.left,
-                  //style: TextStyle(
-                  //fontSize: 24,
-                  //fontFamily: 'Tektur',
-                  //fontWeight: FontWeight.bold),
-                  //),
+                  Text(
+                    'Достижения',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Tektur',
+                        fontWeight: FontWeight.bold),
+                  ),
                 ],
               ),
-              AchievementCard(
-                  name: '1 место за что-то там',
-                  dataText: 'Июль 2023',
-                  picture: SvgAsset.dragon1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '1 место за что-то там',
-                  dataText: '',
-                  picture: SvgAsset.dragon2,
-                  isLocked: true),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '1 место за что-то там',
-                  dataText: '',
-                  picture: SvgAsset.dragon3,
-                  isLocked: true),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
-              AchievementCard(
-                  name: '3 место за что-то там',
-                  dataText: 'Март 2022',
-                  picture: SvgAsset.blood1,
-                  isLocked: false),
-              SizedBox(height: 8),
+              FutureBuilder<List<dynamic>>(
+                future: fetchJson(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    final dataList = snapshot.data!;
+                    return Column(
+                      children: List.generate(
+                        dataList.length,
+                        (index) => AchievementCard(
+                            name: dataList[index]['message'],
+                            dataText: dataList[index]['date'],
+                            picture: SvgAsset.dragon1,
+                            isReceived: dataList[index]['isReceived']),
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Row(
+                      children: [
+                        SizedBox(width: 20),
+                        Text(
+                            'Наш сервер сейчас отдыхает, извините за неудобства'),
+                      ],
+                    );
+                    // return Text('Ошибка: ${snapshot.error}');
+                  } else {
+                    return const Center(
+                        child: Column(children: [
+                      SizedBox(height: 20),
+                      SizedBox(
+                        width: 30, // Задайте желаемую ширину
+                        height: 30, // Задайте желаемую высоту
+                        child: CircularProgressIndicator(),
+                      ),
+                    ]));
+                  }
+                },
+              ),
             ]),
           ),
         ])

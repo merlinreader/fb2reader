@@ -24,11 +24,17 @@ ThemeData darkTheme() => ThemeData(
             color: MyColors.bgWhite,
             fontSize: 14,
             fontWeight: FontWeight.normal)),
-    elevatedButtonTheme: const ElevatedButtonThemeData(
+    elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+            ),
+          ),
           backgroundColor: MaterialStatePropertyAll(MyColors.blackBt),
-          textStyle: MaterialStatePropertyAll(
-              TextStyle(color: Color.fromARGB(255, 255, 0, 0)))),
+          textStyle:
+              MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ),
     //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
     dataTableTheme: DataTableThemeData(
@@ -39,16 +45,29 @@ ThemeData darkTheme() => ThemeData(
     ));
 
 ThemeData purpleButton() => ThemeData(
-        elevatedButtonTheme: const ElevatedButtonThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+            ),
+          ),
+          elevation: null,
           backgroundColor: MaterialStatePropertyAll(MyColors.purple),
           textStyle:
               MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ));
 
 ThemeData whiteButton() => ThemeData(
-        elevatedButtonTheme: const ElevatedButtonThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0),
+            ),
+          ),
+          elevation: null,
           backgroundColor: MaterialStatePropertyAll(MyColors.white),
           textStyle:
               MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
@@ -77,8 +96,14 @@ ThemeData lightTheme() => ThemeData(
             color: MyColors.black,
             fontSize: 14,
             fontWeight: FontWeight.normal)),
-    elevatedButtonTheme: const ElevatedButtonThemeData(
+    elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+            ),
+          ),
           backgroundColor: MaterialStatePropertyAll(MyColors.bgWhite),
           textStyle:
               MaterialStatePropertyAll(TextStyle(color: MyColors.black))),
@@ -89,3 +114,30 @@ ThemeData lightTheme() => ThemeData(
           MaterialStateColor.resolveWith((states) => MyColors.white),
       dataRowColor: MaterialStateColor.resolveWith((states) => MyColors.white),
     ));
+
+ButtonStyle getButtonStyle(BuildContext context) {
+  final currentTheme = Theme.of(context);
+  if (currentTheme.brightness == Brightness.light) {
+    return ButtonStyle(
+      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+      ),
+      elevation: null,
+      backgroundColor: MaterialStateProperty.all(MyColors.white),
+      textStyle: MaterialStateProperty.all(TextStyle(color: MyColors.black)),
+    );
+  } else {
+    return ButtonStyle(
+      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.zero,
+        ),
+      ),
+      elevation: null,
+      backgroundColor: MaterialStateProperty.all(MyColors.black),
+      textStyle: MaterialStateProperty.all(TextStyle(color: MyColors.white)),
+    );
+  }
+}

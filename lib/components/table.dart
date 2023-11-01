@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
+import 'package:merlin/pages/settings/settings.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -44,7 +45,7 @@ class StatTable extends StatelessWidget {
               padding: const EdgeInsets.only(top: 8.0, right: 1),
               child: Theme(
                 // Theme для отключения divider
-                data: darkTheme(),
+                data: isDarkTheme ? darkTheme() : lightTheme(),
                 child: DataTable(
                   dividerThickness: 0.0,
                   // ignore: deprecated_member_use
@@ -109,13 +110,13 @@ class StatTable extends StatelessWidget {
               ),
             );
           } else if (snapshot.hasError) {
-            return const Row(
-              children: [
-                SizedBox(width: 20),
-                Text('Наш сервер сейчас отдыхает, извините за неудобства'),
-              ],
-            );
-            // return Text('Ошибка: ${snapshot.error}');
+            // return const Row(
+            //   children: [
+            //     SizedBox(width: 20),
+            //     Text('Наш сервер сейчас отдыхает, извините за неудобства: ${snapshot.error}'),
+            //   ],
+            // );
+            return Text('Ошибка: ${snapshot.error}');
           } else {
             return const Center(
                 child: Column(children: [
