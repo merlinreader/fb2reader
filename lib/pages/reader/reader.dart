@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
@@ -220,15 +221,10 @@ class Reader extends State {
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
-          onTap: () {
-            Navigator.pop(context, true);
-          },
-          child: SvgPicture.asset(
-            'assets/images/chevron-left.svg',
-            width: 16,
-            height: 16,
-          ),
-        ),
+            onTap: () {
+              Navigator.pop(context, true);
+            },
+            child: const Icon(CustomIcons.chevronLeft, size: 40)),
         backgroundColor: MyColors.white,
         shadowColor: Colors.transparent,
         title: Row(
@@ -247,15 +243,14 @@ class Reader extends State {
               fontWeight: FontWeight.w600,
             ),
             GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, RouteNames.readerSettings)
-                    .then((value) => loadStylePreferences());
-              },
-              child: const Icon(
-                Icons.settings,
-                color: MyColors.black,
-              ),
-            )
+                onTap: () {
+                  Navigator.pushNamed(context, RouteNames.readerSettings)
+                      .then((value) => loadStylePreferences());
+                },
+                child: const Icon(
+                  CustomIcons.sliders,
+                  size: 40,
+                ))
           ],
         ),
       ),
