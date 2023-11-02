@@ -1,21 +1,17 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:merlin/style/colors.dart';
-import 'package:merlin/style/text.dart';
 
 class AchievementCard extends StatelessWidget {
   final String name;
   final String dataText;
   final String picture;
-  final bool isLocked;
+  final bool isReceived;
 
   const AchievementCard({
     required this.name,
     required this.dataText,
     required this.picture,
-    required this.isLocked,
+    required this.isReceived,
     Key? key,
   }) : super(key: key);
 
@@ -27,7 +23,7 @@ class AchievementCard extends StatelessWidget {
       height: 83.0,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isLocked ? Colors.white.withOpacity(0.2) : Colors.transparent,
+        color: isReceived ? Colors.white.withOpacity(0.2) : Colors.transparent,
       ),
       child: Row(
         children: [
@@ -39,32 +35,34 @@ class AchievementCard extends StatelessWidget {
               picture,
               width: 48,
               height: 48,
-              color: isLocked ? Colors.transparent.withOpacity(0.5) : null,
+              color: isReceived ? Colors.transparent.withOpacity(0.5) : null,
             ),
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Flexible(child: Text11(text: name, textColor: MyColors.black)
-                  //Text(
-                  //name,
-                  //style: TextStyle(
-                  //fontFamily: 'Tektur',
-                  //fontSize: 11,
-                  //fontWeight: FontWeight.bold,
-                  //color:
-                  //isLocked ? Colors.black.withOpacity(0.2) : Colors.black,
-                  //),
-                  //),
+              Flexible(
+                child: Text(
+                  name,
+                  style: TextStyle(
+                    fontFamily: 'Tektur',
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: isReceived
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.black,
                   ),
+                ),
+              ),
               Text(
                 dataText,
                 style: TextStyle(
                   fontFamily: 'Tektur',
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: isLocked ? Colors.grey.withOpacity(0.2) : Colors.grey,
+                  color:
+                      isReceived ? Colors.grey.withOpacity(0.2) : Colors.grey,
                 ),
               ),
             ],

@@ -25,7 +25,9 @@ class Page extends State {
   static const List<Widget> _widgetOptions = <Widget>[
     LoadingScreen(),
     RecentPage(),
-    AchievementsPage(),
+    AchievementsPage(
+      token: 'pass',
+    ),
     StatisticPage(),
     //Profile()
   ];
@@ -50,8 +52,7 @@ class Page extends State {
     return Scaffold(
       //верхний бар
       appBar: AppBar(
-          backgroundColor: MyColors.white,
-          // Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).primaryColor,
           elevation: 0.5,
           title: GestureDetector(
             onTap: () {
@@ -69,7 +70,7 @@ class Page extends State {
       //Нижний бар
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedPage,
-        backgroundColor: MyColors.white,
+        backgroundColor: Theme.of(context).primaryColor,
         type: BottomNavigationBarType.fixed,
         //elevation: 5,
         items: const [

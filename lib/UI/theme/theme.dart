@@ -24,8 +24,14 @@ ThemeData darkTheme() => ThemeData(
             color: MyColors.bgWhite,
             fontSize: 14,
             fontWeight: FontWeight.normal)),
-    elevatedButtonTheme: const ElevatedButtonThemeData(
+    elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+            ),
+          ),
           backgroundColor: MaterialStatePropertyAll(MyColors.blackBt),
           textStyle: MaterialStatePropertyAll(
               TextStyle(color: MyColors.white))),
@@ -40,16 +46,29 @@ ThemeData darkTheme() => ThemeData(
     ));
 
 ThemeData purpleButton() => ThemeData(
-        elevatedButtonTheme: const ElevatedButtonThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+            ),
+          ),
+          elevation: null,
           backgroundColor: MaterialStatePropertyAll(MyColors.purple),
           textStyle:
               MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ));
 
 ThemeData whiteButton() => ThemeData(
-        elevatedButtonTheme: const ElevatedButtonThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0),
+            ),
+          ),
+          elevation: null,
           backgroundColor: MaterialStatePropertyAll(MyColors.white),
           textStyle:
               MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
@@ -78,9 +97,14 @@ ThemeData lightTheme() => ThemeData(
             color: MyColors.black,
             fontSize: 14,
             fontWeight: FontWeight.normal)),
-    
-    elevatedButtonTheme: const ElevatedButtonThemeData(
+    elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+            ),
+          ),
           backgroundColor: MaterialStatePropertyAll(MyColors.bgWhite),
           textStyle:
               MaterialStatePropertyAll(TextStyle(color: MyColors.black))),
@@ -91,3 +115,28 @@ ThemeData lightTheme() => ThemeData(
           MaterialStateColor.resolveWith((states) => MyColors.white),
       dataRowColor: MaterialStateColor.resolveWith((states) => MyColors.white),
     ));
+
+ButtonStyle getButtonStyle(BuildContext context, {bool isPressed = false}) {
+  final currentTheme = Theme.of(context);
+  Color backgroundColor;
+  Color textColor;
+
+  if (currentTheme.brightness == Brightness.light) {
+    backgroundColor = isPressed ? MyColors.purple : MyColors.white;
+    textColor = isPressed ? MyColors.white : MyColors.black;
+  } else {
+    backgroundColor = isPressed ? MyColors.purple : MyColors.black;
+    textColor = isPressed ? MyColors.white : MyColors.black;
+  }
+
+  return ButtonStyle(
+    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+    ),
+    elevation: MaterialStateProperty.all(0),
+    backgroundColor: MaterialStateProperty.all(backgroundColor),
+    textStyle: MaterialStateProperty.all(TextStyle(color: textColor)),
+  );
+}

@@ -1,10 +1,11 @@
 // ignore_for_file: deprecated_member_use
-
+import 'package:merlin/UI/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/table.dart';
 import 'package:merlin/functions/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({Key? key}) : super(key: key);
@@ -18,137 +19,106 @@ class _StatisticPageState extends State<StatisticPage> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Column(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              children: <Widget>[
-                const Row(
-                  children: [
-                    Text(
-                      'Статистика',
-                      textAlign: TextAlign.left,
+    return Column(
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: <Widget>[
+              const Row(
+                children: [
+                  Text(
+                    'Статистика',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontFamily: 'Tektur',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  ElevatedButton(
+                    style: getButtonStyle(
+                      context,
+                      isPressed: _currentPageIndex == 0,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _currentPageIndex = 0;
+                      });
+                    },
+                    child: const Text(
+                      'Страна',
                       style: TextStyle(
-                        fontSize: 24,
                         fontFamily: 'Tektur',
+                        fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: _currentPageIndex == 0
-                            ? MyColors.purple
-                            : MyColors.white,
-                        onPrimary: _currentPageIndex == 0
-                            ? MyColors.white
-                            : MyColors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        minimumSize: const Size(76, 40),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _currentPageIndex = 0;
-                        });
-                      },
-                      child: const Text(
-                        'Страна',
-                        style: TextStyle(
-                          fontFamily: 'Tektur',
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  ),
+                  ElevatedButton(
+                    style: getButtonStyle(
+                      context,
+                      isPressed: _currentPageIndex == 1,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _currentPageIndex = 1;
+                      });
+                    },
+                    child: const Text(
+                      'Регион',
+                      style: TextStyle(
+                        fontFamily: 'Tektur',
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: _currentPageIndex == 1
-                            ? MyColors.purple
-                            : MyColors.white,
-                        onPrimary: _currentPageIndex == 1
-                            ? MyColors.white
-                            : MyColors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        minimumSize: const Size(76, 40),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _currentPageIndex = 1;
-                        });
-                      },
-                      child: const Text(
-                        'Регион',
-                        style: TextStyle(
-                          fontFamily: 'Tektur',
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  ),
+                  ElevatedButton(
+                    style: getButtonStyle(
+                      context,
+                      isPressed: _currentPageIndex == 2,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _currentPageIndex = 2;
+                      });
+                    },
+                    child: const Text(
+                      'Город',
+                      style: TextStyle(
+                        fontFamily: 'Tektur',
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: _currentPageIndex == 2
-                            ? MyColors.purple
-                            : MyColors.white,
-                        onPrimary: _currentPageIndex == 2
-                            ? MyColors.white
-                            : MyColors.black,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.zero,
-                        ),
-                        minimumSize: const Size(76, 40),
-                        elevation: 0,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _currentPageIndex = 2;
-                        });
-                      },
-                      child: const Text(
-                        'Город',
-                        style: TextStyle(
-                          fontFamily: 'Tektur',
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          Expanded(
-            child: IndexedStack(
-              index: _currentPageIndex,
-              children: const [
-                Country(), // Страница "Страна"
-                Region(), // Страница "Регион"
-                City(), // Страница "Город"
-              ],
-            ),
+        ),
+        Expanded(
+          child: IndexedStack(
+            index: _currentPageIndex,
+            children: [
+              Country(), // Страница "Страна"
+              Region(), // Страница "Регион"
+              City(), // Страница "Город"
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
 class Country extends StatelessWidget {
-  const Country({super.key});
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -162,38 +132,42 @@ class Country extends StatelessWidget {
               return Swipe(
                 statDay: StatTable(
                   path: 'daily',
-                  country: country,
+                  country: country.isNotEmpty ? country : 'Russia',
                   area: '',
                   city: '',
                 ),
                 statWeek: StatTable(
                   path: 'weekly',
-                  country: country,
+                  country: country.isNotEmpty ? country : 'Russia',
                   area: '',
                   city: '',
                 ),
                 statMonth: StatTable(
                   path: 'monthly',
-                  country: country,
+                  country: country.isNotEmpty ? country : 'Russia',
                   area: '',
                   city: '',
                 ),
                 statSemiAnnual: StatTable(
                   path: 'semi-annual',
-                  country: country,
+                  country: country.isNotEmpty ? country : 'Russia',
                   area: '',
                   city: '',
                 ),
                 statAnnual: StatTable(
                   path: 'annual',
-                  country: country,
+                  country: country.isNotEmpty ? country : 'Russia',
                   area: '',
                   city: '',
                 ),
               );
             }
           }
-          return const Text('Местоположение не найдено');
+          return Center(
+              child: TextTektur(
+                  text: 'Нет данных о местоположении',
+                  fontsize: 16,
+                  textColor: MyColors.grey));
         }
         return const CircularProgressIndicator();
       },
@@ -202,8 +176,6 @@ class Country extends StatelessWidget {
 }
 
 class Region extends StatelessWidget {
-  const Region({super.key});
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -249,7 +221,11 @@ class Region extends StatelessWidget {
               );
             }
           }
-          return const Text('Местоположение не найдено');
+          return Center(
+              child: TextTektur(
+                  text: 'Нет данных о местоположении',
+                  fontsize: 16,
+                  textColor: MyColors.grey));
         }
         return const CircularProgressIndicator();
       },
@@ -258,8 +234,6 @@ class Region extends StatelessWidget {
 }
 
 class City extends StatelessWidget {
-  const City({super.key});
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -306,7 +280,11 @@ class City extends StatelessWidget {
               );
             }
           }
-          return const Text('Местоположение не найдено');
+          return Center(
+              child: TextTektur(
+                  text: 'Нет данных о местоположении',
+                  fontsize: 16,
+                  textColor: MyColors.grey));
         }
         return const CircularProgressIndicator();
       },
@@ -380,6 +358,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
   }
 
   Widget buildTab(Container tabButton, bool isActive) {
+    final mediaQuery = MediaQuery.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -395,7 +374,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                         : currentIndex == 2
                             ? 37
                             : currentIndex == 3
-                                ? 48
+                                ? 50
                                 : currentIndex == 4
                                     ? 20
                                     : 0,
@@ -412,11 +391,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const SizedBox(width: 20),
+            const SizedBox(width: 24),
             Expanded(
               child: buildTab(
                 Container(
-                  width: 30, // Установите нужную ширину
+                  width: 30,
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -435,10 +414,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 currentIndex == 0,
               ),
             ),
+            SizedBox(width: 16),
             Expanded(
               child: buildTab(
                 Container(
-                  width: 43, // Установите нужную ширину
+                  width: 43,
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -457,10 +437,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 currentIndex == 1,
               ),
             ),
+            SizedBox(width: 16),
             Expanded(
               child: buildTab(
                 Container(
-                  width: 37, // Установите нужную ширину
+                  width: 37,
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -479,10 +460,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 currentIndex == 2,
               ),
             ),
+            SizedBox(width: 16),
             Expanded(
               child: buildTab(
                 Container(
-                  width: 48, // Установите нужную ширину
+                  width: 50,
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -501,10 +483,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 currentIndex == 3,
               ),
             ),
+            SizedBox(width: 16),
             Expanded(
               child: buildTab(
                 Container(
-                  width: 20, // Установите нужную ширину
+                  width: 20,
                   height: 24,
                   child: InkWell(
                     onTap: () {
