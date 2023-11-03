@@ -3,6 +3,9 @@ import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/pages/settings/settings.dart';
+import 'package:merlin/main.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -41,11 +44,12 @@ class StatTable extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             final dataList = snapshot.data!;
+            final themeProvider = Provider.of<ThemeProvider>(context);
             return Padding(
               padding: const EdgeInsets.only(top: 8.0, right: 1),
               child: Theme(
                 // Theme для отключения divider
-                data: isDarkTheme ? darkTheme() : lightTheme(),
+                data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
                 child: DataTable(
                   dividerThickness: 0.0,
                   // ignore: deprecated_member_use

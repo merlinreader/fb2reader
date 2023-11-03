@@ -19,8 +19,8 @@ abstract class RouteNames {
 
 class AppRouter {
   final routes = <String, Widget Function(BuildContext)>{
-    RouteNames.main: (context) => const AppPage(),
     RouteNames.splashScreen: (context) => const SplashScreen(),
+    RouteNames.main: (context) => const AppPage(),
     RouteNames.profile: (context) => const Profile(),
     RouteNames.reader: (context) => const ReaderPage(),
     RouteNames.readerSettings: (context) => const SettingsPage(),

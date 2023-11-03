@@ -106,12 +106,12 @@ class RecentPageState extends State<RecentPage> {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataToAdd = prefs.getString(key);
     List<BookInfo> imageDatas = [];
-  
+
     if (imageDataToAdd != null) {
       imageDatas = (jsonDecode(imageDataToAdd) as List)
           .map((item) => BookInfo.fromJson(item))
           .toList();
-    
+
       // Сначала устанавливаем позицию 0 для книги, которую удаляем
       for (var bookInfo in imageDatas) {
         if (bookInfo.filePath == path) {
@@ -119,18 +119,17 @@ class RecentPageState extends State<RecentPage> {
           break;
         }
       }
-    
+
       imageDatas.removeWhere((element) => element.filePath == path);
       String imageDatasString = jsonEncode(imageDatas);
       await prefs.setString(key, imageDatasString);
-    
+
       // Обновляем информацию о позиции в кеше
       await Reader().resetPositionForBook(path);
-    
+
       setState(() {});
     }
   }
-
 
   bool isSended = false;
 
@@ -328,13 +327,11 @@ class RecentPageState extends State<RecentPage> {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-                19, 28, 24, 0), // Верхний отступ 0
-            child: TextTektur(
+            padding: const EdgeInsets.all(24), // Верхний отступ 0
+            child: Text24(
               text: "Последнее",
-              fontsize: 24,
               textColor: MyColors.black,
-              fontWeight: FontWeight.w600,
+              //fontWeight: FontWeight.w600,
             ),
           ),
           Center(

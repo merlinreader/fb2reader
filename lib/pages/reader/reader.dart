@@ -83,6 +83,8 @@ class Reader extends State {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
+
+
       final filePath = textes.first.filePath;
       // ignore: unnecessary_null_comparison
       if (filePath != null) {
@@ -274,65 +276,54 @@ class Reader extends State {
 
     List<String> textPages = getPages(getText, pageSize.toInt());
 
-    if (!visible) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    }
-
 
     return Scaffold(
-      appBar: visible
-          ? PreferredSize(
-              preferredSize: Size(MediaQuery.of(context).size.width, 50),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                child: AppBar(
-                  leading: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context, true);
-                      },
-                      child: Theme(
-                          data: lightTheme(),
-                          child: const Icon(
-                            CustomIcons.chevronLeft,
-                            size: 40,
-                            //color: Theme.of(context).iconTheme,
-                          ))),
-                  backgroundColor: Theme.of(context).primaryColor,
-                  shadowColor: Colors.transparent,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextTektur(
-                        text: textes.isNotEmpty
-                            ? (textes.first.author.toString().length > 8
-                                ? (textes.first.title.toString().length > 8
-                                    ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
-                                    : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
-                                : textes[0].title.toString())
-                            : 'Нет автора',
-                        fontsize: 18,
-                        textColor: MyColors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                                    context, RouteNames.readerSettings)
-                                .then((value) => loadStylePreferences());
-                          },
-                          child: Theme(
-                              data: lightTheme(),
-                              child: const Icon(
-                                CustomIcons.sliders,
-                                size: 40,
-                                //color: Theme.of(context).iconTheme,
-                              )))
-                    ],
-                  ),
-                ),
-              ),
-            )
-          : null,
+      appBar: AppBar(
+        leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context, true);
+            },
+            child: Theme(
+                data: lightTheme(),
+                child: Icon(
+                  CustomIcons.chevronLeft,
+                  size: 40,
+                  color: Theme.of(context).iconTheme.color,
+                ))),
+        backgroundColor: Theme.of(context).primaryColor,
+        shadowColor: Colors.transparent,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text14(
+              // НАДО 18 СОЗДАТЬ
+              text: textes.isNotEmpty
+                  ? (textes.first.author.toString().length > 8
+                      ? (textes.first.title.toString().length > 8
+                          ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
+                          : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
+                      : textes[0].title.toString())
+                  : 'Нет автора',
+              //fontsize: 18,
+              textColor: MyColors.black,
+              //fontWeight: FontWeight.w600,
+            ),
+            GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, RouteNames.readerSettings)
+                      .then((value) => loadStylePreferences());
+                },
+                child: Theme(
+                    data: lightTheme(),
+                    child: Icon(
+                      CustomIcons.sliders,
+                      size: 40,
+                      color: Theme.of(context).iconTheme.color,
+                    )))
+          ],
+        ),
+      ),
+
       body: Container(
         color: getBgcColor,
         child: SafeArea(
@@ -371,83 +362,49 @@ class Reader extends State {
                             );
                     }
                     return null;
-                  }),
-              GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    // Скролл вниз / следующая страница
-                    _scrollController.animateTo(
-                        _scrollController.position.pixels + screenHeight * 0.8,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.ease);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: IgnorePointer(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        color: const Color.fromRGBO(100, 150, 100, 0),
-                      ),
-                    ),
-                  )),
-              Positioned(
-                left: screenWidth / 6,
-                top: screenHeight / 5,
-                child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onDoubleTap: () {
-                      // Режим слова
-                      Fluttertoast.showToast(
-                        msg: 'Здесь будет режим слова',
-                        toastLength:
-                            Toast.LENGTH_SHORT, // Длительность отображения
-                        gravity: ToastGravity.BOTTOM,
-                      );
-                    },
-                    onTap: () {
-                      setState(() {
-                        visible = !visible;
-                      });
-                      if (visible) {
-                        SystemChrome.setSystemUIOverlayStyle(
-                            const SystemUiOverlayStyle(
-                                systemNavigationBarColor: MyColors.white,
-                                statusBarColor: Colors.transparent));
-                        SystemChrome.setEnabledSystemUIMode(
-                            SystemUiMode.edgeToEdge);
-                      } else {
-                        SystemChrome.setEnabledSystemUIMode(
-                            SystemUiMode.immersive);
-                      }
-                    },
-                    child: IgnorePointer(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width / 1.5,
-                        height: MediaQuery.of(context).size.height / 2,
-                        color: const Color.fromRGBO(250, 100, 100, 0),
-                      ),
-                    )),
+
+                  }))),
+      bottomNavigationBar: BottomAppBar(
+        child: SizedBox(
+          height: 30.0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                child: Text14(
+                  text: '${_batteryLevel.toString()}%',
+                  //fontsize: 12,
+                  textColor: MyColors.black,
+                  //fontWeight: FontWeight.w600,
+                ),
               ),
-              Positioned(
-                left: screenWidth / 6,
-                child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      // Сролл вверх / предыдущая страница
-                      _scrollController.animateTo(
-                          _scrollController.position.pixels -
-                              screenHeight * 0.8,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.ease);
-                    },
-                    child: IgnorePointer(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width / 1.5,
-                        height: MediaQuery.of(context).size.height / 5,
-                        color: const Color.fromRGBO(100, 150, 200, 0),
-                      ),
-                    )),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: Text14(
+                    text: textes.isNotEmpty
+                        ? (textes[0].title.toString().length > 28
+                            ? '${textes[0].title.toString().substring(0, 28)}...'
+                            : textes[0].title.toString())
+                        : 'Нет названия',
+                    //fontsize: 12,
+                    textColor: MyColors.black,
+                    //fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                child: Text14(
+                  text: '${_scrollPosition.toStringAsFixed(2)}%',
+                  //fontsize: 12,
+                  textColor: MyColors.black,
+                  //fontWeight: FontWeight.w600,
+                ),
+
               ),
             ],
           ),

@@ -2,8 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
 
 ThemeData darkTheme() => ThemeData(
-    brightness: Brightness.dark,
-    primaryColor: MyColors.black,
+    //brightness: Brightness.dark,
+    //primaryColor: MyColors.black,
+    colorScheme: const ColorScheme(
+        brightness: Brightness.dark,
+        primary: MyColors.white,
+        onPrimary: MyColors.white,
+        secondary: Colors.red,
+        onSecondary: MyColors.darkGray,
+        error: Colors.red,
+        onError: Colors.red,
+        background: MyColors.darkGray,
+        onBackground: Colors.black,
+        surface: MyColors.blackGray,
+        onSurface: Colors.white),
     //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
         //text24
@@ -34,8 +46,9 @@ ThemeData darkTheme() => ThemeData(
           ),
           backgroundColor: const MaterialStatePropertyAll(MyColors.blackBt),
           textStyle:
-              const MaterialStatePropertyAll(
-              TextStyle(color: MyColors.white))),
+
+              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+
     ),
     iconTheme: const IconThemeData(color: MyColors.white),
     //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
@@ -126,7 +139,7 @@ ButtonStyle getButtonStyle(BuildContext context, {bool isPressed = false}) {
     backgroundColor = isPressed ? MyColors.purple : MyColors.white;
     textColor = isPressed ? MyColors.white : MyColors.black;
   } else {
-    backgroundColor = isPressed ? MyColors.purple : MyColors.black;
+    backgroundColor = isPressed ? MyColors.purple : MyColors.darkGray;
     textColor = isPressed ? MyColors.white : MyColors.black;
   }
 
