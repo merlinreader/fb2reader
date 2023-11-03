@@ -1,3 +1,4 @@
+// ignore: file_names
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,7 +11,9 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Timer(Duration(seconds: 2), () {
+
+    Timer(const Duration(seconds: 2), () {
+
       Navigator.pushReplacementNamed(context, RouteNames.main);
     });
     return const Scaffold(

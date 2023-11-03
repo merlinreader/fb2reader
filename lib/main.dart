@@ -5,19 +5,23 @@ import 'package:merlin/functions/location.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/pages/settings/settings.dart';
+
 import 'package:provider/provider.dart';
 import 'package:merlin/pages/splashScreen/splashScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 //В ФАЙЛЕ BUTTON ПРИМЕР ИСПОЛЬЗОВАНИЯ КНОПОК
 
 void main() {
+
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(), // Создание экземпляра ThemeProvider
       child: MerlinApp(),
     ),
   );
+
   getLocation();
 }
 

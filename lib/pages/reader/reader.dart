@@ -66,6 +66,8 @@ class Reader extends State {
 
   double _scrollPosition = 0.0;
 
+  bool visible = false;
+
   void _getBatteryLevel() async {
     final batteryLevel = await _battery.batteryLevel;
     setState(() {
@@ -81,7 +83,8 @@ class Reader extends State {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
-      print('12312321312 $prefs');
+
+
       final filePath = textes.first.filePath;
       // ignore: unnecessary_null_comparison
       if (filePath != null) {
@@ -104,6 +107,12 @@ class Reader extends State {
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
   }
 
   @override
@@ -130,7 +139,6 @@ class Reader extends State {
 
     readingPositions[filePath] = 0;
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
-    print('Position reset to 0 for $filePath');
   }
 
   Future<void> saveReadingPosition(double position, String filePath) async {
@@ -147,7 +155,6 @@ class Reader extends State {
 
     readingPositions[filePath] = position;
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
-    // print('saveReadingPosition $position for $filePath');
   }
 
   Future<void> getReadingPosition(String filePath) async {
@@ -158,10 +165,10 @@ class Reader extends State {
           Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
       if (readingPositions.containsKey(filePath)) {
         final position = readingPositions[filePath];
-        print('getReadingPosition position $position');
         setState(() {
           lastPosition = position;
           isLast = true;
+          _scrollPosition = position;
         });
       }
     }
@@ -245,10 +252,30 @@ class Reader extends State {
 
   double pagePercent = 0;
 
+  List<DeviceOrientation> orientations = [
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeRight,
+  ];
+
+  int currentOrientationIndex = 0;
+
+  void switchOrientation() {
+    currentOrientationIndex =
+        (currentOrientationIndex + 1) % orientations.length;
+    SystemChrome.setPreferredOrientations(
+        [orientations[currentOrientationIndex]]);
+  }
+
   @override
   Widget build(BuildContext context) {
     double pageSize = MediaQuery.of(context).size.height * 3;
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     List<String> textPages = getPages(getText, pageSize.toInt());
+
 
     return Scaffold(
       appBar: AppBar(
@@ -296,24 +323,24 @@ class Reader extends State {
           ],
         ),
       ),
+
       body: Container(
-          color: getBgcColor,
-          child: SafeArea(
-              left: false,
-              top: false,
-              right: false,
-              bottom: false,
-              minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: ListView.builder(
+        color: getBgcColor,
+        child: SafeArea(
+          left: false,
+          top: false,
+          right: false,
+          bottom: false,
+          minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          child: Stack(
+            children: [
+              ListView.builder(
                   controller: _scrollController,
                   itemCount: textPages.length,
                   itemBuilder: (context, index) {
                     if (textes.isNotEmpty) {
                       return _scrollController.hasClients
                           ? () {
-                              if (!isLast) {
-                                // Ваш код для скроллинга к позиции чтения
-                              }
                               return Center(
                                 child: SelectableText(
                                   getText,
@@ -325,7 +352,7 @@ class Reader extends State {
                               );
                             }()
                           : Center(
-                              child: SelectableText(
+                              child: Text(
                                 'Нет текста для отображения',
                                 style: TextStyle(
                                   fontSize: 18.0,
@@ -335,6 +362,7 @@ class Reader extends State {
                             );
                     }
                     return null;
+
                   }))),
       bottomNavigationBar: BottomAppBar(
         child: SizedBox(
@@ -376,9 +404,144 @@ class Reader extends State {
                   textColor: MyColors.black,
                   //fontWeight: FontWeight.w600,
                 ),
+
               ),
             ],
           ),
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Stack(
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              height: visible ? 130 : 30,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Transform.rotate(
+                          angle: 90 *
+                              3.14159265 /
+                              180, // Rotate the battery icon 90 degrees counterclockwise
+                          child: const Icon(
+                            Icons.battery_full, // Use any battery icon you like
+                            color: Colors.black, // Color of the battery icon
+                            size: 24, // Adjust the size as needed
+                          ),
+                        ),
+                        TextTektur(
+                          text: '${_batteryLevel.toString()}%',
+                          fontsize: 7,
+                          textColor: MyColors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: TextTektur(
+                        text: textes.isNotEmpty
+                            ? (textes[0].title.toString().length > 28
+                                ? '${textes[0].title.toString().substring(0, 28)}...'
+                                : textes[0].title.toString())
+                            : 'Нет названия',
+                        fontsize: 12,
+                        textColor: MyColors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                    child: TextTektur(
+                      text: '${_scrollPosition.toStringAsFixed(2)}%',
+                      fontsize: 12,
+                      textColor: MyColors.black,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  height: visible ? 100 : 0,
+                  child: Container(
+                      alignment: AlignmentDirectional.topEnd,
+                      color: MyColors.white,
+                      child: Column(
+                        children: [
+                          _scrollController.hasClients
+                              ? Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                                  child: Slider(
+                                    value: _scrollController.position.pixels,
+                                    min: 0,
+                                    max: _scrollController
+                                        .position.maxScrollExtent,
+                                    onChanged: (value) {
+                                      _scrollController.jumpTo(value);
+                                    },
+                                    activeColor:
+                                        const Color.fromRGBO(29, 29, 33, 1),
+                                    inactiveColor:
+                                        const Color.fromRGBO(96, 96, 96, 1),
+                                    thumbColor:
+                                        const Color.fromRGBO(29, 29, 33, 1),
+                                  ),
+                                )
+                              : const Text("Загрузка..."),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  switchOrientation();
+                                },
+                                child: const Icon(
+                                  CustomIcons.turn,
+                                  size: 40,
+                                ),
+                              ),
+                              const Icon(
+                                CustomIcons.theme,
+                                size: 40,
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  Fluttertoast.showToast(
+                                    msg: 'Здесь будет режим слова',
+                                    toastLength: Toast
+                                        .LENGTH_SHORT, // Длительность отображения
+                                    gravity: ToastGravity.BOTTOM,
+                                  );
+                                },
+                                child: const Icon(
+                                  CustomIcons.wm,
+                                  size: 40,
+                                ),
+                              )
+                            ],
+                          )
+                        ],
+                      ))),
+            )
+          ],
         ),
       ),
     );
