@@ -7,11 +7,9 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
-import 'package:merlin/functions/auth.dart';
 import 'package:merlin/functions/location.dart';
 import 'package:merlin/UI/router.dart';
 //import 'package:merlin/functions/auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});

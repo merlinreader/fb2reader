@@ -8,9 +8,6 @@ import 'package:merlin/components/checkbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:provider/provider.dart';
-import 'package:merlin/UI/theme/theme.dart';
-//import 'package:merlin/style/text.dart';
-//import 'package:merlin/components/checkbox.dart';
 
 
 class ReaderStyle {
@@ -99,12 +96,6 @@ class _SettingsPageState extends State<SettingsPage> {
   bool textColorMint = false;
   bool textColorBeige = false;
   Color textColorPreview = MyColors.black;
-
-  @override
-  void initState() {
-    loadCheckboxes();
-    super.initState();
-  }
 
   void saveStylePreferences() async {
     final prefs = await SharedPreferences.getInstance();

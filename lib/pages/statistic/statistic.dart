@@ -5,7 +5,6 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/table.dart';
 import 'package:merlin/functions/location.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 
 class StatisticPage extends StatefulWidget {

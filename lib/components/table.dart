@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
-import 'package:merlin/pages/settings/settings.dart';
 import 'package:merlin/main.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 

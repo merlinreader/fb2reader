@@ -28,6 +28,42 @@ class Text14 extends StatelessWidget {
   }
 }
 
+class Text12 extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const Text12({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: Theme.of(context).textTheme.titleSmall
+        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
+        );
+  }
+}
+
+class Text7 extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const Text7({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: Theme.of(context).textTheme.displaySmall
+        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
+        );
+  }
+}
+
+class Text18 extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const Text18({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: Theme.of(context).textTheme.titleMedium
+        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 18)
+        );
+  }
+}
+
 class Text11 extends StatelessWidget {
   final String text;
   final Color textColor;

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:merlin/UI/theme/theme.dart';
 
 class CustomCheckbox extends StatelessWidget {
   final bool isChecked;

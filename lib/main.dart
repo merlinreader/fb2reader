@@ -4,10 +4,8 @@ import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/functions/location.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
-import 'package:merlin/pages/settings/settings.dart';
 
 import 'package:provider/provider.dart';
-import 'package:merlin/pages/splashScreen/splashScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -57,7 +55,7 @@ class ThemeProvider with ChangeNotifier {
   set isDarkTheme(bool value) {
     _isDarkTheme = value;
     setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor: value ? MyColors.darkGray : MyColors.white,
+      systemNavigationBarColor: value ? MyColors.blackGray : MyColors.white,
     ));
     notifyListeners(); // Notifies the listeners when the theme changes.
   }

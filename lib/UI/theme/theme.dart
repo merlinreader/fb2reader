@@ -35,7 +35,26 @@ ThemeData darkTheme() => ThemeData(
             fontFamily: 'Tektur',
             color: MyColors.bgWhite,
             fontSize: 14,
-            fontWeight: FontWeight.normal)),
+          fontWeight: FontWeight.normal),
+      //Text18
+      titleMedium: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.bgWhite,
+          fontSize: 18,
+          fontWeight: FontWeight.normal),
+      //Text12
+      titleSmall: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.bgWhite,
+          fontSize: 12,
+          fontWeight: FontWeight.normal),
+      //Text7
+      displaySmall: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.black,
+          fontSize: 7,
+          fontWeight: FontWeight.normal),
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -110,7 +129,26 @@ ThemeData lightTheme() => ThemeData(
             fontFamily: 'Tektur',
             color: MyColors.black,
             fontSize: 14,
-            fontWeight: FontWeight.normal)),
+          fontWeight: FontWeight.normal),
+      //Text18
+      titleMedium: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.normal),
+      //Text12
+      titleSmall: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.black,
+          fontSize: 12,
+          fontWeight: FontWeight.normal),
+      //Text7
+      displaySmall: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.bgWhite,
+          fontSize: 7,
+          fontWeight: FontWeight.normal),
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
