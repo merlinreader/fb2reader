@@ -272,6 +272,9 @@ class Reader extends State {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
 
+    DateTime now = DateTime.now();
+    String formattedTime = "${now.hour}:${now.minute}";
+
     List<String> textPages = getPages(getText, pageSize.toInt());
 
     if (!visible) {
@@ -464,12 +467,27 @@ class Reader extends State {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
-                    child: TextTektur(
-                      text: '${_batteryLevel.toString()}%',
-                      fontsize: 12,
-                      textColor: MyColors.black,
-                      fontWeight: FontWeight.w600,
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Transform.rotate(
+                          angle: 90 *
+                              3.14159265 /
+                              180, // Rotate the battery icon 90 degrees counterclockwise
+                          child: const Icon(
+                            Icons.battery_full, // Use any battery icon you like
+                            color: Colors.black, // Color of the battery icon
+                            size: 24, // Adjust the size as needed
+                          ),
+                        ),
+                        TextTektur(
+                          text: '${_batteryLevel.toString()}%',
+                          fontsize: 7,
+                          textColor: MyColors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ],
                     ),
                   ),
                   Padding(
@@ -488,6 +506,7 @@ class Reader extends State {
                       ),
                     ),
                   ),
+
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
                     child: TextTektur(
