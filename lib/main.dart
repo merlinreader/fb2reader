@@ -6,7 +6,6 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/pages/settings/settings.dart';
 
-import 'package:merlin/pages/splashScreen/splashScreen.dart';
 
 //В ФАЙЛЕ BUTTON ПРИМЕР ИСПОЛЬЗОВАНИЯ КНОПОК
 
@@ -15,7 +14,7 @@ void main() {
     systemNavigationBarColor: MyColors.white,
   ));
   runApp(MerlinApp());
-  //getLocation();
+  getLocation();
 }
 
 class MerlinApp extends StatelessWidget {

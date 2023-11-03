@@ -32,8 +32,9 @@ ThemeData darkTheme() => ThemeData(
                   0), // Установите радиус закругления на 0, чтобы убрать закругление.
             ),
           ),
-          backgroundColor: MaterialStatePropertyAll(MyColors.blackBt),
-          textStyle: MaterialStatePropertyAll(
+          backgroundColor: const MaterialStatePropertyAll(MyColors.blackBt),
+          textStyle:
+              const MaterialStatePropertyAll(
               TextStyle(color: MyColors.white))),
     ),
     iconTheme: const IconThemeData(color: MyColors.white),
@@ -55,9 +56,9 @@ ThemeData purpleButton() => ThemeData(
             ),
           ),
           elevation: null,
-          backgroundColor: MaterialStatePropertyAll(MyColors.purple),
+          backgroundColor: const MaterialStatePropertyAll(MyColors.purple),
           textStyle:
-              MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ));
 
 ThemeData whiteButton() => ThemeData(
@@ -69,9 +70,9 @@ ThemeData whiteButton() => ThemeData(
             ),
           ),
           elevation: null,
-          backgroundColor: MaterialStatePropertyAll(MyColors.white),
+          backgroundColor: const MaterialStatePropertyAll(MyColors.white),
           textStyle:
-              MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ));
 
 ThemeData lightTheme() => ThemeData(
@@ -105,9 +106,9 @@ ThemeData lightTheme() => ThemeData(
                   0), // Установите радиус закругления на 0, чтобы убрать закругление.
             ),
           ),
-          backgroundColor: MaterialStatePropertyAll(MyColors.bgWhite),
+          backgroundColor: const MaterialStatePropertyAll(MyColors.bgWhite),
           textStyle:
-              MaterialStatePropertyAll(TextStyle(color: MyColors.black))),
+              const MaterialStatePropertyAll(TextStyle(color: MyColors.black))),
     ),
     //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
     dataTableTheme: DataTableThemeData(
@@ -131,7 +132,7 @@ ButtonStyle getButtonStyle(BuildContext context, {bool isPressed = false}) {
 
   return ButtonStyle(
     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-      RoundedRectangleBorder(
+      const RoundedRectangleBorder(
         borderRadius: BorderRadius.zero,
       ),
     ),

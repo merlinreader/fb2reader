@@ -5,7 +5,6 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/table.dart';
 import 'package:merlin/functions/location.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class StatisticPage extends StatefulWidget {
   const StatisticPage({Key? key}) : super(key: key);
@@ -358,7 +357,6 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
   }
 
   Widget buildTab(Container tabButton, bool isActive) {
-    final mediaQuery = MediaQuery.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

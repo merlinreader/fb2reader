@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
@@ -81,9 +80,7 @@ class Reader extends State {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
-      print('12312321312 $prefs');
-      final filePath =
-          textes.first.filePath;
+      final filePath = textes.first.filePath;
       // ignore: unnecessary_null_comparison
       if (filePath != null) {
         final readingPositionsJson = prefs.getString('readingPositions');
@@ -131,7 +128,6 @@ class Reader extends State {
 
     readingPositions[filePath] = 0;
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
-    print('Position reset to 0 for $filePath');
   }
 
   Future<void> saveReadingPosition(double position, String filePath) async {
@@ -148,7 +144,6 @@ class Reader extends State {
 
     readingPositions[filePath] = position;
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
-    // print('saveReadingPosition $position for $filePath');
   }
 
   Future<void> getReadingPosition(String filePath) async {
@@ -159,7 +154,6 @@ class Reader extends State {
           Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
       if (readingPositions.containsKey(filePath)) {
         final position = readingPositions[filePath];
-        print('getReadingPosition position $position');
         setState(() {
           lastPosition = position;
           isLast = true;
@@ -249,8 +243,11 @@ class Reader extends State {
   @override
   Widget build(BuildContext context) {
     double pageSize = MediaQuery.of(context).size.height * 3;
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     List<String> textPages = getPages(getText, pageSize.toInt());
-    
+
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
@@ -274,7 +271,7 @@ class Reader extends State {
                   ? (textes.first.author.toString().length > 8
                       ? (textes.first.title.toString().length > 8
                           ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
-                          : '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 6)}...')
+                          : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
                       : textes[0].title.toString())
                   : 'Нет автора',
               fontsize: 18,
@@ -298,44 +295,99 @@ class Reader extends State {
       ),
       body: Container(
           color: getBgcColor,
-          child: SafeArea(
-              left: false,
-              top: false,
-              right: false,
-              bottom: false,
-              minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: textPages.length,
-                  itemBuilder: (context, index) {
-                    if (textes.isNotEmpty) {
-                      return _scrollController.hasClients
-                          ? () {
-                              if (!isLast) {
-                                // Ваш код для скроллинга к позиции чтения
-                              }
-                              return Center(
-                                child: SelectableText(
-                                  getText,
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: getTextColor,
+          child: Stack(
+            children: [
+              SafeArea(
+                  left: false,
+                  top: false,
+                  right: false,
+                  bottom: false,
+                  minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                  child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: textPages.length,
+                      itemBuilder: (context, index) {
+                        if (textes.isNotEmpty) {
+                          return _scrollController.hasClients
+                              ? () {
+                                  return Center(
+                                    child: SelectableText(
+                                      getText,
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        color: getTextColor,
+                                      ),
+                                    ),
+                                  );
+                                }()
+                              : Center(
+                                  child: SelectableText(
+                                    'Нет текста для отображения',
+                                    style: TextStyle(
+                                      fontSize: 18.0,
+                                      color: getTextColor,
+                                    ),
                                   ),
-                                ),
-                              );
-                            }()
-                          : Center(
-                              child: SelectableText(
-                                'Нет текста для отображения',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  color: getTextColor,
-                                ),
-                              ),
-                            );
-                    }
-                    return null;
-                  }))),
+                                );
+                        }
+                        return null;
+                      })),
+              GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    // Скролл вниз / следующая страница
+                    _scrollController.animateTo(
+                        _scrollController.position.pixels + 1000,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        color: const Color.fromRGBO(100, 150, 100, 0),
+                      ),
+                    ),
+                  )),
+              Positioned(
+                left: screenWidth / 6,
+                top: screenHeight / 5,
+                child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      // Режим слова
+                    },
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 1.5,
+                        height: MediaQuery.of(context).size.height / 2,
+                        color: const Color.fromRGBO(250, 100, 100, 0),
+                      ),
+                    )),
+              ),
+              Positioned(
+                left: screenWidth / 6,
+                child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      // Сролл вверх / предыдущая страница
+                      _scrollController.animateTo(
+                          _scrollController.position.pixels - 1000,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.ease);
+                    },
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 1.5,
+                        height: MediaQuery.of(context).size.height / 5,
+                        color: const Color.fromRGBO(100, 150, 200, 0),
+                      ),
+                    )),
+              ),
+            ],
+          )),
       bottomNavigationBar: BottomAppBar(
         child: SizedBox(
           height: 30.0,

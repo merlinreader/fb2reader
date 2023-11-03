@@ -154,7 +154,6 @@ class RecentPageState extends State<RecentPage> {
 
     final prefs = await SharedPreferences.getInstance();
     bool success = await prefs.setString(key, textDataString);
-    print('recent $success');
     if (success == true) {
       isSended = true;
     }
