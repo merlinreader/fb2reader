@@ -13,7 +13,7 @@ void main() {
     systemNavigationBarColor: MyColors.white,
       statusBarColor: Colors.transparent
   ));
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   
 
   runApp(MerlinApp());
