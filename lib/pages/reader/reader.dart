@@ -272,9 +272,6 @@ class Reader extends State {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
 
-    DateTime now = DateTime.now();
-    String formattedTime = "${now.hour}:${now.minute}";
-
     List<String> textPages = getPages(getText, pageSize.toInt());
 
     if (!visible) {
