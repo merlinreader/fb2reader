@@ -26,7 +26,7 @@ class CustomNavBarState extends State<CustomNavBar> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: selectedPage,
-      backgroundColor: MyColors.white,
+      backgroundColor: Theme.of(context).primaryColor,
       type: BottomNavigationBarType.fixed,
       elevation: 1,
       items: const [

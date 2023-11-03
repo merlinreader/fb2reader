@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
+import 'package:merlin/pages/loading/loading.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/pages/achievements/achievements.dart';
 import 'package:merlin/style/text.dart';
-import 'package:merlin/pages/loading.dart';
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
@@ -24,7 +25,9 @@ class Page extends State {
   static const List<Widget> _widgetOptions = <Widget>[
     LoadingScreen(),
     RecentPage(),
-    AchievementsPage(),
+    AchievementsPage(
+      token: 'pass',
+    ),
     StatisticPage(),
     //Profile()
   ];
@@ -49,7 +52,7 @@ class Page extends State {
     return Scaffold(
       //верхний бар
       appBar: AppBar(
-          backgroundColor: MyColors.white,
+          backgroundColor: Theme.of(context).primaryColor,
           elevation: 0.5,
           title: GestureDetector(
             onTap: () {
@@ -58,7 +61,7 @@ class Page extends State {
             child: Row(
               children: [
                 Padding(
-                    padding: const EdgeInsets.only(left: 24, right: 16),
+                    padding: const EdgeInsets.only(left: 6, right: 16),
                     child: SvgPicture.asset(SvgAsset.merlinLogo)),
                 const Text24(text: 'Merlin', textColor: MyColors.black)
               ],
@@ -67,13 +70,13 @@ class Page extends State {
       //Нижний бар
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedPage,
-        backgroundColor: MyColors.white,
-        //type: BottomNavigationBarType.fixed,
-        elevation: 1,
+        backgroundColor: Theme.of(context).primaryColor,
+        type: BottomNavigationBarType.fixed,
+        //elevation: 5,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(CustomIcons.bookOpen),
-            label: 'Книги',
+            label: 'Проводник',
           ),
           BottomNavigationBarItem(
               icon: Icon(CustomIcons.clock), label: 'Последнее'),
@@ -97,6 +100,33 @@ class Page extends State {
             fontSize: 11, fontFamily: 'Tektur', fontWeight: FontWeight.bold),
       ),
       body: _widgetOptions[_selectedPage],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          try {
+            if (RecentPageState().checkImages() == true) {
+            Fluttertoast.showToast(
+                msg: 'Нет последней книги',
+                toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                gravity: ToastGravity.BOTTOM,
+              ); // Расположение уведомления
+            } else {
+              Navigator.pushNamed(context, RouteNames.reader);
+            }
+            return;
+          } catch (e) {
+            Fluttertoast.showToast(
+              msg: 'Нет последней книги',
+              toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+              gravity: ToastGravity.BOTTOM, // Расположение уведомления
+            );
+          }
+        },
+        backgroundColor: MyColors.purple,
+        shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.zero)),
+        autofocus: true,
+        child: const Icon(CustomIcons.bookOpen),
+      ),
     );
   }
 }

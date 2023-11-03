@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:merlin/UI/theme/theme.dart';
 //import 'package:merlin/components/appbar/appbar.dart';
 //import 'package:merlin/components/navbar/navbar.dart';
-
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
@@ -9,6 +9,8 @@ import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/auth.dart';
 import 'package:merlin/functions/location.dart';
+import 'package:merlin/UI/router.dart';
+//import 'package:merlin/functions/auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatelessWidget {
@@ -29,6 +31,12 @@ class _ProfilePage extends State<ProfilePage> {
   late String country;
   late String adminArea;
   late String locality;
+
+  String token = '';
+
+  void nav() {
+    Navigator.of(context).pushNamed(RouteNames.auth);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,44 +77,114 @@ class _ProfilePage extends State<ProfilePage> {
             )
           ])),
           const SizedBox(height: 81),
-          const Expanded(
-            child: Column(
-              children: [
-                Button(
-                  text: 'Авторизоваться',
-                  width: 312,
-                  height: 48,
-                  horizontalPadding: 97,
-                  verticalPadding: 12,
-                  buttonColor: MyColors.purple,
-                  textColor: MyColors.white,
-                  fontSize: 14,
-                  onPressed: sendEmail,
-                  fontWeight: FontWeight.bold,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Expanded(
-                  child: Align(
-                    alignment: AlignmentDirectional.bottomCenter,
-                    child: Button(
-                        text: 'Написать нам',
-                        width: 312,
-                        height: 48,
-                        horizontalPadding: 97,
-                        verticalPadding: 12,
-                        buttonColor: MyColors.white,
-                        textColor: MyColors.black,
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        onPressed: sendEmail),
+          token == ''
+              ? Expanded(
+                  child: Column(
+                    children: [
+                      Theme(
+                        data: purpleButton(),
+                        child: Button(
+                          text: 'Авторизоваться',
+                          width: 312,
+                          height: 48,
+                          horizontalPadding: 97,
+                          verticalPadding: 12,
+                          //buttonColor: MyColors.purple,
+                          textColor: MyColors.white,
+                          fontSize: 14,
+                          //onPressed: launchTelegram,
+                          onPressed: nav,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: Align(
+                            alignment: AlignmentDirectional.bottomCenter,
+                            child: Theme(
+                              data: lightTheme(),
+                              child: const Button(
+                                  text: 'Написать нам',
+                                  width: 312,
+                                  height: 48,
+                                  horizontalPadding: 97,
+                                  verticalPadding: 12,
+                                  //buttonColor: MyColors.white,
+                                  textColor: MyColors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  onPressed: sendEmail),
+                            )),
+                      ),
+                      const SizedBox(height: 24)
+                    ],
+                  ),
+                )
+              : Expanded(
+                  child: Column(
+                    children: [
+                      Theme(
+                        data: purpleButton(),
+                        child: Button(
+                          text: 'Купить слова',
+                          width: 312,
+                          height: 48,
+                          horizontalPadding: 97,
+                          verticalPadding: 12,
+                          //buttonColor: MyColors.purple,
+                          textColor: MyColors.white,
+                          fontSize: 14,
+                          //onPressed: launchTelegram,
+                          onPressed: nav,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Theme(
+                        data: purpleButton(),
+                        child: Button(
+                          text: 'Убрать рекламу',
+                          width: 312,
+                          height: 48,
+                          horizontalPadding: 97,
+                          verticalPadding: 12,
+                          //buttonColor: MyColors.purple,
+                          textColor: MyColors.white,
+                          fontSize: 14,
+                          //onPressed: launchTelegram,
+                          onPressed: nav,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: Align(
+                            alignment: AlignmentDirectional.bottomCenter,
+                            child: Theme(
+                              data: lightTheme(),
+                              child: const Button(
+                                  text: 'Написать нам',
+                                  width: 312,
+                                  height: 48,
+                                  horizontalPadding: 97,
+                                  verticalPadding: 12,
+                                  //buttonColor: MyColors.white,
+                                  textColor: MyColors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  onPressed: sendEmail),
+                            )),
+                      ),
+                      const SizedBox(height: 24)
+                    ],
                   ),
                 ),
-                SizedBox(height: 24)
-              ],
-            ),
-          ),
         ]),
       ),
     );

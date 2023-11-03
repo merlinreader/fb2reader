@@ -3,18 +3,15 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
-import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart';
 
 // для получаения картинки из файла книги
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/pages/reader/reader.dart';
 
@@ -55,20 +52,9 @@ class ImageInfo {
   }
 }
 
-Future<void> requestPermission() async {
-  PermissionStatus status = await Permission.manageExternalStorage.status;
-  if (!status.isGranted) {
-    status = await Permission.manageExternalStorage.request();
-    if (!status.isGranted) {
-      openAppSettings();
-    }
-  }
-}
-
 class RecentPageState extends State<RecentPage> {
   final ImageLoader imageLoader = ImageLoader();
   final ScrollController _scrollController = ScrollController();
-  bool _isVisible = false;
   Uint8List? imageBytes;
   List<ImageInfo> images = [];
   List<BookInfo> textes = [];
@@ -77,24 +63,11 @@ class RecentPageState extends State<RecentPage> {
   String? name;
   String? title;
 
-  void showImage(Uint8List? imageBytes, String title, String author) {
-    print("recent: showImage started");
-    print("recent: showImage done");
-    print(images);
-  }
-
   @override
   void initState() {
     super.initState();
 
     getDataFromLocalStorage('booksKey');
-
-    _scrollController.addListener(() {
-      setState(() {
-        _isVisible = _scrollController.position.userScrollDirection ==
-            ScrollDirection.reverse;
-      });
-    });
   }
 
   @override
@@ -106,7 +79,6 @@ class RecentPageState extends State<RecentPage> {
   Future<void> getDataFromLocalStorage(String key) async {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataJson = prefs.getString(key);
-    print('recent: $imageDataJson');
     if (imageDataJson != null) {
       images = (jsonDecode(imageDataJson) as List)
           .map((item) => ImageInfo.fromJson(item))
@@ -134,17 +106,33 @@ class RecentPageState extends State<RecentPage> {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataToAdd = prefs.getString(key);
     List<BookInfo> imageDatas = [];
+  
     if (imageDataToAdd != null) {
       imageDatas = (jsonDecode(imageDataToAdd) as List)
           .map((item) => BookInfo.fromJson(item))
           .toList();
+    
+      // Сначала устанавливаем позицию 0 для книги, которую удаляем
+      for (var bookInfo in imageDatas) {
+        if (bookInfo.filePath == path) {
+          bookInfo.setPosZero();
+          break;
+        }
+      }
+    
       imageDatas.removeWhere((element) => element.filePath == path);
       String imageDatasString = jsonEncode(imageDatas);
-      bool success = await prefs.setString(key, imageDatasString);
-      print('recent delete text: $success');
+      await prefs.setString(key, imageDatasString);
+    
+      // Обновляем информацию о позиции в кеше
+      await Reader().resetPositionForBook(path);
+    
       setState(() {});
     }
   }
+
+
+  bool isSended = false;
 
   Future<void> sendDataFromLocalStorage(String key, int index) async {
     List text = [];
@@ -165,8 +153,10 @@ class RecentPageState extends State<RecentPage> {
     String textDataString = jsonEncode(bookDatas);
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('textKey', textDataString);
-    print(textDataString);
+    bool success = await prefs.setString(key, textDataString);
+    if (success == true) {
+      isSended = true;
+    }
   }
 
   Future<void> changeDataFromLocalStorage(
@@ -324,6 +314,14 @@ class RecentPageState extends State<RecentPage> {
     );
   }
 
+  bool checkImages() {
+    if (images.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -331,12 +329,12 @@ class RecentPageState extends State<RecentPage> {
         children: [
           Padding(
             padding: const EdgeInsetsDirectional.fromSTEB(
-                24, 28, 24, 0), // Верхний отступ 0
+                19, 28, 24, 0), // Верхний отступ 0
             child: TextTektur(
               text: "Последнее",
-              fontsize: 32,
+              fontsize: 24,
               textColor: MyColors.black,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
           Center(
@@ -345,7 +343,7 @@ class RecentPageState extends State<RecentPage> {
               children: [
                 if (images.isEmpty)
                   TextTektur(
-                      text: "Пока вы не добавили никакаих книг",
+                      text: "Пока вы не добавили никаких книг",
                       fontsize: 16,
                       textColor: MyColors.grey)
               ],
@@ -369,9 +367,22 @@ class RecentPageState extends State<RecentPage> {
                     children: [
                       if (images[index].imageBytes != null)
                         GestureDetector(
-                            onTap: () {
-                              sendDataFromLocalStorage('textKey', index);
-                              Navigator.pushNamed(context, RouteNames.reader);
+                            onTap: () async {
+                              await sendDataFromLocalStorage('textKey', index);
+                              if (isSended) {
+                                isSended = false;
+                                // ignore: use_build_context_synchronously
+                                Navigator.pushNamed(context, RouteNames.reader);
+                              } else {
+                                Fluttertoast.showToast(
+                                  msg: 'Ошибка загрузки книги',
+                                  toastLength: Toast
+                                      .LENGTH_SHORT, // Длительность отображения
+                                  gravity: ToastGravity
+                                      .BOTTOM, // Расположение уведомления
+                                );
+                                return;
+                              }
                             },
                             child: Image.memory(images[index].imageBytes!,
                                 width: MediaQuery.of(context).size.width / 2.5,
@@ -395,20 +406,6 @@ class RecentPageState extends State<RecentPage> {
             ),
           ),
         ],
-      ),
-      floatingActionButton: AnimatedOpacity(
-        duration: const Duration(milliseconds: 150),
-        opacity: _isVisible ? 0.0 : 1.0,
-        child: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, RouteNames.reader);
-          },
-          backgroundColor: MyColors.purple,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.zero)),
-          autofocus: true,
-          child: const Icon(CustomIcons.bookOpen),
-        ),
       ),
     );
   }

@@ -5,13 +5,13 @@ class AchievementCard extends StatelessWidget {
   final String name;
   final String dataText;
   final String picture;
-  final bool isLocked;
+  final bool isReceived;
 
   const AchievementCard({
     required this.name,
     required this.dataText,
     required this.picture,
-    required this.isLocked,
+    required this.isReceived,
     Key? key,
   }) : super(key: key);
 
@@ -23,7 +23,7 @@ class AchievementCard extends StatelessWidget {
       height: 83.0,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isLocked ? Colors.white.withOpacity(0.2) : Colors.transparent,
+        color: isReceived ? Colors.white.withOpacity(0.2) : Colors.transparent,
       ),
       child: Row(
         children: [
@@ -35,7 +35,7 @@ class AchievementCard extends StatelessWidget {
               picture,
               width: 48,
               height: 48,
-              color: isLocked ? Colors.transparent.withOpacity(0.5) : null,
+              color: isReceived ? Colors.transparent.withOpacity(0.5) : null,
             ),
           ),
           Column(
@@ -49,8 +49,9 @@ class AchievementCard extends StatelessWidget {
                     fontFamily: 'Tektur',
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color:
-                        isLocked ? Colors.black.withOpacity(0.2) : Colors.black,
+                    color: isReceived
+                        ? Colors.black.withOpacity(0.2)
+                        : Colors.black,
                   ),
                 ),
               ),
@@ -60,7 +61,8 @@ class AchievementCard extends StatelessWidget {
                   fontFamily: 'Tektur',
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: isLocked ? Colors.grey.withOpacity(0.2) : Colors.grey,
+                  color:
+                      isReceived ? Colors.grey.withOpacity(0.2) : Colors.grey,
                 ),
               ),
             ],

@@ -32,6 +32,9 @@ dependencies:
   fluttertoast: ^8.2.2
   http: ^0.13.4
   battery: ^2.0.3
+  translator: ^0.1.7
+  webview_flutter: ^4.4.1
+  country_provider: ^1.0.2
 
 dev_dependencies:
   flutter_test:

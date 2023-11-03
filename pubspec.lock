@@ -81,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  country_provider:
+    dependency: "direct main"
+    description:
+      name: country_provider
+      sha256: e77d032ebb7a03798e92c951dc0720e6999665891f1070beca64ae452dd56260
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   cross_file:
     dependency: transitive
     description:
@@ -788,7 +796,17 @@ packages:
       sha256: "5c2f730018264d276c20e4f1503fd1308dfbbae39ec8ee63c5236311ac06954b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.6.1"
+
+    version: "0.6.0"
+  translator:
+    dependency: "direct main"
+    description:
+      name: translator
+      sha256: "225ee22fc482736c593be5c232c0c5884b16d7cc42945c51ac73d9a0441dddcc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.7"
+
   typed_data:
     dependency: transitive
     description:
@@ -908,7 +926,41 @@ packages:
       sha256: ccbbfbf29732ee1b391c4c6d13e7032d851f675f47365e81904e4c6fd669c854
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.2-beta"
+
+    version: "0.1.4-beta"
+  webview_flutter:
+    dependency: "direct main"
+    description:
+      name: webview_flutter
+      sha256: c1ab9b81090705c6069197d9fdc1625e587b52b8d70cdde2339d177ad0dbb98e
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.4.1"
+  webview_flutter_android:
+    dependency: transitive
+    description:
+      name: webview_flutter_android
+      sha256: b0cd33dd7d3dd8e5f664e11a19e17ba12c352647269921a3b568406b001f1dff
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.12.0"
+  webview_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: webview_flutter_platform_interface
+      sha256: "6d9213c65f1060116757a7c473247c60f3f7f332cac33dc417c9e362a9a13e4f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.6.0"
+  webview_flutter_wkwebview:
+    dependency: transitive
+    description:
+      name: webview_flutter_wkwebview
+      sha256: b4b42295b3aa91ed22ba6d3dd7de56efbb8f3ab3d6e41d8b1615d13537c7801d
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.9.2"
+
   win32:
     dependency: transitive
     description:

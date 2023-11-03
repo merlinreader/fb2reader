@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -24,14 +26,21 @@ class ImageLoader {
   Future<void> loadImage() async {
     await requestPermission();
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      dialogTitle: "Выберите книгу fb2",
+      allowMultiple: false,
+    );
 
-    if (result == null) {
+    if (result?.files.first.extension != 'fb2') {
+      Fluttertoast.showToast(
+        msg: 'Формат книги должен быть fb2',
+        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        gravity: ToastGravity.BOTTOM, // Расположение уведомления
+      );
       return;
     }
 
-    String path = result.files.single.path!;
-    print('imageloader path: $path');
+    String path = result!.files.single.path!;
 
     final prefs = await SharedPreferences.getInstance();
     String? imageDataToAdd = prefs.getString('booksKey');
@@ -67,7 +76,7 @@ class ImageLoader {
       final String titleFromInfo = titleInfoTag.text;
       title = titleFromInfo;
     } catch (e) {
-      print('Произошла ошибка: нет названия: $e');
+      title = "Название не найдено";
     }
 
     try {
@@ -83,7 +92,7 @@ class ImageLoader {
       lastName = lastNameFromInfo;
       name = '$firstNameFromInfo $lastNameFromInfo';
     } catch (e) {
-      print('Произошла ошибка: нет автора: $e');
+      name = "Автор не найден";
     }
 
     final Iterable<XmlElement> textInfo = document.findAllElements('body');
@@ -91,11 +100,6 @@ class ImageLoader {
       text.add(element.innerText.replaceAll(RegExp(r'\[.*?\]'), ''));
     }
 
-    for (var element in text) {
-      print(element);
-    }
-
-    print('imageloader done');
     ImageInfo imageData = ImageInfo(
         imageBytes: decodedBytes, title: title, author: name, fileName: path);
     imageDatas.add(imageData);
@@ -111,21 +115,15 @@ class ImageLoader {
     String textDataString = jsonEncode(bookDatas);
     await prefs.setString('textKey', textDataString);
 
-    bool success = await prefs.setString('booksKey', imageDatasString);
-    print(success);
-    print(
-        'imageLoader imageData.imageBytes.length ${imageData.imageBytes?.length} symbols');
-    print('imageLoader imageData.author "${imageData.author}"');
-    print('imageLoader imageData.title "${imageData.title}"');
-    print('imageLoader imageData.fileName "${imageData.fileName}"');
+    await prefs.setString('booksKey', imageDatasString);
   }
 }
 
 Future<void> requestPermission() async {
-  PermissionStatus status = await Permission.manageExternalStorage.status;
+  PermissionStatus status = await Permission.storage.status;
   if (!status.isGranted) {
-    status = await Permission.manageExternalStorage.request();
-    if (!status.isGranted) {
+    await Permission.storage.request();
+    if (status.isDenied || status.isPermanentlyDenied) {
       openAppSettings();
     }
   }

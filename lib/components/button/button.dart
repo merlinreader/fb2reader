@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+//import 'package:merlin/style/colors.dart';
 
 class Button extends StatelessWidget {
   final String text;
@@ -6,7 +7,7 @@ class Button extends StatelessWidget {
   final double height;
   final double horizontalPadding;
   final double verticalPadding;
-  final Color buttonColor;
+  final Color? buttonColor;
   final Color textColor;
   final double fontSize;
   final VoidCallback onPressed;
@@ -18,7 +19,7 @@ class Button extends StatelessWidget {
     required this.height,
     required this.horizontalPadding,
     required this.verticalPadding,
-    required this.buttonColor,
+    this.buttonColor,
     required this.textColor,
     required this.fontSize,
     required this.onPressed,
@@ -33,14 +34,16 @@ class Button extends StatelessWidget {
       height: height,
       child: ElevatedButton(
         onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          backgroundColor: buttonColor,
-          padding: EdgeInsets.symmetric(
-              horizontal: horizontalPadding, vertical: verticalPadding),
-        ),
+        //ПРИМЕР ИСПОЛЬЗОВАНИЯ ТЕМ !!!!!!!!!!!!
+        style: Theme.of(context).elevatedButtonTheme.style ??
+            ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0),
+              ),
+              backgroundColor: buttonColor,
+              padding: EdgeInsets.symmetric(
+                  horizontal: horizontalPadding, vertical: verticalPadding),
+            ),
         child: Text(text,
             style: TextStyle(
                 color: textColor,
