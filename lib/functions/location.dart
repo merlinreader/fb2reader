@@ -1,9 +1,17 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 
 Future<Map<String, String>> getLocation() async {
+  PermissionStatus status = await Permission.locationWhenInUse.status;
+  if (!status.isGranted) {
+    await Permission.locationWhenInUse.request();
+    if (!status.isGranted && status.isPermanentlyDenied) {
+      openAppSettings();
+    }
+  }
   Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high);
   List<Placemark> placemarks =

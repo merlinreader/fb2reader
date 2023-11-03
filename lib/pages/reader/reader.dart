@@ -82,8 +82,7 @@ class Reader extends State {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
       print('12312321312 $prefs');
-      final filePath =
-          textes.first.filePath;
+      final filePath = textes.first.filePath;
       // ignore: unnecessary_null_comparison
       if (filePath != null) {
         final readingPositionsJson = prefs.getString('readingPositions');
@@ -250,7 +249,7 @@ class Reader extends State {
   Widget build(BuildContext context) {
     double pageSize = MediaQuery.of(context).size.height * 3;
     List<String> textPages = getPages(getText, pageSize.toInt());
-    
+
     return Scaffold(
       appBar: AppBar(
         leading: GestureDetector(
@@ -259,27 +258,28 @@ class Reader extends State {
             },
             child: Theme(
                 data: lightTheme(),
-                child: const Icon(
+                child: Icon(
                   CustomIcons.chevronLeft,
                   size: 40,
-                  //color: Theme.of(context).iconTheme,
+                  color: Theme.of(context).iconTheme.color,
                 ))),
         backgroundColor: Theme.of(context).primaryColor,
         shadowColor: Colors.transparent,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            TextTektur(
+            Text14(
+              // НАДО 18 СОЗДАТЬ
               text: textes.isNotEmpty
                   ? (textes.first.author.toString().length > 8
                       ? (textes.first.title.toString().length > 8
                           ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 3)}...'
-                          : '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, 6)}...')
+                          : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
                       : textes[0].title.toString())
                   : 'Нет автора',
-              fontsize: 18,
+              //fontsize: 18,
               textColor: MyColors.black,
-              fontWeight: FontWeight.w600,
+              //fontWeight: FontWeight.w600,
             ),
             GestureDetector(
                 onTap: () {
@@ -288,10 +288,10 @@ class Reader extends State {
                 },
                 child: Theme(
                     data: lightTheme(),
-                    child: const Icon(
+                    child: Icon(
                       CustomIcons.sliders,
                       size: 40,
-                      //color: Theme.of(context).iconTheme,
+                      color: Theme.of(context).iconTheme.color,
                     )))
           ],
         ),
@@ -345,36 +345,36 @@ class Reader extends State {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
-                child: TextTektur(
+                child: Text14(
                   text: '${_batteryLevel.toString()}%',
-                  fontsize: 12,
+                  //fontsize: 12,
                   textColor: MyColors.black,
-                  fontWeight: FontWeight.w600,
+                  //fontWeight: FontWeight.w600,
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
                 child: Align(
                   alignment: Alignment.topCenter,
-                  child: TextTektur(
+                  child: Text14(
                     text: textes.isNotEmpty
                         ? (textes[0].title.toString().length > 28
                             ? '${textes[0].title.toString().substring(0, 28)}...'
                             : textes[0].title.toString())
                         : 'Нет названия',
-                    fontsize: 12,
+                    //fontsize: 12,
                     textColor: MyColors.black,
-                    fontWeight: FontWeight.w600,
+                    //fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
-                child: TextTektur(
+                child: Text14(
                   text: '${_scrollPosition.toStringAsFixed(2)}%',
-                  fontsize: 12,
+                  //fontsize: 12,
                   textColor: MyColors.black,
-                  fontWeight: FontWeight.w600,
+                  //fontWeight: FontWeight.w600,
                 ),
               ),
             ],

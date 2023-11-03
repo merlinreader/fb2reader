@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merlin/UI/theme/theme.dart';
 
 class CustomCheckbox extends StatelessWidget {
   final bool isChecked;
@@ -38,7 +39,7 @@ class CustomCheckbox extends StatelessWidget {
               ? Icon(
                   Icons.check,
                   size: 20,
-                  color: checkColor, // Цвет галочки
+                  color: Theme.of(context).iconTheme.color, // Цвет галочки
                 )
               : Container(), // Пустой контейнер, если не выбрано
         ),

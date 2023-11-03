@@ -3,7 +3,11 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
+import 'package:merlin/main.dart';
 import 'package:merlin/components/checkbox.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:merlin/UI/theme/theme.dart';
 //import 'package:merlin/style/text.dart';
 //import 'package:merlin/components/checkbox.dart';
 
@@ -31,7 +35,28 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  @override
+  void initState() {
+    super.initState();
+    loadSettings();
+  }
+
+  Future<void> loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isChecked = prefs.getBool('isDarkTheme') ?? false;
+      // Восстанавливаем состояние темной темы
+      isDarkTheme = isChecked;
+    });
+  }
+
+  Future<void> saveSettings(bool isDarkTheme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkTheme', isDarkTheme);
+  }
+
   // Перменная для изменения темы
+  bool isDarkTheme = false;
   bool isChecked = false;
   // Переменные для темы
   bool darkThemeBackground = false;
@@ -92,35 +117,29 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: darkThemeBackground ? themeBackground : themeBackground,
+      backgroundColor: Theme.of(context).primaryColor,
+      //darkThemeBackground ? themeBackground : themeBackground,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: themeAppBackground,
-        shadowColor: Colors.transparent,
+        backgroundColor: Theme.of(context).primaryColor,
+        //shadowColor: Colors.transparent,
         leading: GestureDetector(
           onTap: () {
             Navigator.pop(context);
             // Navigator.popAndPushNamed(context, RouteNames.reader);
           },
-          child: const Icon(
+          child: Icon(
             CustomIcons.chevronLeft,
             size: 40,
-            color: MyColors.black,
+            color: Theme.of(context).iconTheme.color,
           ),
         ),
         title: Text(
           'Настройки',
           style: TextStyle(
-            color: darkThemeBackground ? themeTextColor : themeTextColor,
+            color: Theme.of(context).iconTheme.color,
             fontFamily: 'Tektur',
             fontSize: 16,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
-          child: Container(
-            height: 1.0,
-            color: const Color.fromRGBO(235, 235, 235, 1),
           ),
         ),
       ),
@@ -128,40 +147,43 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: themeBackground,
+              color: Theme.of(context).primaryColor,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                TextTektur(
-                  text: "Система",
-                  fontsize: 18,
-                  textColor: themeTextColor,
-                ),
+                const Text24(text: "Система", textColor: MyColors.black),
+                // TextTektur(
+                //   text: "Система",
+                //   fontsize: 18,
+                //   textColor: themeTextColor,
+                // ),
                 const SizedBox(height: 16),
                 Row(
                   children: <Widget>[
-                    TextTektur(
+                    Text14(
                       text: "Ночной режим",
-                      fontsize: 14,
                       textColor: themeGrayTextColor,
                     ),
                     const Spacer(),
                     CustomCheckbox(
                       isChecked: isChecked,
-                      bgColor: darkThemeBackground
-                          ? themeAppBackground
-                          : themeAppBackground,
+                      bgColor: Theme.of(context).primaryColor,
                       borderColor:
-                          darkThemeBackground ? themeTextColor : themeTextColor,
+                          Theme.of(context).iconTheme.color ?? MyColors.white,
                       checkColor:
                           darkThemeBackground ? themeTextColor : themeTextColor,
                       onChanged: (newValue) {
+                        final themeProvider =
+                            Provider.of<ThemeProvider>(context, listen: false);
                         setState(() {
+                          themeProvider.isDarkTheme = newValue;
                           isChecked = newValue;
-                          updateTheme();
+                          saveSettings(isChecked);
+                          saveSettings(themeProvider.isDarkTheme);
+                          print('settings $newValue');
                         });
                       },
                     ),
@@ -173,16 +195,16 @@ class _SettingsPageState extends State<SettingsPage> {
           Container(
             margin: const EdgeInsets.only(top: 8.0),
             decoration: BoxDecoration(
-              color: themeBackground,
+              color: Theme.of(context).primaryColor,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                TextTektur(
+                Text14(
                   text: "Настраиваемая тема",
-                  fontsize: 18,
+                  //fontsize: 18,
                   textColor: themeTextColor,
                 ),
                 const SizedBox(height: 16),
@@ -193,9 +215,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        TextTektur(
+                        Text14(
                           text: "Цвет текста",
-                          fontsize: 14,
                           textColor: themeGrayTextColor,
                         ),
                         Row(
@@ -203,7 +224,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             CustomCheckbox(
                               isChecked: textColorBlack,
                               bgColor: MyColors.black,
-                              borderColor: MyColors.black,
+                              borderColor: Theme.of(context).iconTheme.color ??
+                                  MyColors.white,
                               checkColor: MyColors.white,
                               onChanged: (newValue) {
                                 setState(() {
@@ -220,7 +242,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             CustomCheckbox(
                               isChecked: textColorWhite,
                               bgColor: MyColors.white,
-                              borderColor: MyColors.black,
+                              borderColor: Theme.of(context).iconTheme.color ??
+                                  MyColors.white,
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
@@ -237,7 +260,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             CustomCheckbox(
                               isChecked: textColorMint,
                               bgColor: MyColors.mint,
-                              borderColor: MyColors.black,
+                              borderColor: Theme.of(context).iconTheme.color ??
+                                  MyColors.white,
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
@@ -254,7 +278,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             CustomCheckbox(
                               isChecked: textColorBeige,
                               bgColor: MyColors.beige,
-                              borderColor: MyColors.black,
+                              borderColor: Theme.of(context).iconTheme.color ??
+                                  MyColors.white,
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
@@ -275,9 +300,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        TextTektur(
+                        Text14(
                           text: "Цвет фона",
-                          fontsize: 14,
                           textColor: themeGrayTextColor,
                         ),
                         Row(
@@ -285,7 +309,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             CustomCheckbox(
                               isChecked: backgroundColorBlack,
                               bgColor: MyColors.black,
-                              borderColor: MyColors.black,
+                              borderColor: Theme.of(context).iconTheme.color ??
+                                  MyColors.white,
                               checkColor: MyColors.white,
                               onChanged: (newValue) {
                                 setState(() {
@@ -302,7 +327,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             CustomCheckbox(
                               isChecked: backgroundColorWhite,
                               bgColor: MyColors.white,
-                              borderColor: MyColors.black,
+                              borderColor: Theme.of(context).iconTheme.color ??
+                                  MyColors.white,
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
@@ -319,7 +345,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             CustomCheckbox(
                               isChecked: backgroundColorMint,
                               bgColor: MyColors.mint,
-                              borderColor: MyColors.black,
+                              borderColor: Theme.of(context).iconTheme.color ??
+                                  MyColors.white,
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
@@ -336,7 +363,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             CustomCheckbox(
                               isChecked: backgroundColorBeige,
                               bgColor: MyColors.beige,
-                              borderColor: MyColors.black,
+                              borderColor: Theme.of(context).iconTheme.color ??
+                                  MyColors.white,
                               checkColor: MyColors.black,
                               onChanged: (newValue) {
                                 setState(() {
@@ -392,10 +420,4 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
-}
-
-bool isDarkTheme = true;
-
-void changeTheme() {
-  isDarkTheme = !isDarkTheme;
 }
