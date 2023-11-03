@@ -6,13 +6,16 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/pages/settings/settings.dart';
 
-
 //В ФАЙЛЕ BUTTON ПРИМЕР ИСПОЛЬЗОВАНИЯ КНОПОК
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     systemNavigationBarColor: MyColors.white,
+      statusBarColor: Colors.transparent
   ));
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  
+
   runApp(MerlinApp());
   getLocation();
 }
