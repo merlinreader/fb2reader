@@ -57,19 +57,21 @@ class StatTable extends StatelessWidget {
                   columnSpacing: 15,
                   columns: const [
                     DataColumn(
-                      label: Text11(
+                      label: Text11Bold(
                         text: 'Имя',
                         textColor: MyColors.grey,
                       ),
                     ),
                     DataColumn(
-                      label: Text11(
+                      label: Text11Bold(
                         text: 'Страниц',
                         textColor: MyColors.grey,
                       ),
                     ),
                     DataColumn(
+
                       label: Text11(
+
                         text: 'Страниц в\nрежиме слова',
                         textColor: MyColors.grey,
                       ),
@@ -80,7 +82,9 @@ class StatTable extends StatelessWidget {
                     (index) => DataRow(
                       cells: [
                         DataCell(
+
                           Text11(
+
                             text: dataList[index]['firstName']?.length > 10
                                 ? '${dataList[index]['firstName']?.substring(0, 10)}...'
                                 : dataList[index]['firstName'] ?? '',
@@ -110,6 +114,7 @@ class StatTable extends StatelessWidget {
               ),
             );
           } else if (snapshot.hasError) {
+
             // return const Row(
             //   children: [
             //     SizedBox(width: 20),
@@ -117,6 +122,7 @@ class StatTable extends StatelessWidget {
             //   ],
             // );
             return Text('Ошибка: ${snapshot.error}');
+
           } else {
             return const Center(
                 child: Column(children: [

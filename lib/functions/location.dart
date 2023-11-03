@@ -12,7 +12,6 @@ Future<Map<String, String>> getLocation() async {
       openAppSettings();
     }
   }
-
   Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high);
   List<Placemark> placemarks =
