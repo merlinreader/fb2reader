@@ -11,7 +11,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Timer(Duration(seconds: 2), () {
-      Navigator.pushNamed(context, RouteNames.main);
+      Navigator.pushReplacementNamed(context, RouteNames.main);
     });
     return const Scaffold(
       backgroundColor: MyColors.purple,

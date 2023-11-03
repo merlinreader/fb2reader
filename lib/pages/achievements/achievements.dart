@@ -28,7 +28,7 @@ class AchievementsPage extends StatelessWidget {
       return []; // Возвращаем пустой список в случае ошибки
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return ListView(children: [
