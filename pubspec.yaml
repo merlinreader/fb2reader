@@ -36,6 +36,7 @@ dependencies:
   webview_flutter: ^4.4.1
   country_provider: ^1.0.2
   provider: ^6.0.5
+  english_words: ^4.0.0
   csc_picker: ^0.2.7
   uni_links: ^0.5.1
   firebase_dynamic_links: ^5.4.3

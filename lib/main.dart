@@ -30,6 +30,7 @@ class MerlinApp extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: 'Merlin',
           theme: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
           initialRoute: RouteNames.splashScreen,
