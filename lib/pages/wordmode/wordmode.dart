@@ -174,7 +174,7 @@ class WordCount {
 
     for (final word in words) {
       final normalizedWord = word.toLowerCase();
-      if (normalizedWord.length > 1 &&
+      if (normalizedWord.length > 3 &&
           !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
           normalizedWord != '-') {
         if (wordCounts.containsKey(normalizedWord)) {
