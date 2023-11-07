@@ -322,7 +322,7 @@ class Reader extends State {
                     child: Card(
                       child: ListView(
                         shrinkWrap: true,
-                        padding: const EdgeInsets.all(2),
+                        padding: const EdgeInsets.all(4),
                         children: <Widget>[
                           IconButton(
                             alignment: Alignment.centerRight,
@@ -340,6 +340,7 @@ class Reader extends State {
                           ),
                           DataTable(
                             columnSpacing: 38.0,
+                            showBottomBorder: false,
                             dataTextStyle: const TextStyle(
                                 fontFamily: 'Roboto', color: MyColors.black),
                             columns: const [
@@ -371,8 +372,7 @@ class Reader extends State {
                             rows: wordCount.wordEntries.map((entry) {
                               return DataRow(
                                 cells: [
-                                  DataCell(Center(
-                                      child: InkWell(
+                                  DataCell(InkWell(
                                     onTap: () async {
                                       await _showWordInputDialog(
                                           entry.word, wordCount.wordEntries);
@@ -386,7 +386,7 @@ class Reader extends State {
                                       entry.word,
                                       textAlign: TextAlign.start,
                                     ),
-                                  ))),
+                                  )),
                                   DataCell(
                                     ConstrainedBox(
                                       constraints: BoxConstraints(
@@ -438,14 +438,14 @@ class Reader extends State {
       builder: (context) => const AgreementDialog(),
     );
 
-    if (result != null && result) {
+    if (result == true) {
       // Действие, выполняемое после нажатия "Да"
       Fluttertoast.showToast(
         msg: 'Здесь будет возможность самому составить таблицу',
         toastLength: Toast.LENGTH_SHORT, // Длительность отображения
         gravity: ToastGravity.BOTTOM,
       );
-    } else if (result != null) {
+    } else if (result == false) {
       // Действие, выполняемое после нажатия "Нет"
       final wordCount = WordCount(
           filePath: textes.first.filePath, fileText: textes.first.fileText);
@@ -453,7 +453,7 @@ class Reader extends State {
       await wordCount.resetCallCount();
       // await wordCount.checkCallInfo();
       await showTableDialog(context, wordCount);
-    }
+    } 
   }
 
   Future<void> _showWordInputDialog(

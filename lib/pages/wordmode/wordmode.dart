@@ -296,6 +296,9 @@ class AgreementDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
         behavior: HitTestBehavior.opaque,
         child: AlertDialog(
           contentPadding: EdgeInsets.zero,
