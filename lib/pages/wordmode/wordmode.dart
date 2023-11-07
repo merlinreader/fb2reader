@@ -7,6 +7,7 @@ import 'package:merlin/style/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:html/parser.dart' show parse;
 
 class WordCount {
   final String filePath;
@@ -50,9 +51,6 @@ class WordCount {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       if (data.length >= 1 && data[0].length >= 1 && data[0][0].length >= 3) {
-        // print(
-        //     'translateToEnglish word ${data[0][0][0].toString().replaceAll(RegExp(r'[\[\].,;!?():]'), '')}');
-
         return data[0][0][0]
             .toString()
             .replaceAll(RegExp(r'[\[\].,;!?():]'), '')
@@ -65,6 +63,38 @@ class WordCount {
     }
   }
 
+  Future<String> getPartOfSpeech(String word) async {
+    final apiUrl = 'https://www.merriam-webster.com/dictionary/$word';
+    final response = await http.get(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
+      final document = parse(response.body);
+      final partOfSpeechElement = document.querySelector('.parts-of-speech a');
+      if (partOfSpeechElement != null) {
+        final partOfSpeech = partOfSpeechElement.text;
+        return partOfSpeech;
+      }
+    }
+    // print('Не удалось определить часть речи $word');
+    return 'N/A';
+  }
+
+  Future<String> getIPA(String word) async {
+    final apiUrl = 'https://www.merriam-webster.com/dictionary/$word';
+    final response = await http.get(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
+      final document = parse(response.body);
+      final ipaElement = document.querySelector('.play-pron-v2');
+      if (ipaElement != null) {
+        final ipaText = ipaElement.text.replaceAll('\n', '').trim();
+        return ipaText;
+      }
+    }
+    // print('Не удалось получить IPA произношения $word');
+    return 'N/A';
+  }
+
   Future<void> checkCallInfo() async {
     await loadCallInfo();
 
@@ -73,8 +103,8 @@ class WordCount {
       final timeElapsed = now.difference(_lastCallTimestamp!);
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
-      if (timeElapsed.inHours >= 24) {
-        // if (timeElapsed.inMicroseconds >= 1) {
+      // if (timeElapsed.inHours >= 24) {
+      if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset(_callCount);
         await updateCallInfo();
       } else {
@@ -93,6 +123,48 @@ class WordCount {
     }
   }
 
+  List<String> getAllWords() {
+    final textWithoutPunctuation =
+        fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+    final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+
+    List<String> wordCounts = [];
+
+    for (final word in words) {
+      final normalizedWord = word.toLowerCase();
+      if (normalizedWord.length > 1 &&
+          !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
+          normalizedWord != '-') {
+        wordCounts.add(normalizedWord);
+      }
+    }
+    return wordCounts;
+  }
+
+  int getWordCount(String wordToCount) {
+    final textWithoutPunctuation =
+        fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+    final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+
+    final wordCounts = <String, int>{};
+
+    for (final word in words) {
+      final normalizedWord = word.toLowerCase();
+      if (normalizedWord.length > 1 &&
+          !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
+          normalizedWord != '-') {
+        if (wordCounts.containsKey(normalizedWord)) {
+          wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
+        } else {
+          wordCounts[normalizedWord] = 1;
+        }
+      }
+    }
+
+    // Возвращаем количество повторений слова, если оно существует, иначе 0
+    return wordCounts[wordToCount.toLowerCase()] ?? 0;
+  }
+
   Future<void> countWordsWithOffset(int offset) async {
     final textWithoutPunctuation =
         fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
@@ -102,7 +174,6 @@ class WordCount {
 
     for (final word in words) {
       final normalizedWord = word.toLowerCase();
-
       if (normalizedWord.length > 1 &&
           !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
           normalizedWord != '-') {
@@ -132,11 +203,15 @@ class WordCount {
       final word = entry.key;
       final count = entry.value;
       final translation = await translateToEnglish(word);
+      final ipaWord = await getIPA(translation);
+      // final partOfSpeechWord = await getPartOfSpeech(translation);
+      print('"$word" - "$translation" - [$ipaWord]');
 
       wordEntries.add(WordEntry(
         word: word,
         count: count,
         translation: translation,
+        ipa: ipaWord,
       ));
     }
 
@@ -187,11 +262,13 @@ class WordEntry {
   final String word;
   final int count;
   String? translation;
+  String? ipa;
 
   WordEntry({
     required this.word,
     required this.count,
     this.translation,
+    this.ipa,
   });
 
   factory WordEntry.fromJson(Map<String, dynamic> json) {
@@ -199,6 +276,7 @@ class WordEntry {
       word: json['word'],
       count: json['count'],
       translation: json['translation'],
+      ipa: json['ipa'],
     );
   }
 
@@ -207,6 +285,7 @@ class WordEntry {
       'word': word,
       'count': count,
       'translation': translation,
+      'ipa': ipa,
     };
   }
 }
@@ -216,62 +295,66 @@ class AgreementDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      contentPadding: EdgeInsets.zero,
-      buttonPadding: EdgeInsets.zero,
-      content: Container(
-        height: 70,
-        alignment: Alignment.center,
-        child: const Text(
-          'Хотите выбрать 10 слов?',
-          style: TextStyle(fontSize: 16),
-        ),
-      ),
-      actions: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-                child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Colors.black,
-                  width: 0.2,
-                ),
-              ),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text18(
-                  text: 'Да',
-                  textColor: MyColors.black,
-                ),
-              ),
-            )),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 0.2,
+    return GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        child: AlertDialog(
+          contentPadding: EdgeInsets.zero,
+          buttonPadding: EdgeInsets.zero,
+          content: Container(
+            height: 70,
+            alignment: Alignment.center,
+            child: const Text(
+              'Хотите выбрать 10 слов?',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                    child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.black,
+                      width: 0.2,
+                    ),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: const Text18(
+                      text: 'Да',
+                      textColor: MyColors.black,
+                    ),
+                  ),
+                )),
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.black,
+                        width: 0.2,
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                      child: const Text(
+                        'Нет',
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.red,
+                            fontFamily: 'Tektur'),
+                      ),
+                    ),
                   ),
                 ),
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                  child: const Text(
-                    'Нет',
-                    style: TextStyle(
-                        fontSize: 18, color: Colors.red, fontFamily: 'Tektur'),
-                  ),
-                ),
-              ),
+              ],
             ),
           ],
-        ),
-      ],
-    );
+        ));
   }
 }

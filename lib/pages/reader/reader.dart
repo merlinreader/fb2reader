@@ -301,12 +301,10 @@ class Reader extends State {
           future: wordCount.checkCallInfo(),
           builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              // Отобразите анимацию загрузки
               return const Center(
                 child: CircularProgressIndicator(),
               );
             } else if (snapshot.hasError) {
-              // В случае ошибки отобразите сообщение об ошибке
               return AlertDialog(
                 content: Text('Произошла ошибка: ${snapshot.error}'),
               );
@@ -314,11 +312,7 @@ class Reader extends State {
               if (wordCount.wordEntries.isEmpty) {
                 Navigator.pop(context);
               }
-              // Данные загружены успешно, отобразите их
-              print('Слова и их количество:');
-              for (final entry in wordCount.wordEntries) {
-                print('${entry.word}: ${entry.count}');
-              }
+
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
@@ -345,43 +339,31 @@ class Reader extends State {
                             ),
                           ),
                           DataTable(
+                            columnSpacing: 38.0,
+                            dataTextStyle: const TextStyle(
+                                fontFamily: 'Roboto', color: MyColors.black),
                             columns: const [
                               DataColumn(
                                 label: Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text16(
-                                        text: 'Слово',
-                                        textColor: MyColors.black,
-                                      )
-                                    ],
+                                  child: Text16(
+                                    text: 'Слово',
+                                    textColor: MyColors.black,
                                   ),
                                 ),
                               ),
                               DataColumn(
                                 label: Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text16(
-                                        text: 'Повторения',
-                                        textColor: MyColors.black,
-                                      )
-                                    ],
+                                  child: Text16(
+                                    text: 'Произношение',
+                                    textColor: MyColors.black,
                                   ),
                                 ),
                               ),
                               DataColumn(
                                 label: Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text16(
-                                        text: 'Перевод',
-                                        textColor: MyColors.black,
-                                      )
-                                    ],
+                                  child: Text16(
+                                    text: 'Перевод',
+                                    textColor: MyColors.black,
                                   ),
                                 ),
                               ),
@@ -390,25 +372,49 @@ class Reader extends State {
                               return DataRow(
                                 cells: [
                                   DataCell(Center(
-                                    child: Text16(
-                                      text: entry.word,
-                                      textColor: MyColors.black,
+                                      child: InkWell(
+                                    onTap: () async {
+                                      await _showWordInputDialog(
+                                          entry.word, wordCount.wordEntries);
+                                      setState(() {
+                                        entry.word;
+                                        entry.count;
+                                        entry.ipa;
+                                      });
+                                    },
+                                    child: Text(
+                                      entry.word,
+                                      textAlign: TextAlign.start,
                                     ),
-                                  )),
-                                  DataCell(Center(
-                                    child: Text16(
-                                      text: entry.count.toString(),
-                                      textColor: MyColors.black,
+                                  ))),
+                                  DataCell(
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.25,
+                                      ),
+                                      child: Text(
+                                        '[ ${entry.ipa} ]',
+                                        textAlign: TextAlign.start,
+                                      ),
                                     ),
-                                  )),
-                                  DataCell(Center(
-                                    child: Text16(
-                                      text: entry.translation!.isNotEmpty
-                                          ? entry.translation!
-                                          : 'N/A',
-                                      textColor: MyColors.black,
+                                  ),
+                                  DataCell(
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.25,
+                                      ),
+                                      child: Text(
+                                        entry.translation!.isNotEmpty
+                                            ? entry.translation!
+                                            : 'N/A',
+                                        textAlign: TextAlign.start,
+                                      ),
                                     ),
-                                  )),
+                                  ),
                                 ],
                               );
                             }).toList(),
@@ -424,6 +430,117 @@ class Reader extends State {
         );
       },
     );
+  }
+
+  void wordModeDialog(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => const AgreementDialog(),
+    );
+
+    if (result != null && result) {
+      // Действие, выполняемое после нажатия "Да"
+      Fluttertoast.showToast(
+        msg: 'Здесь будет возможность самому составить таблицу',
+        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        gravity: ToastGravity.BOTTOM,
+      );
+    } else if (result != null) {
+      // Действие, выполняемое после нажатия "Нет"
+      final wordCount = WordCount(
+          filePath: textes.first.filePath, fileText: textes.first.fileText);
+      // Если нужно сбросить счётчик времени
+      await wordCount.resetCallCount();
+      // await wordCount.checkCallInfo();
+      await showTableDialog(context, wordCount);
+    }
+  }
+
+  Future<void> _showWordInputDialog(
+      String word, List<WordEntry> wordEntries) async {
+    List<String> words = WordCount(
+            filePath: textes.first.filePath, fileText: textes.first.fileText)
+        .getAllWords();
+    Set<String> uniqueSet = <String>{};
+    List<String> result = [];
+    for (String item in words.reversed) {
+      if (uniqueSet.add(item)) {
+        result.add(item);
+      }
+    }
+    result.reversed.toList();
+    showDialog(
+      context: context,
+      builder: (context) {
+        String newWord = word;
+
+        return AlertDialog(
+          title: const Text('Изменить слово'),
+          content: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+              return result.where((String option) {
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            onSelected: (String selection) {
+              debugPrint('You just selected $selection');
+              newWord = selection;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                debugPrint('Введенное слово: $newWord');
+                debugPrint('onPressed word: $word');
+
+                await updateWordInTable(word, newWord, wordEntries);
+
+                Navigator.of(context).pop();
+              },
+              child: const Text('Сохранить'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Отмена'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> updateWordInTable(
+      String oldWord, String newWord, List<WordEntry> wordEntries) async {
+    final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
+    if (index != -1) {
+      final count = WordCount(
+              filePath: textes.first.filePath, fileText: textes.first.fileText)
+          .getWordCount(newWord);
+      debugPrint('updateWordInTable entry ${wordEntries[index]}');
+      debugPrint('updateWordInTable count ${wordEntries[index].count}');
+      final translation = await WordCount(
+              filePath: textes.first.filePath, fileText: textes.first.fileText)
+          .translateToEnglish(newWord);
+      final ipa = await WordCount(
+              filePath: textes.first.filePath, fileText: textes.first.fileText)
+          .getIPA(translation);
+
+      wordEntries[index] = WordEntry(
+        word: newWord,
+        count: count,
+        translation: translation,
+        ipa: ipa, // Обновите IPA
+      );
+
+      setState(() {});
+    } else {
+      debugPrint('Word $oldWord not found in the list.');
+    }
   }
 
   Future<void> saveSettings(bool isDarkTheme) async {
@@ -466,8 +583,9 @@ class Reader extends State {
                         text: textes.isNotEmpty
                             ? (textes.first.author.toString().length > 8
                                 ? (textes.first.title.toString().length > 8
-                                    ? '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : textes[0].title.toString().substring(0, 3)}'
-                                    : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
+                                    ? '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : ('${textes[0].title.toString().substring(0, 3)}...')}'
+                                    : '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : textes[0].title.toString()}')
+                                // : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
                                 : textes[0].title.toString())
                             : 'Нет автора',
                         textColor: MyColors.black,
@@ -554,14 +672,8 @@ class Reader extends State {
                   top: screenHeight / 5,
                   child: GestureDetector(
                       behavior: HitTestBehavior.translucent,
-                      onDoubleTap: () {
-                        // Режим слова
-                        Fluttertoast.showToast(
-                          msg: 'Здесь будет режим слова',
-                          toastLength:
-                              Toast.LENGTH_SHORT, // Длительность отображения
-                          gravity: ToastGravity.BOTTOM,
-                        );
+                      onDoubleTap: () async {
+                        wordModeDialog(context);
                       },
                       onTap: () {
                         setState(() {
@@ -736,27 +848,7 @@ class Reader extends State {
                               ),
                               GestureDetector(
                                 onTap: () async {
-                                  final result = await showDialog<bool>(
-                                    context: context,
-                                    builder: (context) =>
-                                        const AgreementDialog(),
-                                  );
-
-                                  if (result != null && result) {
-                                    // Действие, выполняемое после нажатия "Да"
-                                  } else {
-                                    // Действие, выполняемое после нажатия "Нет"
-                                    final wordCount = WordCount(
-                                        filePath: textes.first.filePath,
-                                        fileText: textes.first.fileText);
-                                    // await wordCount.resetCallCount();
-                                    // await wordCount.checkCallInfo();
-                                    // print('Слова и их количество:');
-                                    // for (final entry in wordCount.wordEntries) {
-                                    //   print('${entry.word}: ${entry.count}');
-                                    // }
-                                    await showTableDialog(context, wordCount);
-                                  }
+                                  wordModeDialog(context);
                                 },
                                 child: Icon(
                                   CustomIcons.wm,
