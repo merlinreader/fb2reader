@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:merlin/pages/wordmode/models/word_entry.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,16 +11,24 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 
+part 'wordmode.g.dart';
+
+@JsonSerializable(explicitToJson: true)
 class WordCount {
   final String filePath;
   final String fileText;
   List<WordEntry> wordEntries;
 
   WordCount({
-    required this.filePath,
-    required this.fileText,
+    this.filePath = '',
+    this.fileText = '',
     this.wordEntries = const [],
   });
+
+  factory WordCount.fromJson(Map<String, dynamic> json) =>
+      _$WordCountFromJson(json);
+
+  Map<String, dynamic> toJson() => _$WordCountToJson(this);
 
   int _callCount = 0;
   DateTime? _lastCallTimestamp;
@@ -244,49 +254,6 @@ class WordCount {
     } else {
       print('Слово не подходит для подсчета.');
     }
-  }
-
-  Map<String, dynamic> toJson() {
-    final List<Map<String, dynamic>> jsonEntries =
-        wordEntries.map((entry) => entry.toJson()).toList();
-
-    return {
-      'filePath': filePath,
-      'fileText': fileText,
-      'wordEntries': jsonEntries,
-    };
-  }
-}
-
-class WordEntry {
-  final String word;
-  final int count;
-  String? translation;
-  String? ipa;
-
-  WordEntry({
-    required this.word,
-    required this.count,
-    this.translation,
-    this.ipa,
-  });
-
-  factory WordEntry.fromJson(Map<String, dynamic> json) {
-    return WordEntry(
-      word: json['word'],
-      count: json['count'],
-      translation: json['translation'],
-      ipa: json['ipa'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'word': word,
-      'count': count,
-      'translation': translation,
-      'ipa': ipa,
-    };
   }
 }
 
