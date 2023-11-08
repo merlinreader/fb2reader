@@ -9,6 +9,8 @@ import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/location.dart';
 import 'package:merlin/UI/router.dart';
+import 'package:merlin/main.dart';
+import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -96,6 +98,7 @@ class _ProfilePage extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
@@ -172,7 +175,9 @@ class _ProfilePage extends State<ProfilePage> {
                         child: Align(
                             alignment: AlignmentDirectional.bottomCenter,
                             child: Theme(
-                              data: lightTheme(),
+                              data: themeProvider.isDarkTheme
+                                  ? darkTheme()
+                                  : lightTheme(),
                               child: Button(
                                   text: 'Написать нам',
                                   width: 312,
@@ -180,7 +185,8 @@ class _ProfilePage extends State<ProfilePage> {
                                   horizontalPadding: 97,
                                   verticalPadding: 12,
                                   //buttonColor: MyColors.white,
-                                  textColor: MyColors.black,
+                                  textColor:
+                                      Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   onPressed: () {
@@ -237,7 +243,9 @@ class _ProfilePage extends State<ProfilePage> {
                         child: Align(
                             alignment: AlignmentDirectional.bottomCenter,
                             child: Theme(
-                              data: lightTheme(),
+                              data: themeProvider.isDarkTheme
+                                  ? darkTheme()
+                                  : lightTheme(),
                               child: const Button(
                                   text: 'Написать нам',
                                   width: 312,

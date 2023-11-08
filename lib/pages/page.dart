@@ -28,7 +28,8 @@ class Page extends State<AppPage> {
     LoadingScreen(),
     RecentPage(),
     AchievementsPage(
-      token: 'pass',
+      token:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTRiNjA1ZThhZjBmN2EzOTA3YTllMzciLCJ0ZWxlZ3JhbUlkIjo4NzM0NzgzNDc5OCwiaWF0IjoxNjk5NDM4Njg2fQ.yr4uVZwW2EOUMem6r2ei9Qs8gJYWw7hsOgHAdq-gLmw',
     ),
     StatisticPage(),
   ];
