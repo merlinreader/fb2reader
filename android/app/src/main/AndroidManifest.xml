@@ -51,7 +51,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 <data
                     android:scheme="https"
-                    android:host="mydeeplink.com" />
+                    android:host="merlinfb2reader.com" />
             </intent-filter>
 
             <intent-filter>
