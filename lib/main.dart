@@ -67,5 +67,3 @@ class ThemeProvider with ChangeNotifier {
     SystemChrome.setSystemUIOverlayStyle(style);
   }
 }
-
- 
