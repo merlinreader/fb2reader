@@ -24,19 +24,19 @@ class AchievementCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Container(
-          //   alignment: Alignment.centerLeft,
-          //   padding:
-          //       const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),
-          //   child: SvgPicture.network(
-          //     achievement.picture,
-          //     width: 48,
-          //     height: 48,
-          //     color: achievement.isReceived
-          //         ? null
-          //         : Colors.transparent.withOpacity(0.5),
-          //   ),
-          // ),
+          Container(
+            alignment: Alignment.centerLeft,
+            padding:
+                const EdgeInsets.only(left: 16, top: 16, bottom: 16, right: 8),
+            child: Image.network(
+              achievement.picture,
+              width: 48,
+              height: 48,
+              color: achievement.isReceived
+                  ? null
+                  : Colors.transparent.withOpacity(0.5),
+            ),
+          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -62,29 +62,27 @@ class _AchievementsPageState extends State<AchievementsPage> {
           ? const Center(
               child: CircularProgressIndicator(color: MyColors.purple),
             )
-          : Expanded(
-              child: ListView(
-                children: [
-                  const SizedBox(
-                    height: 24,
-                  ),
-                  const Row(
-                    children: [
-                      Text(
-                        'Достижения',
-                        textAlign: TextAlign.left,
-                        style: TextStyle(
-                            fontSize: 24,
-                            fontFamily: 'Tektur',
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  ..._achievements
-                      .map((e) => AchievementCard(achievement: e))
-                      .toList()
-                ],
-              ),
+          : ListView(
+              children: [
+                const SizedBox(
+                  height: 24,
+                ),
+                const Row(
+                  children: [
+                    Text(
+                      'Достижения',
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontFamily: 'Tektur',
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                ..._achievements
+                    .map((e) => AchievementCard(achievement: e))
+                    .toList()
+              ],
             ),
     );
   }
