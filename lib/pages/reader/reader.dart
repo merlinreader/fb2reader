@@ -366,6 +366,7 @@ class Reader extends State {
       BuildContext context, WordCount wordCount) async {
     showDialog<void>(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return FutureBuilder(
           future: wordCount.checkCallInfo(),
@@ -404,8 +405,11 @@ class Reader extends State {
                               alignment: Alignment.centerRight,
                               padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                               icon: const Icon(Icons.close),
-                              onPressed: () {
-                                Navigator.of(context).pop();
+                              onPressed: () async {
+                                debugPrint("DONE");
+                                await saveWordCountToLocalstorage(wordCount);
+                                // ignore: use_build_context_synchronously
+                                Navigator.pop(context);
                               },
                             ),
                             const Center(
