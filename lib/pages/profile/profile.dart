@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/theme/theme.dart';
-//import 'package:merlin/components/appbar/appbar.dart';
-//import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
-import 'package:merlin/functions/auth.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
@@ -14,7 +11,6 @@ import 'package:merlin/UI/router.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
-//import 'package:merlin/functions/auth.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -65,8 +61,8 @@ class _ProfilePage extends State<ProfilePage> {
       String? initialLink = await getInitialLink();
       if (initialLink != null) {
         setState(() {
-          _link = initialLink;
-          token = _link.toString();
+          Uri uri = Uri.parse(initialLink);
+          token = uri.queryParameters['token']!;
         });
       }
     } catch (err) {
