@@ -13,6 +13,7 @@ import 'package:merlin/style/text.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
+import 'package:merlin/pages/recent/recent.dart' as recent;
 
 class BookInfo {
   String filePath;
@@ -67,6 +68,7 @@ class Reader extends State {
   final ScrollController _scrollController = ScrollController();
   double lastPosition = 0;
   bool isLast = false;
+  List<recent.ImageInfo> images = [];
 
   double _scrollPosition = 0.0;
 
@@ -82,6 +84,7 @@ class Reader extends State {
   @override
   void initState() {
     getDataFromLocalStorage('textKey');
+    getImagesFromLocalStorage('booksKey');
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
     super.initState();
@@ -165,6 +168,29 @@ class Reader extends State {
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
   }
 
+  Future<void> getImagesFromLocalStorage(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? imageDataJson = prefs.getString(key);
+    if (imageDataJson != null) {
+      images = (jsonDecode(imageDataJson) as List)
+          .map((item) => recent.ImageInfo.fromJson(item))
+          .toList();
+      setState(() {});
+    }
+  }
+
+  Future<void> saveProgress() async {
+    final prefs = await SharedPreferences.getInstance();
+    images
+            .firstWhere((element) => element.fileName == textes.first.filePath)
+            .progress =
+        _scrollController.position.pixels /
+            _scrollController.position.maxScrollExtent;
+    setState(() {});
+    await prefs.setString('booksKey', jsonEncode(images));
+    print('SUCCESS PROGRESS');
+  }
+
   Future<void> saveReadingPosition(double position, String filePath) async {
     final prefs = await SharedPreferences.getInstance();
     final readingPositionsJson = prefs.getString('readingPositions');
@@ -176,7 +202,6 @@ class Reader extends State {
         readingPositions = readingPositionsMap.cast<String, double>();
       }
     }
-
     readingPositions[filePath] = position;
     await prefs.setString('readingPositions', jsonEncode(readingPositions));
   }
@@ -818,312 +843,303 @@ class Reader extends State {
 
     List<String> textPages = getPages(getText, pageSize.toInt());
 
-    return Scaffold(
-      appBar: visible
-          ? PreferredSize(
-              preferredSize: Size(MediaQuery.of(context).size.width, 50),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                child: AppBar(
-                  leading: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context, true);
-                      },
-                      child: Theme(
-                          data: lightTheme(),
-                          child: Icon(
-                            CustomIcons.chevronLeft,
-                            size: 40,
-                            color: Theme.of(context).iconTheme.color,
-                          ))),
-                  backgroundColor: Theme.of(context).primaryColor,
-                  shadowColor: Colors.transparent,
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text18(
-                        text: textes.isNotEmpty
-                            ? (textes.first.author.toString().length > 8
-                                ? (textes.first.title.toString().length > 8
-                                    ? '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : ('${textes[0].title.toString().substring(0, 3)}...')}'
-                                    : '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : textes[0].title.toString()}')
-                                // : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
-                                : textes[0].title.toString())
-                            : 'Нет автора',
-                        textColor: MyColors.black,
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            Navigator.pushNamed(
-                                    context, RouteNames.readerSettings)
-                                .then((value) => loadStylePreferences());
-                          },
-                          child: Theme(
-                              data: lightTheme(),
-                              child: Icon(
-                                CustomIcons.sliders,
-                                size: 40,
-                                color: Theme.of(context).iconTheme.color,
-                              )))
-                    ],
+    return WillPopScope(
+      onWillPop: () async {
+        await saveProgress();
+        return true;
+      },
+      child: Scaffold(
+        appBar: visible
+            ? PreferredSize(
+                preferredSize: Size(MediaQuery.of(context).size.width, 50),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  child: AppBar(
+                    leading: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context, true);
+                        },
+                        child: Theme(
+                            data: lightTheme(),
+                            child: Icon(
+                              CustomIcons.chevronLeft,
+                              size: 40,
+                              color: Theme.of(context).iconTheme.color,
+                            ))),
+                    backgroundColor: Theme.of(context).primaryColor,
+                    shadowColor: Colors.transparent,
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text18(
+                          text: textes.isNotEmpty
+                              ? (textes.first.author.toString().length > 8
+                                  ? (textes.first.title.toString().length > 8
+                                      ? '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : ('${textes[0].title.toString().substring(0, 3)}...')}'
+                                      : '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : textes[0].title.toString()}')
+                                  // : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
+                                  : textes[0].title.toString())
+                              : 'Нет автора',
+                          textColor: MyColors.black,
+                        ),
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                      context, RouteNames.readerSettings)
+                                  .then((value) => loadStylePreferences());
+                            },
+                            child: Theme(
+                                data: lightTheme(),
+                                child: Icon(
+                                  CustomIcons.sliders,
+                                  size: 40,
+                                  color: Theme.of(context).iconTheme.color,
+                                )))
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            )
-          : null,
-      body: Container(
-          color: getBgcColor,
-          child: SafeArea(
-              left: false,
-              top: false,
-              right: false,
-              bottom: false,
-              minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-              child: Stack(children: [
-                ListView.builder(
-                    controller: _scrollController,
-                    itemCount: textPages.length,
-                    itemBuilder: (context, index) {
-                      if (textes.isNotEmpty) {
-                        return _scrollController.hasClients
-                            ? () {
-                                return Center(
-                                  child: SelectableText(
-                                    getText,
+              )
+            : null,
+        body: Container(
+            color: getBgcColor,
+            child: SafeArea(
+                left: false,
+                top: false,
+                right: false,
+                bottom: false,
+                minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                child: Stack(children: [
+                  ListView.builder(
+                      controller: _scrollController,
+                      itemCount: textPages.length,
+                      itemBuilder: (context, index) {
+                        if (textes.isNotEmpty) {
+                          return _scrollController.hasClients
+                              ? () {
+                                  return Center(
+                                    child: SelectableText(
+                                      getText,
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        color: getTextColor,
+                                      ),
+                                    ),
+                                  );
+                                }()
+                              : Center(
+                                  child: Text(
+                                    'Нет текста для отображения',
                                     style: TextStyle(
                                       fontSize: 18.0,
                                       color: getTextColor,
                                     ),
                                   ),
                                 );
-                              }()
-                            : Center(
-                                child: Text(
-                                  'Нет текста для отображения',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: getTextColor,
-                                  ),
-                                ),
-                              );
-                      }
-                      return null;
-                    }),
-                GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      // Скролл вниз / следующая страница
-                      _scrollController.animateTo(
-                          _scrollController.position.pixels +
-                              screenHeight * 0.8,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.ease);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                      child: IgnorePointer(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          color: const Color.fromRGBO(100, 150, 100, 0),
-                        ),
-                      ),
-                    )),
-                Positioned(
-                  left: screenWidth / 6,
-                  top: screenHeight / 5,
-                  child: GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onDoubleTap: () async {
-                        showSavedWords(context, textes.first.filePath);
-                      },
-                      onTap: () {
-                        setState(() {
-                          visible = !visible;
-                        });
-                        if (visible) {
-                          SystemChrome.setSystemUIOverlayStyle(
-                              const SystemUiOverlayStyle(
-                                  systemNavigationBarColor: MyColors.white,
-                                  statusBarColor: Colors.transparent));
-                          SystemChrome.setEnabledSystemUIMode(
-                              SystemUiMode.edgeToEdge);
-                        } else {
-                          SystemChrome.setEnabledSystemUIMode(
-                              SystemUiMode.immersive);
                         }
-                      },
-                      child: IgnorePointer(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 1.5,
-                          height: MediaQuery.of(context).size.height / 2,
-                          color: const Color.fromRGBO(250, 100, 100, 0),
-                        ),
-                      )),
-                ),
-                Positioned(
-                  left: screenWidth / 6,
-                  child: GestureDetector(
+                        return null;
+                      }),
+                  GestureDetector(
                       behavior: HitTestBehavior.translucent,
                       onTap: () {
-                        // Сролл вверх / предыдущая страница
+                        // Скролл вниз / следующая страница
                         _scrollController.animateTo(
-                            _scrollController.position.pixels -
+                            _scrollController.position.pixels +
                                 screenHeight * 0.8,
                             duration: const Duration(milliseconds: 250),
                             curve: Curves.ease);
                       },
-                      child: IgnorePointer(
-                        child: Container(
-                          width: MediaQuery.of(context).size.width / 1.5,
-                          height: MediaQuery.of(context).size.height / 5,
-                          color: const Color.fromRGBO(100, 150, 200, 0),
-                        ),
-                      )),
-                ),
-              ]))),
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).primaryColor,
-        child: Stack(
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              height: visible ? 130 : 30,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Transform.rotate(
-                          angle: 90 *
-                              3.14159265 /
-                              180, // Rotate the battery icon 90 degrees counterclockwise
-                          child: Icon(
-                            Icons.battery_full, // Use any battery icon you like
-                            color: Theme.of(context)
-                                .iconTheme
-                                .color, // Color of the battery icon
-                            size: 24, // Adjust the size as needed
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                        child: IgnorePointer(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            color: const Color.fromRGBO(100, 150, 100, 0),
                           ),
                         ),
-                        Text7(
-                          text: '${_batteryLevel.toString()}%',
-                          textColor: MyColors.white,
-                        ),
-                      ],
-                    ),
+                      )),
+                  Positioned(
+                    left: screenWidth / 6,
+                    top: screenHeight / 5,
+                    child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onDoubleTap: () async {
+                          showSavedWords(context, textes.first.filePath);
+                        },
+                        onTap: () {
+                          setState(() {
+                            visible = !visible;
+                          });
+                          if (visible) {
+                            SystemChrome.setSystemUIOverlayStyle(
+                                const SystemUiOverlayStyle(
+                                    systemNavigationBarColor: MyColors.white,
+                                    statusBarColor: Colors.transparent));
+                            SystemChrome.setEnabledSystemUIMode(
+                                SystemUiMode.edgeToEdge);
+                          } else {
+                            SystemChrome.setEnabledSystemUIMode(
+                                SystemUiMode.immersive);
+                          }
+                        },
+                        child: IgnorePointer(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 1.5,
+                            height: MediaQuery.of(context).size.height / 2,
+                            color: const Color.fromRGBO(250, 100, 100, 0),
+                          ),
+                        )),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-                    child: Align(
-                      alignment: Alignment.topCenter,
+                  Positioned(
+                    left: screenWidth / 6,
+                    child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () {
+                          // Сролл вверх / предыдущая страница
+                          _scrollController.animateTo(
+                              _scrollController.position.pixels -
+                                  screenHeight * 0.8,
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.ease);
+                        },
+                        child: IgnorePointer(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width / 1.5,
+                            height: MediaQuery.of(context).size.height / 5,
+                            color: const Color.fromRGBO(100, 150, 200, 0),
+                          ),
+                        )),
+                  ),
+                ]))),
+        bottomNavigationBar: BottomAppBar(
+          color: Theme.of(context).primaryColor,
+          child: Stack(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                height: visible ? 130 : 30,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Transform.rotate(
+                            angle: 90 *
+                                3.14159265 /
+                                180, // Rotate the battery icon 90 degrees counterclockwise
+                            child: Icon(
+                              Icons
+                                  .battery_full, // Use any battery icon you like
+                              color: Theme.of(context)
+                                  .iconTheme
+                                  .color, // Color of the battery icon
+                              size: 24, // Adjust the size as needed
+                            ),
+                          ),
+                          Text7(
+                            text: '${_batteryLevel.toString()}%',
+                            textColor: MyColors.white,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Text12(
+                          text: textes.isNotEmpty
+                              ? (textes[0].title.toString().length > 28
+                                  ? '${textes[0].title.toString().substring(0, 28)}...'
+                                  : textes[0].title.toString())
+                              : 'Нет названия',
+                          textColor: MyColors.black,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
                       child: Text12(
-                        text: textes.isNotEmpty
-                            ? (textes[0].title.toString().length > 28
-                                ? '${textes[0].title.toString().substring(0, 28)}...'
-                                : textes[0].title.toString())
-                            : 'Нет названия',
+                        text: '${_scrollPosition.toStringAsFixed(2)}%',
                         textColor: MyColors.black,
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
-                    child: Text12(
-                      text: '${_scrollPosition.toStringAsFixed(2)}%',
-                      textColor: MyColors.black,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  height: visible ? 100 : 0,
-                  child: Container(
-                      alignment: AlignmentDirectional.topEnd,
-                      color: Theme.of(context).primaryColor,
-                      child: Column(
-                        children: [
-                          _scrollController.hasClients
-                              ? Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                                  child: Slider(
-                                    value: _scrollController.position.pixels,
-                                    min: 0,
-                                    max: _scrollController
-                                        .position.maxScrollExtent,
-                                    onChanged: (value) {
-                                      _scrollController.jumpTo(value);
-                                    },
-                                    activeColor:
-                                        const Color.fromRGBO(29, 29, 33, 1),
-                                    inactiveColor:
-                                        const Color.fromRGBO(96, 96, 96, 1),
-                                    thumbColor:
-                                        const Color.fromRGBO(29, 29, 33, 1),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    height: visible ? 100 : 0,
+                    child: Container(
+                        alignment: AlignmentDirectional.topEnd,
+                        color: Theme.of(context).primaryColor,
+                        child: Column(
+                          children: [
+                            _scrollController.hasClients
+                                ? Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                                    child: Slider(
+                                      value: _scrollController.position.pixels,
+                                      min: 0,
+                                      max: _scrollController
+                                          .position.maxScrollExtent,
+                                      onChanged: (value) {
+                                        _scrollController.jumpTo(value);
+                                      },
+                                      activeColor:
+                                          const Color.fromRGBO(29, 29, 33, 1),
+                                      inactiveColor:
+                                          const Color.fromRGBO(96, 96, 96, 1),
+                                      thumbColor:
+                                          const Color.fromRGBO(29, 29, 33, 1),
+                                    ),
+                                  )
+                                : const Text("Загрузка..."),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    switchOrientation();
+                                  },
+                                  child: Icon(
+                                    CustomIcons.turn,
+                                    color: Theme.of(context).iconTheme.color,
+                                    size: 40,
                                   ),
-                                )
-                              : const Text("Загрузка..."),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  switchOrientation();
-                                },
-                                child: Icon(
-                                  CustomIcons.turn,
-                                  color: Theme.of(context).iconTheme.color,
-                                  size: 40,
                                 ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  final themeProvider =
-                                      Provider.of<ThemeProvider>(context,
-                                          listen: false);
-                                  themeProvider.isDarkTheme =
-                                      !themeProvider.isDarkTheme;
-                                  saveSettings(themeProvider.isDarkTheme);
-
-                                  // setState(() {
-                                  //   isChecked = newValue;
-                                  //   saveSettings(isChecked);
-                                  //   saveSettings(themeProvider.isDarkTheme);
-                                  // });
-                                },
-                                child: Icon(
+                                Icon(
                                   CustomIcons.theme,
                                   color: Theme.of(context).iconTheme.color,
                                   size: 40,
                                 ),
-                              ),
-                              GestureDetector(
-                                onTap: () async {
-                                  wordModeDialog(context);
-                                },
-                                child: Icon(
-                                  CustomIcons.wm,
-                                  color: Theme.of(context).iconTheme.color,
-                                  size: 40,
-                                ),
-                              )
-                            ],
-                          )
-                        ],
-                      ))),
-            )
-          ],
+                                GestureDetector(
+                                  onTap: () async {
+                                    wordModeDialog(context);
+                                  },
+                                  child: Icon(
+                                    CustomIcons.wm,
+                                    color: Theme.of(context).iconTheme.color,
+                                    size: 40,
+                                  ),
+                                )
+                              ],
+                            )
+                          ],
+                        ))),
+              )
+            ],
+          ),
         ),
       ),
     );

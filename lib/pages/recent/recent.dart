@@ -26,12 +26,14 @@ class ImageInfo {
   String title;
   String author;
   String fileName;
+  double progress;
 
   ImageInfo(
       {this.imageBytes,
       required this.title,
       required this.author,
-      required this.fileName});
+      required this.fileName,
+      required this.progress});
 
   Map<String, dynamic> toJson() {
     return {
@@ -39,6 +41,7 @@ class ImageInfo {
       'title': title,
       'author': author,
       'fileName': fileName,
+      'progress': progress,
     };
   }
 
@@ -48,6 +51,7 @@ class ImageInfo {
       title: json['title'],
       author: json['author'],
       fileName: json['fileName'],
+      progress: json['progress']?.toDouble() ?? 0.0,
     );
   }
 }
@@ -57,7 +61,6 @@ class RecentPageState extends State<RecentPage> {
   final ScrollController _scrollController = ScrollController();
   Uint8List? imageBytes;
   List<ImageInfo> images = [];
-  List<BookInfo> textes = [];
   String? firstName;
   String? lastName;
   String? name;
@@ -66,7 +69,6 @@ class RecentPageState extends State<RecentPage> {
   @override
   void initState() {
     super.initState();
-
     getDataFromLocalStorage('booksKey');
   }
 
@@ -84,6 +86,9 @@ class RecentPageState extends State<RecentPage> {
           .map((item) => ImageInfo.fromJson(item))
           .toList();
       setState(() {});
+    }
+    for (final test in images) {
+      print('images progress ${test.progress} in ${test.title}');
     }
   }
 
@@ -326,8 +331,8 @@ class RecentPageState extends State<RecentPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(24), // Верхний отступ 0
+          const Padding(
+            padding: EdgeInsets.all(24), // Верхний отступ 0
             child: Text24(
               text: "Последнее",
               textColor: MyColors.black,

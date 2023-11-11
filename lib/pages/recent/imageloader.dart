@@ -103,7 +103,11 @@ class ImageLoader {
       }
 
       ImageInfo imageData = ImageInfo(
-          imageBytes: decodedBytes, title: title, author: name, fileName: path);
+          imageBytes: decodedBytes,
+          title: title,
+          author: name,
+          fileName: path,
+          progress: 0.0);
       imageDatas.add(imageData);
 
       BookInfo bookData = BookInfo(
