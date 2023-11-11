@@ -22,9 +22,11 @@ class Text14 extends StatelessWidget {
   const Text14({super.key, required this.text, required this.textColor});
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.bodySmall
-        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
-        );
+    return Text(
+      text, style: Theme.of(context).textTheme.bodySmall,
+      textAlign: TextAlign.center,
+      //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
+    );
   }
 }
 
@@ -58,9 +60,10 @@ class Text18 extends StatelessWidget {
   const Text18({super.key, required this.text, required this.textColor});
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.titleMedium
-        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 18)
-        );
+    return Text(
+      text, style: Theme.of(context).textTheme.titleMedium,
+      //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 18)
+    );
   }
 }
 

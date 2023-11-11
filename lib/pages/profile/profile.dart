@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/theme/theme.dart';
 //import 'package:merlin/components/appbar/appbar.dart';
 //import 'package:merlin/components/navbar/navbar.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
+import 'package:merlin/functions/auth.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/location.dart';
 import 'package:merlin/UI/router.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:csc_picker/csc_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 //import 'package:merlin/functions/auth.dart';
 
 class Profile extends StatelessWidget {
@@ -31,6 +36,45 @@ class _ProfilePage extends State<ProfilePage> {
   late String locality;
 
   String token = '';
+
+  String? _link = 'unknown';
+  @override
+  void initState() {
+    super.initState();
+    initUniLinks();
+  }
+
+  Future<void> initUniLinks() async {
+    // Подписываемся на поток приходящих ссылок
+    linkStream.listen((String? link) {
+      // Если ссылка есть, обновляем состояние приложения
+      if (!mounted) return;
+      setState(() {
+        _link = link;
+      });
+    }, onError: (err) {
+      // Обработка ошибок
+      if (!mounted) return;
+      setState(() {
+        _link = 'Failed to get latest link: $err';
+      });
+    });
+
+    // Получение начальной ссылки
+    try {
+      String? initialLink = await getInitialLink();
+      if (initialLink != null) {
+        setState(() {
+          _link = initialLink;
+          token = _link.toString();
+        });
+      }
+    } catch (err) {
+      setState(() {
+        _link = 'Failed to get initial link: $err';
+      });
+    }
+  }
 
   void nav() {
     Navigator.of(context).pushNamed(RouteNames.auth);
@@ -69,7 +113,13 @@ class _ProfilePage extends State<ProfilePage> {
                 } else {
                   final locationData =
                       snapshot.data ?? 'Нет данных о местоположении';
-                  return Text(locationData);
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text14(text: locationData, textColor: MyColors.black),
+                      IconButton(onPressed: geo, icon: const Icon(IconPen.pen)),
+                    ],
+                  );
                 }
               },
             )
@@ -91,7 +141,13 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           //onPressed: launchTelegram,
-                          onPressed: nav,
+                          onPressed: () {
+                            final tgUrl = Uri.parse(
+                                'https://t.me/merlin_auth_bot?start=1');
+                            launchUrl(tgUrl,
+                                mode: LaunchMode.externalApplication);
+                            ;
+                          },
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -103,7 +159,7 @@ class _ProfilePage extends State<ProfilePage> {
                             alignment: AlignmentDirectional.bottomCenter,
                             child: Theme(
                               data: lightTheme(),
-                              child: const Button(
+                              child: Button(
                                   text: 'Написать нам',
                                   width: 312,
                                   height: 48,
@@ -113,7 +169,9 @@ class _ProfilePage extends State<ProfilePage> {
                                   textColor: MyColors.black,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  onPressed: sendEmail),
+                                  onPressed: () {
+                                    mail();
+                                  }),
                             )),
                       ),
                       const SizedBox(height: 24)
@@ -187,4 +245,63 @@ class _ProfilePage extends State<ProfilePage> {
       ),
     );
   }
+
+  void mail() => showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+            title: const Center(
+                child: Text18(
+                    text: 'readermerlin@gmail.com', textColor: MyColors.black)),
+            alignment: Alignment.center,
+            actions: [
+              Center(
+                child: Column(
+                  children: [
+                    Theme(
+                        data: purpleButton(),
+                        child: const Button(
+                            text: "Написать",
+                            width: 250,
+                            height: 50,
+                            horizontalPadding: 10,
+                            verticalPadding: 10,
+                            textColor: MyColors.white,
+                            fontSize: 14,
+                            onPressed: sendEmail,
+                            fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 20),
+                    Button(
+                        text: "Отмена",
+                        width: 250,
+                        height: 50,
+                        horizontalPadding: 10,
+                        verticalPadding: 10,
+                        textColor: Theme.of(context).primaryColor,
+                        fontSize: 14,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        fontWeight: FontWeight.bold)
+                  ],
+                ),
+              )
+            ],
+          ));
+
+  void geo() => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Center(
+              child: Text18(text: 'Данные', textColor: MyColors.black)),
+          alignment: Alignment.center,
+          actions: [
+            CSCPicker(
+              layout: Layout.vertical,
+              onCountryChanged: (country) {},
+              onStateChanged: (state) {},
+              onCityChanged: (city) {},
+            ),
+          ],
+        ),
+      );
 }

@@ -84,7 +84,6 @@ class Reader extends State {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
 
-
       final filePath = textes.first.filePath;
       // ignore: unnecessary_null_comparison
       if (filePath != null) {
@@ -302,7 +301,6 @@ class Reader extends State {
 
     List<String> textPages = getPages(getText, pageSize.toInt());
 
-
     return Scaffold(
       appBar: visible
           ? PreferredSize(
@@ -355,46 +353,43 @@ class Reader extends State {
               ),
             )
           : null,
-
       body: Container(
-        color: getBgcColor,
-        child: SafeArea(
-          left: false,
-          top: false,
-          right: false,
-          bottom: false,
-          minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          child: Stack(
-            children: [
-              ListView.builder(
-                  controller: _scrollController,
-                  itemCount: textPages.length,
-                  itemBuilder: (context, index) {
-                    if (textes.isNotEmpty) {
-                      return _scrollController.hasClients
-                          ? () {
-                              return Center(
-                                child: SelectableText(
-                                  getText,
+          color: getBgcColor,
+          child: SafeArea(
+              left: false,
+              top: false,
+              right: false,
+              bottom: false,
+              minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Stack(children: [
+                ListView.builder(
+                    controller: _scrollController,
+                    itemCount: textPages.length,
+                    itemBuilder: (context, index) {
+                      if (textes.isNotEmpty) {
+                        return _scrollController.hasClients
+                            ? () {
+                                return Center(
+                                  child: SelectableText(
+                                    getText,
+                                    style: TextStyle(
+                                      fontSize: 18.0,
+                                      color: getTextColor,
+                                    ),
+                                  ),
+                                );
+                              }()
+                            : Center(
+                                child: Text(
+                                  'Нет текста для отображения',
                                   style: TextStyle(
                                     fontSize: 18.0,
                                     color: getTextColor,
                                   ),
                                 ),
                               );
-                            }()
-                          : Center(
-                              child: Text(
-                                'Нет текста для отображения',
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  color: getTextColor,
-                                ),
-                              ),
-                            );
-                    }
-                    return null;
-
+                      }
+                      return null;
                     }),
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
@@ -475,7 +470,6 @@ class Reader extends State {
                       )),
                 ),
               ]))),
-      
       bottomNavigationBar: BottomAppBar(
         color: Theme.of(context).primaryColor,
         child: Stack(
@@ -525,7 +519,6 @@ class Reader extends State {
                       ),
                     ),
                   ),
-
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
                     child: Text12(
@@ -546,7 +539,6 @@ class Reader extends State {
                   child: Container(
                       alignment: AlignmentDirectional.topEnd,
                       color: Theme.of(context).primaryColor,
-
                       child: Column(
                         children: [
                           _scrollController.hasClients
