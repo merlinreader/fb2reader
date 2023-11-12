@@ -102,7 +102,7 @@ class Reader extends State {
             if (_scrollController.hasClients) {
               _scrollController.animateTo(
                 lastPosition,
-                duration: const Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 100),
                 curve: Curves.linear,
               );
             }
@@ -420,11 +420,11 @@ class Reader extends State {
                   children: <Widget>[
                     Container(
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.white,
+                      color: Theme.of(context).primaryColor,
                       child: Card(
                         child: ListView(
                           shrinkWrap: true,
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(0),
                           children: <Widget>[
                             IconButton(
                               alignment: Alignment.centerRight,
@@ -437,10 +437,13 @@ class Reader extends State {
                                 Navigator.pop(context);
                               },
                             ),
-                            const Center(
-                              child: Text24(
-                                text: 'Выберите слова',
-                                textColor: MyColors.black,
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 40),
+                              child: Center(
+                                child: Text24(
+                                  text: 'Выберите слова',
+                                  textColor: MyColors.black,
+                                ),
                               ),
                             ),
                             DataTable(
@@ -487,9 +490,9 @@ class Reader extends State {
                                           entry.ipa;
                                         });
                                       },
-                                      child: Text(
-                                        entry.word,
-                                        textAlign: TextAlign.start,
+                                      child: TextForTable(
+                                        text: entry.word,
+                                        textColor: MyColors.black,
                                       ),
                                     )),
                                     DataCell(
@@ -500,9 +503,9 @@ class Reader extends State {
                                                   .width *
                                               0.25,
                                         ),
-                                        child: Text(
-                                          '[ ${entry.ipa} ]',
-                                          textAlign: TextAlign.start,
+                                        child: TextForTable(
+                                          text: '[ ${entry.ipa} ]',
+                                          textColor: MyColors.black,
                                         ),
                                       ),
                                     ),
@@ -514,18 +517,26 @@ class Reader extends State {
                                                   .width *
                                               0.25,
                                         ),
-                                        child: Text(
-                                          entry.translation!.isNotEmpty
+                                        child: TextForTable(
+                                          text: entry.translation!.isNotEmpty
                                               ? entry.translation!
                                               : 'N/A',
-                                          textAlign: TextAlign.start,
+                                          textColor: MyColors.black,
                                         ),
                                       ),
                                     ),
                                   ],
                                 );
                               }).toList(),
-                            )
+                            ),
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: const Text16(
+                                  text: 'Сохранить',
+                                  textColor: MyColors.black,
+                                ))
                           ],
                         ),
                       ),
@@ -580,11 +591,11 @@ class Reader extends State {
                     ),
                     child: ListView(
                       shrinkWrap: true,
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.all(0),
                       children: <Widget>[
                         Container(
                           width: MediaQuery.of(context).size.width,
-                          color: Colors.white,
+                          color: Theme.of(context).primaryColor,
                           child: Card(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -599,10 +610,13 @@ class Reader extends State {
                                     Navigator.of(context).pop();
                                   },
                                 ),
-                                const Center(
-                                  child: Text24(
-                                    text: 'Изучаемые слова',
-                                    textColor: MyColors.black,
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 40),
+                                  child: Center(
+                                    child: Text24(
+                                      text: 'Изучаемые слова',
+                                      textColor: MyColors.black,
+                                    ),
                                   ),
                                 ),
                                 DataTable(
@@ -640,16 +654,20 @@ class Reader extends State {
                                   rows: wordCount.wordEntries.map((entry) {
                                     return DataRow(
                                       cells: [
-                                        DataCell(ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.25,
-                                          ),
-                                          child: Text(
-                                            entry.word,
-                                            textAlign: TextAlign.start,
+                                        DataCell(InkWell(
+                                          onTap: () async {
+                                            await _showWordInputDialog(
+                                                entry.word,
+                                                wordCount.wordEntries);
+                                            setState(() {
+                                              entry.word;
+                                              entry.count;
+                                              entry.ipa;
+                                            });
+                                          },
+                                          child: TextForTable(
+                                            text: entry.word,
+                                            textColor: MyColors.black,
                                           ),
                                         )),
                                         DataCell(
@@ -660,9 +678,9 @@ class Reader extends State {
                                                       .width *
                                                   0.25,
                                             ),
-                                            child: Text(
-                                              '[ ${entry.ipa} ]',
-                                              textAlign: TextAlign.start,
+                                            child: TextForTable(
+                                              text: '[ ${entry.ipa} ]',
+                                              textColor: MyColors.black,
                                             ),
                                           ),
                                         ),
@@ -674,20 +692,27 @@ class Reader extends State {
                                                       .width *
                                                   0.25,
                                             ),
-                                            child: Text(
-                                              entry.translation != null &&
-                                                      entry.translation!
-                                                          .isNotEmpty
-                                                  ? entry.translation!
-                                                  : 'N/A',
-                                              textAlign: TextAlign.start,
+                                            child: TextForTable(
+                                              text:
+                                                  entry.translation!.isNotEmpty
+                                                      ? entry.translation!
+                                                      : 'N/A',
+                                              textColor: MyColors.black,
                                             ),
                                           ),
                                         ),
                                       ],
                                     );
                                   }).toList(),
-                                )
+                                ),
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text16(
+                                      text: 'Закрыть',
+                                      textColor: MyColors.black,
+                                    ))
                               ],
                             ),
                           ),
@@ -1097,11 +1122,17 @@ class Reader extends State {
                                         _scrollController.jumpTo(value);
                                       },
                                       activeColor:
-                                          const Color.fromRGBO(29, 29, 33, 1),
+                                          isDarkTheme
+                                          ? const Color.fromRGBO(96, 96, 96, 1)
+                                          : const Color.fromRGBO(29, 29, 33, 1),
                                       inactiveColor:
-                                          const Color.fromRGBO(96, 96, 96, 1),
+                                          isDarkTheme
+                                          ? MyColors.white
+                                          : const Color.fromRGBO(96, 96, 96, 1),
                                       thumbColor:
-                                          const Color.fromRGBO(29, 29, 33, 1),
+                                          isDarkTheme
+                                          ? const Color.fromRGBO(96, 96, 96, 1)
+                                          : const Color.fromRGBO(29, 29, 33, 1),
                                     ),
                                   )
                                 : const Text("Загрузка..."),

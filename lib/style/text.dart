@@ -79,6 +79,20 @@ class Text16 extends StatelessWidget {
   }
 }
 
+class TextForTable extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const TextForTable({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text,
+        style: Theme.of(context).textTheme.bodyMedium,
+        textAlign: TextAlign.start
+        //TextStyle(fontFamily: 'Roboto', color: textColor)
+        );
+  }
+}
+
 class Text11 extends StatelessWidget {
   final String text;
   final Color textColor;
