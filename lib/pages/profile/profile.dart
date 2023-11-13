@@ -208,7 +208,7 @@ class _ProfilePage extends State<ProfilePage> {
                           verticalPadding: 12,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          onPressed: (){},
+                          onPressed: () {},
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -225,7 +225,7 @@ class _ProfilePage extends State<ProfilePage> {
                           verticalPadding: 12,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          onPressed: (){},
+                          onPressed: () {},
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -262,47 +262,56 @@ class _ProfilePage extends State<ProfilePage> {
     );
   }
 
-  void mail() => showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-            title: const Center(
-                child: Text18(
-                    text: 'readermerlin@gmail.com', textColor: MyColors.black)),
-            alignment: Alignment.center,
-            actions: [
-              Center(
-                child: Column(
-                  children: [
-                    Theme(
-                        data: purpleButton(),
-                        child: const Button(
-                            text: "Написать",
-                            width: 250,
-                            height: 50,
-                            horizontalPadding: 10,
-                            verticalPadding: 10,
-                            textColor: MyColors.white,
-                            fontSize: 14,
-                            onPressed: sendEmail,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 20),
-                    Button(
-                        text: "Отмена",
-                        width: 250,
-                        height: 50,
-                        horizontalPadding: 10,
-                        verticalPadding: 10,
-                        textColor: Theme.of(context).colorScheme.onPrimary,
-                        fontSize: 14,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        fontWeight: FontWeight.bold)
-                  ],
-                ),
-              )
-            ],
-          ));
+  void mail() {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              title: const Center(
+                  child: Text18(
+                      text: 'readermerlin@gmail.com',
+                      textColor: MyColors.black)),
+              alignment: Alignment.center,
+              actions: [
+                Center(
+                  child: Column(
+                    children: [
+                      Theme(
+                          data: purpleButton(),
+                          child: const Button(
+                              text: "Написать",
+                              width: 250,
+                              height: 50,
+                              horizontalPadding: 10,
+                              verticalPadding: 10,
+                              textColor: MyColors.white,
+                              fontSize: 14,
+                              onPressed: sendEmail,
+                              fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 20),
+                      Theme(
+                          data: themeProvider.isDarkTheme
+                              ? darkTheme()
+                              : lightTheme(),
+                          child: Button(
+                              text: "Отмена",
+                              width: 250,
+                              height: 50,
+                              horizontalPadding: 10,
+                              verticalPadding: 10,
+                              textColor:
+                                  Theme.of(context).colorScheme.onSurface,
+                              fontSize: 14,
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              fontWeight: FontWeight.bold))
+                    ],
+                  ),
+                )
+              ],
+            ));
+  }
 
   void geo() {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
