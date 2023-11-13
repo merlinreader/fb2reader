@@ -110,7 +110,7 @@ class Reader extends State {
             setState(() {
               isLast = true;
             });
-            // _scrollController.addListener(_updateReadTextCount);
+            _scrollController.addListener(_updateReadTextCount);
             _loadPageCountFromLocalStorage();
           }
         }
@@ -121,7 +121,7 @@ class Reader extends State {
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // _scrollController.removeListener(_updateReadTextCount);
+    _scrollController.removeListener(_updateReadTextCount);
     _savePageCountToLocalStorage();
     super.dispose();
   }
@@ -583,13 +583,32 @@ class Reader extends State {
     );
   }
 
+  String getWordForm(int number) {
+    int lastDigit = number % 10;
+    int lastTwoDigits = number % 100;
+
+    if (lastTwoDigits > 10 && lastTwoDigits < 15) {
+      return 'слов';
+    } else if (lastDigit == 1) {
+      return 'слово';
+    } else if (lastDigit > 1 && lastDigit < 5) {
+      return 'слова';
+    } else if (number > 1 && number < 5) {
+      return 'слова';
+    } else {
+      return 'слов';
+    }
+  }
+
   showEmptyTable(BuildContext context, WordCount wordCount) async {
-    int index = wordCount.wordEntries.length;
-    print(index);
+    String screenWord = getWordForm(10 - wordCount.wordEntries.length);
     showDialog<void>(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
+          
+          screenWord = getWordForm(10 - wordCount.wordEntries.length);
+          
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -619,7 +638,9 @@ class Reader extends State {
                             padding: const EdgeInsets.only(bottom: 40),
                             child: Center(
                               child: Text24(
-                                text: 'Осталось добавить ${(10 - index)} слов',
+                                text: wordCount.wordEntries.length < 10
+                                    ? 'Осталось добавить ${(10 - wordCount.wordEntries.length)} $screenWord'
+                                    : 'Изучаемые слова',
                                 textColor: MyColors.black,
                               ),
                             ),
@@ -705,17 +726,28 @@ class Reader extends State {
                               );
                             }).toList(),
                           ),
-                          TextButton(
-                              onPressed: () async {
-                                await addNewWord(
-                                    wordCount.wordEntries, index, wordCount);
-                                // Navigator.pop(context);
-                                setState(() {});
-                              },
-                              child: const Text16(
-                                text: 'Добавить',
-                                textColor: MyColors.black,
-                              ))
+                          wordCount.wordEntries.length < 10
+                              ? TextButton(
+                                  onPressed: () async {
+                                    await addNewWord(
+                                        wordCount.wordEntries,
+                                        wordCount,
+                                        wordCount.wordEntries.length);
+                                  },
+                                  child: const Text16(
+                                    text: 'Добавить',
+                                    textColor: MyColors.black,
+                                  ))
+                              : TextButton(
+                                  onPressed: () async {
+                                    await saveWordCountToLocalstorage(
+                                        wordCount);
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text16(
+                                    text: 'Сохнарить',
+                                    textColor: MyColors.black,
+                                  ))
                         ],
                       ),
                     ),
@@ -830,22 +862,20 @@ class Reader extends State {
                                   rows: wordCount.wordEntries.map((entry) {
                                     return DataRow(
                                       cells: [
-                                        DataCell(InkWell(
-                                          onTap: () async {
-                                            await _showWordInputDialog(
-                                                entry.word,
-                                                wordCount.wordEntries);
-                                            setState(() {
-                                              entry.word;
-                                              entry.count;
-                                              entry.ipa;
-                                            });
-                                          },
-                                          child: TextForTable(
-                                            text: entry.word,
-                                            textColor: MyColors.black,
+                                        DataCell(
+                                          ConstrainedBox(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.25,
+                                            ),
+                                            child: TextForTable(
+                                              text: entry.word,
+                                              textColor: MyColors.black,
+                                            ),
                                           ),
-                                        )),
+                                        ),
                                         DataCell(
                                           ConstrainedBox(
                                             constraints: BoxConstraints(
@@ -1035,7 +1065,7 @@ class Reader extends State {
   }
 
   Future<void> addNewWord(
-      List<WordEntry> wordEntries, int index, WordCount wordCount) async {
+      List<WordEntry> wordEntries, WordCount wordCount, int length) async {
     List<String> words = WordCount(
             filePath: textes.first.filePath, fileText: textes.first.fileText)
         .getAllWords();
@@ -1078,19 +1108,27 @@ class Reader extends State {
             ),
             TextButton(
               onPressed: () async {
-                if (result.contains(newWord)) {
-                  WordCount wordProcessor = WordCount();
+                if (length < 10) {
+                  if (result.contains(newWord)) {
+                    WordCount wordProcessor = WordCount();
 
-                  List<WordEntry> updatedWordEntries = await wordProcessor
-                      .processSingleWord(newWord, wordCount.wordEntries);
+                    List<WordEntry> updatedWordEntries = await wordProcessor
+                        .processSingleWord(newWord, wordCount.wordEntries);
 
-                  setState(() {
-                    wordCount.wordEntries = updatedWordEntries;
-                  });
-                  Navigator.of(context).pop();
+                    setState(() {
+                      wordCount.wordEntries = updatedWordEntries;
+                    });
+                    Navigator.of(context).pop();
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: 'Введенного слова нет в книге!',
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                    );
+                  }
                 } else {
                   Fluttertoast.showToast(
-                    msg: 'Введенного слова нет в книге',
+                    msg: 'Достигнут лимит слов!',
                     toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,
                   );

@@ -353,7 +353,7 @@ class RecentPageState extends State<RecentPage> {
       body: Stack(
         children: [
           const Padding(
-            padding: EdgeInsets.all(24), // Верхний отступ 0
+            padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
             child: Text24(
               text: "Последнее",
               textColor: MyColors.black,
@@ -374,7 +374,7 @@ class RecentPageState extends State<RecentPage> {
           ),
           Padding(
             padding: const EdgeInsets.only(
-                top: 100), // Верхний отступ для DynamicHeightGridView
+                top: 72), // Верхний отступ для DynamicHeightGridView
             child: DynamicHeightGridView(
               controller: _scrollController,
               itemCount: images.length,
