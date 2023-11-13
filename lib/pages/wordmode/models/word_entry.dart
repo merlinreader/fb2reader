@@ -20,4 +20,6 @@ class WordEntry {
       _$WordEntryFromJson(json);
 
   Map<String, dynamic> toJson() => _$WordEntryToJson(this);
+
+  void add(WordEntry wordEntry) {}
 }

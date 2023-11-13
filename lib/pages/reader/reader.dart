@@ -706,9 +706,11 @@ class Reader extends State {
                             }).toList(),
                           ),
                           TextButton(
-                              onPressed: () {
-                                addNewWord(wordCount, index);
+                              onPressed: () async {
+                                await addNewWord(
+                                    wordCount.wordEntries, index, wordCount);
                                 // Navigator.pop(context);
+                                setState(() {});
                               },
                               child: const Text16(
                                 text: 'Добавить',
@@ -978,7 +980,7 @@ class Reader extends State {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Отмена'),
+              child: const Text16(text: 'Отмена', textColor: MyColors.black),
             ),
             TextButton(
               onPressed: () async {
@@ -995,7 +997,7 @@ class Reader extends State {
                   );
                 }
               },
-              child: const Text('Сохранить'),
+              child: const Text16(text: 'Сохранить', textColor: MyColors.black),
             ),
           ],
         );
@@ -1032,7 +1034,8 @@ class Reader extends State {
     }
   }
 
-  addNewWord(WordCount wordCount, int index) async {
+  Future<void> addNewWord(
+      List<WordEntry> wordEntries, int index, WordCount wordCount) async {
     List<String> words = WordCount(
             filePath: textes.first.filePath, fileText: textes.first.fileText)
         .getAllWords();
@@ -1047,6 +1050,7 @@ class Reader extends State {
     result.reversed.toList();
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           title: const Text('Добавить слово'),
@@ -1070,30 +1074,29 @@ class Reader extends State {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text('Отмена'),
+              child: const Text16(text: 'Отмена', textColor: MyColors.black),
             ),
             TextButton(
               onPressed: () async {
                 if (result.contains(newWord)) {
-                  int count = 0;
-                  for (String word in words) {
-                    if (word == newWord) {
-                      count++;
-                    }
-                  }
-                  wordCount.wordEntries[index] =
-                      WordEntry(word: newWord, count: count);
-                  setState(() {});
+                  WordCount wordProcessor = WordCount();
+
+                  List<WordEntry> updatedWordEntries = await wordProcessor
+                      .processSingleWord(newWord, wordCount.wordEntries);
+
+                  setState(() {
+                    wordCount.wordEntries = updatedWordEntries;
+                  });
                   Navigator.of(context).pop();
                 } else {
                   Fluttertoast.showToast(
                     msg: 'Введенного слова нет в книге',
-                    toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                    toastLength: Toast.LENGTH_SHORT,
                     gravity: ToastGravity.BOTTOM,
                   );
                 }
               },
-              child: const Text('Сохранить'),
+              child: const Text16(text: 'Сохранить', textColor: MyColors.black),
             ),
           ],
         );
@@ -1391,7 +1394,8 @@ class Reader extends State {
                                     size: 32,
                                   ),
                                 ),
-                                const Padding(padding: EdgeInsets.only(right: 30)),
+                                const Padding(
+                                    padding: EdgeInsets.only(right: 30)),
                                 InkWell(
                                   onTap: () {
                                     final themeProvider =
@@ -1402,11 +1406,13 @@ class Reader extends State {
                                     saveSettings(themeProvider.isDarkTheme);
                                   },
                                   child: Icon(
-                                  CustomIcons.theme,
-                                  color: Theme.of(context).iconTheme.color,
-                                  size: 32,
-                                ),),
-                                const Padding(padding: EdgeInsets.only(right: 30)),
+                                    CustomIcons.theme,
+                                    color: Theme.of(context).iconTheme.color,
+                                    size: 32,
+                                  ),
+                                ),
+                                const Padding(
+                                    padding: EdgeInsets.only(right: 30)),
                                 GestureDetector(
                                   onTap: () async {
                                     wordModeDialog(context);
