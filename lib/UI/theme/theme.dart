@@ -5,7 +5,7 @@ ThemeData darkTheme() => ThemeData(
     //brightness: Brightness.dark,
     colorScheme: const ColorScheme(
         brightness: Brightness.dark,
-        primary: MyColors.black,
+        primary: MyColors.blackGray,
         onPrimary: MyColors.white,
         secondary: Colors.red,
         onSecondary: MyColors.darkGray,

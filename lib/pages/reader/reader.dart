@@ -5,10 +5,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
+import 'package:merlin/main.dart';
 import 'package:merlin/pages/wordmode/models/word_entry.dart';
 import 'package:merlin/pages/wordmode/wordmode.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
 import 'package:merlin/pages/recent/recent.dart' as recent;
@@ -1389,13 +1391,30 @@ class Reader extends State {
                                     size: 32,
                                   ),
                                 ),
+<<<<<<< HEAD
                                 const Padding(padding: EdgeInsets.only(right: 30)),
                                 Icon(
+=======
+                                InkWell(
+                                  onTap: () {
+                                    final themeProvider =
+                                        Provider.of<ThemeProvider>(context,
+                                            listen: false);
+                                    themeProvider.isDarkTheme =
+                                        !themeProvider.isDarkTheme;
+                                    saveSettings(themeProvider.isDarkTheme);
+                                  },
+                                  child: Icon(
+>>>>>>> c518196dbe4f8c9999da2bbc70143f10b5a7ce4f
                                   CustomIcons.theme,
                                   color: Theme.of(context).iconTheme.color,
                                   size: 32,
                                 ),
+<<<<<<< HEAD
                                 const Padding(padding: EdgeInsets.only(right: 30)),
+=======
+                                ),
+>>>>>>> c518196dbe4f8c9999da2bbc70143f10b5a7ce4f
                                 GestureDetector(
                                   onTap: () async {
                                     wordModeDialog(context);
