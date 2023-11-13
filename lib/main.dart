@@ -1,26 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:merlin/UI/theme/theme.dart';
-import 'package:merlin/functions/location.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 //В ФАЙЛЕ BUTTON ПРИМЕР ИСПОЛЬЗОВАНИЯ КНОПОК
 
 void main() {
-
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(), // Создание экземпляра ThemeProvider
       child: MerlinApp(),
     ),
   );
-
-  getLocation();
 }
 
 class MerlinApp extends StatelessWidget {
@@ -40,7 +35,6 @@ class MerlinApp extends StatelessWidget {
           theme: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
           initialRoute: RouteNames.splashScreen,
           routes: _router.routes,
-          //home: SplashScreen(),
         );
       },
     );
@@ -73,3 +67,5 @@ class ThemeProvider with ChangeNotifier {
     SystemChrome.setSystemUIOverlayStyle(style);
   }
 }
+
+ 
