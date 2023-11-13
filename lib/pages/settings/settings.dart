@@ -6,9 +6,7 @@ import 'package:merlin/style/text.dart';
 import 'package:merlin/main.dart';
 import 'package:merlin/components/checkbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:provider/provider.dart';
-
 
 class ReaderStyle {
   int textColor;
@@ -30,7 +28,6 @@ class ReaderStyle {
     );
   }
 }
-
 
 class MySettings extends StatelessWidget {
   const MySettings({super.key});
@@ -245,7 +242,6 @@ class _SettingsPageState extends State<SettingsPage> {
       backgroundColor: Theme.of(context).primaryColor,
       //darkThemeBackground ? themeBackground : themeBackground,
       appBar: AppBar(
-
         elevation: 0,
         backgroundColor: Theme.of(context).primaryColor,
         //shadowColor: Colors.transparent,
@@ -306,7 +302,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         final themeProvider =
                             Provider.of<ThemeProvider>(context, listen: false);
                         setState(() {
-
                           themeProvider.isDarkTheme = newValue;
 
                           isChecked = newValue;
@@ -626,4 +621,3 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 }
-

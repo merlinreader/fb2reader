@@ -6,7 +6,6 @@ import 'package:merlin/style/text.dart';
 import 'package:merlin/components/table.dart';
 import 'package:merlin/functions/location.dart';
 
-
 class StatisticPage extends StatefulWidget {
   const StatisticPage({Key? key}) : super(key: key);
 
@@ -19,7 +18,6 @@ class _StatisticPageState extends State<StatisticPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       children: <Widget>[
         Padding(
@@ -52,13 +50,9 @@ class _StatisticPageState extends State<StatisticPage> {
                         _currentPageIndex = 0;
                       });
                     },
-                    child: const Text(
-                      'Страна',
-                      style: TextStyle(
-                        fontFamily: 'Tektur',
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Text11Bold(
+                      text: 'Страна',
+                      textColor: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   ElevatedButton(
@@ -71,13 +65,9 @@ class _StatisticPageState extends State<StatisticPage> {
                         _currentPageIndex = 1;
                       });
                     },
-                    child: const Text(
-                      'Регион',
-                      style: TextStyle(
-                        fontFamily: 'Tektur',
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Text11Bold(
+                      text: 'Регион',
+                      textColor: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   ElevatedButton(
@@ -90,21 +80,15 @@ class _StatisticPageState extends State<StatisticPage> {
                         _currentPageIndex = 2;
                       });
                     },
-                    child: const Text(
-                      'Город',
-                      style: TextStyle(
-                        fontFamily: 'Tektur',
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-
-                      ),
+                    child: Text11Bold(
+                      text: 'Город',
+                      textColor: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-
         ),
         Expanded(
           child: IndexedStack(
@@ -114,7 +98,6 @@ class _StatisticPageState extends State<StatisticPage> {
               Region(), // Страница "Регион"
               City(), // Страница "Город"
             ],
-
           ),
         ),
       ],
@@ -136,41 +119,31 @@ class Country extends StatelessWidget {
               return Swipe(
                 statDay: StatTable(
                   path: 'daily',
-
                   country: country.isNotEmpty ? country : 'Russia',
-
                   area: '',
                   city: '',
                 ),
                 statWeek: StatTable(
                   path: 'weekly',
-
                   country: country.isNotEmpty ? country : 'Russia',
-
                   area: '',
                   city: '',
                 ),
                 statMonth: StatTable(
                   path: 'monthly',
-
                   country: country.isNotEmpty ? country : 'Russia',
-
                   area: '',
                   city: '',
                 ),
                 statSemiAnnual: StatTable(
                   path: 'semi-annual',
-
                   country: country.isNotEmpty ? country : 'Russia',
-
                   area: '',
                   city: '',
                 ),
                 statAnnual: StatTable(
                   path: 'annual',
-
                   country: country.isNotEmpty ? country : 'Russia',
-
                   area: '',
                   city: '',
                 ),
@@ -183,7 +156,6 @@ class Country extends StatelessWidget {
                   text: 'Нет данных о местоположении',
                   fontsize: 16,
                   textColor: MyColors.grey));
-
         }
         return const CircularProgressIndicator();
       },
@@ -243,7 +215,6 @@ class Region extends StatelessWidget {
                   text: 'Нет данных о местоположении',
                   fontsize: 16,
                   textColor: MyColors.grey));
-
         }
         return const CircularProgressIndicator();
       },
@@ -304,7 +275,6 @@ class City extends StatelessWidget {
                   text: 'Нет данных о местоположении',
                   fontsize: 16,
                   textColor: MyColors.grey));
-
         }
         return const CircularProgressIndicator();
       },
@@ -378,7 +348,6 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
   }
 
   Widget buildTab(Container tabButton, bool isActive) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -394,9 +363,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                         : currentIndex == 2
                             ? 37
                             : currentIndex == 3
-
                                 ? 50
-
                                 : currentIndex == 4
                                     ? 20
                                     : 0,
@@ -413,13 +380,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-
             const SizedBox(width: 24),
             Expanded(
               child: buildTab(
                 Container(
                   width: 30,
-
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -438,13 +403,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 currentIndex == 0,
               ),
             ),
-
             SizedBox(width: 16),
             Expanded(
               child: buildTab(
                 Container(
                   width: 43,
-
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -463,13 +426,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 currentIndex == 1,
               ),
             ),
-
             SizedBox(width: 16),
             Expanded(
               child: buildTab(
                 Container(
                   width: 37,
-
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -488,13 +449,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 currentIndex == 2,
               ),
             ),
-
             SizedBox(width: 16),
             Expanded(
               child: buildTab(
                 Container(
                   width: 50,
-
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -513,13 +472,11 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 currentIndex == 3,
               ),
             ),
-
             SizedBox(width: 16),
             Expanded(
               child: buildTab(
                 Container(
                   width: 20,
-
                   height: 24,
                   child: InkWell(
                     onTap: () {

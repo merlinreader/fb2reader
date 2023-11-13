@@ -5,8 +5,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
+import 'package:merlin/main.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
 
@@ -134,11 +136,6 @@ class Reader extends State {
     setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor: value ? MyColors.blackGray : MyColors.white,
     ));
-  }
-
-  // ignore: non_constant_identifier_names
-  ThemeProvider() {
-    _initAsync();
   }
 
   Future<void> _initAsync() async {
@@ -291,6 +288,11 @@ class Reader extends State {
         (currentOrientationIndex + 1) % orientations.length;
     SystemChrome.setPreferredOrientations(
         [orientations[currentOrientationIndex]]);
+  }
+
+  Future<void> saveSettings(bool isDarkTheme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkTheme', isDarkTheme);
   }
 
   @override
@@ -575,10 +577,26 @@ class Reader extends State {
                                   size: 40,
                                 ),
                               ),
-                              Icon(
-                                CustomIcons.theme,
-                                color: Theme.of(context).iconTheme.color,
-                                size: 40,
+                              InkWell(
+                                onTap: () {
+                                  final themeProvider =
+                                      Provider.of<ThemeProvider>(context,
+                                          listen: false);
+                                  themeProvider.isDarkTheme =
+                                      !themeProvider.isDarkTheme;
+                                  saveSettings(themeProvider.isDarkTheme);
+
+                                  // setState(() {
+                                  //   isChecked = newValue;
+                                  //   saveSettings(isChecked);
+                                  //   saveSettings(themeProvider.isDarkTheme);
+                                  // });
+                                },
+                                child: Icon(
+                                  CustomIcons.theme,
+                                  color: Theme.of(context).iconTheme.color,
+                                  size: 40,
+                                ),
                               ),
                               GestureDetector(
                                 onTap: () {

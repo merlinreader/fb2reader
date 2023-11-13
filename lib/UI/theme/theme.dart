@@ -18,23 +18,23 @@ ThemeData darkTheme() => ThemeData(
         onSurface: Colors.white),
     //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
-        //text24
-        titleLarge: TextStyle(
-            color: MyColors.bgWhite,
-            fontFamily: 'Tektur',
-            fontSize: 24,
-            fontWeight: FontWeight.bold),
-        //Text11
-        bodySmall: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.bgWhite,
-            fontSize: 11,
-            fontWeight: FontWeight.bold),
-        //Text14
-        bodyLarge: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.bgWhite,
-            fontSize: 14,
+      //text24
+      titleLarge: TextStyle(
+          color: MyColors.bgWhite,
+          fontFamily: 'Tektur',
+          fontSize: 24,
+          fontWeight: FontWeight.bold),
+      //Text11
+      bodySmall: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.bgWhite,
+          fontSize: 11,
+          fontWeight: FontWeight.bold),
+      //Text14
+      bodyLarge: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.bgWhite,
+          fontSize: 14,
           fontWeight: FontWeight.normal),
       //Text18
       titleMedium: TextStyle(
@@ -65,9 +65,7 @@ ThemeData darkTheme() => ThemeData(
           ),
           backgroundColor: const MaterialStatePropertyAll(MyColors.blackBt),
           textStyle:
-
               const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
-
     ),
     iconTheme: const IconThemeData(color: MyColors.white),
     //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
@@ -93,42 +91,38 @@ ThemeData purpleButton() => ThemeData(
               const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ));
 
-ThemeData whiteButton() => ThemeData(
-        elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ButtonStyle(
-          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(0),
-            ),
-          ),
-          elevation: null,
-          backgroundColor: const MaterialStatePropertyAll(MyColors.white),
-          textStyle:
-              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
-    ));
-
 ThemeData lightTheme() => ThemeData(
-    brightness: Brightness.light,
-    primaryColor: MyColors.white,
+    colorScheme: const ColorScheme(
+        brightness: Brightness.light,
+        primary: MyColors.white,
+        onPrimary: MyColors.white,
+        secondary: Colors.red,
+        onSecondary: MyColors.darkGray,
+        error: Colors.red,
+        onError: Colors.red,
+        background: MyColors.white,
+        onBackground: Colors.black,
+        surface: MyColors.blackGray,
+        onSurface: Colors.black),
     //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
-        //text24
-        titleLarge: TextStyle(
-            color: MyColors.black,
-            fontFamily: 'Tektur',
-            fontSize: 24,
-            fontWeight: FontWeight.bold),
-        //Text11
-        bodySmall: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.black,
-            fontSize: 11,
-            fontWeight: FontWeight.bold),
-        //Text14
-        bodyLarge: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.black,
-            fontSize: 14,
+      //text24
+      titleLarge: TextStyle(
+          color: MyColors.black,
+          fontFamily: 'Tektur',
+          fontSize: 24,
+          fontWeight: FontWeight.bold),
+      //Text11
+      bodySmall: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.black,
+          fontSize: 11,
+          fontWeight: FontWeight.bold),
+      //Text14
+      bodyLarge: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.black,
+          fontSize: 14,
           fontWeight: FontWeight.normal),
       //Text18
       titleMedium: TextStyle(
