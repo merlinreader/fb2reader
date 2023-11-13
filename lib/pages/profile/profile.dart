@@ -245,7 +245,8 @@ class _ProfilePage extends State<ProfilePage> {
                                   height: 48,
                                   horizontalPadding: 97,
                                   verticalPadding: 12,
-                                  textColor: MyColors.black,
+                                  textColor:
+                                      Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   onPressed: () {
@@ -279,7 +280,7 @@ class _ProfilePage extends State<ProfilePage> {
                       Theme(
                           data: purpleButton(),
                           child: const Button(
-                              text: "Написать",
+                              text: " Написать",
                               width: 250,
                               height: 50,
                               horizontalPadding: 10,
