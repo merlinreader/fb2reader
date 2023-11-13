@@ -59,7 +59,7 @@ class Page extends State<AppPage> {
     getLocation();
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           elevation: 0.5,
           title: GestureDetector(
             onTap: () {
@@ -80,7 +80,7 @@ class Page extends State<AppPage> {
         ),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedPage,
-          backgroundColor: Theme.of(context).primaryColor,
+          backgroundColor: Theme.of(context).colorScheme.primary,
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(

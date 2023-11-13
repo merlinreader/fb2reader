@@ -3,10 +3,9 @@ import 'package:merlin/style/colors.dart';
 
 ThemeData darkTheme() => ThemeData(
     //brightness: Brightness.dark,
-    //primaryColor: MyColors.black,
     colorScheme: const ColorScheme(
         brightness: Brightness.dark,
-        primary: MyColors.white,
+        primary: MyColors.black,
         onPrimary: MyColors.white,
         secondary: Colors.red,
         onSecondary: MyColors.darkGray,
@@ -18,53 +17,52 @@ ThemeData darkTheme() => ThemeData(
         onSurface: Colors.white),
     //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
-      //text24
-      titleLarge: TextStyle(
-          color: MyColors.bgWhite,
-          fontFamily: 'Tektur',
-          fontSize: 24,
-          fontWeight: FontWeight.bold),
-      //Text11
-      bodySmall: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.bgWhite,
-          fontSize: 11,
-          fontWeight: FontWeight.bold),
-      //Text14
-      bodyLarge: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.bgWhite,
-          fontSize: 14,
-          fontWeight: FontWeight.normal),
-      //Text18
-      titleMedium: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.bgWhite,
-          fontSize: 18,
-          fontWeight: FontWeight.normal),
-      //Text12
-      titleSmall: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.bgWhite,
-          fontSize: 12,
-          fontWeight: FontWeight.normal),
-      //Text7
-      displaySmall: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.black,
-          fontSize: 7,
-          fontWeight: FontWeight.normal),
-      //Text16
-      displayMedium: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.bgWhite,
-          fontSize: 16,
-          fontWeight: FontWeight.bold),
+        //text24
+        titleLarge: TextStyle(
+            color: MyColors.bgWhite,
+            fontFamily: 'Tektur',
+            fontSize: 24,
+            fontWeight: FontWeight.bold),
+        //Text11
+        bodySmall: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.bgWhite,
+            fontSize: 11,
+            fontWeight: FontWeight.bold),
+        //Text14
+        bodyLarge: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.bgWhite,
+            fontSize: 14,
+            fontWeight: FontWeight.normal),
+        //Text18
+        titleMedium: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.bgWhite,
+            fontSize: 18,
+            fontWeight: FontWeight.normal),
+        //Text12
+        titleSmall: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.bgWhite,
+            fontSize: 12,
+            fontWeight: FontWeight.normal),
+        //Text7
+        displaySmall: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.black,
+            fontSize: 7,
+            fontWeight: FontWeight.normal),
+        //Text16
+        displayMedium: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.bgWhite,
+            fontSize: 16,
+            fontWeight: FontWeight.bold),
         bodyMedium: TextStyle(
             fontFamily: 'Roboto',
             color: MyColors.bgWhite,
-            fontWeight: FontWeight.normal)
-    ),
+            fontWeight: FontWeight.normal)),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -116,53 +114,52 @@ ThemeData lightTheme() => ThemeData(
         onSurface: Colors.black),
     //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
-      //text24
-      titleLarge: TextStyle(
-          color: MyColors.black,
-          fontFamily: 'Tektur',
-          fontSize: 24,
-          fontWeight: FontWeight.bold),
-      //Text11
-      bodySmall: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.black,
-          fontSize: 11,
-          fontWeight: FontWeight.bold),
-      //Text14
-      bodyLarge: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.black,
-          fontSize: 14,
-          fontWeight: FontWeight.normal),
-      //Text18
-      titleMedium: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.normal),
-      //Text12
-      titleSmall: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.black,
-          fontSize: 12,
-          fontWeight: FontWeight.normal),
-      //Text7
-      displaySmall: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.bgWhite,
-          fontSize: 7,
-          fontWeight: FontWeight.normal),
-      //Text16
-      displayMedium: TextStyle(
-          fontFamily: 'Tektur',
-          color: MyColors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.bold),
+        //text24
+        titleLarge: TextStyle(
+            color: MyColors.black,
+            fontFamily: 'Tektur',
+            fontSize: 24,
+            fontWeight: FontWeight.bold),
+        //Text11
+        bodySmall: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.black,
+            fontSize: 11,
+            fontWeight: FontWeight.bold),
+        //Text14
+        bodyLarge: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.black,
+            fontSize: 14,
+            fontWeight: FontWeight.normal),
+        //Text18
+        titleMedium: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.normal),
+        //Text12
+        titleSmall: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.black,
+            fontSize: 12,
+            fontWeight: FontWeight.normal),
+        //Text7
+        displaySmall: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.bgWhite,
+            fontSize: 7,
+            fontWeight: FontWeight.normal),
+        //Text16
+        displayMedium: TextStyle(
+            fontFamily: 'Tektur',
+            color: MyColors.black,
+            fontSize: 16,
+            fontWeight: FontWeight.bold),
         bodyMedium: TextStyle(
             fontFamily: 'Roboto',
             color: MyColors.black,
-            fontWeight: FontWeight.normal)
-    ),
+            fontWeight: FontWeight.normal)),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(

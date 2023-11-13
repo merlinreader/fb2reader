@@ -297,7 +297,7 @@ class _ProfilePage extends State<ProfilePage> {
                         height: 50,
                         horizontalPadding: 10,
                         verticalPadding: 10,
-                        textColor: Theme.of(context).primaryColor,
+                        textColor: Theme.of(context).colorScheme.primary,
                         fontSize: 14,
                         onPressed: () {
                           Navigator.of(context).pop();

@@ -450,7 +450,7 @@ class Reader extends State {
                   children: <Widget>[
                     Container(
                       width: MediaQuery.of(context).size.width,
-                      color: Theme.of(context).primaryColor,
+                      color: Theme.of(context).colorScheme.primary,
                       child: Card(
                         child: ListView(
                           shrinkWrap: true,
@@ -599,7 +599,7 @@ class Reader extends State {
                 children: <Widget>[
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).colorScheme.primary,
                     child: Card(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -767,7 +767,7 @@ class Reader extends State {
                       children: <Widget>[
                         Container(
                           width: MediaQuery.of(context).size.width,
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                           child: Card(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -1134,7 +1134,7 @@ class Reader extends State {
                               size: 40,
                               color: Theme.of(context).iconTheme.color,
                             ))),
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     shadowColor: Colors.transparent,
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1281,7 +1281,7 @@ class Reader extends State {
                   ),
                 ]))),
         bottomNavigationBar: BottomAppBar(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.primary,
           child: Stack(
             children: [
               AnimatedContainer(
@@ -1349,7 +1349,7 @@ class Reader extends State {
                     height: visible ? 100 : 0,
                     child: Container(
                         alignment: AlignmentDirectional.topEnd,
-                        color: Theme.of(context).primaryColor,
+                        color: Theme.of(context).colorScheme.primary,
                         child: Column(
                           children: [
                             _scrollController.hasClients

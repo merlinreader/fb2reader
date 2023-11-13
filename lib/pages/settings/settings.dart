@@ -240,11 +240,11 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).colorScheme.primary,
       //darkThemeBackground ? themeBackground : themeBackground,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         //shadowColor: Colors.transparent,
 
         leading: GestureDetector(
@@ -271,7 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).colorScheme.primary,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             child: Column(
@@ -294,7 +294,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     const Spacer(),
                     CustomCheckbox(
                       isChecked: isChecked,
-                      bgColor: Theme.of(context).primaryColor,
+                      bgColor: Theme.of(context).colorScheme.primary,
                       borderColor:
                           Theme.of(context).iconTheme.color ?? MyColors.white,
                       checkColor:
@@ -320,7 +320,7 @@ class _SettingsPageState extends State<SettingsPage> {
           Container(
             margin: const EdgeInsets.only(top: 8.0),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: Theme.of(context).colorScheme.primary,
             ),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
             child: Column(
