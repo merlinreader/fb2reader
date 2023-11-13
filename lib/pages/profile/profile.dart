@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
@@ -11,6 +12,7 @@ import 'package:merlin/UI/router.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -32,12 +34,22 @@ class _ProfilePage extends State<ProfilePage> {
   late String locality;
 
   String token = '';
+  late String getToken;
 
   String? _link = 'unknown';
   @override
   void initState() {
     super.initState();
     initUniLinks();
+    getTokenFromLocalStorage();
+  }
+
+  Future<void> getTokenFromLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      getToken = prefs.getString('token') ?? '';
+      token = getToken;
+    });
   }
 
   Future<void> initUniLinks() async {
@@ -63,6 +75,7 @@ class _ProfilePage extends State<ProfilePage> {
         setState(() {
           Uri uri = Uri.parse(initialLink);
           token = uri.queryParameters['token']!;
+          saveTokenToLocalStorage(token);
         });
       }
     } catch (err) {
@@ -70,6 +83,11 @@ class _ProfilePage extends State<ProfilePage> {
         _link = 'Failed to get initial link: $err';
       });
     }
+  }
+
+  void saveTokenToLocalStorage(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', token);
   }
 
   void nav() {
