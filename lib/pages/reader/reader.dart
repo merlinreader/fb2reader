@@ -110,7 +110,7 @@ class Reader extends State {
             setState(() {
               isLast = true;
             });
-            _scrollController.addListener(_updateReadTextCount);
+            // _scrollController.addListener(_updateReadTextCount);
             _loadPageCountFromLocalStorage();
           }
         }
@@ -121,8 +121,8 @@ class Reader extends State {
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    _scrollController.removeListener(_updateReadTextCount);
-    _savePageCountToLocalStorage();
+    // _scrollController.removeListener(_updateReadTextCount);
+    // _savePageCountToLocalStorage();
     super.dispose();
   }
 
@@ -274,7 +274,7 @@ class Reader extends State {
 
   Future<void> loadStylePreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.mint.value;
+    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.white.value;
     final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
     setState(() {
       getBgcColor = Color(bgColor);
@@ -447,133 +447,138 @@ class Reader extends State {
                   await saveWordCountToLocalstorage(wordCount);
                   return true;
                 },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      color: Theme.of(context).colorScheme.primary,
-                      child: Card(
-                        child: ListView(
-                          shrinkWrap: true,
-                          padding: const EdgeInsets.all(0),
-                          children: <Widget>[
-                            IconButton(
-                              alignment: Alignment.centerRight,
-                              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                              icon: const Icon(Icons.close),
-                              onPressed: () async {
-                                debugPrint("DONE");
-                                await saveWordCountToLocalstorage(wordCount);
-                                // ignore: use_build_context_synchronously
-                                Navigator.pop(context);
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(bottom: 40),
-                              child: Center(
-                                child: Text24(
-                                  text: 'Выберите слова',
-                                  textColor: MyColors.black,
-                                ),
-                              ),
-                            ),
-                            DataTable(
-                              columnSpacing: 38.0,
-                              showBottomBorder: false,
-                              dataTextStyle: const TextStyle(
-                                  fontFamily: 'Roboto', color: MyColors.black),
-                              columns: const [
-                                DataColumn(
-                                  label: Expanded(
-                                    child: Text16(
-                                      text: 'Слово',
-                                      textColor: MyColors.black,
-                                    ),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: Expanded(
-                                    child: Text16(
-                                      text: 'Произношение',
-                                      textColor: MyColors.black,
-                                    ),
-                                  ),
-                                ),
-                                DataColumn(
-                                  label: Expanded(
-                                    child: Text16(
-                                      text: 'Перевод',
-                                      textColor: MyColors.black,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                              rows: wordCount.wordEntries.map((entry) {
-                                return DataRow(
-                                  cells: [
-                                    DataCell(InkWell(
-                                      onTap: () async {
-                                        await _showWordInputDialog(
-                                            entry.word, wordCount.wordEntries);
-                                        setState(() {
-                                          entry.word;
-                                          entry.count;
-                                          entry.ipa;
-                                        });
-                                      },
-                                      child: TextForTable(
-                                        text: entry.word,
-                                        textColor: MyColors.black,
-                                      ),
-                                    )),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          maxWidth: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.25,
-                                        ),
-                                        child: TextForTable(
-                                          text: '[ ${entry.ipa} ]',
-                                          textColor: MyColors.black,
-                                        ),
-                                      ),
-                                    ),
-                                    DataCell(
-                                      ConstrainedBox(
-                                        constraints: BoxConstraints(
-                                          maxWidth: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.25,
-                                        ),
-                                        child: TextForTable(
-                                          text: entry.translation!.isNotEmpty
-                                              ? entry.translation!
-                                              : 'N/A',
-                                          textColor: MyColors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
-                            ),
-                            TextButton(
-                                onPressed: () {
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        color: Theme.of(context).colorScheme.onSecondary,
+                        child: Card(
+                          child: ListView(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.all(0),
+                            children: <Widget>[
+                              IconButton(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                icon: const Icon(Icons.close),
+                                onPressed: () async {
+                                  debugPrint("DONE");
+                                  await saveWordCountToLocalstorage(wordCount);
+                                  // ignore: use_build_context_synchronously
                                   Navigator.pop(context);
                                 },
-                                child: const Text16(
-                                  text: 'Сохранить',
-                                  textColor: MyColors.black,
-                                ))
-                          ],
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(bottom: 40),
+                                child: Center(
+                                  child: Text24(
+                                    text: 'Выберите слова',
+                                    textColor: MyColors.black,
+                                  ),
+                                ),
+                              ),
+                              DataTable(
+                                columnSpacing: 38.0,
+                                showBottomBorder: false,
+                                dataTextStyle: const TextStyle(
+                                    fontFamily: 'Roboto',
+                                    color: MyColors.black),
+                                columns: const [
+                                  DataColumn(
+                                    label: Expanded(
+                                      child: Text16(
+                                        text: 'Слово',
+                                        textColor: MyColors.black,
+                                      ),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Expanded(
+                                      child: Text16(
+                                        text: 'Произношение',
+                                        textColor: MyColors.black,
+                                      ),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Expanded(
+                                      child: Text16(
+                                        text: 'Перевод',
+                                        textColor: MyColors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                rows: wordCount.wordEntries.map((entry) {
+                                  return DataRow(
+                                    cells: [
+                                      DataCell(InkWell(
+                                        onTap: () async {
+                                          await _showWordInputDialog(entry.word,
+                                              wordCount.wordEntries);
+                                          setState(() {
+                                            entry.word;
+                                            entry.count;
+                                            entry.ipa;
+                                          });
+                                        },
+                                        child: TextForTable(
+                                          text: entry.word,
+                                          textColor: MyColors.black,
+                                        ),
+                                      )),
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.25,
+                                          ),
+                                          child: TextForTable(
+                                            text: '[ ${entry.ipa} ]',
+                                            textColor: MyColors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.25,
+                                          ),
+                                          child: TextForTable(
+                                            text: entry.translation!.isNotEmpty
+                                                ? entry.translation!
+                                                : 'N/A',
+                                            textColor: MyColors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
+                              TextButton(
+                                  onPressed: () async {
+                                    await saveWordCountToLocalstorage(
+                                        wordCount);
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text16(
+                                    text: 'Сохранить',
+                                    textColor: MyColors.black,
+                                  ))
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               );
             }
@@ -620,7 +625,7 @@ class Reader extends State {
                 children: <Widget>[
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.onSecondary,
                     child: Card(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -745,7 +750,7 @@ class Reader extends State {
                                     Navigator.pop(context);
                                   },
                                   child: const Text16(
-                                    text: 'Сохнарить',
+                                    text: 'Сохранить',
                                     textColor: MyColors.black,
                                   ))
                         ],
@@ -803,7 +808,7 @@ class Reader extends State {
                       children: <Widget>[
                         Container(
                           width: MediaQuery.of(context).size.width,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: Theme.of(context).colorScheme.onSecondary,
                           child: Card(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -1186,8 +1191,8 @@ class Reader extends State {
                           text: textes.isNotEmpty
                               ? (textes.first.author.toString().length > 8
                                   ? (textes.first.title.toString().length > 8
-                                      ? '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : ('${textes[0].title.toString().substring(0, 3)}...')}'
-                                      : '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 500 ? textes[0].title.toString() : textes[0].title.toString()}')
+                                      ? '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 600 ? textes[0].title.toString() : MediaQuery.of(context).size.width > 400 ? ('${textes[0].title.toString().substring(0, 3)}..') : ('${textes[0].title.toString().substring(0, 1)}..')}'
+                                      : '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 600 ? textes[0].title.toString() : textes[0].title.toString()}')
                                   // : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
                                   : textes[0].title.toString())
                               : 'Нет автора',
@@ -1329,7 +1334,7 @@ class Reader extends State {
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                height: visible ? 130 : 30,
+                height: visible ? 120 : 30,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1389,7 +1394,7 @@ class Reader extends State {
                 right: 0,
                 child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
-                    height: visible ? 100 : 0,
+                    height: visible ? 90 : 0,
                     child: Container(
                         alignment: AlignmentDirectional.topEnd,
                         color: Theme.of(context).colorScheme.primary,
@@ -1429,7 +1434,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.turn,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 32,
+                                    size: 24,
                                   ),
                                 ),
                                 const Padding(
@@ -1446,7 +1451,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.theme,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 32,
+                                    size: 24,
                                   ),
                                 ),
                                 const Padding(
@@ -1458,7 +1463,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.wm,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 32,
+                                    size: 24,
                                   ),
                                 )
                               ],

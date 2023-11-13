@@ -214,13 +214,17 @@ class RecentPageState extends State<RecentPage> {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('Отмена'),
+                child: const TextForTable(
+                  text: 'Отмена',
+                  textColor: MyColors.black,
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: const Text('Сохранить'),
+                child: const Text('Сохранить',
+                    style: TextStyle(color: Colors.blue)),
                 onPressed: () {
                   if (updatedValue.isEmpty) {
                     Fluttertoast.showToast(
@@ -264,7 +268,9 @@ class RecentPageState extends State<RecentPage> {
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: AlertDialog(
-            title: const Text("Действия"),
+            title: const Text(
+              "Действия",
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -274,14 +280,20 @@ class RecentPageState extends State<RecentPage> {
                     Navigator.of(context).pop();
                     showInputDialog(context, 'authorInput', index);
                   },
-                  child: const Text("Изменить автора"),
+                  child: const TextForTable(
+                    text: "Изменить автора",
+                    textColor: MyColors.black,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     showInputDialog(context, 'bookNameInput', index);
                   },
-                  child: const Text("Изменить название"),
+                  child: const TextForTable(
+                    text: "Изменить название",
+                    textColor: MyColors.black,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
@@ -301,7 +313,10 @@ class RecentPageState extends State<RecentPage> {
                                   Navigator.of(context)
                                       .pop(); // Закрыть диалоговое окно
                                 },
-                                child: const Text("Отмена"),
+                                child: const TextForTable(
+                                  text: "Отмена",
+                                  textColor: MyColors.black,
+                                ),
                               ),
                               TextButton(
                                 onPressed: () {
