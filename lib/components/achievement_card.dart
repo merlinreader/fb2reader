@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/components/achievement.dart';
+import 'package:intl/intl.dart';
 
 class AchievementCard extends StatelessWidget {
   final Achievement achievement;
@@ -54,17 +55,20 @@ class AchievementCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                achievement.date ?? '123',
-                style: TextStyle(
-                  fontFamily: 'Tektur',
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: achievement.isReceived
-                      ? Colors.grey
-                      : Colors.grey.withOpacity(0.2),
-                ),
-              ),
+              achievement.date == null
+                  ? SizedBox.shrink()
+                  : Text(
+                      (DateFormat('dd.MM.yyyy').format(achievement.date!)) ??
+                          '',
+                      style: TextStyle(
+                        fontFamily: 'Tektur',
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: achievement.isReceived
+                            ? Colors.grey
+                            : Colors.grey.withOpacity(0.2),
+                      ),
+                    ),
             ],
           ),
         ],

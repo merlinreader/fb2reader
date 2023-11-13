@@ -29,7 +29,7 @@ class Page extends State<AppPage> {
     RecentPage(),
     AchievementsPage(
       token:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTRlMGNkNjNmYjZmNWJlOGQzMzNlMTIiLCJ0ZWxlZ3JhbUlkIjo1MTM1MzEsImlhdCI6MTY5OTYxMzkxMH0.eRkpxMVSjzSRL5DUwM91IZfnK0_ikTPZsoV5L4Cg9eI',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTRlMGNkNjNmYjZmNWJlOGQzMzNlMTIiLCJ0ZWxlZ3JhbUlkIjoiNTEzNTMxIiwiaWF0IjoxNjk5ODU5NDkwfQ.qmD-izgoZ7oimwrSz9PhlpN2ubL0NpItw_s6iCEHjKA',
     ),
     StatisticPage(),
   ];

@@ -8,7 +8,7 @@ part of 'achievement.dart';
 
 Achievement _$AchievementFromJson(Map<String, dynamic> json) => Achievement(
       description: json['description'] as String,
-      date: json['date'] as String?,
+      date: Achievement._parseDateFromString(json['date'] as String?),
       picture: json['picture'] as String,
       isReceived: json['isReceived'] as bool,
     );
@@ -16,7 +16,7 @@ Achievement _$AchievementFromJson(Map<String, dynamic> json) => Achievement(
 Map<String, dynamic> _$AchievementToJson(Achievement instance) =>
     <String, dynamic>{
       'description': instance.description,
-      'date': instance.date,
+      'date': instance.date?.toIso8601String(),
       'picture': instance.picture,
       'isReceived': instance.isReceived,
     };
