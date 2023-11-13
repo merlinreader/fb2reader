@@ -292,7 +292,7 @@ class _ProfilePage extends State<ProfilePage> {
                         height: 50,
                         horizontalPadding: 10,
                         verticalPadding: 10,
-                        textColor: Theme.of(context).colorScheme.primary,
+                        textColor: Theme.of(context).colorScheme.onPrimary,
                         fontSize: 14,
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -304,11 +304,16 @@ class _ProfilePage extends State<ProfilePage> {
             ],
           ));
 
-  void geo() => showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
+  void geo() {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    showDialog(
+      context: context,
+      builder: (context) => Theme(
+        data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
+        child: AlertDialog(
           title: const Center(
-              child: Text18(text: 'Данные', textColor: MyColors.black)),
+            child: Text18(text: 'Данные', textColor: MyColors.black),
+          ),
           alignment: Alignment.center,
           actions: [
             CSCPicker(
@@ -319,5 +324,7 @@ class _ProfilePage extends State<ProfilePage> {
             ),
           ],
         ),
-      );
+      ),
+    );
+  }
 }
