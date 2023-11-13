@@ -146,7 +146,10 @@ class Page extends State<AppPage> {
                 shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.zero)),
                 autofocus: true,
-                child: const Icon(CustomIcons.bookOpen),
+                child: Icon(
+                  CustomIcons.bookOpen,
+                  color: Theme.of(context).colorScheme.background,
+                ),
               )
             : null);
   }
