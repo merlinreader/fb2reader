@@ -583,6 +583,148 @@ class Reader extends State {
     );
   }
 
+  showEmptyTable(BuildContext context, WordCount wordCount) async {
+    int index = wordCount.wordEntries.length;
+    print(index);
+    showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.9,
+              ),
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(0),
+                children: <Widget>[
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    color: Theme.of(context).primaryColor,
+                    child: Card(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          IconButton(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 40),
+                            child: Center(
+                              child: Text24(
+                                text: 'Осталось добавить ${(10 - index)} слов',
+                                textColor: MyColors.black,
+                              ),
+                            ),
+                          ),
+                          DataTable(
+                            columnSpacing: 38.0,
+                            showBottomBorder: false,
+                            dataTextStyle: const TextStyle(
+                                fontFamily: 'Roboto', color: MyColors.black),
+                            columns: const [
+                              DataColumn(
+                                label: Expanded(
+                                  child: Text16(
+                                    text: 'Слово',
+                                    textColor: MyColors.black,
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: Expanded(
+                                  child: Text16(
+                                    text: 'Произношение',
+                                    textColor: MyColors.black,
+                                  ),
+                                ),
+                              ),
+                              DataColumn(
+                                label: Expanded(
+                                  child: Text16(
+                                    text: 'Перевод',
+                                    textColor: MyColors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            rows: wordCount.wordEntries.map((entry) {
+                              return DataRow(
+                                cells: [
+                                  DataCell(InkWell(
+                                    onTap: () async {
+                                      await _showWordInputDialog(
+                                          entry.word, wordCount.wordEntries);
+                                      setState(() {
+                                        entry.word;
+                                        entry.count;
+                                        entry.ipa;
+                                      });
+                                    },
+                                    child: TextForTable(
+                                      text: entry.word,
+                                      textColor: MyColors.black,
+                                    ),
+                                  )),
+                                  DataCell(
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.25,
+                                      ),
+                                      child: TextForTable(
+                                        text: '[ ${entry.ipa} ]',
+                                        textColor: MyColors.black,
+                                      ),
+                                    ),
+                                  ),
+                                  DataCell(
+                                    ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth:
+                                            MediaQuery.of(context).size.width *
+                                                0.25,
+                                      ),
+                                      child: TextForTable(
+                                        text: entry.translation!.isNotEmpty
+                                            ? entry.translation!
+                                            : 'N/A',
+                                        textColor: MyColors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ),
+                          TextButton(
+                              onPressed: () {
+                                addNewWord(wordCount, index);
+                                // Navigator.pop(context);
+                              },
+                              child: const Text16(
+                                text: 'Добавить',
+                                textColor: MyColors.black,
+                              ))
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   Future<void> showSavedWords(BuildContext context, String filePath) async {
     showDialog<void>(
       context: context,
@@ -777,11 +919,14 @@ class Reader extends State {
 
     if (result == true) {
       // Действие, выполняемое после нажатия "Да"
-      Fluttertoast.showToast(
-        msg: 'Здесь будет возможность самому составить таблицу',
-        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-        gravity: ToastGravity.BOTTOM,
-      );
+      final wordCount = WordCount(
+          filePath: textes.first.filePath, fileText: textes.first.fileText);
+      await showEmptyTable(context, wordCount);
+      // Fluttertoast.showToast(
+      //   msg: 'Здесь будет возможность самому составить таблицу',
+      //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+      //   gravity: ToastGravity.BOTTOM,
+      // );
     } else if (result == false) {
       // Действие, выполняемое после нажатия "Нет"
       final wordCount = WordCount(
@@ -885,6 +1030,75 @@ class Reader extends State {
     } else {
       debugPrint('Word $oldWord not found in the list.');
     }
+  }
+
+  addNewWord(WordCount wordCount, int index) async {
+    List<String> words = WordCount(
+            filePath: textes.first.filePath, fileText: textes.first.fileText)
+        .getAllWords();
+    Set<String> uniqueSet = <String>{};
+    List<String> result = [];
+    for (String item in words.reversed) {
+      if (uniqueSet.add(item)) {
+        result.add(item);
+      }
+    }
+    String newWord = '';
+    result.reversed.toList();
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Добавить слово'),
+          content: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+              return result.where((String option) {
+                newWord = textEditingValue.text.toLowerCase();
+                return option.contains(textEditingValue.text.toLowerCase());
+              });
+            },
+            onSelected: (String selection) {
+              debugPrint('You just selected $selection');
+              newWord = selection;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Отмена'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (result.contains(newWord)) {
+                  int count = 0;
+                  for (String word in words) {
+                    if (word == newWord) {
+                      count++;
+                    }
+                  }
+                  wordCount.wordEntries[index] =
+                      WordEntry(word: newWord, count: count);
+                  setState(() {});
+                  Navigator.of(context).pop();
+                } else {
+                  Fluttertoast.showToast(
+                    msg: 'Введенного слова нет в книге',
+                    toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                    gravity: ToastGravity.BOTTOM,
+                  );
+                }
+              },
+              child: const Text('Сохранить'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<void> saveSettings(bool isDarkTheme) async {
