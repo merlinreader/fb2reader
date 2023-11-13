@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:merlin/components/achievement.dart';
-import 'package:merlin/components/svg/svg_asset.dart';
 import 'package:merlin/components/achievement_card.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;

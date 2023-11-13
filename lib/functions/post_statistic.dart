@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:merlin/pages/reader/reader.dart';
 
 Future<void> postStatisticData(String token) async {
   final Map<String, dynamic> data = {
