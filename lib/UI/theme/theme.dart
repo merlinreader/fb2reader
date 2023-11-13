@@ -54,6 +54,16 @@ ThemeData darkTheme() => ThemeData(
           color: MyColors.black,
           fontSize: 7,
           fontWeight: FontWeight.normal),
+      //Text16
+      displayMedium: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.bgWhite,
+          fontSize: 16,
+          fontWeight: FontWeight.bold),
+        bodyMedium: TextStyle(
+            fontFamily: 'Roboto',
+            color: MyColors.bgWhite,
+            fontWeight: FontWeight.normal)
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
@@ -142,6 +152,16 @@ ThemeData lightTheme() => ThemeData(
           color: MyColors.bgWhite,
           fontSize: 7,
           fontWeight: FontWeight.normal),
+      //Text16
+      displayMedium: TextStyle(
+          fontFamily: 'Tektur',
+          color: MyColors.black,
+          fontSize: 16,
+          fontWeight: FontWeight.bold),
+        bodyMedium: TextStyle(
+            fontFamily: 'Roboto',
+            color: MyColors.black,
+            fontWeight: FontWeight.normal)
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(

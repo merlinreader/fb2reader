@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
+
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -30,6 +31,7 @@ class MerlinApp extends StatelessWidget {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           title: 'Merlin',
           theme: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
           initialRoute: RouteNames.splashScreen,
@@ -66,5 +68,3 @@ class ThemeProvider with ChangeNotifier {
     SystemChrome.setSystemUIOverlayStyle(style);
   }
 }
-
- 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:merlin/UI/router.dart';
@@ -26,12 +27,14 @@ class ImageInfo {
   String title;
   String author;
   String fileName;
+  double progress;
 
   ImageInfo(
       {this.imageBytes,
       required this.title,
       required this.author,
-      required this.fileName});
+      required this.fileName,
+      required this.progress});
 
   Map<String, dynamic> toJson() {
     return {
@@ -39,6 +42,7 @@ class ImageInfo {
       'title': title,
       'author': author,
       'fileName': fileName,
+      'progress': progress,
     };
   }
 
@@ -48,6 +52,7 @@ class ImageInfo {
       title: json['title'],
       author: json['author'],
       fileName: json['fileName'],
+      progress: json['progress']?.toDouble() ?? 0.0,
     );
   }
 }
@@ -57,7 +62,6 @@ class RecentPageState extends State<RecentPage> {
   final ScrollController _scrollController = ScrollController();
   Uint8List? imageBytes;
   List<ImageInfo> images = [];
-  List<BookInfo> textes = [];
   String? firstName;
   String? lastName;
   String? name;
@@ -66,7 +70,18 @@ class RecentPageState extends State<RecentPage> {
   @override
   void initState() {
     super.initState();
+    getDataFromLocalStorage('booksKey');
+  }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    getDataFromLocalStorage('booksKey');
+  }
+
+  @override
+  void didUpdateWidget(RecentPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
     getDataFromLocalStorage('booksKey');
   }
 
@@ -85,6 +100,7 @@ class RecentPageState extends State<RecentPage> {
           .toList();
       setState(() {});
     }
+    setState(() {});
   }
 
   Future<void> delDataFromLocalStorage(String key, String path) async {
@@ -187,50 +203,54 @@ class RecentPageState extends State<RecentPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Изменить значение'),
-          content: TextField(
-            onChanged: (value) {
-              updatedValue = value;
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Отмена'),
-              onPressed: () {
-                Navigator.of(context).pop();
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: AlertDialog(
+            title: const Text('Изменить значение'),
+            content: TextField(
+              onChanged: (value) {
+                updatedValue = value;
               },
             ),
-            TextButton(
-              child: const Text('Сохранить'),
-              onPressed: () {
-                if (updatedValue.isEmpty) {
-                  Fluttertoast.showToast(
-                    msg: 'Введите значение перед сохранением',
-                    toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-                    gravity: ToastGravity.BOTTOM, // Расположение уведомления
-                  );
-                } else {
-                  if (yourVariable == 'authorInput') {
-                    changeDataFromLocalStorage('booksKey',
-                        images[index].fileName, 'author', updatedValue);
-                    images[index].author = updatedValue;
-                    setState(() {
-                      images[index].author = updatedValue;
-                    });
-                  } else if (yourVariable == 'bookNameInput') {
-                    changeDataFromLocalStorage('booksKey',
-                        images[index].fileName, 'title', updatedValue);
-                    images[index].title = updatedValue;
-                    setState(() {
-                      images[index].title = updatedValue;
-                    });
-                  }
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Отмена'),
+                onPressed: () {
                   Navigator.of(context).pop();
-                }
-              },
-            ),
-          ],
+                },
+              ),
+              TextButton(
+                child: const Text('Сохранить'),
+                onPressed: () {
+                  if (updatedValue.isEmpty) {
+                    Fluttertoast.showToast(
+                      msg: 'Введите значение перед сохранением',
+                      toastLength:
+                          Toast.LENGTH_SHORT, // Длительность отображения
+                      gravity: ToastGravity.BOTTOM, // Расположение уведомления
+                    );
+                  } else {
+                    if (yourVariable == 'authorInput') {
+                      changeDataFromLocalStorage('booksKey',
+                          images[index].fileName, 'author', updatedValue);
+                      images[index].author = updatedValue;
+                      setState(() {
+                        images[index].author = updatedValue;
+                      });
+                    } else if (yourVariable == 'bookNameInput') {
+                      changeDataFromLocalStorage('booksKey',
+                          images[index].fileName, 'title', updatedValue);
+                      images[index].title = updatedValue;
+                      setState(() {
+                        images[index].title = updatedValue;
+                      });
+                    }
+                    Navigator.of(context).pop();
+                  }
+                },
+              ),
+            ],
+          ),
         );
       },
     );
@@ -241,72 +261,78 @@ class RecentPageState extends State<RecentPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Действия"),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  showInputDialog(context, 'authorInput', index);
-                },
-                child: const Text("Изменить автора"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  showInputDialog(context, 'bookNameInput', index);
-                },
-                child: const Text("Изменить название"),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text(images[index].title),
-                        content:
-                            const Text("Вы уверены, что хотите удалить книгу?"),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context)
-                                  .pop(); // Закрыть диалоговое окно
-                            },
-                            child: const Text("Отмена"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              // Выполните удаление элемента
-                              delDataFromLocalStorage(
-                                  'booksKey', images[index].fileName);
-                              delTextFromLocalStorage(
-                                  'textKey', images[index].fileName);
-                              images.removeAt(index);
-                              setState(() {});
-                              Navigator.of(context)
-                                  .pop(); // Закрыть диалоговое окно
-                            },
-                            child: const Text(
-                              "Удалить",
-                              style: TextStyle(color: Colors.red),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: const Text(
-                  "Удалить",
-                  style: TextStyle(color: Colors.red),
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: AlertDialog(
+            title: const Text("Действия"),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    showInputDialog(context, 'authorInput', index);
+                  },
+                  child: const Text("Изменить автора"),
                 ),
-              )
-            ],
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    showInputDialog(context, 'bookNameInput', index);
+                  },
+                  child: const Text("Изменить название"),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                          child: AlertDialog(
+                            title: Text(images[index].title),
+                            content: const Text(
+                                "Вы уверены, что хотите удалить книгу?"),
+                            actions: <Widget>[
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(); // Закрыть диалоговое окно
+                                },
+                                child: const Text("Отмена"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  // Выполните удаление элемента
+                                  delDataFromLocalStorage(
+                                      'booksKey', images[index].fileName);
+                                  delTextFromLocalStorage(
+                                      'textKey', images[index].fileName);
+                                  images.removeAt(index);
+                                  setState(() {});
+                                  Navigator.of(context)
+                                      .pop(); // Закрыть диалоговое окно
+                                },
+                                child: const Text(
+                                  "Удалить",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: const Text(
+                    "Удалить",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                )
+              ],
+            ),
           ),
         );
       },
@@ -326,8 +352,8 @@ class RecentPageState extends State<RecentPage> {
     return Scaffold(
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(24), // Верхний отступ 0
+          const Padding(
+            padding: EdgeInsets.all(24), // Верхний отступ 0
             child: Text24(
               text: "Последнее",
               textColor: MyColors.black,
@@ -381,9 +407,71 @@ class RecentPageState extends State<RecentPage> {
                                 return;
                               }
                             },
-                            child: Image.memory(images[index].imageBytes!,
-                                width: MediaQuery.of(context).size.width / 2.5,
-                                fit: BoxFit.fitHeight)),
+                            child: Column(
+                              children: [
+                                Stack(
+                                  alignment: Alignment.bottomCenter,
+                                  children: [
+                                    Image.memory(
+                                      images[index].imageBytes!,
+                                      width: MediaQuery.of(context).size.width /
+                                          2.5,
+                                      fit: BoxFit.fitHeight,
+                                    ),
+                                    Positioned.fill(
+                                      child: Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: Container(
+                                          height: 50, // Высота виньетки
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                              begin: Alignment.bottomCenter,
+                                              end: Alignment.topCenter,
+                                              colors: [
+                                                Colors.black.withOpacity(0.8),
+                                                Colors.transparent,
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 10,
+                                      left: 10,
+                                      right: 10,
+                                      child: Container(
+                                        height: 4,
+                                        decoration: const BoxDecoration(
+                                          color: MyColors.white,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: images[index].progress *
+                                                          100 >=
+                                                      99.9
+                                                  ? MediaQuery.of(context)
+                                                          .size
+                                                          .width /
+                                                      2.846
+                                                  : MediaQuery.of(context)
+                                                          .size
+                                                          .width /
+                                                      2.85 *
+                                                      images[index].progress,
+                                              height: 4,
+                                              decoration: const BoxDecoration(
+                                                  color: MyColors.purple),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )),
                       const SizedBox(height: 4),
                       Text(images[index].author.length > 20
                           ? '${images[index].author.substring(0, 20)}...'
