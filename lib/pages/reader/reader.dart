@@ -453,7 +453,7 @@ class Reader extends State {
                     children: <Widget>[
                       Container(
                         width: MediaQuery.of(context).size.width,
-                        color: Theme.of(context).colorScheme.onSecondary,
+                        color: Colors.transparent,
                         child: Card(
                           child: ListView(
                             shrinkWrap: true,
@@ -611,9 +611,8 @@ class Reader extends State {
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
-          
           screenWord = getWordForm(10 - wordCount.wordEntries.length);
-          
+
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -625,7 +624,7 @@ class Reader extends State {
                 children: <Widget>[
                   Container(
                     width: MediaQuery.of(context).size.width,
-                    color: Theme.of(context).colorScheme.onSecondary,
+                    color: Colors.transparent,
                     child: Card(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -808,7 +807,7 @@ class Reader extends State {
                       children: <Widget>[
                         Container(
                           width: MediaQuery.of(context).size.width,
-                          color: Theme.of(context).colorScheme.onSecondary,
+                          color: Colors.transparent,
                           child: Card(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
