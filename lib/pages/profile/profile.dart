@@ -91,10 +91,6 @@ class _ProfilePage extends State<ProfilePage> {
     await prefs.setString('token', token);
   }
 
-  void nav() {
-    Navigator.of(context).pushNamed(RouteNames.auth);
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -133,7 +129,12 @@ class _ProfilePage extends State<ProfilePage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text14(text: locationData, textColor: MyColors.black),
-                      IconButton(onPressed: geo, icon: const Icon(IconPen.pen)),
+                      IconButton(
+                          onPressed: geo,
+                          icon: const Icon(
+                            CustomIcons.pen,
+                            size: 20,
+                          )),
                     ],
                   );
                 }
@@ -153,10 +154,8 @@ class _ProfilePage extends State<ProfilePage> {
                           height: 48,
                           horizontalPadding: 97,
                           verticalPadding: 12,
-                          //buttonColor: MyColors.purple,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          //onPressed: launchTelegram,
                           onPressed: () {
                             final tgUrl = Uri.parse(
                                 'https://t.me/merlin_auth_bot?start=1');
@@ -183,7 +182,6 @@ class _ProfilePage extends State<ProfilePage> {
                                   height: 48,
                                   horizontalPadding: 97,
                                   verticalPadding: 12,
-                                  //buttonColor: MyColors.white,
                                   textColor:
                                       Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
@@ -208,11 +206,9 @@ class _ProfilePage extends State<ProfilePage> {
                           height: 48,
                           horizontalPadding: 97,
                           verticalPadding: 12,
-                          //buttonColor: MyColors.purple,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          //onPressed: launchTelegram,
-                          onPressed: nav,
+                          onPressed: (){},
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -227,11 +223,9 @@ class _ProfilePage extends State<ProfilePage> {
                           height: 48,
                           horizontalPadding: 97,
                           verticalPadding: 12,
-                          //buttonColor: MyColors.purple,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          //onPressed: launchTelegram,
-                          onPressed: nav,
+                          onPressed: (){},
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -245,17 +239,18 @@ class _ProfilePage extends State<ProfilePage> {
                               data: themeProvider.isDarkTheme
                                   ? darkTheme()
                                   : lightTheme(),
-                              child: const Button(
+                              child: Button(
                                   text: 'Написать нам',
                                   width: 312,
                                   height: 48,
                                   horizontalPadding: 97,
                                   verticalPadding: 12,
-                                  //buttonColor: MyColors.white,
                                   textColor: MyColors.black,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
-                                  onPressed: sendEmail),
+                                  onPressed: () {
+                                    mail();
+                                  }),
                             )),
                       ),
                       const SizedBox(height: 24)
