@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
-
 import 'package:flutter/material.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/text.dart';
@@ -11,7 +10,6 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart';
-
 
 // для получаения картинки из файла книги
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
@@ -86,7 +84,6 @@ class RecentPageState extends State<RecentPage> {
     super.didUpdateWidget(oldWidget);
     getDataFromLocalStorage('booksKey');
   }
-
 
   @override
   void dispose() {
@@ -349,7 +346,7 @@ class RecentPageState extends State<RecentPage> {
       return true;
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

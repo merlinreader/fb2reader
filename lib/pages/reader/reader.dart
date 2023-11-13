@@ -69,6 +69,7 @@ class Reader extends State {
   double lastPosition = 0;
   bool isLast = false;
   List<recent.ImageInfo> images = [];
+  int pageCountSimpleMode = 0;
 
   double _scrollPosition = 0.0;
 
@@ -109,6 +110,8 @@ class Reader extends State {
             setState(() {
               isLast = true;
             });
+            // _scrollController.addListener(_updateReadTextCount);
+            _loadPageCountFromLocalStorage();
           }
         }
       }
@@ -118,6 +121,8 @@ class Reader extends State {
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // _scrollController.removeListener(_updateReadTextCount);
+    _savePageCountToLocalStorage();
     super.dispose();
   }
 
@@ -129,7 +134,34 @@ class Reader extends State {
     getBgcColor = Color(bgColor);
     getTextColor = Color(textColor);
     isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
+
     super.didChangeDependencies();
+  }
+
+  void _updateReadTextCount() {
+    double pageSize = MediaQuery.of(context).size.height;
+    List<String> textPages = getPages(getText, pageSize.toInt());
+    print('$pageSize pageSize');
+    print('${textPages.length} textPages.length');
+    print(((_scrollController.position.pixels /
+                _scrollController.position.maxScrollExtent) *
+            textPages.length)
+        .toInt());
+    _savePageCountToLocalStorage();
+  }
+
+  Future<void> _loadPageCountFromLocalStorage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      pageCountSimpleMode =
+          (prefs.getInt('pageCountSimpleMode-${textes.first.filePath}') ?? 0);
+    });
+  }
+
+  Future<void> _savePageCountToLocalStorage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt(
+        'pageCountSimpleMode-${textes.first.filePath}', pageCountSimpleMode);
   }
 
   bool _isDarkTheme = false;
@@ -862,10 +894,9 @@ class Reader extends State {
 
   @override
   Widget build(BuildContext context) {
-    double pageSize = MediaQuery.of(context).size.height * 3;
+    double pageSize = MediaQuery.of(context).size.height / 1.5;
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
-
     List<String> textPages = getPages(getText, pageSize.toInt());
 
     return WillPopScope(
@@ -1121,16 +1152,13 @@ class Reader extends State {
                                       onChanged: (value) {
                                         _scrollController.jumpTo(value);
                                       },
-                                      activeColor:
-                                          isDarkTheme
+                                      activeColor: isDarkTheme
                                           ? const Color.fromRGBO(96, 96, 96, 1)
                                           : const Color.fromRGBO(29, 29, 33, 1),
-                                      inactiveColor:
-                                          isDarkTheme
+                                      inactiveColor: isDarkTheme
                                           ? MyColors.white
                                           : const Color.fromRGBO(96, 96, 96, 1),
-                                      thumbColor:
-                                          isDarkTheme
+                                      thumbColor: isDarkTheme
                                           ? const Color.fromRGBO(96, 96, 96, 1)
                                           : const Color.fromRGBO(29, 29, 33, 1),
                                     ),
