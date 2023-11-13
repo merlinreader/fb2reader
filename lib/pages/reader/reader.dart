@@ -1391,10 +1391,7 @@ class Reader extends State {
                                     size: 32,
                                   ),
                                 ),
-<<<<<<< HEAD
                                 const Padding(padding: EdgeInsets.only(right: 30)),
-                                Icon(
-=======
                                 InkWell(
                                   onTap: () {
                                     final themeProvider =
@@ -1405,16 +1402,11 @@ class Reader extends State {
                                     saveSettings(themeProvider.isDarkTheme);
                                   },
                                   child: Icon(
->>>>>>> c518196dbe4f8c9999da2bbc70143f10b5a7ce4f
                                   CustomIcons.theme,
                                   color: Theme.of(context).iconTheme.color,
                                   size: 32,
-                                ),
-<<<<<<< HEAD
+                                ),),
                                 const Padding(padding: EdgeInsets.only(right: 30)),
-=======
-                                ),
->>>>>>> c518196dbe4f8c9999da2bbc70143f10b5a7ce4f
                                 GestureDetector(
                                   onTap: () async {
                                     wordModeDialog(context);
