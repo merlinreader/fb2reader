@@ -1386,14 +1386,16 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.turn,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 40,
+                                    size: 32,
                                   ),
                                 ),
+                                const Padding(padding: EdgeInsets.only(right: 30)),
                                 Icon(
                                   CustomIcons.theme,
                                   color: Theme.of(context).iconTheme.color,
-                                  size: 40,
+                                  size: 32,
                                 ),
+                                const Padding(padding: EdgeInsets.only(right: 30)),
                                 GestureDetector(
                                   onTap: () async {
                                     wordModeDialog(context);
@@ -1401,7 +1403,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.wm,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 40,
+                                    size: 32,
                                   ),
                                 )
                               ],
