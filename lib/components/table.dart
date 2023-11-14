@@ -6,8 +6,9 @@ import 'package:merlin/main.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
-class StatTable extends StatelessWidget {
+class StatTable extends StatefulWidget {
   final String path;
   final String country;
   final String area;
@@ -21,16 +22,47 @@ class StatTable extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  @override
+  _StatTableState createState() => _StatTableState();
+}
+
+class _StatTableState extends State<StatTable> {
+  String? id;
+
+  @override
+  void initState() {
+    super.initState();
+    getId();
+  }
+
+  Future<void> getId() async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    const url = 'https://fb2.cloud.leam.pro/api/account/';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    final data = json.decode(response.body);
+    final fetchedId = data['_id'];
+    print(fetchedId.toString());
+    if (response.statusCode == 200) {
+      setState(() {
+        id = fetchedId.toString();
+      });
+    }
+  }
+
   Future<List<dynamic>> fetchJson() async {
     final url = Uri.parse(
-        'https://fb2.cloud.leam.pro/api/statistic/$path?sortBy=totalPageCountWordMode&country=$country&area=$area&city=$city');
+        'https://fb2.cloud.leam.pro/api/statistic/${widget.path}?sortBy=totalPageCountWordMode&country=${widget.country}&area=${widget.area}&city=${widget.city}&userId=$id');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
-      // Обработка полученного JSON-объекта здесь
       return jsonResponse ?? [];
     } else {
-      return []; // Возвращаем пустой список в случае ошибки
+      return [];
     }
   }
 
@@ -52,10 +84,6 @@ class StatTable extends StatelessWidget {
                   dividerThickness: 0.0,
                   // ignore: deprecated_member_use
                   dataRowHeight: 38,
-                  //headingRowColor: MaterialStateColor.resolveWith(
-                  //  (states) => MyColors.white),
-                  //dataRowColor: MaterialStateColor.resolveWith(
-                  //(states) => MyColors.white),
                   columnSpacing: 15,
                   columns: const [
                     DataColumn(
@@ -83,10 +111,14 @@ class StatTable extends StatelessWidget {
                       cells: [
                         DataCell(
                           Text11(
-                            text: dataList[index]['firstName']?.length > 10
-                                ? '${dataList[index]['firstName']?.substring(0, 10)}...'
-                                : dataList[index]['firstName'] ?? '',
-                            textColor: MyColors.black,
+                            text: dataList[index]['_id'] == id
+                                ? '> Вы'
+                                : dataList[index]['firstName']?.length > 10
+                                    ? '${dataList[index]['firstName']?.substring(0, 10)}...'
+                                    : dataList[index]['firstName'] ?? '',
+                            textColor: dataList[index]['_id'] == id
+                                ? MyColors.purple
+                                : MyColors.black,
                           ),
                         ),
                         DataCell(

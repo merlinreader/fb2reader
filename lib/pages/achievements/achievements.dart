@@ -5,13 +5,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/style/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AchievementsPage extends StatefulWidget {
-  final String token;
-  const AchievementsPage({
-    required this.token,
-    Key? key,
-  }) : super(key: key);
+  const AchievementsPage({super.key});
 
   @override
   State<AchievementsPage> createState() => _AchievementsPageState();
@@ -28,13 +25,14 @@ class _AchievementsPageState extends State<AchievementsPage> {
   }
 
   Future<void> fetchJson() async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
     final url =
         Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(
       url,
-      headers: {'Authorization': 'Bearer ${widget.token}'},
+      headers: {'Authorization': 'Bearer $token'},
     );
-    print(widget.token);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       final ach = GetAchievementsResponse.fromJson(jsonResponse);
@@ -47,6 +45,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
       });
     } else {
       print('Ошибка запроса достижений: ${response.statusCode}');
+      print('Токен: $token');
       setState(() {
         _isLoading = false;
       });

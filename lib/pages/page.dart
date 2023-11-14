@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/pages/loading/loading.dart';
@@ -24,13 +23,11 @@ class AppPage extends StatefulWidget {
 
 class Page extends State<AppPage> {
   int _selectedPage = 1;
+
   static const List<Widget> _widgetOptions = <Widget>[
     LoadingScreen(),
     RecentPage(),
-    AchievementsPage(
-      token:
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTRlMGNkNjNmYjZmNWJlOGQzMzNlMTIiLCJ0ZWxlZ3JhbUlkIjoiNTEzNTMxIiwiaWF0IjoxNjk5ODU5NDkwfQ.qmD-izgoZ7oimwrSz9PhlpN2ubL0NpItw_s6iCEHjKA',
-    ),
+    AchievementsPage(),
     StatisticPage(),
   ];
 

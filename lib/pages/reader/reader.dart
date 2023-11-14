@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,9 +68,12 @@ class Reader extends State {
   int _batteryLevel = 0;
   final ScrollController _scrollController = ScrollController();
   double lastPosition = 0;
+  double position = 0;
   bool isLast = false;
   List<recent.ImageInfo> images = [];
   int pageCountSimpleMode = 0;
+  double pageSize = 0;
+  Timer? _actionTimer;
 
   double _scrollPosition = 0.0;
 
@@ -89,40 +93,45 @@ class Reader extends State {
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
-
       final filePath = textes.first.filePath;
-      // ignore: unnecessary_null_comparison
-      if (filePath != null) {
-        final readingPositionsJson = prefs.getString('readingPositions');
-        if (readingPositionsJson != null) {
-          final readingPositions = jsonDecode(readingPositionsJson);
-          if (readingPositions.containsKey(filePath)) {
-            lastPosition = readingPositions[filePath];
+
+      final readingPositionsJson = prefs.getString('readingPositions');
+      if (readingPositionsJson != null) {
+        final readingPositions = jsonDecode(readingPositionsJson);
+        if (readingPositions.containsKey(filePath)) {
+          lastPosition = readingPositions[filePath];
+          Future.delayed(const Duration(milliseconds: 200), () {
             if (_scrollController.hasClients) {
-              _scrollController.animateTo(
-                lastPosition,
-                duration: const Duration(milliseconds: 100),
-                curve: Curves.linear,
-              );
+              // _scrollController.animateTo(
+              //   lastPosition,
+              //   duration: const Duration(milliseconds: 100),
+              //   curve: Curves.linear,
+              // );
+              if (_scrollController.position.maxScrollExtent < lastPosition) {
+                _scrollController
+                    .jumpTo(_scrollController.position.maxScrollExtent);
+              } else {
+                _scrollController.jumpTo(lastPosition - lastPosition / 8000);
+              }
             }
-            setState(() {
-              isLast = true;
-            });
-            // _scrollController.addListener(_updateReadTextCount);
-            _loadPageCountFromLocalStorage();
-          }
+          });
+          setState(() {
+            isLast = true;
+            pageSize = MediaQuery.of(context).size.height / 5.35;
+            position = _scrollController.position.pixels;
+          });
         }
       }
+      _loadPageCountFromLocalStorage();
     });
   }
 
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // _scrollController.removeListener(_updateReadTextCount);
-    // _savePageCountToLocalStorage();
     super.dispose();
   }
 
@@ -138,28 +147,25 @@ class Reader extends State {
     super.didChangeDependencies();
   }
 
-  void _updateReadTextCount() {
-    double pageSize = MediaQuery.of(context).size.height;
-    List<String> textPages = getPages(getText, pageSize.toInt());
-    print('$pageSize pageSize');
-    print('${textPages.length} textPages.length');
-    print(((_scrollController.position.pixels /
-                _scrollController.position.maxScrollExtent) *
-            textPages.length)
-        .toInt());
-    _savePageCountToLocalStorage();
-  }
-
   Future<void> _loadPageCountFromLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       pageCountSimpleMode =
           (prefs.getInt('pageCountSimpleMode-${textes.first.filePath}') ?? 0);
+      print('pageCountSimpleMode-${textes.first.filePath}');
     });
   }
 
-  Future<void> _savePageCountToLocalStorage() async {
+  Future<void> _savePageCountToLocalStorage(List<String> textPages) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    pageCountSimpleMode = ((_scrollController.position.pixels /
+                _scrollController.position.maxScrollExtent) *
+            textPages.length)
+        .toInt();
+    // print(((_scrollController.position.pixels /
+    //             _scrollController.position.maxScrollExtent) *
+    //         textPages.length)
+    //     .toInt());
     prefs.setInt(
         'pageCountSimpleMode-${textes.first.filePath}', pageCountSimpleMode);
   }
@@ -245,8 +251,9 @@ class Reader extends State {
       final readingPositions =
           Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
       if (readingPositions.containsKey(filePath)) {
-        final position = readingPositions[filePath];
         setState(() {
+          position = readingPositions[filePath];
+          print('getReadingPosition position $position');
           lastPosition = position;
           isLast = true;
           _scrollPosition = position;
@@ -606,161 +613,187 @@ class Reader extends State {
   }
 
   showEmptyTable(BuildContext context, WordCount wordCount) async {
-    String screenWord = getWordForm(10 - wordCount.wordEntries.length);
-    showDialog<void>(
-        context: context,
-        barrierDismissible: true,
-        builder: (BuildContext context) {
-          screenWord = getWordForm(10 - wordCount.wordEntries.length);
+    final prefs = await SharedPreferences.getInstance();
+    final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
+    DateTime? lastCallTimestamp;
+    lastCallTimestamp = lastCallTimestampStr != null
+        ? DateTime.parse(lastCallTimestampStr)
+        : null;
 
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.9,
-              ),
-              child: ListView(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(0),
-                children: <Widget>[
-                  Container(
-                    width: MediaQuery.of(context).size.width,
-                    color: Colors.transparent,
-                    child: Card(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          IconButton(
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 40),
-                            child: Center(
-                              child: Text24(
-                                text: wordCount.wordEntries.length < 10
-                                    ? 'Осталось добавить ${(10 - wordCount.wordEntries.length)} $screenWord'
-                                    : 'Изучаемые слова',
-                                textColor: MyColors.black,
+    final now = DateTime.now();
+    final timeElapsed = now.difference(lastCallTimestamp!);
+    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10) {
+      String screenWord = getWordForm(10 - wordCount.wordEntries.length);
+      var lastCallTimestamp = DateTime.now();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          'lastCallTimestamp', lastCallTimestamp.toIso8601String());
+
+      // ignore: use_build_context_synchronously
+      showDialog<void>(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext context) {
+            screenWord = getWordForm(10 - wordCount.wordEntries.length);
+
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.9,
+                ),
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(0),
+                  children: <Widget>[
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.transparent,
+                      child: Card(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            IconButton(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 40),
+                              child: Center(
+                                child: Text24(
+                                  text: wordCount.wordEntries.length < 10
+                                      ? 'Осталось добавить ${(10 - wordCount.wordEntries.length)} $screenWord'
+                                      : 'Изучаемые слова',
+                                  textColor: MyColors.black,
+                                ),
                               ),
                             ),
-                          ),
-                          DataTable(
-                            columnSpacing: 38.0,
-                            showBottomBorder: false,
-                            dataTextStyle: const TextStyle(
-                                fontFamily: 'Roboto', color: MyColors.black),
-                            columns: const [
-                              DataColumn(
-                                label: Expanded(
-                                  child: Text16(
-                                    text: 'Слово',
-                                    textColor: MyColors.black,
-                                  ),
-                                ),
-                              ),
-                              DataColumn(
-                                label: Expanded(
-                                  child: Text16(
-                                    text: 'Произношение',
-                                    textColor: MyColors.black,
-                                  ),
-                                ),
-                              ),
-                              DataColumn(
-                                label: Expanded(
-                                  child: Text16(
-                                    text: 'Перевод',
-                                    textColor: MyColors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                            rows: wordCount.wordEntries.map((entry) {
-                              return DataRow(
-                                cells: [
-                                  DataCell(InkWell(
-                                    onTap: () async {
-                                      await _showWordInputDialog(
-                                          entry.word, wordCount.wordEntries);
-                                      setState(() {
-                                        entry.word;
-                                        entry.count;
-                                        entry.ipa;
-                                      });
-                                    },
-                                    child: TextForTable(
-                                      text: entry.word,
+                            DataTable(
+                              columnSpacing: 38.0,
+                              showBottomBorder: false,
+                              dataTextStyle: const TextStyle(
+                                  fontFamily: 'Roboto', color: MyColors.black),
+                              columns: const [
+                                DataColumn(
+                                  label: Expanded(
+                                    child: Text16(
+                                      text: 'Слово',
                                       textColor: MyColors.black,
                                     ),
-                                  )),
-                                  DataCell(
-                                    ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth:
-                                            MediaQuery.of(context).size.width *
-                                                0.25,
-                                      ),
-                                      child: TextForTable(
-                                        text: '[ ${entry.ipa} ]',
-                                        textColor: MyColors.black,
-                                      ),
+                                  ),
+                                ),
+                                DataColumn(
+                                  label: Expanded(
+                                    child: Text16(
+                                      text: 'Произношение',
+                                      textColor: MyColors.black,
                                     ),
                                   ),
-                                  DataCell(
-                                    ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth:
-                                            MediaQuery.of(context).size.width *
-                                                0.25,
-                                      ),
-                                      child: TextForTable(
-                                        text: entry.translation!.isNotEmpty
-                                            ? entry.translation!
-                                            : 'N/A',
-                                        textColor: MyColors.black,
-                                      ),
+                                ),
+                                DataColumn(
+                                  label: Expanded(
+                                    child: Text16(
+                                      text: 'Перевод',
+                                      textColor: MyColors.black,
                                     ),
                                   ),
-                                ],
-                              );
-                            }).toList(),
-                          ),
-                          wordCount.wordEntries.length < 10
-                              ? TextButton(
-                                  onPressed: () async {
-                                    await addNewWord(
-                                        wordCount.wordEntries,
-                                        wordCount,
-                                        wordCount.wordEntries.length);
-                                  },
-                                  child: const Text16(
-                                    text: 'Добавить',
-                                    textColor: MyColors.black,
-                                  ))
-                              : TextButton(
-                                  onPressed: () async {
-                                    await saveWordCountToLocalstorage(
-                                        wordCount);
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text16(
-                                    text: 'Сохранить',
-                                    textColor: MyColors.black,
-                                  ))
-                        ],
+                                ),
+                              ],
+                              rows: wordCount.wordEntries.map((entry) {
+                                return DataRow(
+                                  cells: [
+                                    DataCell(InkWell(
+                                      onTap: () async {
+                                        await _showWordInputDialog(
+                                            entry.word, wordCount.wordEntries);
+                                        setState(() {
+                                          entry.word;
+                                          entry.count;
+                                          entry.ipa;
+                                        });
+                                      },
+                                      child: TextForTable(
+                                        text: entry.word,
+                                        textColor: MyColors.black,
+                                      ),
+                                    )),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxWidth: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.25,
+                                        ),
+                                        child: TextForTable(
+                                          text: '[ ${entry.ipa} ]',
+                                          textColor: MyColors.black,
+                                        ),
+                                      ),
+                                    ),
+                                    DataCell(
+                                      ConstrainedBox(
+                                        constraints: BoxConstraints(
+                                          maxWidth: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.25,
+                                        ),
+                                        child: TextForTable(
+                                          text: entry.translation!.isNotEmpty
+                                              ? entry.translation!
+                                              : 'N/A',
+                                          textColor: MyColors.black,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }).toList(),
+                            ),
+                            wordCount.wordEntries.length < 10
+                                ? TextButton(
+                                    onPressed: () async {
+                                      await addNewWord(
+                                          wordCount.wordEntries,
+                                          wordCount,
+                                          wordCount.wordEntries.length);
+                                    },
+                                    child: const Text16(
+                                      text: 'Добавить',
+                                      textColor: MyColors.black,
+                                    ))
+                                : TextButton(
+                                    onPressed: () async {
+                                      await saveWordCountToLocalstorage(
+                                          wordCount);
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text16(
+                                      text: 'Сохранить',
+                                      textColor: MyColors.black,
+                                    ))
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          });
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Можно только раз в 24 часа!',
+        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        gravity: ToastGravity.BOTTOM, // Расположение уведомления
+      );
+      return;
+    }
   }
 
   Future<void> showSavedWords(BuildContext context, String filePath) async {
@@ -955,14 +988,10 @@ class Reader extends State {
 
     if (result == true) {
       // Действие, выполняемое после нажатия "Да"
+
       final wordCount = WordCount(
           filePath: textes.first.filePath, fileText: textes.first.fileText);
       await showEmptyTable(context, wordCount);
-      // Fluttertoast.showToast(
-      //   msg: 'Здесь будет возможность самому составить таблицу',
-      //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-      //   gravity: ToastGravity.BOTTOM,
-      // );
     } else if (result == false) {
       // Действие, выполняемое после нажатия "Нет"
       final wordCount = WordCount(
@@ -1153,7 +1182,7 @@ class Reader extends State {
 
   @override
   Widget build(BuildContext context) {
-    double pageSize = MediaQuery.of(context).size.height / 1.5;
+    double pageSize = MediaQuery.of(context).size.height;
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     List<String> textPages = getPages(getText, pageSize.toInt());
@@ -1161,6 +1190,9 @@ class Reader extends State {
     return WillPopScope(
       onWillPop: () async {
         await saveProgress();
+        await _savePageCountToLocalStorage(textPages);
+        // ignore: use_build_context_synchronously
+        Navigator.pop(context, true);
         return true;
       },
       child: Scaffold(
@@ -1234,10 +1266,12 @@ class Reader extends State {
                               ? () {
                                   return Center(
                                     child: SelectableText(
-                                      getText,
+                                      textPages[index],
+                                      textAlign: TextAlign.justify,
                                       style: TextStyle(
                                         fontSize: 18.0,
                                         color: getTextColor,
+                                        height: 1.21,
                                       ),
                                     ),
                                   );
@@ -1404,12 +1438,36 @@ class Reader extends State {
                                     padding:
                                         const EdgeInsets.fromLTRB(16, 0, 16, 0),
                                     child: Slider(
-                                      value: _scrollController.position.pixels,
+                                      value: position != 0
+                                          ? position >
+                                                  _scrollController
+                                                      .position.maxScrollExtent
+                                              ? _scrollController
+                                                  .position.maxScrollExtent
+                                              : position
+                                          : _scrollController.position.pixels,
                                       min: 0,
                                       max: _scrollController
                                           .position.maxScrollExtent,
                                       onChanged: (value) {
-                                        _scrollController.jumpTo(value);
+                                        setState(() {
+                                          position = value;
+                                        });
+                                        if (_actionTimer?.isActive ?? false) {
+                                          _actionTimer?.cancel();
+                                        }
+                                        _actionTimer = Timer(
+                                            const Duration(milliseconds: 250),
+                                            () {
+                                          _scrollController.jumpTo(value);
+                                        });
+                                      },
+                                      onChangeEnd: (value) {
+                                        _actionTimer?.cancel();
+                                        if (value !=
+                                            _scrollController.position.pixels) {
+                                          _scrollController.jumpTo(value);
+                                        }
                                       },
                                       activeColor: isDarkTheme
                                           ? const Color.fromRGBO(96, 96, 96, 1)

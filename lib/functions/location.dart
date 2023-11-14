@@ -2,6 +2,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 Future<Map<String, String>> getLocation() async {
@@ -22,29 +23,32 @@ Future<Map<String, String>> getLocation() async {
   String? locality = placemark.locality;
 
   final prefs = await SharedPreferences.getInstance();
-  prefs.setString('country', country ?? '');
-  prefs.setString('adminArea', area ?? '');
-  prefs.setString('locality', locality ?? '');
-
-  final locationData = {
+  prefs.setString("country", country ?? '');
+  prefs.setString("adminArea", area ?? '');
+  prefs.setString("locality", locality ?? '');
+  Map<String, String> locationData = {
     'country': country ?? '',
     'area': area ?? '',
     'city': locality ?? '',
   };
-
   // Отправляем данные на сервер
-  await sendLocationDataToServer(locationData);
+  await sendLocationDataToServer(locationData, prefs.getString('token') ?? '');
 
   return locationData;
 }
 
-Future<void> sendLocationDataToServer(Map<String, String> locationData) async {
+Future<void> sendLocationDataToServer(
+    Map<String, String> locationData, String? token) async {
+  final prefs = await SharedPreferences.getInstance();
   const url = 'https://fb2.cloud.leam.pro/api/account/geo';
 
   final response = await http.patch(
     Uri.parse(url),
-    // headers: {'Authorization': 'Bearer $token'},
-    body: locationData,
+    headers: {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(locationData),
   );
 
   if (response.statusCode == 200) {
