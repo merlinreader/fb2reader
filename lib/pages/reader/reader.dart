@@ -117,9 +117,8 @@ class Reader extends State {
                 _scrollController
                     .jumpTo(_scrollController.position.maxScrollExtent);
               } else {
-                _scrollController.jumpTo(lastPosition - lastPosition / 100);
+                _scrollController.jumpTo(lastPosition - lastPosition / 10000);
               }
-              
             }
           });
           setState(() {
@@ -1451,7 +1450,7 @@ class Reader extends State {
                                           _actionTimer?.cancel();
                                         }
                                         _actionTimer = Timer(
-                                            const Duration(milliseconds: 500),
+                                            const Duration(milliseconds: 250),
                                             () {
                                           _scrollController.jumpTo(value);
                                         });
