@@ -7,7 +7,6 @@ import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/location.dart';
-import 'package:merlin/UI/router.dart';
 import 'package:merlin/main.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
@@ -280,7 +279,7 @@ class _ProfilePage extends State<ProfilePage> {
                       Theme(
                           data: purpleButton(),
                           child: const Button(
-                              text: " Написать",
+                              text: "Написать",
                               width: 250,
                               height: 50,
                               horizontalPadding: 10,
