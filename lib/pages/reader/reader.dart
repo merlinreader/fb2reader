@@ -92,43 +92,44 @@ class Reader extends State {
     getImagesFromLocalStorage('booksKey');
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
-    super.initState();
-
     _scrollController.addListener(_updateReadTextCount);
+    super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
-
       final filePath = textes.first.filePath;
-      // ignore: unnecessary_null_comparison
-      if (filePath != null) {
-        final readingPositionsJson = prefs.getString('readingPositions');
-        if (readingPositionsJson != null) {
-          final readingPositions = jsonDecode(readingPositionsJson);
-          if (readingPositions.containsKey(filePath)) {
-            lastPosition = readingPositions[filePath];
 
+      final readingPositionsJson = prefs.getString('readingPositions');
+      if (readingPositionsJson != null) {
+        final readingPositions = jsonDecode(readingPositionsJson);
+        if (readingPositions.containsKey(filePath)) {
+          lastPosition = readingPositions[filePath];
+          print(lastPosition);
+          // Using Future.delayed to delay the execution of animateTo
+          Future.delayed(const Duration(milliseconds: 200), () {
             if (_scrollController.hasClients) {
-              _scrollController.animateTo(
-                lastPosition,
-                duration: const Duration(milliseconds: 100),
-                curve: Curves.linear,
-              );
-              print(lastPosition);
+              // _scrollController.animateTo(
+              //   lastPosition,
+              //   duration: const Duration(milliseconds: 100),
+              //   curve: Curves.linear,
+              // );
+              if (_scrollController.position.maxScrollExtent < lastPosition) {
+                _scrollController
+                    .jumpTo(_scrollController.position.maxScrollExtent);
+              } else {
+                _scrollController.jumpTo(lastPosition - lastPosition / 100);
+              }
+              
             }
-            setState(() {
-              isLast = true;
-              pageSize = MediaQuery.of(context).size.height / 5.35;
-              setState(() {
-                position = _scrollController.position.pixels;
-                print(position);
-              });
-            });
-            _scrollController.addListener(_updateReadTextCount);
-            _loadPageCountFromLocalStorage();
-          }
+          });
+          setState(() {
+            isLast = true;
+            pageSize = MediaQuery.of(context).size.height / 5.35;
+            position = _scrollController.position.pixels;
+          });
         }
       }
+      _loadPageCountFromLocalStorage();
     });
   }
 
@@ -180,6 +181,10 @@ class Reader extends State {
                 _scrollController.position.maxScrollExtent) *
             textPages.length)
         .toInt();
+    print(((_scrollController.position.pixels /
+                _scrollController.position.maxScrollExtent) *
+            textPages.length)
+        .toInt());
     prefs.setInt(
         'pageCountSimpleMode-${textes.first.filePath}', pageCountSimpleMode);
   }
@@ -1174,7 +1179,7 @@ class Reader extends State {
 
   @override
   Widget build(BuildContext context) {
-    double pageSize = MediaQuery.of(context).size.height / 1.5;
+    double pageSize = MediaQuery.of(context).size.height;
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     List<String> textPages = getPages(getText, pageSize.toInt());
@@ -1255,10 +1260,12 @@ class Reader extends State {
                               ? () {
                                   return Center(
                                     child: SelectableText(
-                                      getText,
+                                      textPages[index],
+                                      textAlign: TextAlign.justify,
                                       style: TextStyle(
                                         fontSize: 18.0,
                                         color: getTextColor,
+                                        height: 1.21,
                                       ),
                                     ),
                                   );
@@ -1425,9 +1432,14 @@ class Reader extends State {
                                     padding:
                                         const EdgeInsets.fromLTRB(16, 0, 16, 0),
                                     child: Slider(
-                                      value: position == 0
-                                          ? _scrollController.position.pixels
-                                          : position,
+                                      value: position != 0
+                                          ? position >
+                                                  _scrollController
+                                                      .position.maxScrollExtent
+                                              ? _scrollController
+                                                  .position.maxScrollExtent
+                                              : position
+                                          : _scrollController.position.pixels,
                                       min: 0,
                                       max: _scrollController
                                           .position.maxScrollExtent,
