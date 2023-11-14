@@ -135,7 +135,7 @@ class WordCount {
 
   List<String> getAllWords() {
     final textWithoutPunctuation =
-        fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+        fileText.replaceAll(RegExp(r'[.,;!?():"\\"]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
 
     List<String> wordCounts = [];
@@ -227,6 +227,35 @@ class WordCount {
 
     // Присваиваем wordEntries к текущим wordEntries
     this.wordEntries = wordEntries;
+  }
+
+  Future<List<WordEntry>> processSingleWord(
+      String newWord, List<WordEntry> wordEntries) async {
+    final normalizedWord = newWord.toLowerCase();
+
+    // Check conditions for the word
+    final count = getWordCount(normalizedWord);
+
+    // Placeholder functions - replace with your actual implementations
+    final translation = await translateToEnglish(normalizedWord);
+    final ipaWord = await getIPA(translation);
+
+    // Create a new WordEntry based on processed information
+    final newWordEntry = WordEntry(
+      word: normalizedWord,
+      count: count,
+      translation: translation,
+      ipa: ipaWord,
+    );
+
+    // Make sure the list is modifiable
+    List<WordEntry> modifiableWordEntries =
+        List<WordEntry>.of(wordEntries, growable: true);
+
+    // Add the new WordEntry to the list
+    modifiableWordEntries.add(newWordEntry);
+
+    return modifiableWordEntries;
   }
 
   // Метод чтобы сбросить счётчик 24 часов

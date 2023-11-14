@@ -214,13 +214,17 @@ class RecentPageState extends State<RecentPage> {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('Отмена'),
+                child: const TextForTable(
+                  text: 'Отмена',
+                  textColor: MyColors.black,
+                ),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               TextButton(
-                child: const Text('Сохранить'),
+                child: const Text('Сохранить',
+                    style: TextStyle(color: Colors.blue)),
                 onPressed: () {
                   if (updatedValue.isEmpty) {
                     Fluttertoast.showToast(
@@ -264,7 +268,9 @@ class RecentPageState extends State<RecentPage> {
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: AlertDialog(
-            title: const Text("Действия"),
+            title: const Text(
+              "Действия",
+            ),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -274,14 +280,20 @@ class RecentPageState extends State<RecentPage> {
                     Navigator.of(context).pop();
                     showInputDialog(context, 'authorInput', index);
                   },
-                  child: const Text("Изменить автора"),
+                  child: const TextForTable(
+                    text: "Изменить автора",
+                    textColor: MyColors.black,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                     showInputDialog(context, 'bookNameInput', index);
                   },
-                  child: const Text("Изменить название"),
+                  child: const TextForTable(
+                    text: "Изменить название",
+                    textColor: MyColors.black,
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
@@ -301,7 +313,10 @@ class RecentPageState extends State<RecentPage> {
                                   Navigator.of(context)
                                       .pop(); // Закрыть диалоговое окно
                                 },
-                                child: const Text("Отмена"),
+                                child: const TextForTable(
+                                  text: "Отмена",
+                                  textColor: MyColors.black,
+                                ),
                               ),
                               TextButton(
                                 onPressed: () {
@@ -353,7 +368,7 @@ class RecentPageState extends State<RecentPage> {
       body: Stack(
         children: [
           const Padding(
-            padding: EdgeInsets.all(24), // Верхний отступ 0
+            padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
             child: Text24(
               text: "Последнее",
               textColor: MyColors.black,
@@ -374,7 +389,7 @@ class RecentPageState extends State<RecentPage> {
           ),
           Padding(
             padding: const EdgeInsets.only(
-                top: 100), // Верхний отступ для DynamicHeightGridView
+                top: 72), // Верхний отступ для DynamicHeightGridView
             child: DynamicHeightGridView(
               controller: _scrollController,
               itemCount: images.length,
@@ -383,95 +398,85 @@ class RecentPageState extends State<RecentPage> {
               crossAxisCount: 2,
               builder: (ctx, index) {
                 return GestureDetector(
+                  onTap: () async {
+                    await sendDataFromLocalStorage('textKey', index);
+                    if (isSended) {
+                      isSended = false;
+                      // ignore: use_build_context_synchronously
+                      await Navigator.pushNamed(context, RouteNames.reader)
+                          .then((_) {
+                        getDataFromLocalStorage('booksKey');
+                      });
+                    } else {
+                      Fluttertoast.showToast(
+                        msg: 'Ошибка загрузки книги',
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                      );
+                      return;
+                    }
+                  },
                   onLongPress: () {
                     onTapLongPressOne(context, index);
                   },
                   child: Column(
                     children: [
                       if (images[index].imageBytes != null)
-                        GestureDetector(
-                            onTap: () async {
-                              await sendDataFromLocalStorage('textKey', index);
-                              if (isSended) {
-                                isSended = false;
-                                // ignore: use_build_context_synchronously
-                                Navigator.pushNamed(context, RouteNames.reader);
-                              } else {
-                                Fluttertoast.showToast(
-                                  msg: 'Ошибка загрузки книги',
-                                  toastLength: Toast
-                                      .LENGTH_SHORT, // Длительность отображения
-                                  gravity: ToastGravity
-                                      .BOTTOM, // Расположение уведомления
-                                );
-                                return;
-                              }
-                            },
-                            child: Column(
-                              children: [
-                                Stack(
-                                  alignment: Alignment.bottomCenter,
+                        Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            Image.memory(
+                              images[index].imageBytes!,
+                              width: MediaQuery.of(context).size.width / 2.5,
+                              fit: BoxFit.fitHeight,
+                            ),
+                            Positioned.fill(
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  height: 50, // Высота виньетки
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                      colors: [
+                                        Colors.black.withOpacity(0.8),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 10,
+                              left: 10,
+                              right: 10,
+                              child: Container(
+                                height: 4,
+                                decoration: const BoxDecoration(
+                                  color: MyColors.white,
+                                ),
+                                child: Row(
                                   children: [
-                                    Image.memory(
-                                      images[index].imageBytes!,
-                                      width: MediaQuery.of(context).size.width /
-                                          2.5,
-                                      fit: BoxFit.fitHeight,
-                                    ),
-                                    Positioned.fill(
-                                      child: Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Container(
-                                          height: 50, // Высота виньетки
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.bottomCenter,
-                                              end: Alignment.topCenter,
-                                              colors: [
-                                                Colors.black.withOpacity(0.8),
-                                                Colors.transparent,
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 10,
-                                      left: 10,
-                                      right: 10,
-                                      child: Container(
-                                        height: 4,
-                                        decoration: const BoxDecoration(
-                                          color: MyColors.white,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: images[index].progress *
-                                                          100 >=
-                                                      99.9
-                                                  ? MediaQuery.of(context)
-                                                          .size
-                                                          .width /
-                                                      2.846
-                                                  : MediaQuery.of(context)
-                                                          .size
-                                                          .width /
-                                                      2.85 *
-                                                      images[index].progress,
-                                              height: 4,
-                                              decoration: const BoxDecoration(
-                                                  color: MyColors.purple),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                    Container(
+                                      width: images[index].progress * 100 >=
+                                              99.9
+                                          ? MediaQuery.of(context).size.width /
+                                              2.846
+                                          : MediaQuery.of(context).size.width /
+                                              2.85 *
+                                              images[index].progress,
+                                      height: 4,
+                                      decoration: const BoxDecoration(
+                                          color: MyColors.purple),
                                     ),
                                   ],
                                 ),
-                              ],
-                            )),
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: 4),
                       Text(images[index].author.length > 20
                           ? '${images[index].author.substring(0, 20)}...'

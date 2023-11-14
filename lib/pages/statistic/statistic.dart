@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:merlin/functions/post_statistic.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/table.dart';
@@ -45,7 +46,9 @@ class _StatisticPageState extends State<StatisticPage> {
                       context,
                       isPressed: _currentPageIndex == 0,
                     ),
-                    onPressed: () {
+                    onPressed: () async {
+                      await getPageCountSimpleMode();
+
                       setState(() {
                         _currentPageIndex = 0;
                       });

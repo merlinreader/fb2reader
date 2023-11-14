@@ -42,8 +42,8 @@ class Page extends State<AppPage> {
       await ImageLoader().loadImage();
       setState(() {
         profile = false;
-        _selectedPage = 0;
-        _widgetOptions[0];
+        _selectedPage = 1;
+        _widgetOptions[1];
       });
     }
   }

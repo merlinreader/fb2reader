@@ -14,7 +14,8 @@ ThemeData darkTheme() => ThemeData(
         background: MyColors.darkGray,
         onBackground: Colors.black,
         surface: MyColors.blackGray,
-        onSurface: Colors.white),
+        onSurface: Colors.white,
+        scrim: Colors.blue),
     //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
         //text24
@@ -111,7 +112,8 @@ ThemeData lightTheme() => ThemeData(
         background: MyColors.white,
         onBackground: Colors.black,
         surface: MyColors.blackGray,
-        onSurface: Colors.black),
+        onSurface: Colors.black,
+        scrim: Colors.blue),
     //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
         //text24
