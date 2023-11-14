@@ -135,7 +135,7 @@ class WordCount {
 
   List<String> getAllWords() {
     final textWithoutPunctuation =
-        fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+        fileText.replaceAll(RegExp(r'[.,;!?():"\\"]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
 
     List<String> wordCounts = [];

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,9 +68,11 @@ class Reader extends State {
   int _batteryLevel = 0;
   final ScrollController _scrollController = ScrollController();
   double lastPosition = 0;
+  double position = 0;
   bool isLast = false;
   List<recent.ImageInfo> images = [];
   int pageCountSimpleMode = 0;
+  double pageSize = 0;
 
   double _scrollPosition = 0.0;
 
@@ -89,6 +92,8 @@ class Reader extends State {
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
     super.initState();
+    _scrollController.addListener(_updateReadTextCount);
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
 
@@ -106,11 +111,14 @@ class Reader extends State {
                 duration: const Duration(milliseconds: 100),
                 curve: Curves.linear,
               );
+              print(lastPosition);
             }
             setState(() {
               isLast = true;
+              pageSize = MediaQuery.of(context).size.height / 5.35;
+              position = _scrollController.position.pixels;
             });
-            // _scrollController.addListener(_updateReadTextCount);
+            _scrollController.addListener(_updateReadTextCount);
             _loadPageCountFromLocalStorage();
           }
         }
@@ -120,9 +128,10 @@ class Reader extends State {
 
   @override
   void dispose() {
+    _savePageCountToLocalStorage();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // _scrollController.removeListener(_updateReadTextCount);
-    // _savePageCountToLocalStorage();
+    _scrollController.removeListener(_updateReadTextCount);
+
     super.dispose();
   }
 
@@ -139,14 +148,13 @@ class Reader extends State {
   }
 
   void _updateReadTextCount() {
-    double pageSize = MediaQuery.of(context).size.height;
-    List<String> textPages = getPages(getText, pageSize.toInt());
-    print('$pageSize pageSize');
-    print('${textPages.length} textPages.length');
-    print(((_scrollController.position.pixels /
-                _scrollController.position.maxScrollExtent) *
-            textPages.length)
-        .toInt());
+    // print('$pageSize pageSize');
+    // print('${textPages.length} textPages.length');
+    // print(((_scrollController.position.pixels /
+    //             _scrollController.position.maxScrollExtent) *
+    //         textPages.length)
+    //     .toInt());
+
     _savePageCountToLocalStorage();
   }
 
@@ -155,11 +163,17 @@ class Reader extends State {
     setState(() {
       pageCountSimpleMode =
           (prefs.getInt('pageCountSimpleMode-${textes.first.filePath}') ?? 0);
+      print('pageCountSimpleMode-${textes.first.filePath}');
     });
   }
 
   Future<void> _savePageCountToLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> textPages = getPages(getText, pageSize.toInt());
+    pageCountSimpleMode = ((_scrollController.position.pixels /
+                _scrollController.position.maxScrollExtent) *
+            textPages.length)
+        .toInt();
     prefs.setInt(
         'pageCountSimpleMode-${textes.first.filePath}', pageCountSimpleMode);
   }
@@ -1404,11 +1418,16 @@ class Reader extends State {
                                     padding:
                                         const EdgeInsets.fromLTRB(16, 0, 16, 0),
                                     child: Slider(
-                                      value: _scrollController.position.pixels,
+                                      value: position,
                                       min: 0,
                                       max: _scrollController
                                           .position.maxScrollExtent,
                                       onChanged: (value) {
+                                        setState(() {
+                                          position = value;
+                                        });
+                                      },
+                                      onChangeEnd: (value) {
                                         _scrollController.jumpTo(value);
                                       },
                                       activeColor: isDarkTheme
