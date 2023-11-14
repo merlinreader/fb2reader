@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:merlin/pages/recent/recent.dart';
+import 'package:merlin/pages/wordmode/wordmode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> postStatisticData(String token) async {
@@ -37,22 +38,30 @@ getPageCountSimpleMode() async {
         .map((item) => ImageInfo.fromJson(item))
         .toList();
   }
-  // Список со значениями прочитынных страниц
-  List<int> countsInSimpleMode = [];
-  List<String> filenames = [];
-  print('Started');
+  List<WordCount> wordCounts = [];
   for (final entry in books) {
-    filenames.add(entry.fileName);
-  }
-
-  for (final entry in filenames) {
-    int countFromStorage = prefs.getInt('pageCountSimpleMode-$entry') ?? 0;
-    if (countFromStorage > 0) {
-      countsInSimpleMode.add(countFromStorage);
+    String? storedData = prefs.getString('${entry.fileName}-words');
+    if (storedData != null) {
+      List<dynamic> decodedData = jsonDecode(storedData);
+      WordCount wordCount = WordCount.fromJson(decodedData[0]);
+      wordCounts.add(wordCount);
     }
   }
 
-  for (final entry in countsInSimpleMode) {
-    print(entry);
+  Map<int, bool> dataToSend = {};
+  int index = 0;
+  for (final entry in books) {
+    int countFromStorage =
+        prefs.getInt('pageCountSimpleMode-${entry.fileName}') ?? 0;
+    if (entry.fileName == wordCounts[index].filePath) {
+      if (countFromStorage > 0) {
+        final dataToAdd = <int, bool>{countFromStorage: true};
+        dataToSend.addEntries(dataToAdd.entries);
+      }
+    } else {
+      final dataToAdd = <int, bool>{countFromStorage: false};
+      dataToSend.addEntries(dataToAdd.entries);
+    }
   }
+  print(dataToSend);
 }
