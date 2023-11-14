@@ -23,7 +23,7 @@ dependencies:
   path: ^1.8.3
   path_provider: ^2.1.1
   xml: ^6.3.0
-  yandex_mobileads: ^6.0.1
+  #yandex_mobileads: ^6.0.1
   shared_preferences: ^2.2.2
   permission_handler: ^11.0.1
   routemaster: ^1.0.1
@@ -51,6 +51,15 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   json_serializable: ^6.7.1
   build_runner: ^2.4.6
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons: 
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/AppLogo.png"
+    #adaptive_icon_background: "#8B5EF6"
+    #adaptive_icon_foreground: "assets/icon/AppLogo2.png"
+
 flutter:
   uses-material-design: true
 
@@ -62,5 +71,7 @@ flutter:
       fonts:
         - asset: ./lib/UI/fonts/Tektur.ttf
   assets:
+    #- assets/
+    - assets/icon/
     - assets/images/
     - assets/stat.json

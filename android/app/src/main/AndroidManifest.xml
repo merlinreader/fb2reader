@@ -11,9 +11,9 @@
 
 
     <application
-        android:label="merlin"
+        android:label="Merlin"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
@@ -38,24 +38,27 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="true"/>
 
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="merlin"
+                    android:host="merlinfb2reader.com"
+                    android:pathPrefix="/auth" />
+            </intent-filter>
+
+            <!-- <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="https"
                     android:host="merlinfb2reader.com" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="https"
-                    android:host="merlinfb2reader.com" />
-            </intent-filter>
+            </intent-filter> -->
 
         </activity>
         <!-- Don't delete the meta-data below.

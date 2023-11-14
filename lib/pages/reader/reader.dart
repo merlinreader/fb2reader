@@ -1433,7 +1433,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.turn,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 24,
+                                    size: 34,
                                   ),
                                 ),
                                 const Padding(
@@ -1450,7 +1450,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.theme,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 24,
+                                    size: 34,
                                   ),
                                 ),
                                 const Padding(
@@ -1462,7 +1462,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.wm,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 24,
+                                    size: 34,
                                   ),
                                 )
                               ],

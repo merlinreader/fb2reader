@@ -64,6 +64,16 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       isChecked = prefs.getBool('isDarkTheme') ?? false;
+      backgroundColorBlack = prefs.getBool('backgroundColorBlack') ?? false;
+      backgroundColorWhite = prefs.getBool('backgroundColorWhite') ?? false;
+      backgroundColorMint = prefs.getBool('backgroundColorMint') ?? false;
+      backgroundColorBeige = prefs.getBool('backgroundColorBeige') ?? false;
+
+      textColorBlack = prefs.getBool('textColorBlack') ?? false;
+      textColorWhite = prefs.getBool('textColorWhite') ?? false;
+      textColorMint = prefs.getBool('textColorMint') ?? false;
+      textColorBeige = prefs.getBool('textColorBlack') ?? false;
+
       // Восстанавливаем состояние темной темы
       isDarkTheme = isChecked;
     });

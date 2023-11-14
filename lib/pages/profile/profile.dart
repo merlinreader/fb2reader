@@ -36,6 +36,7 @@ class _ProfilePage extends State<ProfilePage> {
 
   String token = '';
   late String getToken;
+  late String qwerty;
 
   String? _link = 'unknown';
   @override
@@ -53,6 +54,16 @@ class _ProfilePage extends State<ProfilePage> {
     });
   }
 
+  // Future<void> initUniLinks() async {
+  //   getLinksStream().listen(() {
+  //     // Парсинг ссылки и переход в нужное место в приложении
+  //     setState(() {
+  //       qwerty = link; // Полученная deep link ссылка
+  //     });
+  //   }, onError: (err) {
+  //     // Обработка ошибки
+  //   });
+  // }
   Future<void> initUniLinks() async {
     // Подписываемся на поток приходящих ссылок
     linkStream.listen((String? link) {
@@ -161,7 +172,6 @@ class _ProfilePage extends State<ProfilePage> {
                                 'https://t.me/merlin_auth_bot?start=1');
                             launchUrl(tgUrl,
                                 mode: LaunchMode.externalApplication);
-                            ;
                           },
                           fontWeight: FontWeight.bold,
                         ),
