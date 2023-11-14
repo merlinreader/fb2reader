@@ -12,7 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:merlin/pages/reader/reader.dart';
+// import 'package:merlin/pages/reader/reader.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
 class ImageLoader {
@@ -46,7 +46,7 @@ class ImageLoader {
       final prefs = await SharedPreferences.getInstance();
       String? imageDataToAdd = prefs.getString('booksKey');
       List<ImageInfo> imageDatas = [];
-      List<BookInfo> bookDatas = [];
+      // List<BookInfo> bookDatas = [];
 
       if (imageDataToAdd != null) {
         imageDatas = (jsonDecode(imageDataToAdd) as List)
@@ -110,18 +110,20 @@ class ImageLoader {
           progress: 0.0);
       imageDatas.add(imageData);
 
-      BookInfo bookData = BookInfo(
-          filePath: path,
-          fileText: text.toString(),
-          title: title,
-          author: name,
-          lastPosition: 0);
-      bookDatas.add(bookData);
       String imageDatasString = jsonEncode(imageDatas);
-      String textDataString = jsonEncode(bookDatas);
-      await prefs.setString('textKey', textDataString);
-
       await prefs.setString('booksKey', imageDatasString);
+
+      // BookInfo bookData = BookInfo(
+      //     filePath: path,
+      //     fileText: text.toString(),
+      //     title: title,
+      //     author: name,
+      //     lastPosition: 0);
+      // bookDatas.add(bookData);
+
+      // String textDataString = jsonEncode(bookDatas);
+      // await prefs.setString('textKey', textDataString);
+
     } else {
       Fluttertoast.showToast(
         msg: 'Вы не дали доступ к хранилищу',

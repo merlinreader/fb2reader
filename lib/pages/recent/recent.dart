@@ -398,95 +398,85 @@ class RecentPageState extends State<RecentPage> {
               crossAxisCount: 2,
               builder: (ctx, index) {
                 return GestureDetector(
+                  onTap: () async {
+                    await sendDataFromLocalStorage('textKey', index);
+                    if (isSended) {
+                      isSended = false;
+                      // ignore: use_build_context_synchronously
+                      await Navigator.pushNamed(context, RouteNames.reader)
+                          .then((_) {
+                        getDataFromLocalStorage('booksKey');
+                      });
+                    } else {
+                      Fluttertoast.showToast(
+                        msg: 'Ошибка загрузки книги',
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                      );
+                      return;
+                    }
+                  },
                   onLongPress: () {
                     onTapLongPressOne(context, index);
                   },
                   child: Column(
                     children: [
                       if (images[index].imageBytes != null)
-                        GestureDetector(
-                            onTap: () async {
-                              await sendDataFromLocalStorage('textKey', index);
-                              if (isSended) {
-                                isSended = false;
-                                // ignore: use_build_context_synchronously
-                                Navigator.pushNamed(context, RouteNames.reader);
-                              } else {
-                                Fluttertoast.showToast(
-                                  msg: 'Ошибка загрузки книги',
-                                  toastLength: Toast
-                                      .LENGTH_SHORT, // Длительность отображения
-                                  gravity: ToastGravity
-                                      .BOTTOM, // Расположение уведомления
-                                );
-                                return;
-                              }
-                            },
-                            child: Column(
-                              children: [
-                                Stack(
-                                  alignment: Alignment.bottomCenter,
+                        Stack(
+                          alignment: Alignment.bottomCenter,
+                          children: [
+                            Image.memory(
+                              images[index].imageBytes!,
+                              width: MediaQuery.of(context).size.width / 2.5,
+                              fit: BoxFit.fitHeight,
+                            ),
+                            Positioned.fill(
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  height: 50, // Высота виньетки
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                      colors: [
+                                        Colors.black.withOpacity(0.8),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 10,
+                              left: 10,
+                              right: 10,
+                              child: Container(
+                                height: 4,
+                                decoration: const BoxDecoration(
+                                  color: MyColors.white,
+                                ),
+                                child: Row(
                                   children: [
-                                    Image.memory(
-                                      images[index].imageBytes!,
-                                      width: MediaQuery.of(context).size.width /
-                                          2.5,
-                                      fit: BoxFit.fitHeight,
-                                    ),
-                                    Positioned.fill(
-                                      child: Align(
-                                        alignment: Alignment.bottomCenter,
-                                        child: Container(
-                                          height: 50, // Высота виньетки
-                                          decoration: BoxDecoration(
-                                            gradient: LinearGradient(
-                                              begin: Alignment.bottomCenter,
-                                              end: Alignment.topCenter,
-                                              colors: [
-                                                Colors.black.withOpacity(0.8),
-                                                Colors.transparent,
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 10,
-                                      left: 10,
-                                      right: 10,
-                                      child: Container(
-                                        height: 4,
-                                        decoration: const BoxDecoration(
-                                          color: MyColors.white,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              width: images[index].progress *
-                                                          100 >=
-                                                      99.9
-                                                  ? MediaQuery.of(context)
-                                                          .size
-                                                          .width /
-                                                      2.846
-                                                  : MediaQuery.of(context)
-                                                          .size
-                                                          .width /
-                                                      2.85 *
-                                                      images[index].progress,
-                                              height: 4,
-                                              decoration: const BoxDecoration(
-                                                  color: MyColors.purple),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                    Container(
+                                      width: images[index].progress * 100 >=
+                                              99.9
+                                          ? MediaQuery.of(context).size.width /
+                                              2.846
+                                          : MediaQuery.of(context).size.width /
+                                              2.85 *
+                                              images[index].progress,
+                                      height: 4,
+                                      decoration: const BoxDecoration(
+                                          color: MyColors.purple),
                                     ),
                                   ],
                                 ),
-                              ],
-                            )),
+                              ),
+                            ),
+                          ],
+                        ),
                       const SizedBox(height: 4),
                       Text(images[index].author.length > 20
                           ? '${images[index].author.substring(0, 20)}...'
