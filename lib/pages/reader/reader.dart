@@ -73,6 +73,7 @@ class Reader extends State {
   List<recent.ImageInfo> images = [];
   int pageCountSimpleMode = 0;
   double pageSize = 0;
+  Timer? _actionTimer;
 
   double _scrollPosition = 0.0;
 
@@ -92,6 +93,7 @@ class Reader extends State {
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
     super.initState();
+
     _scrollController.addListener(_updateReadTextCount);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -105,6 +107,7 @@ class Reader extends State {
           final readingPositions = jsonDecode(readingPositionsJson);
           if (readingPositions.containsKey(filePath)) {
             lastPosition = readingPositions[filePath];
+
             if (_scrollController.hasClients) {
               _scrollController.animateTo(
                 lastPosition,
@@ -116,7 +119,10 @@ class Reader extends State {
             setState(() {
               isLast = true;
               pageSize = MediaQuery.of(context).size.height / 5.35;
-              position = _scrollController.position.pixels;
+              setState(() {
+                position = _scrollController.position.pixels;
+                print(position);
+              });
             });
             _scrollController.addListener(_updateReadTextCount);
             _loadPageCountFromLocalStorage();
@@ -259,8 +265,9 @@ class Reader extends State {
       final readingPositions =
           Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
       if (readingPositions.containsKey(filePath)) {
-        final position = readingPositions[filePath];
         setState(() {
+          position = readingPositions[filePath];
+          print('getReadingPosition position $position');
           lastPosition = position;
           isLast = true;
           _scrollPosition = position;
@@ -1418,7 +1425,9 @@ class Reader extends State {
                                     padding:
                                         const EdgeInsets.fromLTRB(16, 0, 16, 0),
                                     child: Slider(
-                                      value: position,
+                                      value: position == 0
+                                          ? _scrollController.position.pixels
+                                          : position,
                                       min: 0,
                                       max: _scrollController
                                           .position.maxScrollExtent,
@@ -1426,9 +1435,21 @@ class Reader extends State {
                                         setState(() {
                                           position = value;
                                         });
+                                        if (_actionTimer?.isActive ?? false) {
+                                          _actionTimer?.cancel();
+                                        }
+                                        _actionTimer = Timer(
+                                            const Duration(milliseconds: 500),
+                                            () {
+                                          _scrollController.jumpTo(value);
+                                        });
                                       },
                                       onChangeEnd: (value) {
-                                        _scrollController.jumpTo(value);
+                                        _actionTimer?.cancel();
+                                        if (value !=
+                                            _scrollController.position.pixels) {
+                                          _scrollController.jumpTo(value);
+                                        }
                                       },
                                       activeColor: isDarkTheme
                                           ? const Color.fromRGBO(96, 96, 96, 1)
