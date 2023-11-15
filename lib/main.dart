@@ -6,8 +6,7 @@ import 'package:merlin/UI/router.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-//В ФАЙЛЕ BUTTON ПРИМЕР ИСПОЛЬЗОВАНИЯ КНОПОК
+import 'package:uni_links/uni_links.dart';
 
 void main() {
   runApp(
@@ -16,6 +15,20 @@ void main() {
       child: MerlinApp(),
     ),
   );
+  handleDeeplinks();
+}
+
+Future<void> handleDeeplinks() async {
+  try {
+    String? initialLink = await getInitialLink();
+    if (initialLink != null) {
+      print(initialLink);
+      // Обработайте глубокую ссылку здесь
+      // Например, можно использовать Navigator для навигации
+    }
+  } on PlatformException {
+    // Ошибка при обработке глубокой ссылки
+  }
 }
 
 class MerlinApp extends StatelessWidget {
