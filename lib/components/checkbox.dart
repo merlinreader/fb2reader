@@ -6,6 +6,7 @@ class CustomCheckbox extends StatelessWidget {
   final Color bgColor;
   final Color borderColor;
   final Color checkColor;
+  final Color iconColor;
 
   const CustomCheckbox(
       {super.key,
@@ -13,7 +14,8 @@ class CustomCheckbox extends StatelessWidget {
       required this.onChanged,
       required this.bgColor,
       required this.borderColor,
-      required this.checkColor});
+      required this.checkColor,
+      required this.iconColor});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,7 @@ class CustomCheckbox extends StatelessWidget {
               ? Icon(
                   Icons.check,
                   size: 20,
-                  color: Theme.of(context).iconTheme.color, // Цвет галочки
+                  color: iconColor, // Цвет галочки
                 )
               : Container(), // Пустой контейнер, если не выбрано
         ),

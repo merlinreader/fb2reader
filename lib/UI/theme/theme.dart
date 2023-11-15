@@ -174,6 +174,7 @@ ThemeData lightTheme() => ThemeData(
           textStyle:
               const MaterialStatePropertyAll(TextStyle(color: MyColors.black))),
     ),
+    iconTheme: const IconThemeData(color: MyColors.black),
     //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
     dataTableTheme: DataTableThemeData(
       headingRowColor:

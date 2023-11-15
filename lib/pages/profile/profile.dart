@@ -8,6 +8,8 @@ import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/location.dart';
 import 'package:merlin/main.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:csc_picker/csc_picker.dart';
@@ -36,6 +38,7 @@ class _ProfilePage extends State<ProfilePage> {
   String token = '';
   late String getToken;
   late String qwerty;
+  String? firstName;
 
   String? _link = 'unknown';
   @override
@@ -101,6 +104,25 @@ class _ProfilePage extends State<ProfilePage> {
     await prefs.setString('token', token);
   }
 
+  Future<void> getFirstName() async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    const url = 'https://fb2.cloud.leam.pro/api/account/';
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    final data = json.decode(response.body);
+    final fetchedId = data['firstName'];
+    print(fetchedId.toString());
+    if (response.statusCode == 200) {
+      setState(() {
+        firstName = fetchedId.toString();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -123,8 +145,8 @@ class _ProfilePage extends State<ProfilePage> {
               child: Column(children: [
             const MerlinWidget(),
             const SizedBox(height: 12),
-            const Text24(
-              text: 'Merlin',
+            Text24(
+              text: firstName ?? 'Merlin',
               textColor: MyColors.black,
             ),
             FutureBuilder(

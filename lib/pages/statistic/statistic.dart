@@ -22,19 +22,15 @@ class _StatisticPageState extends State<StatisticPage> {
     return Column(
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
           child: Column(
             children: <Widget>[
               const Row(
                 children: [
-                  Text(
-                    'Статистика',
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontFamily: 'Tektur',
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Text24(
+                    text: "Статистика",
+                    textColor: MyColors.black,
+                    //fontWeight: FontWeight.w600,
                   ),
                 ],
               ),

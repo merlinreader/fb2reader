@@ -74,6 +74,13 @@ class _SettingsPageState extends State<SettingsPage> {
       textColorMint = prefs.getBool('textColorMint') ?? false;
       textColorBeige = prefs.getBool('textColorBlack') ?? false;
 
+      int textColorPreviewJson = prefs.getInt('textColor') ?? 0xff000000;
+      textColorPreview = Color(textColorPreviewJson);
+
+      int backgroundColorPreviewJson =
+          prefs.getInt('backgroundColor') ?? 0xffffffff;
+      backgroundColorPreview = Color(backgroundColorPreviewJson);
+
       // Восстанавливаем состояние темной темы
       isDarkTheme = isChecked;
     });
@@ -321,6 +328,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           print('settings $newValue');
                         });
                       },
+                      iconColor:
+                          Theme.of(context).iconTheme.color ?? MyColors.white,
                     ),
                   ],
                 ),
@@ -383,6 +392,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   }
                                 });
                               },
+                              iconColor: MyColors.white,
                             ),
                             CustomCheckbox(
                               isChecked: textColorWhite,
@@ -411,6 +421,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   }
                                 });
                               },
+                              iconColor: MyColors.black,
                             ),
                             CustomCheckbox(
                               isChecked: textColorMint,
@@ -438,6 +449,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   }
                                 });
                               },
+                              iconColor: MyColors.black,
                             ),
                             CustomCheckbox(
                               isChecked: textColorBeige,
@@ -466,6 +478,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   }
                                 });
                               },
+                              iconColor: MyColors.black,
                             ),
                           ],
                         )
@@ -507,6 +520,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   }
                                 });
                               },
+                              iconColor: MyColors.white,
                             ),
                             CustomCheckbox(
                               isChecked: backgroundColorWhite,
@@ -535,6 +549,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   }
                                 });
                               },
+                              iconColor: MyColors.black,
                             ),
                             CustomCheckbox(
                               isChecked: backgroundColorMint,
@@ -562,6 +577,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   }
                                 });
                               },
+                              iconColor: MyColors.black,
                             ),
                             CustomCheckbox(
                               isChecked: backgroundColorBeige,
@@ -589,6 +605,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   }
                                 });
                               },
+                              iconColor: MyColors.black,
                             ),
                           ],
                         ),
