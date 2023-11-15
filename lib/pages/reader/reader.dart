@@ -1486,13 +1486,13 @@ class Reader extends State {
                                         }
                                       },
                                       activeColor: isDarkTheme
-                                          ? const Color.fromRGBO(96, 96, 96, 1)
+                                          ? MyColors.white 
                                           : const Color.fromRGBO(29, 29, 33, 1),
                                       inactiveColor: isDarkTheme
-                                          ? MyColors.white
+                                          ? const Color.fromRGBO(96, 96, 96, 1)
                                           : const Color.fromRGBO(96, 96, 96, 1),
                                       thumbColor: isDarkTheme
-                                          ? const Color.fromRGBO(96, 96, 96, 1)
+                                          ? MyColors.white 
                                           : const Color.fromRGBO(29, 29, 33, 1),
                                     ),
                                   )
@@ -1507,7 +1507,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.turn,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 34,
+                                    size: 30,
                                   ),
                                 ),
                                 const Padding(
@@ -1524,7 +1524,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.theme,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 34,
+                                    size: 30,
                                   ),
                                 ),
                                 const Padding(
@@ -1536,7 +1536,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.wm,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 34,
+                                    size: 30,
                                   ),
                                 )
                               ],
