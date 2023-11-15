@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, sized_box_for_whitespace
+// ignore_for_file: deprecated_member_use
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:merlin/functions/post_statistic.dart';
@@ -22,7 +22,7 @@ class _StatisticPageState extends State<StatisticPage> {
     return Column(
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.fromLTRB(18, 20, 24, 16),
+          padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
           child: Column(
             children: <Widget>[
               const Row(
@@ -92,7 +92,7 @@ class _StatisticPageState extends State<StatisticPage> {
         Expanded(
           child: IndexedStack(
             index: _currentPageIndex,
-            children: const [
+            children: [
               Country(), // Страница "Страна"
               Region(), // Страница "Регион"
               City(), // Страница "Город"
@@ -105,8 +105,6 @@ class _StatisticPageState extends State<StatisticPage> {
 }
 
 class Country extends StatelessWidget {
-  const Country({super.key});
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -167,8 +165,6 @@ class Country extends StatelessWidget {
 }
 
 class Region extends StatelessWidget {
-  const Region({super.key});
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -230,8 +226,6 @@ class Region extends StatelessWidget {
 }
 
 class City extends StatelessWidget {
-  const City({super.key});
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
