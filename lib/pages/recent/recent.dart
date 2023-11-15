@@ -102,9 +102,6 @@ class RecentPageState extends State<RecentPage> {
           .toList();
       setState(() {});
     }
-    for (final entry in images) {
-      print(entry.imageBytes);
-    }
     setState(() {});
   }
 

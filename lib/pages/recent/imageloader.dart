@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -74,7 +76,6 @@ class ImageLoader {
         final XmlElement binaryInfo = document.findAllElements('binary').first;
         final String binary = binaryInfo.text;
         final String cleanedBinary = binary.replaceAll(RegExp(r"\s+"), "");
-        print(cleanedBinary);
         decodedBytes = base64.decode(cleanedBinary);
       } catch (e) {
         decodedBytes = Uint8List.fromList([0]);
@@ -174,7 +175,7 @@ class ImageLoader {
       case PermissionStatus.permanentlyDenied:
         return false;
       case PermissionStatus.provisional:
-      // TODO: Handle this case.
+        return true;
     }
   }
 }

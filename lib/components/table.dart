@@ -46,7 +46,7 @@ class _StatTableState extends State<StatTable> {
     );
     final data = json.decode(response.body);
     final fetchedId = data['_id'];
-    print(fetchedId.toString());
+    // print(fetchedId.toString());
     if (response.statusCode == 200) {
       setState(() {
         id = fetchedId.toString();

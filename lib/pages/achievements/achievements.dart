@@ -48,8 +48,8 @@ class _AchievementsPageState extends State<AchievementsPage> {
         _isLoading = false;
       });
     } else {
-      print('Ошибка запроса достижений: ${response.statusCode}');
-      print('Токен: $token');
+      // print('Ошибка запроса достижений: ${response.statusCode}');
+      // print('Токен: $token');
       setState(() {
         _isLoading = false;
       });

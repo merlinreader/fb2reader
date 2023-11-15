@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -152,7 +154,7 @@ class Reader extends State {
     setState(() {
       pageCountSimpleMode =
           (prefs.getInt('pageCountSimpleMode-${textes.first.filePath}') ?? 0);
-      print('pageCountSimpleMode-${textes.first.filePath}');
+      // print('pageCountSimpleMode-${textes.first.filePath}');
     });
   }
 
@@ -179,11 +181,6 @@ class Reader extends State {
     setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor: value ? MyColors.blackGray : MyColors.white,
     ));
-  }
-
-  Future<void> _initAsync() async {
-    final prefs = await SharedPreferences.getInstance();
-    isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
   }
 
   void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
@@ -226,7 +223,7 @@ class Reader extends State {
             _scrollController.position.maxScrollExtent;
     setState(() {});
     await prefs.setString('booksKey', jsonEncode(images));
-    print('SUCCESS PROGRESS');
+    // print('SUCCESS PROGRESS');
   }
 
   Future<void> saveReadingPosition(double position, String filePath) async {
@@ -253,7 +250,7 @@ class Reader extends State {
       if (readingPositions.containsKey(filePath)) {
         setState(() {
           position = readingPositions[filePath];
-          print('getReadingPosition position $position');
+          // print('getReadingPosition position $position');
           lastPosition = position;
           isLast = true;
           _scrollPosition = position;
@@ -272,10 +269,10 @@ class Reader extends State {
     setState(() {
       _scrollPosition = percentage;
       position = _scrollController.position.pixels;
-      print(position);
-      print(percentage);
-      print('max = ${_scrollController.position.maxScrollExtent}');
-      print(' ');
+      // print(position);
+      // print(percentage);
+      // print('max = ${_scrollController.position.maxScrollExtent}');
+      // print(' ');
     });
     await saveReadingPosition(
         _scrollController.position.pixels, textes.first.filePath);
@@ -456,7 +453,7 @@ class Reader extends State {
 
               return WillPopScope(
                 onWillPop: () async {
-                  debugPrint("DONE");
+                  // debugPrint("DONE");
                   await saveWordCountToLocalstorage(wordCount);
                   return true;
                 },
@@ -477,7 +474,7 @@ class Reader extends State {
                                 padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                 icon: const Icon(Icons.close),
                                 onPressed: () async {
-                                  debugPrint("DONE");
+                                  // debugPrint("DONE");
                                   await saveWordCountToLocalstorage(wordCount);
                                   // ignore: use_build_context_synchronously
                                   Navigator.pop(context);
@@ -634,14 +631,14 @@ class Reader extends State {
     } else {
       timeElapsed = now.difference(oneDayMore);
     }
-    print('lastCallTimestampStr $lastCallTimestampStr');
-    print('lastCallTimestamp $lastCallTimestamp');
-    print('now $now');
-    print('timeElapsed $timeElapsed');
+    // print('lastCallTimestampStr $lastCallTimestampStr');
+    // print('lastCallTimestamp $lastCallTimestamp');
+    // print('now $now');
+    // print('timeElapsed $timeElapsed');
     // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
     if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 ||
         lastCallTimestampStr == null) {
-      print('Entered');
+      // print('Entered');
       String screenWord = getWordForm(10 - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
@@ -836,11 +833,7 @@ class Reader extends State {
             } else if (snapshot.connectionState == ConnectionState.done) {
               if (snapshot.hasData) {
                 WordCount? wordCount = snapshot.data;
-                debugPrint('Getted wordCount $wordCount');
-                if (wordCount != null) {
-                  var temp = snapshot.data?.filePath;
-                  debugPrint('wordCount path $temp');
-                }
+                // debugPrint('Getted wordCount $wordCount');
                 if (wordCount == null || wordCount.wordEntries.isEmpty) {
                   Fluttertoast.showToast(
                     msg: 'Нет сохраненных слов',
@@ -1062,7 +1055,7 @@ class Reader extends State {
               return matchingStart.followedBy(matchingAll);
             },
             onSelected: (String selection) {
-              debugPrint('You just selected $selection');
+              // debugPrint('You just selected $selection');
               newWord = selection;
             },
           ),
@@ -1075,8 +1068,8 @@ class Reader extends State {
             ),
             TextButton(
               onPressed: () async {
-                debugPrint('Введенное слово: $newWord');
-                debugPrint('onPressed word: $word');
+                // debugPrint('Введенное слово: $newWord');
+                // debugPrint('onPressed word: $word');
                 if (result.contains(newWord)) {
                   await updateWordInTable(word, newWord, wordEntries);
                   Navigator.of(context).pop();
@@ -1103,8 +1096,8 @@ class Reader extends State {
       final count = WordCount(
               filePath: textes.first.filePath, fileText: textes.first.fileText)
           .getWordCount(newWord);
-      debugPrint('updateWordInTable entry ${wordEntries[index]}');
-      debugPrint('updateWordInTable count ${wordEntries[index].count}');
+      // debugPrint('updateWordInTable entry ${wordEntries[index]}');
+      // debugPrint('updateWordInTable count ${wordEntries[index].count}');
       final translation = await WordCount(
               filePath: textes.first.filePath, fileText: textes.first.fileText)
           .translateToEnglish(newWord);
@@ -1121,7 +1114,7 @@ class Reader extends State {
 
       setState(() {});
     } else {
-      debugPrint('Word $oldWord not found in the list.');
+      // debugPrint('Word $oldWord not found in the list.');
     }
   }
 
@@ -1163,7 +1156,7 @@ class Reader extends State {
               return matchingStart.followedBy(matchingAll);
             },
             onSelected: (String selection) {
-              debugPrint('You just selected $selection');
+              // debugPrint('You just selected $selection');
               newWord = selection;
             },
           ),

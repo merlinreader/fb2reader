@@ -124,8 +124,6 @@ class WordCount {
           toastLength: Toast.LENGTH_SHORT, // Длительность отображения
           gravity: ToastGravity.BOTTOM, // Расположение уведомления
         );
-        print(
-            'Вы уже вызывали метод сегодня. Дождитесь 24 часа для следующего вызова.');
         return;
       }
     } else {
@@ -277,7 +275,7 @@ class WordCount {
     final translation = await translateToEnglish(word);
     final ipaWord = await getIPA(translation);
     // final partOfSpeechWord = await getPartOfSpeech(translation);
-    print('"$word" - "$translation" - [$ipaWord]');
+    // print('"$word" - "$translation" - [$ipaWord]');
   
     return WordEntry(
       word: word,
@@ -325,24 +323,6 @@ class WordCount {
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt('callCount', _callCount);
     prefs.remove('lastCallTimestamp');
-  }
-
-  // Метод для выделенного слова
-  void countWordOccurrences(String wordToCount) {
-    final textWithoutPunctuation =
-        fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
-    final words = textWithoutPunctuation.split(RegExp(r'\s+'));
-    final normalizedWord = wordToCount.toLowerCase();
-
-    if (normalizedWord.length > 1 &&
-        !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
-        normalizedWord != '-') {
-      final wordCount =
-          words.where((word) => word.toLowerCase() == normalizedWord).length;
-      print('$normalizedWord: $wordCount');
-    } else {
-      print('Слово не подходит для подсчета.');
-    }
   }
 }
 

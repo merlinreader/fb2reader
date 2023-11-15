@@ -116,7 +116,7 @@ class _ProfilePage extends State<ProfilePage> {
     );
     final data = json.decode(response.body);
     final fetchedId = data['firstName'];
-    print(fetchedId.toString());
+    // print(fetchedId.toString());
     if (response.statusCode == 200) {
       setState(() {
         firstName = fetchedId.toString();

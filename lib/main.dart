@@ -22,7 +22,7 @@ Future<void> handleDeeplinks() async {
   try {
     String? initialLink = await getInitialLink();
     if (initialLink != null) {
-      print(initialLink);
+      // print(initialLink);
       // Обработайте глубокую ссылку здесь
       // Например, можно использовать Navigator для навигации
     }

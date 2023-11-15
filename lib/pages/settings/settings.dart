@@ -327,7 +327,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           isChecked = newValue;
                           saveSettings(isChecked);
                           saveSettings(themeProvider.isDarkTheme);
-                          print('settings $newValue');
+                          // print('settings $newValue');
                         });
                       },
                       iconColor:

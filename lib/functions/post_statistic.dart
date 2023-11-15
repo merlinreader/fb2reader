@@ -22,9 +22,9 @@ Future<void> postStatisticData(String token) async {
   );
 
   if (response.statusCode == 200) {
-    print('Данные отправлены успешно!');
+    // print('Данные отправлены успешно!');
   } else {
-    print('Ошибка при отправке данных: ${response.statusCode}');
+    // print('Ошибка при отправке данных: ${response.statusCode}');
   }
 }
 
@@ -63,5 +63,5 @@ getPageCountSimpleMode() async {
       dataToSend.addEntries(dataToAdd.entries);
     }
   }
-  print(dataToSend);
+  // print(dataToSend);
 }

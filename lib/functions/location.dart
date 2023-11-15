@@ -52,9 +52,9 @@ Future<void> sendLocationDataToServer(
   );
 
   if (response.statusCode == 200) {
-    print('Данные успешно отправлены на сервер');
+    // print('Данные успешно отправлены на сервер');
   } else {
-    print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
+    // print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
   }
 }
 
