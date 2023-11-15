@@ -403,7 +403,7 @@ class RecentPageState extends State<RecentPage> {
                     if (isSended) {
                       isSended = false;
                       // ignore: use_build_context_synchronously
-                      await Navigator.pushNamed(context, RouteNames.reader)
+                      Navigator.pushNamed(context, RouteNames.reader)
                           .then((_) {
                         getDataFromLocalStorage('booksKey');
                       });

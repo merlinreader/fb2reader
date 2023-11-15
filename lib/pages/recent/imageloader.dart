@@ -32,11 +32,18 @@ class ImageLoader {
         allowMultiple: false,
       );
 
-      if (result?.files.first.extension != 'fb2') {
+      if (result?.files.first.extension != 'fb2' && result?.count == 0) {
         Fluttertoast.showToast(
           msg: 'Формат книги должен быть fb2',
-          toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-          gravity: ToastGravity.BOTTOM, // Расположение уведомления
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        return;
+      } else if (result?.count != 0 && result?.count == 0) {
+        Fluttertoast.showToast(
+          msg: 'Никакой файл не выбран',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM, 
         );
         return;
       }
