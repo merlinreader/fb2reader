@@ -158,7 +158,9 @@ class _StatTableState extends State<StatTable> {
               SizedBox(
                 width: 30, // Задайте желаемую ширину
                 height: 30, // Задайте желаемую высоту
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: MyColors.purple,
+                ),
               ),
             ]));
           }

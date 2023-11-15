@@ -47,7 +47,7 @@ class _StatisticPageState extends State<StatisticPage> {
                       isPressed: _currentPageIndex == 0,
                     ),
                     onPressed: () async {
-                      await getPageCountSimpleMode();
+                      // await getPageCountSimpleMode();
 
                       setState(() {
                         _currentPageIndex = 0;
@@ -160,7 +160,9 @@ class Country extends StatelessWidget {
                   fontsize: 16,
                   textColor: MyColors.grey));
         }
-        return const CircularProgressIndicator();
+        return const CircularProgressIndicator(
+          color: MyColors.purple,
+        );
       },
     );
   }
@@ -219,7 +221,9 @@ class Region extends StatelessWidget {
                   fontsize: 16,
                   textColor: MyColors.grey));
         }
-        return const CircularProgressIndicator();
+        return const CircularProgressIndicator(
+          color: MyColors.purple,
+        );
       },
     );
   }
@@ -279,7 +283,9 @@ class City extends StatelessWidget {
                   fontsize: 16,
                   textColor: MyColors.grey));
         }
-        return const CircularProgressIndicator();
+        return const CircularProgressIndicator(
+          color: MyColors.purple,
+        );
       },
     );
   }
@@ -380,12 +386,13 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(width: 24),
-            Expanded(
-              child: buildTab(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // const SizedBox(width: 24),
+              buildTab(
                 Container(
                   width: 30,
                   height: 24,
@@ -405,10 +412,8 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 ),
                 currentIndex == 0,
               ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: buildTab(
+              // const SizedBox(width: 16),
+              buildTab(
                 Container(
                   width: 43,
                   height: 24,
@@ -428,10 +433,8 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 ),
                 currentIndex == 1,
               ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: buildTab(
+              // const SizedBox(width: 16),
+              buildTab(
                 Container(
                   width: 37,
                   height: 24,
@@ -451,10 +454,8 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 ),
                 currentIndex == 2,
               ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: buildTab(
+              // const SizedBox(width: 16),
+              buildTab(
                 Container(
                   width: 50,
                   height: 24,
@@ -474,10 +475,8 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 ),
                 currentIndex == 3,
               ),
-            ),
-            SizedBox(width: 16),
-            Expanded(
-              child: buildTab(
+              // const SizedBox(width: 16),
+              buildTab(
                 Container(
                   width: 20,
                   height: 24,
@@ -497,8 +496,8 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 ),
                 currentIndex == 4,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         Expanded(
           child: TabBarView(
