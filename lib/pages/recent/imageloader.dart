@@ -39,7 +39,7 @@ class ImageLoader {
           gravity: ToastGravity.BOTTOM,
         );
         return;
-      } else if (result?.count != 0) {
+      } else if (result?.count != 0 && result?.count == 0) {
         Fluttertoast.showToast(
           msg: 'Никакой файл не выбран',
           toastLength: Toast.LENGTH_SHORT,
