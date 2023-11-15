@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -43,7 +41,7 @@ class ImageLoader {
         Fluttertoast.showToast(
           msg: 'Никакой файл не выбран',
           toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM, 
+          gravity: ToastGravity.BOTTOM,
         );
         return;
       }
@@ -63,8 +61,8 @@ class ImageLoader {
       if (imageDatas.any((imageData) => imageData.fileName == path)) {
         Fluttertoast.showToast(
           msg: 'Данная книга уже есть в приложении',
-          toastLength: Toast.LENGTH_LONG, // Длительность отображения
-          gravity: ToastGravity.BOTTOM, // Расположение уведомления
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
         );
         return;
       }
@@ -72,10 +70,20 @@ class ImageLoader {
       String fileContent = await File(path).readAsString();
 
       XmlDocument document = XmlDocument.parse(fileContent);
-      final XmlElement binaryInfo = document.findAllElements('binary').first;
-      final String binary = binaryInfo.text;
-      final String cleanedBinary = binary.replaceAll(RegExp(r"\s+"), "");
-      decodedBytes = base64.decode(cleanedBinary);
+      try {
+        final XmlElement binaryInfo = document.findAllElements('binary').first;
+        final String binary = binaryInfo.text;
+        final String cleanedBinary = binary.replaceAll(RegExp(r"\s+"), "");
+        print(cleanedBinary);
+        decodedBytes = base64.decode(cleanedBinary);
+      } catch (e) {
+        decodedBytes = Uint8List.fromList([0]);
+        Fluttertoast.showToast(
+          msg: 'Книга не содержит обложку',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+      }
 
       try {
         final XmlElement titleInfo =
@@ -130,7 +138,6 @@ class ImageLoader {
 
       // String textDataString = jsonEncode(bookDatas);
       // await prefs.setString('textKey', textDataString);
-
     } else {
       Fluttertoast.showToast(
         msg: 'Вы не дали доступ к хранилищу',

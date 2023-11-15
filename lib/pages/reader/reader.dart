@@ -1250,147 +1250,161 @@ class Reader extends State {
                             ))),
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     shadowColor: Colors.transparent,
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text18(
-                          text: textes.isNotEmpty
-                              ? (textes.first.author.toString().length > 8
-                                  ? (textes.first.title.toString().length > 8
-                                      ? '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 600 ? textes[0].title.toString() : MediaQuery.of(context).size.width > 400 ? ('${textes[0].title.toString().substring(0, 3)}..') : ('${textes[0].title.toString().substring(0, 1)}..')}'
-                                      : '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 600 ? textes[0].title.toString() : textes[0].title.toString()}')
-                                  // : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
-                                  : textes[0].title.toString())
-                              : 'Нет автора',
-                          textColor: MyColors.black,
-                        ),
-                        GestureDetector(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width / 1.5,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              clipBehavior: Clip.antiAlias,
+                              child: Text(
+                                textes.isNotEmpty
+                                    ? '${textes[0].author.toString()}. ${textes[0].title.toString()}'
+                                    : 'Нет автора',
+                                softWrap: false,
+                                overflow: TextOverflow.fade,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: 'Tektur',
+                                    color: isDarkTheme
+                                        ? MyColors.white
+                                        : MyColors.black),
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(
                                       context, RouteNames.readerSettings)
                                   .then((value) => loadStylePreferences());
                             },
-                            child: Theme(
-                                data: lightTheme(),
-                                child: Icon(
-                                  CustomIcons.sliders,
-                                  size: 40,
-                                  color: Theme.of(context).iconTheme.color,
-                                )))
-                      ],
+                            child: Icon(
+                              CustomIcons.sliders,
+                              size: 40,
+                              color: Theme.of(context).iconTheme.color,
+                            ),
+                          ),
+                        ],
+                      )
+                          
+                        
                     ),
-                  ),
                 ),
+                
               )
             : null,
         body: Container(
             color: getBgcColor,
             child: Stack(children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 29),
-                child: ListView.builder(
-                    controller: _scrollController,
-                    itemCount: textPages.length,
-                    itemBuilder: (context, index) {
-                      if (textes.isNotEmpty) {
-                        return _scrollController.hasClients
-                            ? () {
-                                return Text(
-                                  textPages[index],
-                                  // textAlign: TextAlign.justify,
-                                  // textAlign: TextAlign.center,
-                                  softWrap: true,
-                                  style: TextStyle(
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 29),
+                  child: ListView.builder(
+                      controller: _scrollController,
+                      itemCount: textPages.length,
+                      itemBuilder: (context, index) {
+                        if (textes.isNotEmpty) {
+                          return _scrollController.hasClients
+                              ? () {
+                                  return Text(
+                                    textPages[index],
+                                    // textAlign: TextAlign.justify,
+                                    // textAlign: TextAlign.center,
+                                    softWrap: true,
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        color: getTextColor,
+                                        height: 1.41,
+                                        locale: const Locale('ru', 'RU')),
+                                  );
+                                }()
+                              : Center(
+                                  child: Text(
+                                    'Нет текста для отображения',
+                                    style: TextStyle(
                                       fontSize: 18.0,
                                       color: getTextColor,
-                                      height: 1.41,
-                                      locale: const Locale('ru', 'RU')),
-                                );
-                              }()
-                            : Center(
-                                child: Text(
-                                  'Нет текста для отображения',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: getTextColor,
+                                    ),
                                   ),
-                                ),
-                              );
-                      }
-                      return null;
-                    }),
+                                );
+                        }
+                        return null;
+                      }),
+                ),
               ),
-              // GestureDetector(
-              //     behavior: HitTestBehavior.translucent,
-              //     onTap: () {
-              //       // Скролл вниз / следующая страница
-              //       _scrollController.animateTo(
-              //           _scrollController.position.pixels + screenHeight * 0.8,
-              //           duration: const Duration(milliseconds: 250),
-              //           curve: Curves.ease);
-              //     },
-              //     child: Padding(
-              //       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-              //       child: IgnorePointer(
-              //         child: Container(
-              //           width: MediaQuery.of(context).size.width,
-              //           height: MediaQuery.of(context).size.height,
-              //           color: const Color.fromRGBO(100, 150, 100, 0),
-              //         ),
-              //       ),
-              //     )),
-              // Positioned(
-              //   left: screenWidth / 6,
-              //   top: screenHeight / 5,
-              //   child: GestureDetector(
-              //       behavior: HitTestBehavior.translucent,
-              //       onDoubleTap: () async {
-              //         showSavedWords(context, textes.first.filePath);
-              //       },
-              //       onTap: () {
-              //         setState(() {
-              //           visible = !visible;
-              //         });
-              //         if (visible) {
-              //           SystemChrome.setSystemUIOverlayStyle(
-              //               const SystemUiOverlayStyle(
-              //                   systemNavigationBarColor: MyColors.white,
-              //                   statusBarColor: Colors.transparent));
-              //           SystemChrome.setEnabledSystemUIMode(
-              //               SystemUiMode.edgeToEdge);
-              //         } else {
-              //           SystemChrome.setEnabledSystemUIMode(
-              //               SystemUiMode.immersive);
-              //         }
-              //       },
-              //       child: IgnorePointer(
-              //         child: Container(
-              //           width: MediaQuery.of(context).size.width / 1.5,
-              //           height: MediaQuery.of(context).size.height / 2,
-              //           color: const Color.fromRGBO(250, 100, 100, 0),
-              //         ),
-              //       )),
-              // ),
-              // Positioned(
-              //   left: screenWidth / 6,
-              //   child: GestureDetector(
-              //       behavior: HitTestBehavior.translucent,
-              //       onTap: () {
-              //         // Сролл вверх / предыдущая страница
-              //         _scrollController.animateTo(
-              //             _scrollController.position.pixels -
-              //                 screenHeight * 0.8,
-              //             duration: const Duration(milliseconds: 250),
-              //             curve: Curves.ease);
-              //       },
-              //       child: IgnorePointer(
-              //         child: Container(
-              //           width: MediaQuery.of(context).size.width / 1.5,
-              //           height: MediaQuery.of(context).size.height / 5,
-              //           color: const Color.fromRGBO(100, 150, 200, 0),
-              //         ),
-              //       )),
-              // ),
+              GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    // Скролл вниз / следующая страница
+                    _scrollController.animateTo(
+                        _scrollController.position.pixels + screenHeight * 0.8,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        color: const Color.fromRGBO(100, 150, 100, 0),
+                      ),
+                    ),
+                  )),
+              Positioned(
+                left: screenWidth / 6,
+                top: screenHeight / 5,
+                child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onDoubleTap: () async {
+                      showSavedWords(context, textes.first.filePath);
+                    },
+                    onTap: () {
+                      setState(() {
+                        visible = !visible;
+                      });
+                      if (visible) {
+                        SystemChrome.setSystemUIOverlayStyle(
+                            const SystemUiOverlayStyle(
+                                systemNavigationBarColor: MyColors.white,
+                                statusBarColor: Colors.transparent));
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.edgeToEdge);
+                      } else {
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.immersive);
+                      }
+                    },
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 1.5,
+                        height: MediaQuery.of(context).size.height / 2,
+                        color: const Color.fromRGBO(250, 100, 100, 0),
+                      ),
+                    )),
+              ),
+              Positioned(
+                left: screenWidth / 6,
+                child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      // Сролл вверх / предыдущая страница
+                      _scrollController.animateTo(
+                          _scrollController.position.pixels -
+                              screenHeight * 0.8,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.ease);
+                    },
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 1.5,
+                        height: MediaQuery.of(context).size.height / 5,
+                        color: const Color.fromRGBO(100, 150, 200, 0),
+                      ),
+                    )),
+              ),
             ])),
         bottomNavigationBar: BottomAppBar(
           color: Theme.of(context).colorScheme.primary,
