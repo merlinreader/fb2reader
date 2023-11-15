@@ -437,7 +437,9 @@ class Reader extends State {
           builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: MyColors.purple,
+                ),
               );
             } else if (snapshot.hasError) {
               return AlertDialog(
@@ -806,7 +808,9 @@ class Reader extends State {
           builder: (BuildContext context, AsyncSnapshot<WordCount> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: MyColors.purple,
+                ),
               );
             } else if (snapshot.hasError) {
               return AlertDialog(
