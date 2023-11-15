@@ -57,8 +57,7 @@ class AchievementCard extends StatelessWidget {
               achievement.date == null
                   ? SizedBox.shrink()
                   : Text(
-                      (DateFormat('dd.MM.yyyy').format(achievement.date!)) ??
-                          '',
+                      (DateFormat('dd.MM.yyyy').format(achievement.date!)),
                       style: TextStyle(
                         fontFamily: 'Tektur',
                         fontSize: 11,
