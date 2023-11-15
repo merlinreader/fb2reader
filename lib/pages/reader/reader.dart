@@ -635,6 +635,7 @@ class Reader extends State {
     print('now $now');
     print('timeElapsed $timeElapsed');
     if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
+        // if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 ||
         lastCallTimestampStr == null) {
       print('Entered');
       String screenWord = getWordForm(10 - wordCount.wordEntries.length);
@@ -1044,10 +1045,17 @@ class Reader extends State {
               if (textEditingValue.text == '') {
                 return const Iterable<String>.empty();
               }
-              return result.where((String option) {
-                newWord = textEditingValue.text.toLowerCase();
-                return option.contains(textEditingValue.text.toLowerCase());
+              String pattern = textEditingValue.text.toLowerCase();
+              final Iterable<String> matchingStart =
+                  result.where((String option) {
+                return option.toLowerCase().startsWith(pattern);
               });
+              final Iterable<String> matchingAll =
+                  result.where((String option) {
+                return option.toLowerCase().contains(pattern) &&
+                    !option.toLowerCase().startsWith(pattern);
+              });
+              return matchingStart.followedBy(matchingAll);
             },
             onSelected: (String selection) {
               debugPrint('You just selected $selection');
@@ -1138,10 +1146,17 @@ class Reader extends State {
               if (textEditingValue.text == '') {
                 return const Iterable<String>.empty();
               }
-              return result.where((String option) {
-                newWord = textEditingValue.text.toLowerCase();
-                return option.contains(textEditingValue.text.toLowerCase());
+              String pattern = textEditingValue.text.toLowerCase();
+              final Iterable<String> matchingStart =
+                  result.where((String option) {
+                return option.toLowerCase().startsWith(pattern);
               });
+              final Iterable<String> matchingAll =
+                  result.where((String option) {
+                return option.toLowerCase().contains(pattern) &&
+                    !option.toLowerCase().startsWith(pattern);
+              });
+              return matchingStart.followedBy(matchingAll);
             },
             onSelected: (String selection) {
               debugPrint('You just selected $selection');
