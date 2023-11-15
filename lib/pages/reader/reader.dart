@@ -822,7 +822,7 @@ class Reader extends State {
                 }
                 if (wordCount == null || wordCount.wordEntries.isEmpty) {
                   Fluttertoast.showToast(
-                    msg: 'Нет сохренных слов',
+                    msg: 'Нет сохраненных слов',
                     toastLength: Toast.LENGTH_SHORT, // Длительность отображения
                     gravity: ToastGravity.BOTTOM,
                   );

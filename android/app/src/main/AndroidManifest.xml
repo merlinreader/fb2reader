@@ -46,7 +46,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="merlin"
+                    android:scheme="https"
                     android:host="merlinfb2reader.com"
                     android:pathPrefix="/auth" />
             </intent-filter>
