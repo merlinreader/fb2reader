@@ -327,7 +327,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           saveSettings(themeProvider.isDarkTheme);
                           print('settings $newValue');
                         });
-                      }, iconColor: MyColors.black,
+                      },
+                      iconColor:
+                          Theme.of(context).iconTheme.color ?? MyColors.white,
                     ),
                   ],
                 ),
@@ -389,7 +391,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     );
                                   }
                                 });
-                              }, iconColor: MyColors.white,
+                              },
+                              iconColor: MyColors.white,
                             ),
                             CustomCheckbox(
                               isChecked: textColorWhite,
@@ -417,7 +420,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     );
                                   }
                                 });
-                              }, iconColor: MyColors.black,
+                              },
+                              iconColor: MyColors.black,
                             ),
                             CustomCheckbox(
                               isChecked: textColorMint,
@@ -444,7 +448,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     );
                                   }
                                 });
-                              }, iconColor: MyColors.black,
+                              },
+                              iconColor: MyColors.black,
                             ),
                             CustomCheckbox(
                               isChecked: textColorBeige,
@@ -472,7 +477,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     );
                                   }
                                 });
-                              }, iconColor: MyColors.black,
+                              },
+                              iconColor: MyColors.black,
                             ),
                           ],
                         )
@@ -513,7 +519,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     );
                                   }
                                 });
-                              }, iconColor: MyColors.white,
+                              },
+                              iconColor: MyColors.white,
                             ),
                             CustomCheckbox(
                               isChecked: backgroundColorWhite,
@@ -541,7 +548,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     );
                                   }
                                 });
-                              }, iconColor: MyColors.black,
+                              },
+                              iconColor: MyColors.black,
                             ),
                             CustomCheckbox(
                               isChecked: backgroundColorMint,
@@ -568,7 +576,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     );
                                   }
                                 });
-                              }, iconColor: MyColors.black,
+                              },
+                              iconColor: MyColors.black,
                             ),
                             CustomCheckbox(
                               isChecked: backgroundColorBeige,
@@ -595,7 +604,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     );
                                   }
                                 });
-                              }, iconColor: MyColors.black,
+                              },
+                              iconColor: MyColors.black,
                             ),
                           ],
                         ),
