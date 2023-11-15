@@ -618,13 +618,25 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
     DateTime? lastCallTimestamp;
+    Duration timeElapsed;
     lastCallTimestamp = lastCallTimestampStr != null
         ? DateTime.parse(lastCallTimestampStr)
         : null;
 
     final now = DateTime.now();
-    final timeElapsed = now.difference(lastCallTimestamp!);
-    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10) {
+    final oneDayMore = now.add(const Duration(days: 1));
+    if (lastCallTimestamp != null) {
+      timeElapsed = now.difference(lastCallTimestamp);
+    } else {
+      timeElapsed = now.difference(oneDayMore);
+    }
+    print('lastCallTimestampStr $lastCallTimestampStr');
+    print('lastCallTimestamp $lastCallTimestamp');
+    print('now $now');
+    print('timeElapsed $timeElapsed');
+    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
+        lastCallTimestampStr == null) {
+      print('Entered');
       String screenWord = getWordForm(10 - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
