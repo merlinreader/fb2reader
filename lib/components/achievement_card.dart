@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:merlin/components/achievement.dart';
-import 'package:merlin/UI/theme/theme.dart';
 import 'package:intl/intl.dart';
 
 class AchievementCard extends StatelessWidget {
@@ -59,7 +58,7 @@ class AchievementCard extends StatelessWidget {
                 ),
               ),
               achievement.date == null
-                  ? SizedBox.shrink()
+                  ? const SizedBox.shrink()
                   : Text(
                       (DateFormat('dd.MM.yyyy').format(achievement.date!)),
                       style: TextStyle(

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
@@ -100,6 +101,9 @@ class RecentPageState extends State<RecentPage> {
           .map((item) => ImageInfo.fromJson(item))
           .toList();
       setState(() {});
+    }
+    for (final entry in images) {
+      print(entry.imageBytes);
     }
     setState(() {});
   }
@@ -426,11 +430,19 @@ class RecentPageState extends State<RecentPage> {
                         Stack(
                           alignment: Alignment.bottomCenter,
                           children: [
+                            images[index].imageBytes?.first != 0
+                                ?
                             Image.memory(
                               images[index].imageBytes!,
                               width: MediaQuery.of(context).size.width / 2.5,
                               fit: BoxFit.fitHeight,
-                            ),
+                                  )
+                                : SvgPicture.asset(
+                                    'assets/icon/no_name_book.svg',
+                                    width:
+                                        MediaQuery.of(context).size.width / 2.5,
+                                    fit: BoxFit.fitHeight,
+                                  ),
                             Positioned.fill(
                               child: Align(
                                 alignment: Alignment.bottomCenter,

@@ -271,6 +271,11 @@ class Reader extends State {
         100;
     setState(() {
       _scrollPosition = percentage;
+      position = _scrollController.position.pixels;
+      print(position);
+      print(percentage);
+      print('max = ${_scrollController.position.maxScrollExtent}');
+      print(' ');
     });
     await saveReadingPosition(
         _scrollController.position.pixels, textes.first.filePath);
@@ -311,6 +316,7 @@ class Reader extends State {
         gravity: ToastGravity.BOTTOM,
       );
     }
+
     getText = textes[0]
         .fileText
         .toString()
@@ -337,8 +343,6 @@ class Reader extends State {
     }
     return pages;
   }
-
-  double pagePercent = 0;
 
   List<DeviceOrientation> orientations = [
     DeviceOrientation.portraitUp,
@@ -634,8 +638,8 @@ class Reader extends State {
     print('lastCallTimestamp $lastCallTimestamp');
     print('now $now');
     print('timeElapsed $timeElapsed');
-    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
-        // if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 ||
+    // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
+    if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 ||
         lastCallTimestampStr == null) {
       print('Entered');
       String screenWord = getWordForm(10 - wordCount.wordEntries.length);
@@ -1246,65 +1250,74 @@ class Reader extends State {
                             ))),
                     backgroundColor: Theme.of(context).colorScheme.primary,
                     shadowColor: Colors.transparent,
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text18(
-                          text: textes.isNotEmpty
-                              ? (textes.first.author.toString().length > 8
-                                  ? (textes.first.title.toString().length > 8
-                                      ? '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 600 ? textes[0].title.toString() : MediaQuery.of(context).size.width > 400 ? ('${textes[0].title.toString().substring(0, 3)}..') : ('${textes[0].title.toString().substring(0, 1)}..')}'
-                                      : '${textes[0].author.toString()}. ${MediaQuery.of(context).size.width > 600 ? textes[0].title.toString() : textes[0].title.toString()}')
-                                  // : '${textes[0].author.toString()}. ${textes[0].title.length >= 4 ? textes[0].title.toString() : textes[0].title.toString()}...')
-                                  : textes[0].title.toString())
-                              : 'Нет автора',
-                          textColor: MyColors.black,
-                        ),
-                        GestureDetector(
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width / 1.5,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              clipBehavior: Clip.antiAlias,
+                              child: Text(
+                                textes.isNotEmpty
+                                    ? '${textes[0].author.toString()}. ${textes[0].title.toString()}'
+                                    : 'Нет автора',
+                                softWrap: false,
+                                overflow: TextOverflow.fade,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: 'Tektur',
+                                    color: isDarkTheme
+                                        ? MyColors.white
+                                        : MyColors.black),
+                              ),
+                            ),
+                          ),
+                          GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(
                                       context, RouteNames.readerSettings)
                                   .then((value) => loadStylePreferences());
                             },
-                            child: Theme(
-                                data: lightTheme(),
-                                child: Icon(
-                                  CustomIcons.sliders,
-                                  size: 40,
-                                  color: Theme.of(context).iconTheme.color,
-                                )))
-                      ],
+                            child: Icon(
+                              CustomIcons.sliders,
+                              size: 40,
+                              color: Theme.of(context).iconTheme.color,
+                            ),
+                          ),
+                        ],
+                      )
+                          
+                        
                     ),
-                  ),
                 ),
+                
               )
             : null,
         body: Container(
             color: getBgcColor,
-            child: SafeArea(
-                left: false,
+            child: Stack(children: [
+              SafeArea(
                 top: false,
-                right: false,
-                bottom: false,
-                minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                child: Stack(children: [
-                  ListView.builder(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 29),
+                  child: ListView.builder(
                       controller: _scrollController,
                       itemCount: textPages.length,
                       itemBuilder: (context, index) {
                         if (textes.isNotEmpty) {
                           return _scrollController.hasClients
                               ? () {
-                                  return Center(
-                                    child: SelectableText(
-                                      textPages[index],
-                                      textAlign: TextAlign.justify,
-                                      style: TextStyle(
+                                  return Text(
+                                    textPages[index],
+                                    // textAlign: TextAlign.justify,
+                                    // textAlign: TextAlign.center,
+                                    softWrap: true,
+                                    style: TextStyle(
                                         fontSize: 18.0,
                                         color: getTextColor,
-                                        height: 1.21,
-                                      ),
-                                    ),
+                                        height: 1.41,
+                                        locale: const Locale('ru', 'RU')),
                                   );
                                 }()
                               : Center(
@@ -1319,79 +1332,80 @@ class Reader extends State {
                         }
                         return null;
                       }),
-                  GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        // Скролл вниз / следующая страница
-                        _scrollController.animateTo(
-                            _scrollController.position.pixels +
-                                screenHeight * 0.8,
-                            duration: const Duration(milliseconds: 250),
-                            curve: Curves.ease);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                        child: IgnorePointer(
-                          child: Container(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            color: const Color.fromRGBO(100, 150, 100, 0),
-                          ),
-                        ),
-                      )),
-                  Positioned(
-                    left: screenWidth / 6,
-                    top: screenHeight / 5,
-                    child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onDoubleTap: () async {
-                          showSavedWords(context, textes.first.filePath);
-                        },
-                        onTap: () {
-                          setState(() {
-                            visible = !visible;
-                          });
-                          if (visible) {
-                            SystemChrome.setSystemUIOverlayStyle(
-                                const SystemUiOverlayStyle(
-                                    systemNavigationBarColor: MyColors.white,
-                                    statusBarColor: Colors.transparent));
-                            SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.edgeToEdge);
-                          } else {
-                            SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.immersive);
-                          }
-                        },
-                        child: IgnorePointer(
-                          child: Container(
-                            width: MediaQuery.of(context).size.width / 1.5,
-                            height: MediaQuery.of(context).size.height / 2,
-                            color: const Color.fromRGBO(250, 100, 100, 0),
-                          ),
-                        )),
-                  ),
-                  Positioned(
-                    left: screenWidth / 6,
-                    child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTap: () {
-                          // Сролл вверх / предыдущая страница
-                          _scrollController.animateTo(
-                              _scrollController.position.pixels -
-                                  screenHeight * 0.8,
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.ease);
-                        },
-                        child: IgnorePointer(
-                          child: Container(
-                            width: MediaQuery.of(context).size.width / 1.5,
-                            height: MediaQuery.of(context).size.height / 5,
-                            color: const Color.fromRGBO(100, 150, 200, 0),
-                          ),
-                        )),
-                  ),
-                ]))),
+                ),
+              ),
+              GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () {
+                    // Скролл вниз / следующая страница
+                    _scrollController.animateTo(
+                        _scrollController.position.pixels + screenHeight * 0.8,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        color: const Color.fromRGBO(100, 150, 100, 0),
+                      ),
+                    ),
+                  )),
+              Positioned(
+                left: screenWidth / 6,
+                top: screenHeight / 5,
+                child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onDoubleTap: () async {
+                      showSavedWords(context, textes.first.filePath);
+                    },
+                    onTap: () {
+                      setState(() {
+                        visible = !visible;
+                      });
+                      if (visible) {
+                        SystemChrome.setSystemUIOverlayStyle(
+                            const SystemUiOverlayStyle(
+                                systemNavigationBarColor: MyColors.white,
+                                statusBarColor: Colors.transparent));
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.edgeToEdge);
+                      } else {
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.immersive);
+                      }
+                    },
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 1.5,
+                        height: MediaQuery.of(context).size.height / 2,
+                        color: const Color.fromRGBO(250, 100, 100, 0),
+                      ),
+                    )),
+              ),
+              Positioned(
+                left: screenWidth / 6,
+                child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      // Сролл вверх / предыдущая страница
+                      _scrollController.animateTo(
+                          _scrollController.position.pixels -
+                              screenHeight * 0.8,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.ease);
+                    },
+                    child: IgnorePointer(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 1.5,
+                        height: MediaQuery.of(context).size.height / 5,
+                        color: const Color.fromRGBO(100, 150, 200, 0),
+                      ),
+                    )),
+              ),
+            ])),
         bottomNavigationBar: BottomAppBar(
           color: Theme.of(context).colorScheme.primary,
           child: Stack(
@@ -1501,13 +1515,13 @@ class Reader extends State {
                                         }
                                       },
                                       activeColor: isDarkTheme
-                                          ? MyColors.white 
+                                          ? MyColors.white
                                           : const Color.fromRGBO(29, 29, 33, 1),
                                       inactiveColor: isDarkTheme
                                           ? const Color.fromRGBO(96, 96, 96, 1)
                                           : const Color.fromRGBO(96, 96, 96, 1),
                                       thumbColor: isDarkTheme
-                                          ? MyColors.white 
+                                          ? MyColors.white
                                           : const Color.fromRGBO(29, 29, 33, 1),
                                     ),
                                   )

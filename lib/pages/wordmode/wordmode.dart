@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -113,8 +114,8 @@ class WordCount {
       final timeElapsed = now.difference(_lastCallTimestamp!);
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
-      if (timeElapsed.inHours >= 24) {
-        // if (timeElapsed.inMicroseconds >= 1) {
+      // if (timeElapsed.inHours >= 24) {
+      if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset(_callCount);
         await updateCallInfo();
       } else {
@@ -175,6 +176,60 @@ class WordCount {
     return wordCounts[wordToCount.toLowerCase()] ?? 0;
   }
 
+  // Future<void> countWordsWithOffset(int offset) async {
+  //   final textWithoutPunctuation =
+  //       fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+  //   final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+
+  //   final wordCounts = <String, int>{};
+
+  //   for (final word in words) {
+  //     final normalizedWord = word.toLowerCase();
+  //     if (normalizedWord.length > 3 &&
+  //         !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
+  //         normalizedWord != '-') {
+  //       if (wordCounts.containsKey(normalizedWord)) {
+  //         wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
+  //       } else {
+  //         wordCounts[normalizedWord] = 1;
+  //       }
+  //     }
+  //   }
+
+  //   final sortedWordCounts = wordCounts.entries.toList()
+  //     ..sort((a, b) => b.value.compareTo(a.value));
+
+  //   final start = offset * 10;
+  //   var end = (offset + 1) * 10;
+
+  //   // Убедимся, что конец в пределах допустимого
+  //   if (end > sortedWordCounts.length) {
+  //     end = sortedWordCounts.length;
+  //   }
+
+  //   // Создаем список WordEntry с переводом и транскрипцией
+  //   final wordEntries = <WordEntry>[];
+  //   for (var i = start; i < end; i++) {
+  //     final entry = sortedWordCounts[i];
+  //     final word = entry.key;
+  //     final count = entry.value;
+  //     final translation = await translateToEnglish(word);
+  //     final ipaWord = await getIPA(translation);
+  //     // final partOfSpeechWord = await getPartOfSpeech(translation);
+  //     print('"$word" - "$translation" - [$ipaWord]');
+
+  //     wordEntries.add(WordEntry(
+  //       word: word,
+  //       count: count,
+  //       translation: translation,
+  //       ipa: ipaWord,
+  //     ));
+  //   }
+
+  //   // Присваиваем wordEntries к текущим wordEntries
+  //   this.wordEntries = wordEntries;
+  // }
+
   Future<void> countWordsWithOffset(int offset) async {
     final textWithoutPunctuation =
         fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
@@ -202,32 +257,37 @@ class WordCount {
     var end = (offset + 1) * 10;
 
     // Убедимся, что конец в пределах допустимого
-    if (end > sortedWordCounts.length) {
-      end = sortedWordCounts.length;
-    }
+    end = min(end, sortedWordCounts.length);
 
-    // Создаем список WordEntry с переводом и транскрипцией
-    final wordEntries = <WordEntry>[];
+    final wordEntriesFutures = <Future<WordEntry>>[];
     for (var i = start; i < end; i++) {
       final entry = sortedWordCounts[i];
-      final word = entry.key;
-      final count = entry.value;
-      final translation = await translateToEnglish(word);
-      final ipaWord = await getIPA(translation);
-      // final partOfSpeechWord = await getPartOfSpeech(translation);
-      print('"$word" - "$translation" - [$ipaWord]');
-
-      wordEntries.add(WordEntry(
-        word: word,
-        count: count,
-        translation: translation,
-        ipa: ipaWord,
-      ));
+  
+      wordEntriesFutures.add(
+        createWordEntry(entry.key, entry.value),
+      );
     }
+    final wordEntries = await Future.wait(wordEntriesFutures);
 
     // Присваиваем wordEntries к текущим wordEntries
     this.wordEntries = wordEntries;
   }
+
+  Future<WordEntry> createWordEntry(String word, int count) async {
+    final translation = await translateToEnglish(word);
+    final ipaWord = await getIPA(translation);
+    // final partOfSpeechWord = await getPartOfSpeech(translation);
+    print('"$word" - "$translation" - [$ipaWord]');
+  
+    return WordEntry(
+      word: word,
+      count: count,
+      translation: translation,
+      ipa: ipaWord,
+      // partOfSpeech: partOfSpeechWord, // Uncomment if needed
+    );
+  }
+
 
   Future<List<WordEntry>> processSingleWord(
       String newWord, List<WordEntry> wordEntries) async {
