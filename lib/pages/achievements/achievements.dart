@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:merlin/style/text.dart';
 
 class AchievementsPage extends StatefulWidget {
   const AchievementsPage({super.key});
@@ -31,7 +32,10 @@ class _AchievementsPageState extends State<AchievementsPage> {
         Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(
       url,
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {
+        'Authorization':
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTRlMGNkNjNmYjZmNWJlOGQzMzNlMTIiLCJ0ZWxlZ3JhbUlkIjoiNTEzNTMxIiwiaWF0IjoxNzAwMDM4NjU1fQ.dCKX6jX5CpVshWcir87sfqqJbmrhYmBJbvNZNdt4XAA'
+      },
     );
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -54,34 +58,31 @@ class _AchievementsPageState extends State<AchievementsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 24),
-      child: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: MyColors.purple),
-            )
-          : ListView(
-              children: [
-                const SizedBox(
-                  height: 24,
-                ),
-                const Row(
+    return Stack(
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
+          child: Text24(
+            text: "Достижения",
+            textColor: MyColors.black,
+            //fontWeight: FontWeight.w600,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 72),
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(color: MyColors.purple),
+                )
+              : ListView(
                   children: [
-                    Text(
-                      'Достижения',
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontFamily: 'Tektur',
-                          fontWeight: FontWeight.bold),
-                    ),
+                    ..._achievements
+                        .map((e) => AchievementCard(achievement: e))
+                        .toList()
                   ],
                 ),
-                ..._achievements
-                    .map((e) => AchievementCard(achievement: e))
-                    .toList()
-              ],
-            ),
+        )
+      ],
     );
   }
 }

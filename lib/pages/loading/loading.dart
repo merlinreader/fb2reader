@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merlin/style/colors.dart';
 
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
@@ -6,7 +7,9 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: CircularProgressIndicator(), // Индикатор загрузки в центре
+      child: CircularProgressIndicator(
+        color: MyColors.purple,
+      ), // Индикатор загрузки в центре
     );
   }
 }

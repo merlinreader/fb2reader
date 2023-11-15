@@ -437,7 +437,9 @@ class Reader extends State {
           builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: MyColors.purple,
+                ),
               );
             } else if (snapshot.hasError) {
               return AlertDialog(
@@ -616,13 +618,26 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
     DateTime? lastCallTimestamp;
+    Duration timeElapsed;
     lastCallTimestamp = lastCallTimestampStr != null
         ? DateTime.parse(lastCallTimestampStr)
         : null;
 
     final now = DateTime.now();
-    final timeElapsed = now.difference(lastCallTimestamp!);
-    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10) {
+    final oneDayMore = now.add(const Duration(days: 1));
+    if (lastCallTimestamp != null) {
+      timeElapsed = now.difference(lastCallTimestamp);
+    } else {
+      timeElapsed = now.difference(oneDayMore);
+    }
+    print('lastCallTimestampStr $lastCallTimestampStr');
+    print('lastCallTimestamp $lastCallTimestamp');
+    print('now $now');
+    print('timeElapsed $timeElapsed');
+    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
+        // if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 ||
+        lastCallTimestampStr == null) {
+      print('Entered');
       String screenWord = getWordForm(10 - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
@@ -806,7 +821,9 @@ class Reader extends State {
           builder: (BuildContext context, AsyncSnapshot<WordCount> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: MyColors.purple,
+                ),
               );
             } else if (snapshot.hasError) {
               return AlertDialog(
@@ -822,7 +839,7 @@ class Reader extends State {
                 }
                 if (wordCount == null || wordCount.wordEntries.isEmpty) {
                   Fluttertoast.showToast(
-                    msg: 'Нет сохренных слов',
+                    msg: 'Нет сохраненных слов',
                     toastLength: Toast.LENGTH_SHORT, // Длительность отображения
                     gravity: ToastGravity.BOTTOM,
                   );
@@ -1028,10 +1045,17 @@ class Reader extends State {
               if (textEditingValue.text == '') {
                 return const Iterable<String>.empty();
               }
-              return result.where((String option) {
-                newWord = textEditingValue.text.toLowerCase();
-                return option.contains(textEditingValue.text.toLowerCase());
+              String pattern = textEditingValue.text.toLowerCase();
+              final Iterable<String> matchingStart =
+                  result.where((String option) {
+                return option.toLowerCase().startsWith(pattern);
               });
+              final Iterable<String> matchingAll =
+                  result.where((String option) {
+                return option.toLowerCase().contains(pattern) &&
+                    !option.toLowerCase().startsWith(pattern);
+              });
+              return matchingStart.followedBy(matchingAll);
             },
             onSelected: (String selection) {
               debugPrint('You just selected $selection');
@@ -1122,10 +1146,17 @@ class Reader extends State {
               if (textEditingValue.text == '') {
                 return const Iterable<String>.empty();
               }
-              return result.where((String option) {
-                newWord = textEditingValue.text.toLowerCase();
-                return option.contains(textEditingValue.text.toLowerCase());
+              String pattern = textEditingValue.text.toLowerCase();
+              final Iterable<String> matchingStart =
+                  result.where((String option) {
+                return option.toLowerCase().startsWith(pattern);
               });
+              final Iterable<String> matchingAll =
+                  result.where((String option) {
+                return option.toLowerCase().contains(pattern) &&
+                    !option.toLowerCase().startsWith(pattern);
+              });
+              return matchingStart.followedBy(matchingAll);
             },
             onSelected: (String selection) {
               debugPrint('You just selected $selection');
@@ -1470,13 +1501,13 @@ class Reader extends State {
                                         }
                                       },
                                       activeColor: isDarkTheme
-                                          ? const Color.fromRGBO(96, 96, 96, 1)
+                                          ? MyColors.white 
                                           : const Color.fromRGBO(29, 29, 33, 1),
                                       inactiveColor: isDarkTheme
-                                          ? MyColors.white
+                                          ? const Color.fromRGBO(96, 96, 96, 1)
                                           : const Color.fromRGBO(96, 96, 96, 1),
                                       thumbColor: isDarkTheme
-                                          ? const Color.fromRGBO(96, 96, 96, 1)
+                                          ? MyColors.white 
                                           : const Color.fromRGBO(29, 29, 33, 1),
                                     ),
                                   )
@@ -1491,7 +1522,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.turn,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 34,
+                                    size: 30,
                                   ),
                                 ),
                                 const Padding(
@@ -1508,7 +1539,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.theme,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 34,
+                                    size: 30,
                                   ),
                                 ),
                                 const Padding(
@@ -1520,7 +1551,7 @@ class Reader extends State {
                                   child: Icon(
                                     CustomIcons.wm,
                                     color: Theme.of(context).iconTheme.color,
-                                    size: 34,
+                                    size: 30,
                                   ),
                                 )
                               ],

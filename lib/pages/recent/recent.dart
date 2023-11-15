@@ -66,6 +66,7 @@ class RecentPageState extends State<RecentPage> {
   String? lastName;
   String? name;
   String? title;
+  bool _isOperationInProgress = false;
 
   @override
   void initState() {
@@ -399,20 +400,20 @@ class RecentPageState extends State<RecentPage> {
               builder: (ctx, index) {
                 return GestureDetector(
                   onTap: () async {
-                    await sendDataFromLocalStorage('textKey', index);
-                    if (isSended) {
-                      isSended = false;
-                      // ignore: use_build_context_synchronously
-                      await Navigator.pushNamed(context, RouteNames.reader)
-                          .then((_) {
-                        getDataFromLocalStorage('booksKey');
-                      });
+                    if (!_isOperationInProgress) {
+                      _isOperationInProgress = true;
+                      await sendDataFromLocalStorage('textKey', index);
+                      if (isSended) {
+                        isSended = false;
+                        // ignore: use_build_context_synchronously
+                        Navigator.pushNamed(context, RouteNames.reader)
+                            .then((_) {
+                          getDataFromLocalStorage('booksKey');
+                          _isOperationInProgress = false;
+                        });
+                      }
                     } else {
-                      Fluttertoast.showToast(
-                        msg: 'Ошибка загрузки книги',
-                        toastLength: Toast.LENGTH_SHORT,
-                        gravity: ToastGravity.BOTTOM,
-                      );
+                      _isOperationInProgress = false;
                       return;
                     }
                   },

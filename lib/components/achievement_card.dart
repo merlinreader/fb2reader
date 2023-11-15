@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merlin/components/achievement.dart';
+import 'package:merlin/UI/theme/theme.dart';
 import 'package:intl/intl.dart';
 
 class AchievementCard extends StatelessWidget {
@@ -49,16 +50,18 @@ class AchievementCard extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: achievement.isReceived
-                        ? Colors.black
-                        : Colors.black.withOpacity(0.2),
+                        ? Theme.of(context).colorScheme.onSurface
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.2),
                   ),
                 ),
               ),
               achievement.date == null
                   ? SizedBox.shrink()
                   : Text(
-                      (DateFormat('dd.MM.yyyy').format(achievement.date!)) ??
-                          '',
+                      (DateFormat('dd.MM.yyyy').format(achievement.date!)),
                       style: TextStyle(
                         fontFamily: 'Tektur',
                         fontSize: 11,
