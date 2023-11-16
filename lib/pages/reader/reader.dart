@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
+import 'package:merlin/domain/data_providers/color_provider.dart';
 import 'package:merlin/main.dart';
 import 'package:merlin/pages/wordmode/models/word_entry.dart';
 import 'package:merlin/pages/wordmode/wordmode.dart';
@@ -140,12 +141,8 @@ class Reader extends State {
   @override
   Future<void> didChangeDependencies() async {
     final prefs = await SharedPreferences.getInstance();
-    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.white.value;
-    final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
-    getBgcColor = Color(bgColor);
-    getTextColor = Color(textColor);
     isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
-
+    loadStylePreferences();
     super.didChangeDependencies();
   }
 
@@ -278,16 +275,22 @@ class Reader extends State {
         _scrollController.position.pixels, textes.first.filePath);
   }
 
-  Color getTextColor = MyColors.black;
-  Color getBgcColor = MyColors.white;
+  Color textColor = MyColors.black;
+  Color backgroundColor = MyColors.white;
+  final ColorProvider _colorProvider = ColorProvider();
 
   Future<void> loadStylePreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    final bgColor = prefs.getInt('backgroundColor') ?? MyColors.white.value;
-    final textColor = prefs.getInt('textColor') ?? MyColors.black.value;
+    final backgroundColorFromStorage =
+        await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
+    final textColorFromStorage =
+        await _colorProvider.getColor(ColorKeys.readerTextColor);
     setState(() {
-      getBgcColor = Color(bgColor);
-      getTextColor = Color(textColor);
+      if (backgroundColorFromStorage != null) {
+        backgroundColor = backgroundColorFromStorage;
+      }
+      if (textColorFromStorage != null) {
+        textColor = textColorFromStorage;
+      }
     });
   }
 
@@ -1242,8 +1245,7 @@ class Reader extends State {
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 1.5,
+                          Expanded(
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               clipBehavior: Clip.antiAlias,
@@ -1280,7 +1282,7 @@ class Reader extends State {
               )
             : null,
         body: Container(
-            color: getBgcColor,
+            color: backgroundColor,
             child: Stack(children: [
               SafeArea(
                 top: false,
@@ -1300,7 +1302,7 @@ class Reader extends State {
                                     softWrap: true,
                                     style: TextStyle(
                                         fontSize: 18.0,
-                                        color: getTextColor,
+                                        color: textColor,
                                         height: 1.41,
                                         locale: const Locale('ru', 'RU')),
                                   );
@@ -1310,7 +1312,7 @@ class Reader extends State {
                                     'Нет текста для отображения',
                                     style: TextStyle(
                                       fontSize: 18.0,
-                                      color: getTextColor,
+                                      color: textColor,
                                     ),
                                   ),
                                 );
