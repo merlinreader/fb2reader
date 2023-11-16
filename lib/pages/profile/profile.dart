@@ -49,6 +49,9 @@ class _ProfilePage extends State<ProfilePage> {
   late String getToken;
   late String qwerty;
   String firstName = 'Merlin';
+  List<AchievementStatus> getAchievements = [];
+  late var achievements;
+  
 
   // ignore: unused_field
   String? _link = 'unknown';
@@ -57,6 +60,43 @@ class _ProfilePage extends State<ProfilePage> {
     super.initState();
     initUniLinks();
     getTokenFromLocalStorage();
+    getAchievementsFromJson();
+  }
+
+  Future<List<Achievement>> fetchJson() async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    final url =
+        Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      final ach = GetAchievementsResponse.fromJson(jsonResponse);
+      final List<Achievement> achievements = [];
+      achievements.add(ach.achievements.baby);
+      achievements.add(ach.achievements.spell);
+      achievements.addAll(ach.achievements.simpleModeAchievements);
+      achievements.addAll(ach.achievements.wordModeAchievements);
+      print('pizda ${achievements.length}');
+      return achievements;
+    } else {
+      // print('Ошибка запроса достижений: ${response.statusCode}');
+      // print('Токен: $token');
+      return [];
+    }
+  }
+
+  Future<void> getAchievementsFromJson() async {
+    print('start');
+    achievements = await fetchJson();
+    for (var entry in achievements) {
+      getAchievements.add(AchievementStatus(entry, false));
+    }
+    print('done');
+    print(getAchievements.length);
   }
 
   Future<void> getTokenFromLocalStorage() async {
@@ -403,39 +443,9 @@ class _ProfilePage extends State<ProfilePage> {
     );
   }
 
-  Future<List<Achievement>> fetchJson() async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
-    final url =
-        Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
-    final response = await http.get(
-      url,
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    if (response.statusCode == 200) {
-      final jsonResponse = json.decode(response.body);
-      final ach = GetAchievementsResponse.fromJson(jsonResponse);
-      final List<Achievement> achievements = [];
-      achievements.add(ach.achievements.baby);
-      achievements.add(ach.achievements.spell);
-      achievements.addAll(ach.achievements.simpleModeAchievements);
-      achievements.addAll(ach.achievements.wordModeAchievements);
-      return achievements;
-    } else {
-      // print('Ошибка запроса достижений: ${response.statusCode}');
-      // print('Токен: $token');
-      return [];
-    }
-  }
-
-  void chooseAvatar() async {
+  void chooseAvatar() {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final achievements = await fetchJson();
-    List<AchievementStatus> getAchievements = [];
-    for (var entry in achievements) {
-      getAchievements.add(AchievementStatus(entry, false));
-    }
-    bool isClicked = false;
+    print(getAchievements.length);
     // ignore: use_build_context_synchronously
     showDialog(
       context: context,
