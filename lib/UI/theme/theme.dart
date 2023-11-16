@@ -24,6 +24,12 @@ ThemeData darkTheme() => ThemeData(
             fontFamily: 'Tektur',
             fontSize: 24,
             fontWeight: FontWeight.bold),
+        //text20
+        labelMedium: TextStyle(
+            color: MyColors.bgWhite,
+            fontFamily: 'Tektur',
+            fontSize: 20,
+            fontWeight: FontWeight.bold),
         //Text11
         bodySmall: TextStyle(
             fontFamily: 'Tektur',
@@ -140,6 +146,12 @@ ThemeData lightTheme() => ThemeData(
             color: MyColors.black,
             fontSize: 18,
             fontWeight: FontWeight.normal),
+        //text20
+        labelMedium: TextStyle(
+            color: MyColors.bgWhite,
+            fontFamily: 'Tektur',
+            fontSize: 20,
+            fontWeight: FontWeight.bold),
         //Text12
         titleSmall: TextStyle(
             fontFamily: 'Tektur',

@@ -12,6 +12,7 @@ import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:merlin/pages/statistic/statistic.dart';
+import 'package:merlin/pages/profile/profile.dart';
 import 'package:merlin/functions/location.dart';
 
 class AppPage extends StatefulWidget {

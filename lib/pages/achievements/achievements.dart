@@ -8,6 +8,12 @@ import 'package:merlin/style/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:merlin/style/text.dart';
 
+// пока не забыл
+// Создаем список с name полученных ачивок
+// Пихаем это в попап в профиле на карандшик
+// Выводим из нашего кода только те, что в списке
+// Чтобы список обновился, надо заходить в Достижения. Но это каждый человек будет делать, чтобы убедиться, чо ачивка есть.
+
 class AchievementsPage extends StatefulWidget {
   const AchievementsPage({super.key});
 

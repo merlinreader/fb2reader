@@ -1,7 +1,10 @@
+import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/theme/theme.dart';
+import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
+import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
@@ -15,6 +18,13 @@ import 'package:uni_links/uni_links.dart';
 import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class AchievementStatus {
+  Achievement achievement;
+  bool isUnlocked;
+
+  AchievementStatus(this.achievement, this.isUnlocked);
+}
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
@@ -118,11 +128,20 @@ class _ProfilePage extends State<ProfilePage> {
         });
       }
     }
+    await prefs.setString('firstName', firstName);
+  }
+
+  Future<void> getFirstNameFromLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      firstName = prefs.getString('firstName') ?? 'Merlin';
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    getFirstName();
+    getFirstNameFromLocalStorage();
+    double size = 20;
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: SafeArea(
@@ -141,7 +160,21 @@ class _ProfilePage extends State<ProfilePage> {
           const SizedBox(height: 24),
           Center(
               child: Column(children: [
-            const MerlinWidget(),
+            Stack(
+              children: <Widget>[
+                const MerlinWidget(),
+                Positioned(
+                  bottom: -15,
+                  left: 250,
+                  child: IconButton(
+                      onPressed: chooseAvatar,
+                      icon: Icon(
+                        CustomIcons.pen,
+                        size: size,
+                      )),
+                )
+              ],
+            ),
             const SizedBox(height: 12),
             Text24(
               text: firstName,
@@ -156,16 +189,15 @@ class _ProfilePage extends State<ProfilePage> {
                   final locationData =
                       snapshot.data ?? 'Нет данных о местоположении';
                   return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Center(
-                        child: Text14(
-                            text: locationData, textColor: MyColors.black),
-                      ),
+                      SizedBox(width: size),
+                      Text14(text: locationData, textColor: MyColors.black),
                       IconButton(
                           onPressed: geo,
-                          icon: const Icon(
+                          icon: Icon(
                             CustomIcons.pen,
-                            size: 20,
+                            size: size,
                           )),
                     ],
                   );
@@ -352,8 +384,10 @@ class _ProfilePage extends State<ProfilePage> {
       builder: (context) => Theme(
         data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
         child: AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
           title: const Center(
-            child: Text18(text: 'Данные', textColor: MyColors.black),
+            child: Text20(text: 'Геолокация', textColor: MyColors.black),
           ),
           alignment: Alignment.center,
           actions: [
@@ -368,4 +402,136 @@ class _ProfilePage extends State<ProfilePage> {
       ),
     );
   }
+
+  Future<List<Achievement>> fetchJson() async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    final url =
+        Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
+    final response = await http.get(
+      url,
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    if (response.statusCode == 200) {
+      final jsonResponse = json.decode(response.body);
+      final ach = GetAchievementsResponse.fromJson(jsonResponse);
+      final List<Achievement> achievements = [];
+      achievements.add(ach.achievements.baby);
+      achievements.add(ach.achievements.spell);
+      achievements.addAll(ach.achievements.simpleModeAchievements);
+      achievements.addAll(ach.achievements.wordModeAchievements);
+      return achievements;
+    } else {
+      // print('Ошибка запроса достижений: ${response.statusCode}');
+      // print('Токен: $token');
+      return [];
+    }
+  }
+
+  void chooseAvatar() async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final achievements = await fetchJson();
+    List<AchievementStatus> getAchievements = [];
+    for (var entry in achievements) {
+      getAchievements.add(AchievementStatus(entry, false));
+    }
+    bool isClicked = false;
+    // ignore: use_build_context_synchronously
+    showDialog(
+      context: context,
+      builder: (context) => Theme(
+        data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
+        child: AlertDialog(
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          alignment: Alignment.center,
+          titlePadding: const EdgeInsets.only(top: 10, bottom: 10),
+          title: Center(
+              child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: SizedBox(
+                  height: 65,
+                  width: 65,
+                  child: MerlinWidget(),
+                ),
+              ),
+              const Text24(text: 'Аватар', textColor: MyColors.black),
+              const SizedBox(
+                height: 10,
+              ),
+              Container(
+                height: 10,
+                width: double.infinity,
+                color: MyColors.bgWhite,
+              ),
+            ],
+          )),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Center(
+                child:
+                    Text16(text: 'Выберите аватар', textColor: MyColors.black),
+              ),
+              Container(
+                padding: const EdgeInsets.only(top: 15),
+                height: MediaQuery.of(context).size.height / 6,
+                width: MediaQuery.of(context).size.width,
+                child: GridView.builder(
+                    itemCount: achievements.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4),
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            print('asdsa');
+                            for (var entry in getAchievements) {
+                              entry.isUnlocked = false;
+                            }
+                            getAchievements[index].isUnlocked = true;
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(6.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              boxShadow: const [
+                                BoxShadow(
+                                    color: MyColors.black,
+                                    offset: Offset.zero,
+                                    blurRadius: 5,
+                                    spreadRadius: 0.1,
+                                    blurStyle: BlurStyle.normal)
+                              ],
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: getAchievements[index].isUnlocked
+                                      ? MyColors.purple
+                                      : MyColors.white,
+                                  width: 4,
+                                  style: BorderStyle.solid),
+                              image: DecorationImage(
+                                  image: NetworkImage(getAchievements[index]
+                                      .achievement
+                                      .picture)),
+                              // image: NetworkImage(achievements[index].picture)),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+/*..._achievements
+                        .map((e) => AchievementCard(achievement: e))
+                        .toList() */

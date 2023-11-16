@@ -67,6 +67,22 @@ class Text18 extends StatelessWidget {
   }
 }
 
+class Text20 extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const Text20({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: Theme.of(context).textTheme.titleLarge
+        //TextStyle(
+        //fontFamily: 'Tektur',
+        //color: textColor,
+        //fontSize: 24,
+        //fontWeight: FontWeight.bold)
+        );
+  }
+}
+
 class Text16 extends StatelessWidget {
   final String text;
   final Color textColor;

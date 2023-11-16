@@ -33,8 +33,8 @@ class MerlinWidget extends StatelessWidget {
   }
 }
 
-class Dragon1Widget extends StatelessWidget {
-  const Dragon1Widget({super.key});
+class AvatarWidget extends StatelessWidget {
+  const AvatarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
