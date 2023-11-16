@@ -16,7 +16,6 @@ import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class Profile extends StatelessWidget {
   const Profile({super.key});
   @override
@@ -39,7 +38,7 @@ class _ProfilePage extends State<ProfilePage> {
   String token = '';
   late String getToken;
   late String qwerty;
-  String? firstName;
+  late String firstName;
 
   String? _link = 'unknown';
   @override
@@ -109,17 +108,22 @@ class _ProfilePage extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
     const url = 'https://fb2.cloud.leam.pro/api/account/';
-
+    final fetchedName;
     final response = await http.get(
       Uri.parse(url),
       headers: {'Authorization': 'Bearer $token'},
     );
     final data = json.decode(response.body);
-    final fetchedId = data['firstName'];
-    // print(fetchedId.toString());
+    print(data['firstName']);
+    if (data['firstName'] == null) {
+      fetchedName = 'Merlin';
+    } else {
+      fetchedName = data['firstName'];
+    }
+    print(fetchedName.toString());
     if (response.statusCode == 200) {
       setState(() {
-        firstName = fetchedId.toString();
+        firstName = fetchedName.toString();
       });
     }
   }
@@ -147,7 +151,7 @@ class _ProfilePage extends State<ProfilePage> {
             const MerlinWidget(),
             const SizedBox(height: 12),
             Text24(
-              text: firstName ?? 'Merlin',
+              text: firstName,
               textColor: MyColors.black,
             ),
             FutureBuilder(
