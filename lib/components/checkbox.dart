@@ -5,23 +5,15 @@ class CustomCheckbox extends StatelessWidget {
   final Function(bool) onChanged;
   final Color bgColor;
   final Color borderColor;
-  final Color checkColor;
   final Color iconColor;
 
   const CustomCheckbox(
-      {super.key,
-      required this.isChecked,
-      required this.onChanged,
-      required this.bgColor,
-      required this.borderColor,
-      required this.checkColor,
-      required this.iconColor});
+      {super.key, required this.isChecked, required this.onChanged, required this.bgColor, required this.borderColor, required this.iconColor});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-          const EdgeInsets.only(right: 8.0, left: 0.0, top: 8.0, bottom: 8.0),
+      padding: const EdgeInsets.only(right: 8.0, left: 0.0, top: 8.0, bottom: 8.0),
       child: InkWell(
         onTap: () {
           onChanged(!isChecked);
