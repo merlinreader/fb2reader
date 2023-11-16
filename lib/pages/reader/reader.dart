@@ -114,7 +114,8 @@ class Reader extends State {
               //   curve: Curves.linear,
               // );
               if (_scrollController.position.maxScrollExtent < lastPosition) {
-                _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+                _scrollController
+                    .jumpTo(_scrollController.position.maxScrollExtent);
               } else {
                 _scrollController.jumpTo(lastPosition - lastPosition / 8000);
               }
@@ -148,19 +149,24 @@ class Reader extends State {
   Future<void> _loadPageCountFromLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      pageCountSimpleMode = (prefs.getInt('pageCountSimpleMode-${textes.first.filePath}') ?? 0);
+      pageCountSimpleMode =
+          (prefs.getInt('pageCountSimpleMode-${textes.first.filePath}') ?? 0);
       // print('pageCountSimpleMode-${textes.first.filePath}');
     });
   }
 
   Future<void> _savePageCountToLocalStorage(List<String> textPages) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pageCountSimpleMode = ((_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * textPages.length).toInt();
+    pageCountSimpleMode = ((_scrollController.position.pixels /
+                _scrollController.position.maxScrollExtent) *
+            textPages.length)
+        .toInt();
     // print(((_scrollController.position.pixels /
     //             _scrollController.position.maxScrollExtent) *
     //         textPages.length)
     //     .toInt());
-    prefs.setInt('pageCountSimpleMode-${textes.first.filePath}', pageCountSimpleMode);
+    prefs.setInt(
+        'pageCountSimpleMode-${textes.first.filePath}', pageCountSimpleMode);
   }
 
   bool _isDarkTheme = false;
@@ -198,15 +204,20 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataJson = prefs.getString(key);
     if (imageDataJson != null) {
-      images = (jsonDecode(imageDataJson) as List).map((item) => recent.ImageInfo.fromJson(item)).toList();
+      images = (jsonDecode(imageDataJson) as List)
+          .map((item) => recent.ImageInfo.fromJson(item))
+          .toList();
       setState(() {});
     }
   }
 
   Future<void> saveProgress() async {
     final prefs = await SharedPreferences.getInstance();
-    images.firstWhere((element) => element.fileName == textes.first.filePath).progress =
-        _scrollController.position.pixels / _scrollController.position.maxScrollExtent;
+    images
+            .firstWhere((element) => element.fileName == textes.first.filePath)
+            .progress =
+        _scrollController.position.pixels /
+            _scrollController.position.maxScrollExtent;
     setState(() {});
     await prefs.setString('booksKey', jsonEncode(images));
     // print('SUCCESS PROGRESS');
@@ -231,7 +242,8 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     final readingPositionsJson = prefs.getString('readingPositions');
     if (readingPositionsJson != null) {
-      final readingPositions = Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
+      final readingPositions =
+          Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
       if (readingPositions.containsKey(filePath)) {
         setState(() {
           position = readingPositions[filePath];
@@ -248,7 +260,9 @@ class Reader extends State {
     if (_scrollController.position.maxScrollExtent == 0) {
       return;
     }
-    double percentage = (_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * 100;
+    double percentage = (_scrollController.position.pixels /
+            _scrollController.position.maxScrollExtent) *
+        100;
     setState(() {
       _scrollPosition = percentage;
       position = _scrollController.position.pixels;
@@ -257,7 +271,8 @@ class Reader extends State {
       // print('max = ${_scrollController.position.maxScrollExtent}');
       // print(' ');
     });
-    await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
+    await saveReadingPosition(
+        _scrollController.position.pixels, textes.first.filePath);
   }
 
   Color textColor = MyColors.black;
@@ -265,8 +280,10 @@ class Reader extends State {
   final ColorProvider _colorProvider = ColorProvider();
 
   Future<void> loadStylePreferences() async {
-    final backgroundColorFromStorage = await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
-    final textColorFromStorage = await _colorProvider.getColor(ColorKeys.readerTextColor);
+    final backgroundColorFromStorage =
+        await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
+    final textColorFromStorage =
+        await _colorProvider.getColor(ColorKeys.readerTextColor);
     setState(() {
       if (backgroundColorFromStorage != null) {
         backgroundColor = backgroundColorFromStorage;
@@ -285,7 +302,9 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     String? textDataJson = prefs.getString(key);
     if (textDataJson != null) {
-      textes = (jsonDecode(textDataJson) as List).map((item) => BookInfo.fromJson(item)).toList();
+      textes = (jsonDecode(textDataJson) as List)
+          .map((item) => BookInfo.fromJson(item))
+          .toList();
       setState(() {});
     }
     if (textes.isEmpty) {
@@ -297,7 +316,11 @@ class Reader extends State {
       );
     }
 
-    getText = textes[0].fileText.toString().replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
+    getText = textes[0]
+        .fileText
+        .toString()
+        .replaceAll(RegExp(r'\['), '')
+        .replaceAll(RegExp(r'\]'), '');
   }
 
   List<String> getPages(String text, int pageSize) {
@@ -330,8 +353,10 @@ class Reader extends State {
   int currentOrientationIndex = 0;
 
   void switchOrientation() {
-    currentOrientationIndex = (currentOrientationIndex + 1) % orientations.length;
-    SystemChrome.setPreferredOrientations([orientations[currentOrientationIndex]]);
+    currentOrientationIndex =
+        (currentOrientationIndex + 1) % orientations.length;
+    SystemChrome.setPreferredOrientations(
+        [orientations[currentOrientationIndex]]);
   }
 
   // Метод для объединения прошлых и новых слов
@@ -372,10 +397,15 @@ class Reader extends State {
 
     // Загрузка и декодирование существующих данных, если они есть.
     String? storedData = prefs.getString(key);
-    List<WordCount> wordDatas = storedData != null ? (jsonDecode(storedData) as List).map((item) => WordCount.fromJson(item)).toList() : [];
+    List<WordCount> wordDatas = storedData != null
+        ? (jsonDecode(storedData) as List)
+            .map((item) => WordCount.fromJson(item))
+            .toList()
+        : [];
 
     // Поиск и обновление существующего WordCount, если он есть, иначе добавление нового.
-    int index = wordDatas.indexWhere((element) => element.filePath == wordCount.filePath);
+    int index = wordDatas
+        .indexWhere((element) => element.filePath == wordCount.filePath);
     if (index != -1) {
       wordDatas[index] = wordCount; // Обновление существующего WordCount
     } else {
@@ -399,7 +429,8 @@ class Reader extends State {
     }
   }
 
-  Future<void> showTableDialog(BuildContext context, WordCount wordCount) async {
+  Future<void> showTableDialog(
+      BuildContext context, WordCount wordCount) async {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -462,7 +493,9 @@ class Reader extends State {
                               DataTable(
                                 columnSpacing: 38.0,
                                 showBottomBorder: false,
-                                dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                dataTextStyle: const TextStyle(
+                                    fontFamily: 'Roboto',
+                                    color: MyColors.black),
                                 columns: const [
                                   DataColumn(
                                     label: Expanded(
@@ -494,7 +527,8 @@ class Reader extends State {
                                     cells: [
                                       DataCell(InkWell(
                                         onTap: () async {
-                                          await _showWordInputDialog(entry.word, wordCount.wordEntries);
+                                          await _showWordInputDialog(entry.word,
+                                              wordCount.wordEntries);
                                           setState(() {
                                             entry.word;
                                             entry.count;
@@ -509,7 +543,10 @@ class Reader extends State {
                                       DataCell(
                                         ConstrainedBox(
                                           constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                            maxWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.25,
                                           ),
                                           child: TextForTable(
                                             text: '[ ${entry.ipa} ]',
@@ -520,10 +557,15 @@ class Reader extends State {
                                       DataCell(
                                         ConstrainedBox(
                                           constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                            maxWidth: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.25,
                                           ),
                                           child: TextForTable(
-                                            text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                            text: entry.translation!.isNotEmpty
+                                                ? entry.translation!
+                                                : 'N/A',
                                             textColor: MyColors.black,
                                           ),
                                         ),
@@ -534,7 +576,8 @@ class Reader extends State {
                               ),
                               TextButton(
                                   onPressed: () async {
-                                    await saveWordCountToLocalstorage(wordCount);
+                                    await saveWordCountToLocalstorage(
+                                        wordCount);
                                     Navigator.pop(context);
                                   },
                                   child: const Text16(
@@ -578,7 +621,9 @@ class Reader extends State {
     final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
     DateTime? lastCallTimestamp;
     Duration timeElapsed;
-    lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
+    lastCallTimestamp = lastCallTimestampStr != null
+        ? DateTime.parse(lastCallTimestampStr)
+        : null;
 
     final now = DateTime.now();
     final oneDayMore = now.add(const Duration(days: 1));
@@ -592,12 +637,14 @@ class Reader extends State {
     // print('now $now');
     // print('timeElapsed $timeElapsed');
     // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
-    if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 || lastCallTimestampStr == null) {
+    if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 ||
+        lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(10 - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('lastCallTimestamp', lastCallTimestamp.toIso8601String());
+      await prefs.setString(
+          'lastCallTimestamp', lastCallTimestamp.toIso8601String());
 
       showDialog<void>(
           context: context,
@@ -644,7 +691,8 @@ class Reader extends State {
                             DataTable(
                               columnSpacing: 38.0,
                               showBottomBorder: false,
-                              dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                              dataTextStyle: const TextStyle(
+                                  fontFamily: 'Roboto', color: MyColors.black),
                               columns: const [
                                 DataColumn(
                                   label: Expanded(
@@ -676,7 +724,8 @@ class Reader extends State {
                                   cells: [
                                     DataCell(InkWell(
                                       onTap: () async {
-                                        await _showWordInputDialog(entry.word, wordCount.wordEntries);
+                                        await _showWordInputDialog(
+                                            entry.word, wordCount.wordEntries);
                                         setState(() {
                                           entry.word;
                                           entry.count;
@@ -691,7 +740,10 @@ class Reader extends State {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: BoxConstraints(
-                                          maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                          maxWidth: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.25,
                                         ),
                                         child: TextForTable(
                                           text: '[ ${entry.ipa} ]',
@@ -702,10 +754,15 @@ class Reader extends State {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: BoxConstraints(
-                                          maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                          maxWidth: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.25,
                                         ),
                                         child: TextForTable(
-                                          text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                          text: entry.translation!.isNotEmpty
+                                              ? entry.translation!
+                                              : 'N/A',
                                           textColor: MyColors.black,
                                         ),
                                       ),
@@ -717,7 +774,10 @@ class Reader extends State {
                             wordCount.wordEntries.length < 10
                                 ? TextButton(
                                     onPressed: () async {
-                                      await addNewWord(wordCount.wordEntries, wordCount, wordCount.wordEntries.length);
+                                      await addNewWord(
+                                          wordCount.wordEntries,
+                                          wordCount,
+                                          wordCount.wordEntries.length);
                                     },
                                     child: const Text16(
                                       text: 'Добавить',
@@ -725,7 +785,8 @@ class Reader extends State {
                                     ))
                                 : TextButton(
                                     onPressed: () async {
-                                      await saveWordCountToLocalstorage(wordCount);
+                                      await saveWordCountToLocalstorage(
+                                          wordCount);
                                       Navigator.pop(context);
                                     },
                                     child: const Text16(
@@ -801,7 +862,8 @@ class Reader extends State {
                               children: <Widget>[
                                 IconButton(
                                   alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                   icon: const Icon(Icons.close),
                                   onPressed: () {
                                     Navigator.of(context).pop();
@@ -819,7 +881,9 @@ class Reader extends State {
                                 DataTable(
                                   columnSpacing: 38.0,
                                   showBottomBorder: false,
-                                  dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                  dataTextStyle: const TextStyle(
+                                      fontFamily: 'Roboto',
+                                      color: MyColors.black),
                                   columns: const [
                                     DataColumn(
                                       label: Expanded(
@@ -852,7 +916,10 @@ class Reader extends State {
                                         DataCell(
                                           ConstrainedBox(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.25,
                                             ),
                                             child: TextForTable(
                                               text: entry.word,
@@ -863,7 +930,10 @@ class Reader extends State {
                                         DataCell(
                                           ConstrainedBox(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.25,
                                             ),
                                             child: TextForTable(
                                               text: '[ ${entry.ipa} ]',
@@ -874,10 +944,16 @@ class Reader extends State {
                                         DataCell(
                                           ConstrainedBox(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                              maxWidth: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.25,
                                             ),
                                             child: TextForTable(
-                                              text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                              text:
+                                                  entry.translation!.isNotEmpty
+                                                      ? entry.translation!
+                                                      : 'N/A',
                                               textColor: MyColors.black,
                                             ),
                                           ),
@@ -927,11 +1003,13 @@ class Reader extends State {
     if (result == true) {
       // Действие, выполняемое после нажатия "Да"
 
-      final wordCount = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText);
+      final wordCount = WordCount(
+          filePath: textes.first.filePath, fileText: textes.first.fileText);
       await showEmptyTable(context, wordCount);
     } else if (result == false) {
       // Действие, выполняемое после нажатия "Нет"
-      final wordCount = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText);
+      final wordCount = WordCount(
+          filePath: textes.first.filePath, fileText: textes.first.fileText);
       // Если нужно сбросить счётчик времени
       // await wordCount.resetCallCount();
       // await wordCount.checkCallInfo();
@@ -939,8 +1017,11 @@ class Reader extends State {
     }
   }
 
-  Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries) async {
-    List<String> words = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
+  Future<void> _showWordInputDialog(
+      String word, List<WordEntry> wordEntries) async {
+    List<String> words = WordCount(
+            filePath: textes.first.filePath, fileText: textes.first.fileText)
+        .getAllWords();
     Set<String> uniqueSet = <String>{};
     List<String> result = [];
     for (String item in words.reversed) {
@@ -962,11 +1043,14 @@ class Reader extends State {
                 return const Iterable<String>.empty();
               }
               String pattern = textEditingValue.text.toLowerCase();
-              final Iterable<String> matchingStart = result.where((String option) {
+              final Iterable<String> matchingStart =
+                  result.where((String option) {
                 return option.toLowerCase().startsWith(pattern);
               });
-              final Iterable<String> matchingAll = result.where((String option) {
-                return option.toLowerCase().contains(pattern) && !option.toLowerCase().startsWith(pattern);
+              final Iterable<String> matchingAll =
+                  result.where((String option) {
+                return option.toLowerCase().contains(pattern) &&
+                    !option.toLowerCase().startsWith(pattern);
               });
               return matchingStart.followedBy(matchingAll);
             },
@@ -1005,14 +1089,21 @@ class Reader extends State {
     );
   }
 
-  Future<void> updateWordInTable(String oldWord, String newWord, List<WordEntry> wordEntries) async {
+  Future<void> updateWordInTable(
+      String oldWord, String newWord, List<WordEntry> wordEntries) async {
     final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
     if (index != -1) {
-      final count = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getWordCount(newWord);
+      final count = WordCount(
+              filePath: textes.first.filePath, fileText: textes.first.fileText)
+          .getWordCount(newWord);
       // debugPrint('updateWordInTable entry ${wordEntries[index]}');
       // debugPrint('updateWordInTable count ${wordEntries[index].count}');
-      final translation = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).translateToEnglish(newWord);
-      final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation);
+      final translation = await WordCount(
+              filePath: textes.first.filePath, fileText: textes.first.fileText)
+          .translateToEnglish(newWord);
+      final ipa = await WordCount(
+              filePath: textes.first.filePath, fileText: textes.first.fileText)
+          .getIPA(translation);
 
       wordEntries[index] = WordEntry(
         word: newWord,
@@ -1027,8 +1118,11 @@ class Reader extends State {
     }
   }
 
-  Future<void> addNewWord(List<WordEntry> wordEntries, WordCount wordCount, int length) async {
-    List<String> words = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
+  Future<void> addNewWord(
+      List<WordEntry> wordEntries, WordCount wordCount, int length) async {
+    List<String> words = WordCount(
+            filePath: textes.first.filePath, fileText: textes.first.fileText)
+        .getAllWords();
     Set<String> uniqueSet = <String>{};
     List<String> result = [];
     for (String item in words.reversed) {
@@ -1050,11 +1144,14 @@ class Reader extends State {
                 return const Iterable<String>.empty();
               }
               String pattern = textEditingValue.text.toLowerCase();
-              final Iterable<String> matchingStart = result.where((String option) {
+              final Iterable<String> matchingStart =
+                  result.where((String option) {
                 return option.toLowerCase().startsWith(pattern);
               });
-              final Iterable<String> matchingAll = result.where((String option) {
-                return option.toLowerCase().contains(pattern) && !option.toLowerCase().startsWith(pattern);
+              final Iterable<String> matchingAll =
+                  result.where((String option) {
+                return option.toLowerCase().contains(pattern) &&
+                    !option.toLowerCase().startsWith(pattern);
               });
               return matchingStart.followedBy(matchingAll);
             },
@@ -1076,7 +1173,8 @@ class Reader extends State {
                   if (result.contains(newWord)) {
                     WordCount wordProcessor = WordCount();
 
-                    List<WordEntry> updatedWordEntries = await wordProcessor.processSingleWord(newWord, wordCount.wordEntries);
+                    List<WordEntry> updatedWordEntries = await wordProcessor
+                        .processSingleWord(newWord, wordCount.wordEntries);
 
                     setState(() {
                       wordCount.wordEntries = updatedWordEntries;
@@ -1147,22 +1245,30 @@ class Reader extends State {
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 1.5,
+                          Expanded(
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
                               clipBehavior: Clip.antiAlias,
                               child: Text(
-                                textes.isNotEmpty ? '${textes[0].author.toString()}. ${textes[0].title.toString()}' : 'Нет автора',
+                                textes.isNotEmpty
+                                    ? '${textes[0].author.toString()}. ${textes[0].title.toString()}'
+                                    : 'Нет автора',
                                 softWrap: false,
                                 overflow: TextOverflow.fade,
-                                style: TextStyle(fontSize: 16, fontFamily: 'Tektur', color: isDarkTheme ? MyColors.white : MyColors.black),
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontFamily: 'Tektur',
+                                    color: isDarkTheme
+                                        ? MyColors.white
+                                        : MyColors.black),
                               ),
                             ),
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
+                              Navigator.pushNamed(
+                                      context, RouteNames.readerSettings)
+                                  .then((value) => loadStylePreferences());
                             },
                             child: Icon(
                               CustomIcons.sliders,
@@ -1194,7 +1300,11 @@ class Reader extends State {
                                     // textAlign: TextAlign.justify,
                                     // textAlign: TextAlign.center,
                                     softWrap: true,
-                                    style: TextStyle(fontSize: 18.0, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        color: textColor,
+                                        height: 1.41,
+                                        locale: const Locale('ru', 'RU')),
                                   );
                                 }()
                               : Center(
@@ -1215,8 +1325,10 @@ class Reader extends State {
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
                     // Скролл вниз / следующая страница
-                    _scrollController.animateTo(_scrollController.position.pixels + screenHeight * 0.8,
-                        duration: const Duration(milliseconds: 250), curve: Curves.ease);
+                    _scrollController.animateTo(
+                        _scrollController.position.pixels + screenHeight * 0.8,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.ease);
                   },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
@@ -1242,10 +1354,14 @@ class Reader extends State {
                       });
                       if (visible) {
                         SystemChrome.setSystemUIOverlayStyle(
-                            const SystemUiOverlayStyle(systemNavigationBarColor: MyColors.white, statusBarColor: Colors.transparent));
-                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                            const SystemUiOverlayStyle(
+                                systemNavigationBarColor: MyColors.white,
+                                statusBarColor: Colors.transparent));
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.edgeToEdge);
                       } else {
-                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+                        SystemChrome.setEnabledSystemUIMode(
+                            SystemUiMode.immersive);
                       }
                     },
                     child: IgnorePointer(
@@ -1262,8 +1378,11 @@ class Reader extends State {
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
                       // Сролл вверх / предыдущая страница
-                      _scrollController.animateTo(_scrollController.position.pixels - screenHeight * 0.8,
-                          duration: const Duration(milliseconds: 250), curve: Curves.ease);
+                      _scrollController.animateTo(
+                          _scrollController.position.pixels -
+                              screenHeight * 0.8,
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.ease);
                     },
                     child: IgnorePointer(
                       child: Container(
@@ -1291,10 +1410,15 @@ class Reader extends State {
                         alignment: Alignment.center,
                         children: [
                           Transform.rotate(
-                            angle: 90 * 3.14159265 / 180, // Rotate the battery icon 90 degrees counterclockwise
+                            angle: 90 *
+                                3.14159265 /
+                                180, // Rotate the battery icon 90 degrees counterclockwise
                             child: Icon(
-                              Icons.battery_full, // Use any battery icon you like
-                              color: Theme.of(context).iconTheme.color, // Color of the battery icon
+                              Icons
+                                  .battery_full, // Use any battery icon you like
+                              color: Theme.of(context)
+                                  .iconTheme
+                                  .color, // Color of the battery icon
                               size: 24, // Adjust the size as needed
                             ),
                           ),
@@ -1343,15 +1467,20 @@ class Reader extends State {
                           children: [
                             _scrollController.hasClients
                                 ? Padding(
-                                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                                    padding:
+                                        const EdgeInsets.fromLTRB(16, 0, 16, 0),
                                     child: Slider(
                                       value: position != 0
-                                          ? position > _scrollController.position.maxScrollExtent
-                                              ? _scrollController.position.maxScrollExtent
+                                          ? position >
+                                                  _scrollController
+                                                      .position.maxScrollExtent
+                                              ? _scrollController
+                                                  .position.maxScrollExtent
                                               : position
                                           : _scrollController.position.pixels,
                                       min: 0,
-                                      max: _scrollController.position.maxScrollExtent,
+                                      max: _scrollController
+                                          .position.maxScrollExtent,
                                       onChanged: (value) {
                                         setState(() {
                                           position = value;
@@ -1359,19 +1488,28 @@ class Reader extends State {
                                         if (_actionTimer?.isActive ?? false) {
                                           _actionTimer?.cancel();
                                         }
-                                        _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                        _actionTimer = Timer(
+                                            const Duration(milliseconds: 250),
+                                            () {
                                           _scrollController.jumpTo(value);
                                         });
                                       },
                                       onChangeEnd: (value) {
                                         _actionTimer?.cancel();
-                                        if (value != _scrollController.position.pixels) {
+                                        if (value !=
+                                            _scrollController.position.pixels) {
                                           _scrollController.jumpTo(value);
                                         }
                                       },
-                                      activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                      inactiveColor: isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
-                                      thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                      activeColor: isDarkTheme
+                                          ? MyColors.white
+                                          : const Color.fromRGBO(29, 29, 33, 1),
+                                      inactiveColor: isDarkTheme
+                                          ? const Color.fromRGBO(96, 96, 96, 1)
+                                          : const Color.fromRGBO(96, 96, 96, 1),
+                                      thumbColor: isDarkTheme
+                                          ? MyColors.white
+                                          : const Color.fromRGBO(29, 29, 33, 1),
                                     ),
                                   )
                                 : const Text("Загрузка..."),
@@ -1388,11 +1526,15 @@ class Reader extends State {
                                     size: 30,
                                   ),
                                 ),
-                                const Padding(padding: EdgeInsets.only(right: 30)),
+                                const Padding(
+                                    padding: EdgeInsets.only(right: 30)),
                                 InkWell(
                                   onTap: () {
-                                    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-                                    themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
+                                    final themeProvider =
+                                        Provider.of<ThemeProvider>(context,
+                                            listen: false);
+                                    themeProvider.isDarkTheme =
+                                        !themeProvider.isDarkTheme;
                                     saveSettings(themeProvider.isDarkTheme);
                                   },
                                   child: Icon(
@@ -1401,7 +1543,8 @@ class Reader extends State {
                                     size: 30,
                                   ),
                                 ),
-                                const Padding(padding: EdgeInsets.only(right: 30)),
+                                const Padding(
+                                    padding: EdgeInsets.only(right: 30)),
                                 GestureDetector(
                                   onTap: () async {
                                     wordModeDialog(context);
