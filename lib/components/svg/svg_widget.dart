@@ -34,7 +34,11 @@ class MerlinWidget extends StatelessWidget {
 }
 
 class AvatarWidget extends StatelessWidget {
-  const AvatarWidget({super.key});
+  final AvatarWidget baby;
+
+  const AvatarWidget({
+    required this.baby,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -473,7 +473,9 @@ class _ProfilePage extends State<ProfilePage> {
               Container(
                 height: 10,
                 width: double.infinity,
-                color: MyColors.bgWhite,
+                color: themeProvider.isDarkTheme
+                    ? MyColors.grey
+                    : MyColors.lightGray,
               ),
             ],
           )),
