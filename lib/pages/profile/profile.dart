@@ -38,7 +38,7 @@ class _ProfilePage extends State<ProfilePage> {
   String token = '';
   late String getToken;
   late String qwerty;
-  late String firstName;
+  String firstName = 'Merlin';
 
   String? _link = 'unknown';
   @override
@@ -115,21 +115,23 @@ class _ProfilePage extends State<ProfilePage> {
     );
     final data = json.decode(response.body);
     print(data['firstName']);
-    if (data['firstName'] == null) {
-      fetchedName = 'Merlin';
-    } else {
-      fetchedName = data['firstName'];
-    }
-    print(fetchedName.toString());
+
     if (response.statusCode == 200) {
-      setState(() {
+      if (data['firstName'].isNotEmpty) {
+        fetchedName = data['firstName'];
         firstName = fetchedName.toString();
-      });
+
+        print(fetchedName.toString());
+        setState(() {
+          firstName = fetchedName.toString();
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    getFirstName();
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: SafeArea(
