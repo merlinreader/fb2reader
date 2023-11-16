@@ -51,7 +51,6 @@ class _ProfilePage extends State<ProfilePage> {
   String firstName = 'Merlin';
   List<AchievementStatus> getAchievements = [];
   late var achievements;
-  
 
   // ignore: unused_field
   String? _link = 'unknown';
@@ -487,7 +486,7 @@ class _ProfilePage extends State<ProfilePage> {
               ),
               Container(
                 padding: const EdgeInsets.only(top: 15),
-                height: MediaQuery.of(context).size.height / 6,
+                height: MediaQuery.of(context).size.height / 3,
                 width: MediaQuery.of(context).size.width,
                 child: GridView.builder(
                     itemCount: achievements.length,
@@ -497,12 +496,16 @@ class _ProfilePage extends State<ProfilePage> {
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
+                          print('asdsa');
+                          for (var entry in getAchievements) {
+                            entry.isUnlocked = false;
+                          }
+                          getAchievements[index].isUnlocked = true;
                           setState(() {
-                            print('asdsa');
-                            for (var entry in getAchievements) {
-                              entry.isUnlocked = false;
-                            }
                             getAchievements[index].isUnlocked = true;
+                            //TODO: убрать этот костыль когда-нибудь на 100500 итерации
+                            Navigator.of(context).pop();
+                            chooseAvatar();
                           });
                         },
                         child: Padding(
@@ -537,6 +540,26 @@ class _ProfilePage extends State<ProfilePage> {
               )
             ],
           ),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  for (var entry in getAchievements) {
+                    entry.isUnlocked = false;
+                  }
+                  setState(() {
+                    Navigator.of(context).pop();
+                    chooseAvatar();
+                  });
+                },
+                child:
+                    const Text16(text: 'Сбросить', textColor: MyColors.black)),
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child:
+                    const Text16(text: 'Сохранить', textColor: MyColors.black))
+          ],
         ),
       ),
     );
