@@ -93,14 +93,16 @@ class Reader extends State {
   void initState() {
     getDataFromLocalStorage('textKey');
     getImagesFromLocalStorage('booksKey');
+
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
+
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
       final filePath = textes.first.filePath;
-
+      pageSize = MediaQuery.of(context).size.height;
       final readingPositionsJson = prefs.getString('readingPositions');
       if (readingPositionsJson != null) {
         final readingPositions = jsonDecode(readingPositionsJson);
@@ -113,12 +115,7 @@ class Reader extends State {
               //   duration: const Duration(milliseconds: 100),
               //   curve: Curves.linear,
               // );
-              if (_scrollController.position.maxScrollExtent < lastPosition) {
-                _scrollController
-                    .jumpTo(_scrollController.position.maxScrollExtent);
-              } else {
-                _scrollController.jumpTo(lastPosition - lastPosition / 8000);
-              }
+              _scrollController.jumpTo(lastPosition);
             }
           });
           setState(() {
@@ -155,15 +152,17 @@ class Reader extends State {
     });
   }
 
-  Future<void> _savePageCountToLocalStorage(List<String> textPages) async {
+  Future<void> _savePageCountToLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     pageCountSimpleMode = ((_scrollController.position.pixels /
                 _scrollController.position.maxScrollExtent) *
-            textPages.length)
+            (_scrollController.position.maxScrollExtent /
+                MediaQuery.of(context).size.height))
         .toInt();
     // print(((_scrollController.position.pixels /
     //             _scrollController.position.maxScrollExtent) *
-    //         textPages.length)
+    //         (_scrollController.position.maxScrollExtent /
+    //             MediaQuery.of(context).size.height))
     //     .toInt());
     prefs.setInt(
         'pageCountSimpleMode-${textes.first.filePath}', pageCountSimpleMode);
@@ -321,26 +320,6 @@ class Reader extends State {
         .toString()
         .replaceAll(RegExp(r'\['), '')
         .replaceAll(RegExp(r'\]'), '');
-  }
-
-  List<String> getPages(String text, int pageSize) {
-    List<String> pages = [];
-    int textLength = text.length;
-    int i = 0;
-
-    while (i < textLength) {
-      int endIndex = i + pageSize;
-      if (endIndex > textLength) {
-        endIndex = textLength;
-      } else {
-        while (endIndex > i && !text[endIndex - 1].contains(RegExp(r'\s'))) {
-          endIndex--;
-        }
-      }
-      pages.add(text.substring(i, endIndex));
-      i = endIndex;
-    }
-    return pages;
   }
 
   List<DeviceOrientation> orientations = [
@@ -1210,15 +1189,10 @@ class Reader extends State {
 
   @override
   Widget build(BuildContext context) {
-    double pageSize = MediaQuery.of(context).size.height;
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
-    List<String> textPages = getPages(getText, pageSize.toInt());
-
     return WillPopScope(
       onWillPop: () async {
         await saveProgress();
-        await _savePageCountToLocalStorage(textPages);
+        await _savePageCountToLocalStorage();
         Navigator.pop(context, true);
         return true;
       },
@@ -1290,13 +1264,13 @@ class Reader extends State {
                   padding: const EdgeInsets.fromLTRB(24, 0, 24, 29),
                   child: ListView.builder(
                       controller: _scrollController,
-                      itemCount: textPages.length,
+                      itemCount: 1,
                       itemBuilder: (context, index) {
                         if (textes.isNotEmpty) {
                           return _scrollController.hasClients
                               ? () {
                                   return Text(
-                                    textPages[index],
+                                    getText,
                                     // textAlign: TextAlign.justify,
                                     // textAlign: TextAlign.center,
                                     softWrap: true,
@@ -1326,7 +1300,8 @@ class Reader extends State {
                   onTap: () {
                     // Скролл вниз / следующая страница
                     _scrollController.animateTo(
-                        _scrollController.position.pixels + screenHeight * 0.8,
+                        _scrollController.position.pixels +
+                            MediaQuery.of(context).size.height * 0.8,
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.ease);
                   },
@@ -1341,8 +1316,8 @@ class Reader extends State {
                     ),
                   )),
               Positioned(
-                left: screenWidth / 6,
-                top: screenHeight / 5,
+                left: MediaQuery.of(context).size.width / 6,
+                top: MediaQuery.of(context).size.height / 5,
                 child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onDoubleTap: () async {
@@ -1373,14 +1348,14 @@ class Reader extends State {
                     )),
               ),
               Positioned(
-                left: screenWidth / 6,
+                left: MediaQuery.of(context).size.width / 6,
                 child: GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
                       // Сролл вверх / предыдущая страница
                       _scrollController.animateTo(
                           _scrollController.position.pixels -
-                              screenHeight * 0.8,
+                              MediaQuery.of(context).size.height * 0.8,
                           duration: const Duration(milliseconds: 250),
                           curve: Curves.ease);
                     },
