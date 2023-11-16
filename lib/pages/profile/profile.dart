@@ -40,6 +40,7 @@ class _ProfilePage extends State<ProfilePage> {
   late String qwerty;
   String firstName = 'Merlin';
 
+  // ignore: unused_field
   String? _link = 'unknown';
   @override
   void initState() {
@@ -56,16 +57,6 @@ class _ProfilePage extends State<ProfilePage> {
     });
   }
 
-  // Future<void> initUniLinks() async {
-  //   getLinksStream().listen(() {
-  //     // Парсинг ссылки и переход в нужное место в приложении
-  //     setState(() {
-  //       qwerty = link; // Полученная deep link ссылка
-  //     });
-  //   }, onError: (err) {
-  //     // Обработка ошибки
-  //   });
-  // }
   Future<void> initUniLinks() async {
     // Подписываемся на поток приходящих ссылок
     linkStream.listen((String? link) {
@@ -165,9 +156,11 @@ class _ProfilePage extends State<ProfilePage> {
                   final locationData =
                       snapshot.data ?? 'Нет данных о местоположении';
                   return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text14(text: locationData, textColor: MyColors.black),
+                      Center(
+                        child: Text14(
+                            text: locationData, textColor: MyColors.black),
+                      ),
                       IconButton(
                           onPressed: geo,
                           icon: const Icon(

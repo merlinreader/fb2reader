@@ -39,7 +39,6 @@ Future<Map<String, String>> getLocation() async {
 
 Future<void> sendLocationDataToServer(
     Map<String, String> locationData, String? token) async {
-  final prefs = await SharedPreferences.getInstance();
   const url = 'https://fb2.cloud.leam.pro/api/account/geo';
 
   final response = await http.patch(

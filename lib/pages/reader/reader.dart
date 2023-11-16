@@ -305,7 +305,6 @@ class Reader extends State {
       setState(() {});
     }
     if (textes.isEmpty) {
-      // ignore: use_build_context_synchronously
       Navigator.pop(context);
       Fluttertoast.showToast(
         msg: 'Нет последней книги',
@@ -476,7 +475,6 @@ class Reader extends State {
                                 onPressed: () async {
                                   // debugPrint("DONE");
                                   await saveWordCountToLocalstorage(wordCount);
-                                  // ignore: use_build_context_synchronously
                                   Navigator.pop(context);
                                 },
                               ),
@@ -645,7 +643,6 @@ class Reader extends State {
       await prefs.setString(
           'lastCallTimestamp', lastCallTimestamp.toIso8601String());
 
-      // ignore: use_build_context_synchronously
       showDialog<void>(
           context: context,
           barrierDismissible: true,
@@ -1219,7 +1216,6 @@ class Reader extends State {
       onWillPop: () async {
         await saveProgress();
         await _savePageCountToLocalStorage(textPages);
-        // ignore: use_build_context_synchronously
         Navigator.pop(context, true);
         return true;
       },
@@ -1230,19 +1226,19 @@ class Reader extends State {
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   child: AppBar(
-                    leading: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context, true);
-                        },
-                        child: Theme(
-                            data: lightTheme(),
-                            child: Icon(
-                              CustomIcons.chevronLeft,
-                              size: 40,
-                              color: Theme.of(context).iconTheme.color,
-                            ))),
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    shadowColor: Colors.transparent,
+                      leading: GestureDetector(
+                          onTap: () {
+                            Navigator.pop(context, true);
+                          },
+                          child: Theme(
+                              data: lightTheme(),
+                              child: Icon(
+                                CustomIcons.chevronLeft,
+                                size: 40,
+                                color: Theme.of(context).iconTheme.color,
+                              ))),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      shadowColor: Colors.transparent,
                       title: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -1279,12 +1275,8 @@ class Reader extends State {
                             ),
                           ),
                         ],
-                      )
-                          
-                        
-                    ),
+                      )),
                 ),
-                
               )
             : null,
         body: Container(

@@ -32,10 +32,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
         Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(
       url,
-      headers: {
-        'Authorization':
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NTRlMGNkNjNmYjZmNWJlOGQzMzNlMTIiLCJ0ZWxlZ3JhbUlkIjoiNTEzNTMxIiwiaWF0IjoxNzAwMDM4NjU1fQ.dCKX6jX5CpVshWcir87sfqqJbmrhYmBJbvNZNdt4XAA'
-      },
+      headers: {'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
