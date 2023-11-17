@@ -56,26 +56,29 @@ getPageCountSimpleMode() async {
     int countFromStorage = prefs.getInt('pageCount-${entry.fileName}') ?? 0;
     int lastCountFromStorage =
         prefs.getInt('lastPageCount-${entry.fileName}') ?? 0;
-    int diff = lastCountFromStorage - countFromStorage;
-    diff = diff < 0 ? diff : 0;
-    if (entry.fileName == wordCounts[index].filePath) {
-      if (countFromStorage > 0) {
-        if (lastCountFromStorage != 0 &&
-            countFromStorage < lastCountFromStorage) {
-          final dataToAdd = <int, bool>{0: true};
-          dataToSend.addEntries(dataToAdd.entries);
-        } else {
-          final dataToAdd = <int, bool>{diff: true};
-          dataToSend.addEntries(dataToAdd.entries);
+    int diff = countFromStorage - lastCountFromStorage;
+    diff = diff < 0 ? 0 : diff;
+
+    if (wordCounts.isNotEmpty) {
+      if (entry.fileName == wordCounts[index].filePath) {
+        if (countFromStorage > 0) {
+          if (lastCountFromStorage != 0 &&
+              countFromStorage > lastCountFromStorage) {
+            final dataToAdd = <int, bool>{diff: true};
+            dataToSend.addEntries(dataToAdd.entries);
+          } else {
+            final dataToAdd = <int, bool>{0: true};
+            dataToSend.addEntries(dataToAdd.entries);
+          }
         }
       }
     } else {
       if (lastCountFromStorage != 0 &&
-          countFromStorage < lastCountFromStorage) {
-        final dataToAdd = <int, bool>{0: false};
+          countFromStorage > lastCountFromStorage) {
+        final dataToAdd = <int, bool>{diff: false};
         dataToSend.addEntries(dataToAdd.entries);
       } else {
-        final dataToAdd = <int, bool>{diff: false};
+        final dataToAdd = <int, bool>{0: false};
         dataToSend.addEntries(dataToAdd.entries);
       }
     }
@@ -87,6 +90,7 @@ getPageCountSimpleMode() async {
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
       pageCountWordMode = pageCountWordMode + entry.key;
+      pageCountSimpleMode = pageCountWordMode + entry.key;
     } else {
       pageCountSimpleMode = pageCountSimpleMode + entry.key;
     }
