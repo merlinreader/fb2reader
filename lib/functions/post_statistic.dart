@@ -90,8 +90,9 @@ getPageCountSimpleMode() async {
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
       pageCountWordMode = pageCountWordMode + entry.key;
-      pageCountSimpleMode = pageCountWordMode + entry.key;
-    } else {
+      // pageCountSimpleMode = pageCountWordMode + entry.key;
+    }
+    if (entry.value == false) {
       pageCountSimpleMode = pageCountSimpleMode + entry.key;
     }
   }
