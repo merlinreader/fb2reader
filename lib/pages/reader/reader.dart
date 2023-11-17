@@ -1473,7 +1473,9 @@ class Reader extends State {
                                               max: _scrollController
                                                   .position.maxScrollExtent,
                                               label:
-                                                  "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%",
+                                                  visible
+                                                  ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
+                                                  : "",
                                               onChanged: (value) {
                                                 setState(() {
                                                   position = value;
@@ -1515,7 +1517,9 @@ class Reader extends State {
                                           ),
                                           Text11(
                                               text:
-                                                  "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%",
+                                                  visible
+                                                  ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
+                                                  : "",
                                               textColor: MyColors.darkGray)
                                         ],
                                       ),
