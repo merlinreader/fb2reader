@@ -9,6 +9,7 @@ import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/domain/data_providers/color_provider.dart';
+import 'package:merlin/functions/post_statistic.dart';
 import 'package:merlin/main.dart';
 import 'package:merlin/pages/wordmode/models/word_entry.dart';
 import 'package:merlin/pages/wordmode/wordmode.dart';
@@ -74,7 +75,8 @@ class Reader extends State {
   double position = 0;
   bool isLast = false;
   List<recent.ImageInfo> images = [];
-  int pageCountSimpleMode = 0;
+  int pageCount = 0;
+  int lastPageCount = 0;
   double pageSize = 0;
   Timer? _actionTimer;
 
@@ -101,6 +103,9 @@ class Reader extends State {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
+      lastPageCount = prefs.getInt('pageCount-${textes.first.filePath}') ?? 0;
+      prefs.setInt('lastPageCount-${textes.first.filePath}', lastPageCount);
+      print('initState lastPageCount $lastPageCount');
       final filePath = textes.first.filePath;
       pageSize = MediaQuery.of(context).size.height;
       final readingPositionsJson = prefs.getString('readingPositions');
@@ -132,6 +137,8 @@ class Reader extends State {
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setPreferredOrientations([orientations[0]]);
+    getPageCountSimpleMode();
     super.dispose();
   }
 
@@ -146,26 +153,20 @@ class Reader extends State {
   Future<void> _loadPageCountFromLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      pageCountSimpleMode =
-          (prefs.getInt('pageCountSimpleMode-${textes.first.filePath}') ?? 0);
-      // print('pageCountSimpleMode-${textes.first.filePath}');
+      pageCount = (prefs.getInt('pageCount-${textes.first.filePath}') ?? 0);
+      // print('pageCount-${textes.first.filePath}');
     });
   }
 
   Future<void> _savePageCountToLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pageCountSimpleMode = ((_scrollController.position.pixels /
+    pageCount = ((_scrollController.position.pixels /
                 _scrollController.position.maxScrollExtent) *
             (_scrollController.position.maxScrollExtent /
                 MediaQuery.of(context).size.height))
         .toInt();
-    // print(((_scrollController.position.pixels /
-    //             _scrollController.position.maxScrollExtent) *
-    //         (_scrollController.position.maxScrollExtent /
-    //             MediaQuery.of(context).size.height))
-    //     .toInt());
-    prefs.setInt(
-        'pageCountSimpleMode-${textes.first.filePath}', pageCountSimpleMode);
+    print(pageCount);
+    prefs.setInt('pageCount-${textes.first.filePath}', pageCount);
   }
 
   bool _isDarkTheme = false;
@@ -269,6 +270,9 @@ class Reader extends State {
       // print(percentage);
       // print('max = ${_scrollController.position.maxScrollExtent}');
       // print(' ');
+      _savePageCountToLocalStorage();
+      print('lastPageCount $lastPageCount');
+      print('pageCount $pageCount');
     });
     await saveReadingPosition(
         _scrollController.position.pixels, textes.first.filePath);
@@ -1261,7 +1265,7 @@ class Reader extends State {
               SafeArea(
                 top: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 29),
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                   child: ListView.builder(
                       controller: _scrollController,
                       itemCount: 1,
@@ -1271,7 +1275,7 @@ class Reader extends State {
                               ? () {
                                   return Text(
                                     getText,
-                                    // textAlign: TextAlign.justify,
+                                    textAlign: TextAlign.justify,
                                     // textAlign: TextAlign.center,
                                     softWrap: true,
                                     style: TextStyle(

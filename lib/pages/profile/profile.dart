@@ -79,7 +79,6 @@ class _ProfilePage extends State<ProfilePage> {
       achievements.add(ach.achievements.spell);
       achievements.addAll(ach.achievements.simpleModeAchievements);
       achievements.addAll(ach.achievements.wordModeAchievements);
-      print('pizda ${achievements.length}');
       return achievements;
     } else {
       // print('Ошибка запроса достижений: ${response.statusCode}');
@@ -89,13 +88,10 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   Future<void> getAchievementsFromJson() async {
-    print('start');
     achievements = await fetchJson();
     for (var entry in achievements) {
       getAchievements.add(AchievementStatus(entry, false));
     }
-    print('done');
-    print(getAchievements.length);
   }
 
   Future<void> getTokenFromLocalStorage() async {

@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/pages/wordmode/wordmode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,17 +53,46 @@ getPageCountSimpleMode() async {
   Map<int, bool> dataToSend = {};
   int index = 0;
   for (final entry in books) {
-    int countFromStorage =
-        prefs.getInt('pageCountSimpleMode-${entry.fileName}') ?? 0;
+    int countFromStorage = prefs.getInt('pageCount-${entry.fileName}') ?? 0;
+    int lastCountFromStorage =
+        prefs.getInt('lastPageCount-${entry.fileName}') ?? 0;
+    int diff = lastCountFromStorage - countFromStorage;
+    diff = diff < 0 ? diff : 0;
     if (entry.fileName == wordCounts[index].filePath) {
       if (countFromStorage > 0) {
-        final dataToAdd = <int, bool>{countFromStorage: true};
-        dataToSend.addEntries(dataToAdd.entries);
+        if (lastCountFromStorage != 0 &&
+            countFromStorage < lastCountFromStorage) {
+          final dataToAdd = <int, bool>{0: true};
+          dataToSend.addEntries(dataToAdd.entries);
+        } else {
+          final dataToAdd = <int, bool>{diff: true};
+          dataToSend.addEntries(dataToAdd.entries);
+        }
       }
     } else {
-      final dataToAdd = <int, bool>{countFromStorage: false};
-      dataToSend.addEntries(dataToAdd.entries);
+      if (lastCountFromStorage != 0 &&
+          countFromStorage < lastCountFromStorage) {
+        final dataToAdd = <int, bool>{0: false};
+        dataToSend.addEntries(dataToAdd.entries);
+      } else {
+        final dataToAdd = <int, bool>{diff: false};
+        dataToSend.addEntries(dataToAdd.entries);
+      }
     }
   }
+  int pageCountSimpleMode = 0;
+  int pageCountWordMode = 0;
+  String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00")
+      .format(DateTime.now().toUtc());
+  for (final entry in dataToSend.entries) {
+    if (entry.value == true) {
+      pageCountWordMode = pageCountWordMode + entry.key;
+    } else {
+      pageCountSimpleMode = pageCountSimpleMode + entry.key;
+    }
+  }
+  print('pageCountWordMode $pageCountWordMode');
+  print('pageCountSimpleMode $pageCountSimpleMode');
+  print('nowDataUTC $nowDataUTC');
   // print(dataToSend);
 }
