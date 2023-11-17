@@ -2,37 +2,17 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:location/location.dart';
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/pages/wordmode/wordmode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+import 'package:merlin/functions/location.dart';
 
-Future<void> postStatisticData(String token) async {
-  final Map<String, dynamic> data = {
-    //"pageCountSimpleMode": pageCountSimpleMode,
-    //"pageCountWordMode": pageCountWordMode,
-    "date": DateTime.now().toIso8601String(),
-  };
-
-  final url = Uri.parse('https://fb2.cloud.leam.pro/api/statistic');
-  final response = await http.post(
-    url,
-    headers: <String, String>{
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    },
-    body: jsonEncode(data),
-  );
-
-  if (response.statusCode == 200) {
-    // print('Данные отправлены успешно!');
-  } else {
-    // print('Ошибка при отправке данных: ${response.statusCode}');
-  }
-}
-
-// метод который составляет список прочитынных страниц
+// метод который составляет список прочитанных страниц
 getPageCountSimpleMode() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  String token = prefs.getString('token') ?? '';
   String? imageDataJson = prefs.getString('booksKey');
   List<ImageInfo> books = [];
   if (imageDataJson != null) {
@@ -99,4 +79,87 @@ getPageCountSimpleMode() async {
   print('pageCountSimpleMode $pageCountSimpleMode');
   print('nowDataUTC $nowDataUTC');
   // print(dataToSend);
+  // for (final entry in dataToSend.entries) {
+  //   int number = entry.key;
+  //   bool value = entry.value;
+  //   pageCountSimpleMode += number;
+  //   if (value) {
+  //     pageCountWordMode += number;
+  //   }
+  // }
+
+// Присвоение значений переменным data
+  if (token == '') {
+    if (prefs.getString("deviceId") == null) {
+      saveDeviceIdToLocalStorage();
+    }
+    await postAnonymStatisticData(
+        pageCountSimpleMode, pageCountWordMode, nowDataUTC);
+  } else {
+    await postUserStatisticData(
+        token, pageCountSimpleMode, pageCountWordMode, nowDataUTC);
+  }
+}
+
+void saveDeviceIdToLocalStorage() async {
+  final prefs = await SharedPreferences.getInstance();
+  var uuid = const Uuid();
+  var deviceId = uuid.v4();
+  await prefs.setString('deviceId', deviceId);
+}
+
+Future<void> postUserStatisticData(String token, int pageCountSimpleMode,
+    int pageCountWordMode, String nowDataUTC) async {
+  final Map<String, dynamic> data = {
+    "pageCountSimpleMode": pageCountSimpleMode,
+    "pageCountWordMode": pageCountWordMode,
+    "date": nowDataUTC,
+  };
+  print(token);
+  print(data);
+  final url = Uri.parse('https://fb2.cloud.leam.pro/api/statistic/user');
+  final response = await http.post(
+    url,
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    },
+    body: jsonEncode(data),
+  );
+  print(jsonEncode(data));
+  // if (response.statusCode == 200) {
+  //   print('Данные отправлены успешно!');
+  // } else {
+  //   print('Ошибка при отправке данных: ${response.statusCode}');
+  // }
+}
+
+Future<void> postAnonymStatisticData(
+    int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
+  final prefs = await SharedPreferences.getInstance();
+  getLocation();
+  final Map<String, dynamic> data = {
+    "deviceId": prefs.getString("deviceId"),
+    "country": prefs.getString("country"),
+    "area": prefs.getString("adminArea"),
+    "city": prefs.getString("locality"),
+    "pageCountSimpleMode": pageCountWordMode,
+    "pageCountWordMode": pageCountSimpleMode,
+    "date": nowDataUTC,
+  };
+  print(data);
+  final url = Uri.parse('https://fb2.cloud.leam.pro/api/statistic/anonym');
+  final response = await http.post(
+    url,
+    headers: <String, String>{
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode(data),
+  );
+  print(response.body);
+  if (response.statusCode == 200) {
+    print('Данные отправлены успешно!');
+  } else {
+    print('Ошибка при отправке данных: ${response.statusCode}');
+  }
 }

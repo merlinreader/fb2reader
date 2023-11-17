@@ -14,6 +14,9 @@ import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:merlin/pages/statistic/statistic.dart';
 import 'package:merlin/pages/profile/profile.dart';
 import 'package:merlin/functions/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+import 'package:merlin/functions/post_statistic.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({Key? key}) : super(key: key);
@@ -54,6 +57,7 @@ class Page extends State<AppPage> {
 
   @override
   Widget build(BuildContext context) {
+    getPageCountSimpleMode();
     getLocation();
     return Scaffold(
         appBar: AppBar(

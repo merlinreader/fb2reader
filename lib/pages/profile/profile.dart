@@ -164,12 +164,13 @@ class _ProfilePage extends State<ProfilePage> {
       }
     }
     await prefs.setString('firstName', firstName);
+    print(prefs.getString('firstName'));
   }
 
   Future<void> getFirstNameFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      firstName = prefs.getString('firstName') ?? 'Merlin';
+      firstName = prefs.getString('firstName') ?? firstName;
     });
   }
 

@@ -1,3 +1,6 @@
+// Этот файл пока что не используется
+// Вероятно, он и не нужен
+
 import 'package:flutter/material.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:intl/intl.dart';
