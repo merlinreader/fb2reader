@@ -1378,11 +1378,12 @@ class Reader extends State {
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                height: visible ? 120 : 30,
+                height: visible ? 100 : 30,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: !visible
+                      ? [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                       child: Stack(
@@ -1429,7 +1430,8 @@ class Reader extends State {
                         textColor: MyColors.black,
                       ),
                     ),
-                  ],
+                        ]
+                      : [],
                 ),
               ),
               Positioned(
@@ -1447,48 +1449,80 @@ class Reader extends State {
                             _scrollController.hasClients
                                 ? Padding(
                                     padding:
-                                        const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                                    child: Slider(
-                                      value: position != 0
-                                          ? position >
+                                        const EdgeInsets.fromLTRB(16, 0, 28, 0),
+                                    child: SliderTheme(
+                                      data: const SliderThemeData(
+                                          showValueIndicator:
+                                              ShowValueIndicator.always),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Slider(
+                                              value: position != 0
+                                                  ? position >
+                                                          _scrollController
+                                                              .position
+                                                              .maxScrollExtent
+                                                      ? _scrollController
+                                                          .position
+                                                          .maxScrollExtent
+                                                      : position
+                                                  : _scrollController
+                                                      .position.pixels,
+                                              min: 0,
+                                              max: _scrollController
+                                                  .position.maxScrollExtent,
+                                              label:
+                                                  visible
+                                                  ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
+                                                  : "",
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  position = value;
+                                                });
+                                                if (_actionTimer?.isActive ??
+                                                    false) {
+                                                  _actionTimer?.cancel();
+                                                }
+                                                _actionTimer = Timer(
+                                                    const Duration(
+                                                        milliseconds: 250), () {
                                                   _scrollController
-                                                      .position.maxScrollExtent
-                                              ? _scrollController
-                                                  .position.maxScrollExtent
-                                              : position
-                                          : _scrollController.position.pixels,
-                                      min: 0,
-                                      max: _scrollController
-                                          .position.maxScrollExtent,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          position = value;
-                                        });
-                                        if (_actionTimer?.isActive ?? false) {
-                                          _actionTimer?.cancel();
-                                        }
-                                        _actionTimer = Timer(
-                                            const Duration(milliseconds: 250),
-                                            () {
-                                          _scrollController.jumpTo(value);
-                                        });
-                                      },
-                                      onChangeEnd: (value) {
-                                        _actionTimer?.cancel();
-                                        if (value !=
-                                            _scrollController.position.pixels) {
-                                          _scrollController.jumpTo(value);
-                                        }
-                                      },
-                                      activeColor: isDarkTheme
-                                          ? MyColors.white
-                                          : const Color.fromRGBO(29, 29, 33, 1),
-                                      inactiveColor: isDarkTheme
-                                          ? const Color.fromRGBO(96, 96, 96, 1)
-                                          : const Color.fromRGBO(96, 96, 96, 1),
-                                      thumbColor: isDarkTheme
-                                          ? MyColors.white
-                                          : const Color.fromRGBO(29, 29, 33, 1),
+                                                      .jumpTo(value);
+                                                });
+                                              },
+                                              onChangeEnd: (value) {
+                                                _actionTimer?.cancel();
+                                                if (value !=
+                                                    _scrollController
+                                                        .position.pixels) {
+                                                  _scrollController
+                                                      .jumpTo(value);
+                                                }
+                                              },
+                                              activeColor: isDarkTheme
+                                                  ? MyColors.white
+                                                  : const Color.fromRGBO(
+                                                      29, 29, 33, 1),
+                                              inactiveColor: isDarkTheme
+                                                  ? const Color.fromRGBO(
+                                                      96, 96, 96, 1)
+                                                  : const Color.fromRGBO(
+                                                      96, 96, 96, 1),
+                                              thumbColor: isDarkTheme
+                                                  ? MyColors.white
+                                                  : const Color.fromRGBO(
+                                                      29, 29, 33, 1),
+                                            ),
+                                          ),
+                                          Text11(
+                                              text:
+                                                  visible
+                                                  ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
+                                                  : "",
+                                              textColor: MyColors.darkGray)
+                                        ],
+                                      ),
                                     ),
                                   )
                                 : const Text("Загрузка..."),
