@@ -391,7 +391,7 @@ class RecentPageState extends State<RecentPage> {
           ),
           Padding(
             padding: const EdgeInsets.only(
-                top: 72), // Верхний отступ для DynamicHeightGridView
+                top: 72),
             child: DynamicHeightGridView(
               controller: _scrollController,
               itemCount: images.length,
@@ -403,21 +403,25 @@ class RecentPageState extends State<RecentPage> {
                   onTap: () async {
                     if (!_isOperationInProgress) {
                       _isOperationInProgress = true;
-                      await sendDataFromLocalStorage('textKey', index);
-                      if (isSended) {
-                        isSended = false;
-                        // ignore: use_build_context_synchronously
-                        Navigator.pushNamed(context, RouteNames.reader)
-                            .then((_) {
-                          getDataFromLocalStorage('booksKey');
-                          _isOperationInProgress = false;
-                        });
+                      try {
+                        await sendDataFromLocalStorage('textKey', index);
+                        if (isSended) {
+                          isSended = false;
+                          await Navigator.pushNamed(context, RouteNames.reader)
+                              .then((_) {
+                            getDataFromLocalStorage('booksKey');
+                          });
+                        }
+                      } catch (e) {
+                        // Обработка ошибок, если необходимо
+                      } finally {
+                        _isOperationInProgress = false;
+                        getDataFromLocalStorage('booksKey');
+                        if (mounted) setState(() {});
                       }
-                    } else {
-                      _isOperationInProgress = false;
-                      return;
                     }
                   },
+
                   onLongPress: () {
                     onTapLongPressOne(context, index);
                   },
