@@ -1,5 +1,6 @@
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
@@ -18,6 +19,7 @@ import 'package:uni_links/uni_links.dart';
 import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class AchievementStatus {
   Achievement achievement;
@@ -367,10 +369,22 @@ class _ProfilePage extends State<ProfilePage> {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-              title: const Center(
-                  child: Text18(
-                      text: 'readermerlin@gmail.com',
-                      textColor: MyColors.black)),
+              title: Center(
+                child: TextButton(onPressed: (){
+                  Clipboard.setData(const ClipboardData(text: 'readermerlin@gmail.com'));
+                  Fluttertoast.showToast(
+                                            msg: 'Почта скопирована',
+                                            toastLength: Toast
+                                                .LENGTH_SHORT, // Длительность отображения
+                                            gravity: ToastGravity
+                                                .BOTTOM, // Расположение уведомления
+                                          );
+                }, child: const Text18(text: 'readermerlin@gmail.com', textColor: MyColors.black)),
+                
+                  // child: Text18(
+                  //     text: 'readermerlin@gmail.com',
+                  //     textColor: MyColors.black)
+                      ),
               alignment: Alignment.center,
               actions: [
                 Center(
