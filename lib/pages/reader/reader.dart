@@ -1266,37 +1266,36 @@ class Reader extends State {
                 top: false,
                 minimum: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                 child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: 1,
-                      itemBuilder: (context, index) {
-                        if (textes.isNotEmpty) {
-                          return _scrollController.hasClients
-                              ? () {
-                                  return Text(
-                                    getText,
+                    controller: _scrollController,
+                    itemCount: 1,
+                    itemBuilder: (context, index) {
+                      if (textes.isNotEmpty) {
+                        return _scrollController.hasClients
+                            ? () {
+                                return Text(
+                                  getText,
                                   // textAlign: TextAlign.justify,
-                                    // textAlign: TextAlign.center,
+                                  // textAlign: TextAlign.center,
                                   softWrap: true,
-                                    style: TextStyle(
-                                      fontSize: 18.0,
-                                        color: textColor,
-                                        height: 1.41,
-                                        locale: const Locale('ru', 'RU')),
-                                  );
-                                }()
-                              : Center(
-                                  child: Text(
-                                    'Нет текста для отображения',
-                                    style: TextStyle(
+                                  style: TextStyle(
                                       fontSize: 18.0,
                                       color: textColor,
-                                    ),
-                                  ),
+                                      height: 1.41,
+                                      locale: const Locale('ru', 'RU')),
                                 );
-                        }
-                        return null;
-                      }),
-                
+                              }()
+                            : Center(
+                                child: Text(
+                                  'Нет текста для отображения',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    color: textColor,
+                                  ),
+                                ),
+                              );
+                      }
+                      return null;
+                    }),
               ),
               GestureDetector(
                   behavior: HitTestBehavior.translucent,
@@ -1383,7 +1382,7 @@ class Reader extends State {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: !visible
                       ? [
-                    Padding(
+                          Padding(
                             padding: const EdgeInsets.fromLTRB(24, 0, 0, 0),
                             child: Container(
                               width: MediaQuery.of(context).size.width / 8,
@@ -1394,8 +1393,7 @@ class Reader extends State {
                                   Transform.rotate(
                                     angle: 90 * 3.14159265 / 180,
                                     child: Icon(
-                                      Icons
-                                    .battery_full,
+                                      Icons.battery_full,
                                       color: Theme.of(context).iconTheme.color,
                                       size: 24,
                                     ),
