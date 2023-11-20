@@ -1260,7 +1260,10 @@ class Reader extends State {
               )
             : null,
         body: Container(
-            color: backgroundColor,
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              // border: Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 4)
+            ),
             child: Stack(children: [
               SafeArea(
                 top: false,
