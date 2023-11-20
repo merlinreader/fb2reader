@@ -1384,52 +1384,47 @@ class Reader extends State {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: !visible
                       ? [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Transform.rotate(
-                            angle: 90 *
-                                3.14159265 /
-                                180, // Rotate the battery icon 90 degrees counterclockwise
-                            child: Icon(
-                              Icons
-                                  .battery_full, // Use any battery icon you like
-                              color: Theme.of(context)
-                                  .iconTheme
-                                  .color, // Color of the battery icon
-                              size: 24, // Adjust the size as needed
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Transform.rotate(
+                                  angle: 90 * 3.14159265 / 180,
+                                  child: Icon(
+                                    Icons.battery_full,
+                                    color: Theme.of(context).iconTheme.color,
+                                    size: 24,
+                                  ),
+                                ),
+                                Text7(
+                                  text: '${_batteryLevel.toString()}%',
+                                  textColor: MyColors.white,
+                                ),
+                              ],
                             ),
                           ),
-                          Text7(
-                            text: '${_batteryLevel.toString()}%',
-                            textColor: MyColors.white,
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: Text12(
+                                text: textes.isNotEmpty
+                                    ? (textes[0].title.toString().length > 28
+                                        ? '${textes[0].title.toString().substring(0, 28)}...'
+                                        : textes[0].title.toString())
+                                    : 'Нет названия',
+                                textColor: MyColors.black,
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Text12(
-                          text: textes.isNotEmpty
-                              ? (textes[0].title.toString().length > 28
-                                  ? '${textes[0].title.toString().substring(0, 28)}...'
-                                  : textes[0].title.toString())
-                              : 'Нет названия',
-                          textColor: MyColors.black,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
-                      child: Text12(
-                        text: '${_scrollPosition.toStringAsFixed(2)}%',
-                        textColor: MyColors.black,
-                      ),
-                    ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
+                            child: Text12(
+                              text: '${_scrollPosition.toStringAsFixed(2)}%',
+                              textColor: MyColors.black,
+                            ),
+                          ),
                         ]
                       : [],
                 ),
@@ -1472,8 +1467,7 @@ class Reader extends State {
                                               min: 0,
                                               max: _scrollController
                                                   .position.maxScrollExtent,
-                                              label:
-                                                  visible
+                                              label: visible
                                                   ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
                                                   : "",
                                               onChanged: (value) {
@@ -1516,8 +1510,7 @@ class Reader extends State {
                                             ),
                                           ),
                                           Text11(
-                                              text:
-                                                  visible
+                                              text: visible
                                                   ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
                                                   : "",
                                               textColor: MyColors.darkGray)
