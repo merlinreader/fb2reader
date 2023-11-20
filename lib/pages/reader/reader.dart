@@ -1264,9 +1264,8 @@ class Reader extends State {
             child: Stack(children: [
               SafeArea(
                 top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                  child: ListView.builder(
+                minimum: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                child: ListView.builder(
                       controller: _scrollController,
                       itemCount: 1,
                       itemBuilder: (context, index) {
@@ -1275,11 +1274,11 @@ class Reader extends State {
                               ? () {
                                   return Text(
                                     getText,
-                                    textAlign: TextAlign.justify,
+                                  // textAlign: TextAlign.justify,
                                     // textAlign: TextAlign.center,
-                                    softWrap: true,
+                                  softWrap: true,
                                     style: TextStyle(
-                                        fontSize: 18.0,
+                                      fontSize: 18.0,
                                         color: textColor,
                                         height: 1.41,
                                         locale: const Locale('ru', 'RU')),
@@ -1297,7 +1296,7 @@ class Reader extends State {
                         }
                         return null;
                       }),
-                ),
+                
               ),
               GestureDetector(
                   behavior: HitTestBehavior.translucent,
@@ -1380,56 +1379,62 @@ class Reader extends State {
                 duration: const Duration(milliseconds: 250),
                 height: visible ? 100 : 30,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: !visible
                       ? [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Transform.rotate(
-                            angle: 90 *
-                                3.14159265 /
-                                180, // Rotate the battery icon 90 degrees counterclockwise
-                            child: Icon(
-                              Icons
-                                  .battery_full, // Use any battery icon you like
-                              color: Theme.of(context)
-                                  .iconTheme
-                                  .color, // Color of the battery icon
-                              size: 24, // Adjust the size as needed
+                            padding: const EdgeInsets.fromLTRB(24, 0, 0, 0),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width / 8,
+                              alignment: Alignment.topLeft,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Transform.rotate(
+                                    angle: 90 * 3.14159265 / 180,
+                                    child: Icon(
+                                      Icons
+                                    .battery_full,
+                                      color: Theme.of(context).iconTheme.color,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  Text7(
+                                    text: '${_batteryLevel.toString()}%',
+                                    textColor: MyColors.white,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          Text7(
-                            text: '${_batteryLevel.toString()}%',
-                            textColor: MyColors.white,
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: Text12(
+                                  text: textes.isNotEmpty
+                                      ? (textes[0].title.toString().length > 28
+                                          ? '${textes[0].title.toString().substring(0, 28)}...'
+                                          : textes[0].title.toString())
+                                      : 'Нет названия',
+                                  textColor: MyColors.black,
+                                ),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Text12(
-                          text: textes.isNotEmpty
-                              ? (textes[0].title.toString().length > 28
-                                  ? '${textes[0].title.toString().substring(0, 28)}...'
-                                  : textes[0].title.toString())
-                              : 'Нет названия',
-                          textColor: MyColors.black,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
-                      child: Text12(
-                        text: '${_scrollPosition.toStringAsFixed(2)}%',
-                        textColor: MyColors.black,
-                      ),
-                    ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 3, 24, 0),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width / 8,
+                              alignment: Alignment.topRight,
+                              child: Text12(
+                                text: '${_scrollPosition.toStringAsFixed(2)}%',
+                                textColor: MyColors.black,
+                              ),
+                            ),
+                          ),
                         ]
                       : [],
                 ),
@@ -1449,12 +1454,14 @@ class Reader extends State {
                             _scrollController.hasClients
                                 ? Padding(
                                     padding:
-                                        const EdgeInsets.fromLTRB(16, 0, 28, 0),
+                                        const EdgeInsets.fromLTRB(8, 0, 28, 0),
                                     child: SliderTheme(
                                       data: const SliderThemeData(
                                           showValueIndicator:
                                               ShowValueIndicator.always),
                                       child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           Expanded(
                                             child: Slider(
@@ -1472,9 +1479,15 @@ class Reader extends State {
                                               min: 0,
                                               max: _scrollController
                                                   .position.maxScrollExtent,
-                                              label:
-                                                  visible
-                                                  ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
+                                              label: visible
+                                                  ? (position /
+                                                                  _scrollController
+                                                                      .position
+                                                                      .maxScrollExtent) *
+                                                              100 >
+                                                          0
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
+                                                      : "0.00%"
                                                   : "",
                                               onChanged: (value) {
                                                 setState(() {
@@ -1515,12 +1528,25 @@ class Reader extends State {
                                                       29, 29, 33, 1),
                                             ),
                                           ),
-                                          Text11(
-                                              text:
-                                                  visible
-                                                  ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
-                                                  : "",
-                                              textColor: MyColors.darkGray)
+                                          Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                12,
+                                            alignment: Alignment.center,
+                                            child: Text11(
+                                                text: visible
+                                                    ? (position /
+                                                                    _scrollController
+                                                                        .position
+                                                                        .maxScrollExtent) *
+                                                                100 >
+                                                            0
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
+                                                        : "0.00%"
+                                                    : "",
+                                                textColor: MyColors.darkGray),
+                                          )
                                         ],
                                       ),
                                     ),
