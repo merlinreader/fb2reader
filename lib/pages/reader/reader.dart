@@ -84,6 +84,8 @@ class Reader extends State {
 
   bool visible = false;
 
+  double fontSize = 18;
+
   void _getBatteryLevel() async {
     final batteryLevel = await _battery.batteryLevel;
     setState(() {
@@ -143,6 +145,15 @@ class Reader extends State {
     });
   }
 
+  Future<void> loadFontSize() async {
+    final prefs = await SharedPreferences.getInstance();
+    final fontSizeFromStorage = prefs.getDouble('fontSize') ?? 18;
+    setState(() {
+      fontSize = fontSizeFromStorage;
+      _scrollController.jumpTo(_scrollController.position.pixels + 1);
+    });
+  }
+
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -156,6 +167,7 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
     loadStylePreferences();
+    loadFontSize();
     super.didChangeDependencies();
   }
 
@@ -1290,7 +1302,7 @@ class Reader extends State {
                                   // textAlign: TextAlign.center,
                                   softWrap: true,
                                   style: TextStyle(
-                                      fontSize: 18.0,
+                                      fontSize: fontSize,
                                       color: textColor,
                                       height: 1.41,
                                       locale: const Locale('ru', 'RU')),
