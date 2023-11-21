@@ -9,8 +9,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:merlin/functions/location.dart';
 
+Future<DateTime?> getSavedDateTime() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? savedDateTimeString = prefs.getString('savedDateTime');
+  if (savedDateTimeString != null) {
+    return DateTime.parse(savedDateTimeString);
+  }
+  return null;
+}
+
+Future<double?> getPageSize() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  double? savedPageSize = prefs.getDouble('pageSize');
+  if (savedPageSize != null) {
+    return savedPageSize;
+  }
+  return null;
+}
+
 // метод который составляет список прочитанных страниц
-getPageCountSimpleMode() async {
+getPageCount() async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token') ?? '';
   String? imageDataJson = prefs.getString('booksKey');
@@ -63,23 +81,40 @@ getPageCountSimpleMode() async {
       }
     }
   }
+  double pageSize = await getPageSize() ?? 0;
+  DateTime savedDateTime = await getSavedDateTime() ?? DateTime.now();
+  DateTime nowDateTime = DateTime.now();
+  Duration difference = nowDateTime.difference(savedDateTime);
+  int differenceInSeconds = difference.inSeconds;
+  print('pageSize = $pageSize');
+  print('savedDateTime = $savedDateTime');
+  print('differenceInSeconds = $differenceInSeconds');
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
   String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00")
       .format(DateTime.now().toUtc());
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
-      pageCountWordMode = pageCountWordMode + entry.key;
-      // pageCountSimpleMode = pageCountWordMode + entry.key;
+      double speed = pageSize / differenceInSeconds;
+      print('WM entry.key = ${entry.key}');
+      print('speed WM = $speed sym/sec');
+      if (33.3 > speed) {
+        pageCountWordMode = pageCountWordMode + entry.key;
+      }
     }
     if (entry.value == false) {
-      pageCountSimpleMode = pageCountSimpleMode + entry.key;
+      double speed = pageSize / differenceInSeconds;
+      print('SM entry.key = ${entry.key}');
+      print('speed SM = $speed sym/sec');
+      if (33.3 > speed) {
+        pageCountSimpleMode = pageCountSimpleMode + entry.key;
+      }
     }
   }
   print('pageCountWordMode $pageCountWordMode');
   print('pageCountSimpleMode $pageCountSimpleMode');
   print('nowDataUTC $nowDataUTC');
-  // print(dataToSend);
+  print(dataToSend);
   // for (final entry in dataToSend.entries) {
   //   int number = entry.key;
   //   bool value = entry.value;

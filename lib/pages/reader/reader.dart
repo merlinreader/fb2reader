@@ -91,6 +91,13 @@ class Reader extends State {
     });
   }
 
+  void saveDateTime(double pageSize) async {
+    final prefs = await SharedPreferences.getInstance();
+    DateTime currentTime = DateTime.now();
+    prefs.setString('savedDateTime', currentTime.toIso8601String());
+    prefs.setDouble('pageSize', pageSize);
+  }
+
   @override
   void initState() {
     getDataFromLocalStorage('textKey');
@@ -108,6 +115,8 @@ class Reader extends State {
       print('initState lastPageCount $lastPageCount');
       final filePath = textes.first.filePath;
       pageSize = MediaQuery.of(context).size.height;
+      print('pageSize = $pageSize');
+      saveDateTime(pageSize);
       final readingPositionsJson = prefs.getString('readingPositions');
       if (readingPositionsJson != null) {
         final readingPositions = jsonDecode(readingPositionsJson);
@@ -138,7 +147,7 @@ class Reader extends State {
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([orientations[0]]);
-    getPageCountSimpleMode();
+    getPageCount();
     super.dispose();
   }
 
