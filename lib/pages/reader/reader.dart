@@ -421,6 +421,49 @@ class Reader extends State {
     }
   }
 
+  void replaceWordsWithTranslation(List<WordEntry> wordEntries) {
+    // Копируем исходный текст в мутабельную переменную для замен
+    String updatedText = getText;
+
+    // Перебираем список слов
+    for (var entry in wordEntries) {
+      // Печатаем, какое слово мы ищем
+      print('Ищем слово: ${entry.word}');
+
+      // Создаем регулярное выражение для поиска слова в тексте
+      final wordRegExp =
+          RegExp(entry.word, caseSensitive: false, unicode: true);
+
+      // Ищем совпадения и заменяем каждое из них
+      updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
+        // Выводим найденные совпадения
+        final matchedWord = match.group(0)!;
+        print('Найдено совпадение: $matchedWord');
+        // Заменяем слово, сохраняя исходный регистр
+        return matchCase(matchedWord, entry.translation ?? '');
+      });
+    }
+
+    // Выводим обновленный текст после всех замен
+    print('Обновленный текст: $updatedText');
+    setState(() {
+      getText = updatedText;
+    });
+  }
+
+  String matchCase(String source, String pattern) {
+    // Сохраняем регистр первой буквы исходного слова
+    if (source[0] == source[0].toUpperCase()) {
+      return pattern[0].toUpperCase() + pattern.substring(1).toLowerCase();
+    }
+    // Если весь текст в верхнем регистре - перевод тоже
+    if (source.toUpperCase() == source) {
+      return pattern.toUpperCase();
+    }
+    // Иначе возвращаем перевод в нижнем регистре
+    return pattern.toLowerCase();
+  }
+
   Future<void> showTableDialog(
       BuildContext context, WordCount wordCount) async {
     showDialog<void>(
@@ -570,6 +613,8 @@ class Reader extends State {
                                   onPressed: () async {
                                     await saveWordCountToLocalstorage(
                                         wordCount);
+                                    replaceWordsWithTranslation(
+                                        wordCount.wordEntries);
                                     Navigator.pop(context);
                                   },
                                   child: const Text16(
