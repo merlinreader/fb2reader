@@ -150,7 +150,6 @@ class Reader extends State {
     final fontSizeFromStorage = prefs.getDouble('fontSize') ?? 18;
     setState(() {
       fontSize = fontSizeFromStorage;
-      _scrollController.jumpTo(_scrollController.position.pixels + 1);
     });
   }
 

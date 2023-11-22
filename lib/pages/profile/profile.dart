@@ -2,6 +2,7 @@ import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
+import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
@@ -11,6 +12,7 @@ import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/location.dart';
+import 'package:merlin/components/ads/advertisement.dart';
 import 'package:merlin/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -20,6 +22,7 @@ import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'package:yandex_mobileads/mobile_ads.dart';
 
 class AchievementStatus {
   Achievement achievement;
@@ -62,6 +65,7 @@ class _ProfilePage extends State<ProfilePage> {
     initUniLinks();
     getTokenFromLocalStorage();
     getAchievementsFromJson();
+    MobileAds.initialize();
   }
 
   Future<List<Achievement>> fetchJson() async {
@@ -288,7 +292,8 @@ class _ProfilePage extends State<ProfilePage> {
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   onPressed: () {
-                                    mail();
+                                    //mail();//////////////////////////////тут
+                                    RewardedAdPage();
                                   }),
                             )),
                       ),
@@ -309,7 +314,9 @@ class _ProfilePage extends State<ProfilePage> {
                           verticalPadding: 12,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, RouteNames.rewardedAd);
+                          },
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -370,21 +377,26 @@ class _ProfilePage extends State<ProfilePage> {
         context: context,
         builder: (context) => AlertDialog(
               title: Center(
-                child: TextButton(onPressed: (){
-                  Clipboard.setData(const ClipboardData(text: 'readermerlin@gmail.com'));
-                  Fluttertoast.showToast(
-                                            msg: 'Почта скопирована',
-                                            toastLength: Toast
-                                                .LENGTH_SHORT, // Длительность отображения
-                                            gravity: ToastGravity
-                                                .BOTTOM, // Расположение уведомления
-                                          );
-                }, child: const Text18(text: 'readermerlin@gmail.com', textColor: MyColors.black)),
-                
-                  // child: Text18(
-                  //     text: 'readermerlin@gmail.com',
-                  //     textColor: MyColors.black)
-                      ),
+                child: TextButton(
+                    onPressed: () {
+                      Clipboard.setData(
+                          const ClipboardData(text: 'readermerlin@gmail.com'));
+                      Fluttertoast.showToast(
+                        msg: 'Почта скопирована',
+                        toastLength:
+                            Toast.LENGTH_SHORT, // Длительность отображения
+                        gravity:
+                            ToastGravity.BOTTOM, // Расположение уведомления
+                      );
+                    },
+                    child: const Text18(
+                        text: 'readermerlin@gmail.com',
+                        textColor: MyColors.black)),
+
+                // child: Text18(
+                //     text: 'readermerlin@gmail.com',
+                //     textColor: MyColors.black)
+              ),
               alignment: Alignment.center,
               actions: [
                 Center(
