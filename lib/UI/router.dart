@@ -5,6 +5,7 @@ import 'package:merlin/pages/profile/profile.dart';
 import 'package:merlin/pages/reader/reader.dart';
 import 'package:merlin/pages/settings/settings.dart';
 import 'package:merlin/pages/splashScreen/splashScreen.dart';
+import 'package:merlin/pages/profile/choose_avatar_dialog.dart';
 //import 'package:path/path.dart';
 
 abstract class RouteNames {

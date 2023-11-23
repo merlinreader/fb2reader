@@ -30,7 +30,6 @@ Future<void> handleDeeplinks() async {
     // Ошибка при обработке глубокой ссылки
   }
 }
-
 class MerlinApp extends StatelessWidget {
   final _router = AppRouter();
 
@@ -59,7 +58,7 @@ class ThemeProvider with ChangeNotifier {
   bool _isDarkTheme = false;
 
   bool get isDarkTheme => _isDarkTheme;
-
+ 
   set isDarkTheme(bool value) {
     _isDarkTheme = value;
     setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -81,3 +80,4 @@ class ThemeProvider with ChangeNotifier {
     SystemChrome.setSystemUIOverlayStyle(style);
   }
 }
+

@@ -1,4 +1,4 @@
-import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
+//import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -6,6 +6,7 @@ import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
+import 'package:merlin/pages/profile/choose_avatar_dialog.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
@@ -49,10 +50,11 @@ class _ProfilePage extends State<ProfilePage> {
 
   String token = '';
   late String getToken;
-  late String qwerty;
   String firstName = 'Merlin';
   List<AchievementStatus> getAchievements = [];
+  List<Color> _containerColors = List.filled(32, MyColors.white);
   late var achievements;
+  String? selectAvatar;
 
   // ignore: unused_field
   String? _link = 'unknown';
@@ -62,6 +64,7 @@ class _ProfilePage extends State<ProfilePage> {
     initUniLinks();
     getTokenFromLocalStorage();
     getAchievementsFromJson();
+    getAvatarFromLocalStorage();
   }
 
   Future<List<Achievement>> fetchJson() async {
@@ -142,6 +145,14 @@ class _ProfilePage extends State<ProfilePage> {
     await prefs.setString('token', token);
   }
 
+  Future<void> getAvatarFromLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      selectAvatar = prefs.getString('avatar');
+      //idAvatar = selectAvatar;
+    });
+  }
+
   Future<void> getFirstName() async {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
@@ -199,18 +210,32 @@ class _ProfilePage extends State<ProfilePage> {
           Center(
               child: Column(children: [
             Stack(
+              alignment: AlignmentDirectional.center,
+              //fit: StackFit.expand,
               children: <Widget>[
-                const MerlinWidget(),
+                selectAvatar == null
+                    ? const MerlinWidget()
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(48),
+                        child: Image(
+                          image: NetworkImage(selectAvatar!),
+                          height: 96,
+                          width: 96,
+                        )),
                 Positioned(
-                  bottom: -15,
-                  left: 250,
+                  left: 70,
+                  //left: 20,
+                  bottom: 0,
+                  //left: 300,
                   child: IconButton(
                       onPressed: chooseAvatar,
                       icon: Icon(
                         CustomIcons.pen,
                         size: size,
                       )),
-                )
+                ),
+
+                // Text('dhweuhf')
               ],
             ),
             const SizedBox(height: 12),
@@ -370,21 +395,26 @@ class _ProfilePage extends State<ProfilePage> {
         context: context,
         builder: (context) => AlertDialog(
               title: Center(
-                child: TextButton(onPressed: (){
-                  Clipboard.setData(const ClipboardData(text: 'readermerlin@gmail.com'));
-                  Fluttertoast.showToast(
-                                            msg: 'Почта скопирована',
-                                            toastLength: Toast
-                                                .LENGTH_SHORT, // Длительность отображения
-                                            gravity: ToastGravity
-                                                .BOTTOM, // Расположение уведомления
-                                          );
-                }, child: const Text18(text: 'readermerlin@gmail.com', textColor: MyColors.black)),
-                
-                  // child: Text18(
-                  //     text: 'readermerlin@gmail.com',
-                  //     textColor: MyColors.black)
-                      ),
+                child: TextButton(
+                    onPressed: () {
+                      Clipboard.setData(
+                          const ClipboardData(text: 'readermerlin@gmail.com'));
+                      Fluttertoast.showToast(
+                        msg: 'Почта скопирована',
+                        toastLength:
+                            Toast.LENGTH_SHORT, // Длительность отображения
+                        gravity:
+                            ToastGravity.BOTTOM, // Расположение уведомления
+                      );
+                    },
+                    child: const Text18(
+                        text: 'readermerlin@gmail.com',
+                        textColor: MyColors.black)),
+
+                // child: Text18(
+                //     text: 'readermerlin@gmail.com',
+                //     textColor: MyColors.black)
+              ),
               alignment: Alignment.center,
               actions: [
                 Center(
@@ -454,130 +484,13 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   void chooseAvatar() {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    print(getAchievements.length);
-    // ignore: use_build_context_synchronously
-    showDialog(
-      context: context,
-      builder: (context) => Theme(
-        data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
-        child: AlertDialog(
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
-          alignment: Alignment.center,
-          titlePadding: const EdgeInsets.only(top: 10, bottom: 10),
-          title: Center(
-              child: Column(
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: SizedBox(
-                  height: 65,
-                  width: 65,
-                  child: MerlinWidget(),
-                ),
-              ),
-              const Text24(text: 'Аватар', textColor: MyColors.black),
-              const SizedBox(
-                height: 10,
-              ),
-              Container(
-                height: 10,
-                width: double.infinity,
-                color: themeProvider.isDarkTheme
-                    ? MyColors.grey
-                    : MyColors.lightGray,
-              ),
-            ],
-          )),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Center(
-                child:
-                    Text16(text: 'Выберите аватар', textColor: MyColors.black),
-              ),
-              Container(
-                padding: const EdgeInsets.only(top: 15),
-                height: MediaQuery.of(context).size.height / 3,
-                width: MediaQuery.of(context).size.width,
-                child: GridView.builder(
-                    itemCount: achievements.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4),
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          print('asdsa');
-                          for (var entry in getAchievements) {
-                            entry.isUnlocked = false;
-                          }
-                          getAchievements[index].isUnlocked = true;
-                          setState(() {
-                            getAchievements[index].isUnlocked = true;
-                            //TODO: убрать этот костыль когда-нибудь на 100500 итерации
-                            Navigator.of(context).pop();
-                            chooseAvatar();
-                          });
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              boxShadow: const [
-                                BoxShadow(
-                                    color: MyColors.black,
-                                    offset: Offset.zero,
-                                    blurRadius: 5,
-                                    spreadRadius: 0.1,
-                                    blurStyle: BlurStyle.normal)
-                              ],
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                  color: getAchievements[index].isUnlocked
-                                      ? MyColors.purple
-                                      : MyColors.white,
-                                  width: 4,
-                                  style: BorderStyle.solid),
-                              image: DecorationImage(
-                                  image: NetworkImage(getAchievements[index]
-                                      .achievement
-                                      .picture)),
-                              // image: NetworkImage(achievements[index].picture)),
-                            ),
-                          ),
-                        ),
-                      );
-                    }),
-              )
-            ],
-          ),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  for (var entry in getAchievements) {
-                    entry.isUnlocked = false;
-                  }
-                  setState(() {
-                    Navigator.of(context).pop();
-                    chooseAvatar();
-                  });
-                },
-                child:
-                    const Text16(text: 'Сбросить', textColor: MyColors.black)),
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child:
-                    const Text16(text: 'Сохранить', textColor: MyColors.black))
-          ],
-        ),
-      ),
-    );
+    setState(() {
+      showDialog(context: context, builder: (context) => const ChooseAvatarDialog());
+      //.then((value) => );
+    });
   }
 }
 /*..._achievements
                         .map((e) => AchievementCard(achievement: e))
                         .toList() */
+
