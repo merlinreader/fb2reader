@@ -145,14 +145,6 @@ class Reader extends State {
     });
   }
 
-  Future<void> loadFontSize() async {
-    final prefs = await SharedPreferences.getInstance();
-    final fontSizeFromStorage = prefs.getDouble('fontSize') ?? 18;
-    setState(() {
-      fontSize = fontSizeFromStorage;
-    });
-  }
-
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
@@ -166,7 +158,6 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
     loadStylePreferences();
-    loadFontSize();
     super.didChangeDependencies();
   }
 
@@ -307,12 +298,18 @@ class Reader extends State {
         await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
     final textColorFromStorage =
         await _colorProvider.getColor(ColorKeys.readerTextColor);
+    final prefs = await SharedPreferences.getInstance();
+
+    final fontSizeFromStorage = prefs.getDouble('fontSize');
     setState(() {
       if (backgroundColorFromStorage != null) {
         backgroundColor = backgroundColorFromStorage;
       }
       if (textColorFromStorage != null) {
         textColor = textColorFromStorage;
+      }
+      if (fontSizeFromStorage != null) {
+        fontSize = fontSizeFromStorage;
       }
     });
   }
