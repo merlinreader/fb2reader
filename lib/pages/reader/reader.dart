@@ -79,6 +79,8 @@ class Reader extends State {
   int lastPageCount = 0;
   double pageSize = 0;
   Timer? _actionTimer;
+  bool? isTrans = false;
+  bool isBorder = false;
 
   double _scrollPosition = 0.0;
 
@@ -120,8 +122,10 @@ class Reader extends State {
       print('pageSize = $pageSize');
       saveDateTime(pageSize);
       final readingPositionsJson = prefs.getString('readingPositions');
-      bool? isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
-
+      isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
+      setState(() {
+        isTrans;
+      });
       if (isTrans != null && isTrans == true) {
         var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
         replaceWordsWithTranslation(temp.wordEntries);
@@ -441,6 +445,7 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
 
     prefs.setBool('${textes.first.filePath}-isTrans', true);
+    isBorder = true;
     var lastCallTranslateStr = prefs.getString('lastCallTranslate');
     if (lastCallTranslateStr != null) {
       final now = DateTime.now();
@@ -448,7 +453,7 @@ class Reader extends State {
           ? DateTime.parse(lastCallTranslateStr)
           : null;
       final timeElapsed = now.difference(lastCallTranslateStamp!);
-      if (timeElapsed.inMicroseconds >= 1) {
+      if (timeElapsed.inMilliseconds >= 1) {
         await getDataFromLocalStorage('textKey');
       }
     }
@@ -474,12 +479,13 @@ class Reader extends State {
       });
     }
 
-    // Выводим обновленный текст после всех замен
-    print('Обновленный текст: $updatedText');
     await prefs.setString(
         'lastCallTranslate', DateTime.now().toIso8601String());
+    isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
+    print(isTrans);
     setState(() {
       getText = updatedText;
+      isTrans;
     });
   }
 
@@ -706,7 +712,7 @@ class Reader extends State {
     // print('now $now');
     // print('timeElapsed $timeElapsed');
     // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
-    if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 ||
+    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= 10 ||
         lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(10 - wordCount.wordEntries.length);
@@ -856,6 +862,8 @@ class Reader extends State {
                                     onPressed: () async {
                                       await saveWordCountToLocalstorage(
                                           wordCount);
+                                      replaceWordsWithTranslation(
+                                          wordCount.wordEntries);
                                       Navigator.pop(context);
                                     },
                                     child: const Text16(
@@ -1347,9 +1355,11 @@ class Reader extends State {
             : null,
         body: Container(
             decoration: BoxDecoration(
-              color: backgroundColor,
-              // border: Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 4)
-            ),
+                color: backgroundColor,
+                border: isBorder == true
+                    ? Border.all(
+                        color: const Color.fromRGBO(0, 255, 163, 1), width: 4)
+                    : Border.all(width: 0, color: Colors.transparent)),
             child: Stack(children: [
               SafeArea(
                 top: false,
@@ -1673,7 +1683,30 @@ class Reader extends State {
                                     padding: EdgeInsets.only(right: 30)),
                                 GestureDetector(
                                   onTap: () async {
-                                    wordModeDialog(context);
+                                    switch (isBorder) {
+                                      case false:
+                                        if (isTrans == true) {
+                                          var temp =
+                                              await loadWordCountFromLocalStorage(
+                                                  textes.first.filePath);
+                                          print(
+                                              'temp.filePath = ${temp.filePath}');
+                                          if (temp.filePath != '') {
+                                            replaceWordsWithTranslation(
+                                                temp.wordEntries);
+                                          }
+                                        } else {
+                                          wordModeDialog(context);
+                                        }
+                                        break;
+                                      default:
+                                        await getDataFromLocalStorage(
+                                            'textKey');
+                                        isBorder = false;
+                                        wordModeDialog(context);
+                                        print('isTrans = $isTrans');
+                                        break;
+                                    }
                                   },
                                   child: Icon(
                                     CustomIcons.wm,

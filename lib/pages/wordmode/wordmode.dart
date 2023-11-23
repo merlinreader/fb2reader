@@ -114,8 +114,8 @@ class WordCount {
       final timeElapsed = now.difference(_lastCallTimestamp!);
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
-      // if (timeElapsed.inHours >= 24) {
-      if (timeElapsed.inMicroseconds >= 1) {
+      if (timeElapsed.inHours >= 24) {
+        // if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset(_callCount);
         await updateCallInfo();
       } else {
@@ -260,7 +260,7 @@ class WordCount {
     final wordEntriesFutures = <Future<WordEntry>>[];
     for (var i = start; i < end; i++) {
       final entry = sortedWordCounts[i];
-  
+
       wordEntriesFutures.add(
         createWordEntry(entry.key, entry.value),
       );
@@ -276,7 +276,7 @@ class WordCount {
     final ipaWord = await getIPA(translation);
     // final partOfSpeechWord = await getPartOfSpeech(translation);
     // print('"$word" - "$translation" - [$ipaWord]');
-  
+
     return WordEntry(
       word: word,
       count: count,
@@ -285,7 +285,6 @@ class WordCount {
       // partOfSpeech: partOfSpeechWord, // Uncomment if needed
     );
   }
-
 
   Future<List<WordEntry>> processSingleWord(
       String newWord, List<WordEntry> wordEntries) async {
