@@ -361,13 +361,13 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                 height: 2,
                 color: MyColors.purple,
                 width: currentIndex == 0
-                    ? 30
+                    ? 28
                     : currentIndex == 1
-                        ? 43
+                        ? 41
                         : currentIndex == 2
-                            ? 37
+                            ? 35
                             : currentIndex == 3
-                                ? 50
+                                ? 46
                                 : currentIndex == 4
                                     ? 20
                                     : 0,
@@ -389,7 +389,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
               // const SizedBox(width: 24),
               buildTab(
                 Container(
-                  width: 30,
+                  //width: 28,
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -410,7 +410,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
               // const SizedBox(width: 16),
               buildTab(
                 Container(
-                  width: 43,
+                  //width: 43,
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -431,7 +431,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
               // const SizedBox(width: 16),
               buildTab(
                 Container(
-                  width: 37,
+                  //width: 37,
                   height: 24,
                   child: InkWell(
                     onTap: () {
@@ -452,7 +452,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
               // const SizedBox(width: 16),
               buildTab(
                 Container(
-                  width: 50,
+                  //width: 50,
                   height: 24,
                   child: InkWell(
                     onTap: () {

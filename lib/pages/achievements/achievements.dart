@@ -61,6 +61,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
 
   @override
   Widget build(BuildContext context) {
+    print(_achievements);
     return Stack(
       children: [
         const Padding(
@@ -73,17 +74,29 @@ class _AchievementsPageState extends State<AchievementsPage> {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 72),
-          child: _isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: MyColors.purple),
+          child: _achievements.isEmpty
+              ? Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextTektur(
+                          text: "Авторизуйтесь, чтобы открыть достижения",
+                          fontsize: 16,
+                          textColor: MyColors.grey)
+                    ],
+                  ),
                 )
-              : ListView(
-                  children: [
-                    ..._achievements
-                        .map((e) => AchievementCard(achievement: e))
-                        .toList()
-                  ],
-                ),
+              : _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(color: MyColors.purple),
+                    )
+                  : ListView(
+                      children: [
+                        ..._achievements
+                            .map((e) => AchievementCard(achievement: e))
+                            .toList()
+                      ],
+                    ),
         )
       ],
     );

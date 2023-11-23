@@ -57,7 +57,6 @@ class Page extends State<AppPage> {
 
   @override
   Widget build(BuildContext context) {
-    getPageCountSimpleMode();
     getLocation();
     return Scaffold(
         appBar: AppBar(

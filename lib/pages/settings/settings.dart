@@ -61,6 +61,8 @@ class _SettingsPageState extends State<SettingsPage> {
   // Перменная для изменения темы
   bool isDarkTheme = false;
   bool isChecked = false;
+  // Переменная размера шрифта
+  double fontSize = 18;
   // Переменные для темы
   bool darkThemeBackground = false;
   Color themeAppBackground = MyColors.bgWhite;
@@ -86,6 +88,7 @@ class _SettingsPageState extends State<SettingsPage> {
         await _colorProvider.getColor(ColorKeys.readerTextColor);
     setState(() {
       isChecked = prefs.getBool('isDarkTheme') ?? false;
+      fontSize = prefs.getDouble('fontSize') ?? 18;
       currentBackgroundColor = backgroundColorFromStorage ?? MyColors.white;
       currentTextColor = textColorFromStorage ?? MyColors.black;
       // Восстанавливаем состояние темной темы
@@ -93,9 +96,10 @@ class _SettingsPageState extends State<SettingsPage> {
     });
   }
 
-  Future<void> saveSettings(bool isDarkTheme) async {
+  Future<void> saveSettings(double fontSize) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDarkTheme', isDarkTheme);
+    //await prefs.setBool('isDarkTheme', isDarkTheme);
+    await prefs.setDouble('fontSize', fontSize);
   }
 
   void updateTheme() {
@@ -179,31 +183,65 @@ class _SettingsPageState extends State<SettingsPage> {
                 Row(
                   children: <Widget>[
                     Text14(
-                      text: "Ночной режим",
+                      text: "Размер шрифта",
                       textColor: themeGrayTextColor,
                     ),
                     const Spacer(),
-                    CustomCheckbox(
-                      isChecked: isChecked,
-                      bgColor: Theme.of(context).colorScheme.primary,
-                      borderColor:
-                          Theme.of(context).iconTheme.color ?? MyColors.white,
-                      onChanged: (newValue) {
-                        final themeProvider =
-                            Provider.of<ThemeProvider>(context, listen: false);
-                        setState(() {
-                          themeProvider.isDarkTheme = newValue;
+                    // CustomCheckbox(
+                    //   isChecked: isChecked,
+                    //   bgColor: Theme.of(context).colorScheme.primary,
+                    //   borderColor:
+                    //       Theme.of(context).iconTheme.color ?? MyColors.white,
+                    //   onChanged: (newValue) {
+                    //     final themeProvider =
+                    //         Provider.of<ThemeProvider>(context, listen: false);
+                    //     setState(() {
+                    //       themeProvider.isDarkTheme = newValue;
 
-                          isChecked = newValue;
-                          saveSettings(isChecked);
-                          saveSettings(themeProvider.isDarkTheme);
-                          // print('settings $newValue');
+                    //       isChecked = newValue;
+                    //       saveSettings(isChecked);
+                    //       saveSettings(themeProvider.isDarkTheme);
+                    //       // print('settings $newValue');
+                    //     });
+                    //   },
+                    //   iconColor:
+                    //       Theme.of(context).iconTheme.color ?? MyColors.white,
+                    // ),
+                  ],
+                ),
+                Container(
+                  margin: const EdgeInsets.only(right: 10),
+                  child: SliderTheme(
+                    data: SliderThemeData(
+                      trackHeight: 5.0,
+                      thumbShape:
+                          const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+                      overlayShape:
+                          const RoundSliderOverlayShape(overlayRadius: 20.0),
+                      thumbColor: isDarkTheme
+                          ? MyColors.white
+                          : const Color.fromRGBO(29, 29, 33, 1),
+                      activeTrackColor: isDarkTheme
+                          ? MyColors.white
+                          : const Color.fromRGBO(29, 29, 33, 1),
+                      inactiveTrackColor: isDarkTheme
+                          ? const Color.fromRGBO(96, 96, 96, 1)
+                          : const Color.fromRGBO(96, 96, 96, 1),
+                    ),
+                    child: Slider(
+                      value: fontSize,
+                      onChanged: (double s) {
+                        setState(() {
+                          fontSize = s;
+                          saveSettings(fontSize);
                         });
                       },
-                      iconColor:
-                          Theme.of(context).iconTheme.color ?? MyColors.white,
+                      divisions: 10,
+                      min: 10.0,
+                      max: 30.0,
+                      label: fontSize.round().toString(),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -218,7 +256,7 @@ class _SettingsPageState extends State<SettingsPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text14(
+                Text18(
                   text: "Настраиваемая тема",
                   //fontsize: 18,
                   textColor: themeTextColor,
@@ -337,7 +375,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             style: TextStyle(
                               color: currentTextColor,
                               fontFamily: 'Roboto',
-                              fontSize: 14,
+                              fontSize: fontSize,
                               fontWeight:
                                   FontWeight.normal, /*PERCENT not supported*/
                             ),

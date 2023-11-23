@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
+import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
+import 'package:merlin/components/ads/network_provider.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/pages/profile/choose_avatar_dialog.dart';
@@ -12,6 +14,7 @@ import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
 import 'package:merlin/functions/sendmail.dart';
 import 'package:merlin/functions/location.dart';
+import 'package:merlin/components/ads/advertisement.dart';
 import 'package:merlin/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -21,6 +24,7 @@ import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'package:yandex_mobileads/mobile_ads.dart';
 
 class AchievementStatus {
   Achievement achievement;
@@ -44,6 +48,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePage extends State<ProfilePage> {
+  late RewardedAdPage rewardedAdPage;
   late String country;
   late String adminArea;
   late String locality;
@@ -54,6 +59,20 @@ class _ProfilePage extends State<ProfilePage> {
   List<AchievementStatus> getAchievements = [];
   List<Color> _containerColors = List.filled(32, MyColors.white);
   late var achievements;
+
+  final networks = NetworkProvider.instance.rewardedNetworks;
+
+  late var adUnitId = networks.first.adUnitId;
+  RewardedAd? _ad;
+  late final RewardedAdLoader _adLoader;
+  var adRequest = const AdRequest();
+  late AdRequestConfiguration _adRequestConfiguration =
+      AdRequestConfiguration(adUnitId: adUnitId);
+  var isLoading = false;
+
+  // кол-во доступнх юзеру слов
+  int words = 10;
+  late int getWords;
   String? selectAvatar;
 
   // ignore: unused_field
@@ -64,6 +83,64 @@ class _ProfilePage extends State<ProfilePage> {
     initUniLinks();
     getTokenFromLocalStorage();
     getAchievementsFromJson();
+    getWordsFromLocalStorage();
+    MobileAds.initialize();
+    _initAds();
+  }
+
+  void saveWordsToLocalStorage(int words) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('words', words);
+  }
+
+  Future<void> getWordsFromLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      getWords = prefs.getInt('words') ?? 10;
+      words = getWords;
+    });
+  }
+
+  Future<void> _initAds() async {
+    _adLoader = await RewardedAdLoader.create(
+      onAdLoaded: (RewardedAd rewardedAd) {
+        setState(() => {_ad = rewardedAd, isLoading = false});
+        _showRewardedAd();
+        // logMessage('callback: rewarded ad loaded');
+      },
+      onAdFailedToLoad: (error) {
+        setState(() => {_ad = null, isLoading = false});
+        // logMessage('callback: rewarded ad failed to load, '
+        //     'code: ${error.code}, description: ${error.description}');
+      },
+    );
+  }
+
+  Future<void> _showRewardedAd() async {
+    final ad = _ad;
+    if (ad != null) {
+      _setAdEventListener(ad);
+      await ad.show();
+      // logMessage('async: shown rewarded ad');
+      var reward = await ad.waitForDismiss();
+      // logMessage('async: dismissed rewarded ad, '
+      // 'reward: ${reward?.amount} of ${reward?.type}');
+      setState(() => _ad = null);
+    }
+  }
+
+  void _setAdEventListener(RewardedAd ad) async {
+    final prefs = await SharedPreferences.getInstance();
+    ad.setAdEventListener(
+        eventListener: RewardedAdEventListener(
+            onAdShown: () => print("callback: rewarded ad shown."),
+            onAdFailedToShow: (error) => print(
+                "callback: rewarded ad failed to show: ${error.description}."),
+            onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
+            onAdClicked: () => print("callback: rewarded ad clicked."),
+            onAdImpression: (data) =>
+                print("callback: rewarded ad impression: ${data.getRawData()}"),
+            onRewarded: (Reward reward) => saveWordsToLocalStorage(words + 5)));
     getAvatarFromLocalStorage();
   }
 
@@ -327,14 +404,20 @@ class _ProfilePage extends State<ProfilePage> {
                       Theme(
                         data: purpleButton(),
                         child: Button(
-                          text: 'Купить слова',
+                          text: 'Получить слова ($words)',
                           width: 312,
                           height: 48,
                           horizontalPadding: 97,
                           verticalPadding: 12,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          onPressed: () {},
+                          onPressed: () {
+                            _adLoader.loadAd(
+                                adRequestConfiguration:
+                                    _adRequestConfiguration);
+                            // Navigator.pushNamed(context, RouteNames.rewardedAd);
+                            //rewardedAdPage.callShowRewardedAd();
+                          },
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -342,7 +425,7 @@ class _ProfilePage extends State<ProfilePage> {
                         height: 10,
                       ),
                       Theme(
-                        data: purpleButton(),
+                        data: grayButton(),
                         child: Button(
                           text: 'Убрать рекламу',
                           width: 312,

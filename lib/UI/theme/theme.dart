@@ -7,7 +7,7 @@ ThemeData darkTheme() => ThemeData(
         brightness: Brightness.dark,
         primary: MyColors.blackGray,
         onPrimary: MyColors.white,
-        secondary: Colors.red,
+        secondary: MyColors.purple,
         onSecondary: MyColors.darkGray,
         error: Colors.red,
         onError: Colors.red,
@@ -106,12 +106,27 @@ ThemeData purpleButton() => ThemeData(
               const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ));
 
+ThemeData grayButton() => ThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+            ),
+          ),
+          elevation: null,
+          backgroundColor: const MaterialStatePropertyAll(MyColors.grey),
+          textStyle:
+              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+    ));
+
 ThemeData lightTheme() => ThemeData(
     colorScheme: const ColorScheme(
         brightness: Brightness.light,
         primary: MyColors.white,
         onPrimary: MyColors.white,
-        secondary: Colors.red,
+        secondary: MyColors.purple,
         onSecondary: MyColors.darkGray,
         error: Colors.red,
         onError: Colors.red,

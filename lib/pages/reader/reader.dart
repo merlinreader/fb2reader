@@ -79,16 +79,27 @@ class Reader extends State {
   int lastPageCount = 0;
   double pageSize = 0;
   Timer? _actionTimer;
+  bool? isTrans = false;
+  bool isBorder = false;
 
   double _scrollPosition = 0.0;
 
   bool visible = false;
+
+  double fontSize = 18;
 
   void _getBatteryLevel() async {
     final batteryLevel = await _battery.batteryLevel;
     setState(() {
       _batteryLevel = batteryLevel;
     });
+  }
+
+  void saveDateTime(double pageSize) async {
+    final prefs = await SharedPreferences.getInstance();
+    DateTime currentTime = DateTime.now();
+    prefs.setString('savedDateTime', currentTime.toIso8601String());
+    prefs.setDouble('pageSize', pageSize);
   }
 
   @override
@@ -108,7 +119,17 @@ class Reader extends State {
       print('initState lastPageCount $lastPageCount');
       final filePath = textes.first.filePath;
       pageSize = MediaQuery.of(context).size.height;
+      print('pageSize = $pageSize');
+      saveDateTime(pageSize);
       final readingPositionsJson = prefs.getString('readingPositions');
+      isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
+      setState(() {
+        isTrans;
+      });
+      if (isTrans != null && isTrans == true) {
+        var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
+        replaceWordsWithTranslation(temp.wordEntries);
+      }
       if (readingPositionsJson != null) {
         final readingPositions = jsonDecode(readingPositionsJson);
         if (readingPositions.containsKey(filePath)) {
@@ -138,7 +159,7 @@ class Reader extends State {
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([orientations[0]]);
-    getPageCountSimpleMode();
+    getPageCount();
     super.dispose();
   }
 
@@ -287,12 +308,18 @@ class Reader extends State {
         await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
     final textColorFromStorage =
         await _colorProvider.getColor(ColorKeys.readerTextColor);
+    final prefs = await SharedPreferences.getInstance();
+
+    final fontSizeFromStorage = prefs.getDouble('fontSize');
     setState(() {
       if (backgroundColorFromStorage != null) {
         backgroundColor = backgroundColorFromStorage;
       }
       if (textColorFromStorage != null) {
         textColor = textColorFromStorage;
+      }
+      if (fontSizeFromStorage != null) {
+        fontSize = fontSizeFromStorage;
       }
     });
   }
@@ -314,16 +341,18 @@ class Reader extends State {
       Navigator.pop(context);
       Fluttertoast.showToast(
         msg: 'Нет последней книги',
-        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
     }
 
-    getText = textes[0]
-        .fileText
-        .toString()
-        .replaceAll(RegExp(r'\['), '')
-        .replaceAll(RegExp(r'\]'), '');
+    setState(() {
+      getText = textes[0]
+          .fileText
+          .toString()
+          .replaceAll(RegExp(r'\['), '')
+          .replaceAll(RegExp(r'\]'), '');
+    });
   }
 
   List<DeviceOrientation> orientations = [
@@ -410,6 +439,67 @@ class Reader extends State {
     } else {
       return WordCount();
     }
+  }
+
+  void replaceWordsWithTranslation(List<WordEntry> wordEntries) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    prefs.setBool('${textes.first.filePath}-isTrans', true);
+    isBorder = true;
+    var lastCallTranslateStr = prefs.getString('lastCallTranslate');
+    if (lastCallTranslateStr != null) {
+      final now = DateTime.now();
+      DateTime? lastCallTranslateStamp = lastCallTranslateStr != null
+          ? DateTime.parse(lastCallTranslateStr)
+          : null;
+      final timeElapsed = now.difference(lastCallTranslateStamp!);
+      if (timeElapsed.inMilliseconds >= 1) {
+        await getDataFromLocalStorage('textKey');
+      }
+    }
+    // Копируем исходный текст в мутабельную переменную для замен
+    String updatedText = getText;
+
+    // Перебираем список слов
+    for (var entry in wordEntries) {
+      // Печатаем, какое слово мы ищем
+      print('Ищем слово: ${entry.word}');
+
+      // Создаем регулярное выражение для поиска слова в тексте
+      final wordRegExp =
+          RegExp(entry.word, caseSensitive: false, unicode: true);
+
+      // Ищем совпадения и заменяем каждое из них
+      updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
+        // Выводим найденные совпадения
+        final matchedWord = match.group(0)!;
+        print('Найдено совпадение: $matchedWord');
+        // Заменяем слово, сохраняя исходный регистр
+        return matchCase(matchedWord, entry.translation ?? '');
+      });
+    }
+
+    await prefs.setString(
+        'lastCallTranslate', DateTime.now().toIso8601String());
+    isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
+    print(isTrans);
+    setState(() {
+      getText = updatedText;
+      isTrans;
+    });
+  }
+
+  String matchCase(String source, String pattern) {
+    // Сохраняем регистр первой буквы исходного слова
+    if (source[0] == source[0].toUpperCase()) {
+      return pattern[0].toUpperCase() + pattern.substring(1).toLowerCase();
+    }
+    // Если весь текст в верхнем регистре - перевод тоже
+    if (source.toUpperCase() == source) {
+      return pattern.toUpperCase();
+    }
+    // Иначе возвращаем перевод в нижнем регистре
+    return pattern.toLowerCase();
   }
 
   Future<void> showTableDialog(
@@ -561,6 +651,8 @@ class Reader extends State {
                                   onPressed: () async {
                                     await saveWordCountToLocalstorage(
                                         wordCount);
+                                    replaceWordsWithTranslation(
+                                        wordCount.wordEntries);
                                     Navigator.pop(context);
                                   },
                                   child: const Text16(
@@ -620,7 +712,7 @@ class Reader extends State {
     // print('now $now');
     // print('timeElapsed $timeElapsed');
     // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
-    if (timeElapsed.inSeconds >= 1 && wordCount.wordEntries.length <= 10 ||
+    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= 10 ||
         lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(10 - wordCount.wordEntries.length);
@@ -770,6 +862,8 @@ class Reader extends State {
                                     onPressed: () async {
                                       await saveWordCountToLocalstorage(
                                           wordCount);
+                                      replaceWordsWithTranslation(
+                                          wordCount.wordEntries);
                                       Navigator.pop(context);
                                     },
                                     child: const Text16(
@@ -1260,44 +1354,47 @@ class Reader extends State {
               )
             : null,
         body: Container(
-            color: backgroundColor,
+            decoration: BoxDecoration(
+                color: backgroundColor,
+                border: isBorder == true
+                    ? Border.all(
+                        color: const Color.fromRGBO(0, 255, 163, 1), width: 4)
+                    : Border.all(width: 0, color: Colors.transparent)),
             child: Stack(children: [
               SafeArea(
                 top: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                  child: ListView.builder(
-                      controller: _scrollController,
-                      itemCount: 1,
-                      itemBuilder: (context, index) {
-                        if (textes.isNotEmpty) {
-                          return _scrollController.hasClients
-                              ? () {
-                                  return Text(
-                                    getText,
-                                    textAlign: TextAlign.justify,
-                                    // textAlign: TextAlign.center,
-                                    softWrap: true,
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        color: textColor,
-                                        height: 1.41,
-                                        locale: const Locale('ru', 'RU')),
-                                  );
-                                }()
-                              : Center(
-                                  child: Text(
-                                    'Нет текста для отображения',
-                                    style: TextStyle(
-                                      fontSize: 18.0,
+                minimum: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: 1,
+                    itemBuilder: (context, index) {
+                      if (textes.isNotEmpty) {
+                        return _scrollController.hasClients
+                            ? () {
+                                return Text(
+                                  getText,
+                                  // textAlign: TextAlign.justify,
+                                  // textAlign: TextAlign.center,
+                                  softWrap: true,
+                                  style: TextStyle(
+                                      fontSize: fontSize,
                                       color: textColor,
-                                    ),
-                                  ),
+                                      height: 1.41,
+                                      locale: const Locale('ru', 'RU')),
                                 );
-                        }
-                        return null;
-                      }),
-                ),
+                              }()
+                            : Center(
+                                child: Text(
+                                  'Нет текста для отображения',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    color: textColor,
+                                  ),
+                                ),
+                              );
+                      }
+                      return null;
+                    }),
               ),
               GestureDetector(
                   behavior: HitTestBehavior.translucent,
@@ -1380,56 +1477,61 @@ class Reader extends State {
                 duration: const Duration(milliseconds: 250),
                 height: visible ? 100 : 30,
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: !visible
                       ? [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Transform.rotate(
-                            angle: 90 *
-                                3.14159265 /
-                                180, // Rotate the battery icon 90 degrees counterclockwise
-                            child: Icon(
-                              Icons
-                                  .battery_full, // Use any battery icon you like
-                              color: Theme.of(context)
-                                  .iconTheme
-                                  .color, // Color of the battery icon
-                              size: 24, // Adjust the size as needed
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 0, 0, 0),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width / 8,
+                              alignment: Alignment.topLeft,
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Transform.rotate(
+                                    angle: 90 * 3.14159265 / 180,
+                                    child: Icon(
+                                      Icons.battery_full,
+                                      color: Theme.of(context).iconTheme.color,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  Text7(
+                                    text: '${_batteryLevel.toString()}%',
+                                    textColor: MyColors.white,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                          Text7(
-                            text: '${_batteryLevel.toString()}%',
-                            textColor: MyColors.white,
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: Text12(
+                                  text: textes.isNotEmpty
+                                      ? (textes[0].title.toString().length > 28
+                                          ? '${textes[0].title.toString().substring(0, 28)}...'
+                                          : textes[0].title.toString())
+                                      : 'Нет названия',
+                                  textColor: MyColors.black,
+                                ),
+                              ),
+                            ),
                           ),
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Text12(
-                          text: textes.isNotEmpty
-                              ? (textes[0].title.toString().length > 28
-                                  ? '${textes[0].title.toString().substring(0, 28)}...'
-                                  : textes[0].title.toString())
-                              : 'Нет названия',
-                          textColor: MyColors.black,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 3, 24, 0),
-                      child: Text12(
-                        text: '${_scrollPosition.toStringAsFixed(2)}%',
-                        textColor: MyColors.black,
-                      ),
-                    ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 3, 24, 0),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width / 8,
+                              alignment: Alignment.topRight,
+                              child: Text12(
+                                text: '${_scrollPosition.toStringAsFixed(2)}%',
+                                textColor: MyColors.black,
+                              ),
+                            ),
+                          ),
                         ]
                       : [],
                 ),
@@ -1449,12 +1551,14 @@ class Reader extends State {
                             _scrollController.hasClients
                                 ? Padding(
                                     padding:
-                                        const EdgeInsets.fromLTRB(16, 0, 28, 0),
+                                        const EdgeInsets.fromLTRB(8, 0, 28, 0),
                                     child: SliderTheme(
                                       data: const SliderThemeData(
                                           showValueIndicator:
                                               ShowValueIndicator.always),
                                       child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           Expanded(
                                             child: Slider(
@@ -1472,9 +1576,15 @@ class Reader extends State {
                                               min: 0,
                                               max: _scrollController
                                                   .position.maxScrollExtent,
-                                              label:
-                                                  visible
-                                                  ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
+                                              label: visible
+                                                  ? (position /
+                                                                  _scrollController
+                                                                      .position
+                                                                      .maxScrollExtent) *
+                                                              100 >
+                                                          0
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
+                                                      : "0.00%"
                                                   : "",
                                               onChanged: (value) {
                                                 setState(() {
@@ -1515,12 +1625,25 @@ class Reader extends State {
                                                       29, 29, 33, 1),
                                             ),
                                           ),
-                                          Text11(
-                                              text:
-                                                  visible
-                                                  ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 5)}%"
-                                                  : "",
-                                              textColor: MyColors.darkGray)
+                                          Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width /
+                                                12,
+                                            alignment: Alignment.center,
+                                            child: Text11(
+                                                text: visible
+                                                    ? (position /
+                                                                    _scrollController
+                                                                        .position
+                                                                        .maxScrollExtent) *
+                                                                100 >
+                                                            0
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
+                                                        : "0.00%"
+                                                    : "",
+                                                textColor: MyColors.darkGray),
+                                          )
                                         ],
                                       ),
                                     ),
@@ -1560,7 +1683,30 @@ class Reader extends State {
                                     padding: EdgeInsets.only(right: 30)),
                                 GestureDetector(
                                   onTap: () async {
-                                    wordModeDialog(context);
+                                    switch (isBorder) {
+                                      case false:
+                                        if (isTrans == true) {
+                                          var temp =
+                                              await loadWordCountFromLocalStorage(
+                                                  textes.first.filePath);
+                                          print(
+                                              'temp.filePath = ${temp.filePath}');
+                                          if (temp.filePath != '') {
+                                            replaceWordsWithTranslation(
+                                                temp.wordEntries);
+                                          }
+                                        } else {
+                                          wordModeDialog(context);
+                                        }
+                                        break;
+                                      default:
+                                        await getDataFromLocalStorage(
+                                            'textKey');
+                                        isBorder = false;
+                                        wordModeDialog(context);
+                                        print('isTrans = $isTrans');
+                                        break;
+                                    }
                                   },
                                   child: Icon(
                                     CustomIcons.wm,
