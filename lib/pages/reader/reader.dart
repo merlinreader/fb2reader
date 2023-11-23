@@ -120,6 +120,12 @@ class Reader extends State {
       print('pageSize = $pageSize');
       saveDateTime(pageSize);
       final readingPositionsJson = prefs.getString('readingPositions');
+      bool? isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
+
+      if (isTrans != null && isTrans == true) {
+        var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
+        replaceWordsWithTranslation(temp.wordEntries);
+      }
       if (readingPositionsJson != null) {
         final readingPositions = jsonDecode(readingPositionsJson);
         if (readingPositions.containsKey(filePath)) {
@@ -331,16 +337,18 @@ class Reader extends State {
       Navigator.pop(context);
       Fluttertoast.showToast(
         msg: 'Нет последней книги',
-        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
       );
     }
 
-    getText = textes[0]
-        .fileText
-        .toString()
-        .replaceAll(RegExp(r'\['), '')
-        .replaceAll(RegExp(r'\]'), '');
+    setState(() {
+      getText = textes[0]
+          .fileText
+          .toString()
+          .replaceAll(RegExp(r'\['), '')
+          .replaceAll(RegExp(r'\]'), '');
+    });
   }
 
   List<DeviceOrientation> orientations = [
@@ -429,7 +437,21 @@ class Reader extends State {
     }
   }
 
-  void replaceWordsWithTranslation(List<WordEntry> wordEntries) {
+  void replaceWordsWithTranslation(List<WordEntry> wordEntries) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    prefs.setBool('${textes.first.filePath}-isTrans', true);
+    var lastCallTranslateStr = prefs.getString('lastCallTranslate');
+    if (lastCallTranslateStr != null) {
+      final now = DateTime.now();
+      DateTime? lastCallTranslateStamp = lastCallTranslateStr != null
+          ? DateTime.parse(lastCallTranslateStr)
+          : null;
+      final timeElapsed = now.difference(lastCallTranslateStamp!);
+      if (timeElapsed.inMicroseconds >= 1) {
+        await getDataFromLocalStorage('textKey');
+      }
+    }
     // Копируем исходный текст в мутабельную переменную для замен
     String updatedText = getText;
 
@@ -454,6 +476,8 @@ class Reader extends State {
 
     // Выводим обновленный текст после всех замен
     print('Обновленный текст: $updatedText');
+    await prefs.setString(
+        'lastCallTranslate', DateTime.now().toIso8601String());
     setState(() {
       getText = updatedText;
     });
