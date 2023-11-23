@@ -210,14 +210,14 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
                 Container(
-                  margin: EdgeInsets.only(right: 10),
+                  margin: const EdgeInsets.only(right: 10),
                   child: SliderTheme(
                     data: SliderThemeData(
                       trackHeight: 5.0,
                       thumbShape:
-                          RoundSliderThumbShape(enabledThumbRadius: 10.0),
+                          const RoundSliderThumbShape(enabledThumbRadius: 10.0),
                       overlayShape:
-                          RoundSliderOverlayShape(overlayRadius: 20.0),
+                          const RoundSliderOverlayShape(overlayRadius: 20.0),
                       thumbColor: isDarkTheme
                           ? MyColors.white
                           : const Color.fromRGBO(29, 29, 33, 1),
@@ -236,7 +236,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           saveSettings(fontSize);
                         });
                       },
-                      divisions: 5,
+                      divisions: 10,
                       min: 10.0,
                       max: 30.0,
                       label: fontSize.round().toString(),
