@@ -21,6 +21,18 @@ class RewardedAdPage extends StatefulWidget {
 
   @override
   State<RewardedAdPage> createState() => _RewardedAdPageState();
+
+  void callShowRewardedAd() {
+    _RewardedAdPageState state = _RewardedAdPageState();
+    state._showRewardedAd();
+    print('showshowshow must go on');
+  }
+
+  void callLoadRewardedAd() {
+    _RewardedAdPageState state = _RewardedAdPageState();
+    state._loadRewardedAd();
+    print('LOAD');
+  }
 }
 
 class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
@@ -43,16 +55,16 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
         child: Column(
           children: [
             SizedBox(height: 16.0),
-            AdInfoField(
-              networks: networks,
-              onChanged: (id, request) => setState(() {
-                isLoading = false;
-                _ad = null;
-                adUnitId = id;
-                adRequest = request;
-                _updateAdRequestConfiguration(id, request);
-              }),
-            ),
+            // AdInfoField(
+            //   networks: networks,
+            //   onChanged: (id, request) => setState(() {
+            //     isLoading = false;
+            //     _ad = null;
+            //     adUnitId = id;
+            //     adRequest = request;
+            //     _updateAdRequestConfiguration(id, request);
+            //   }),
+            // ),
             SizedBox(height: 16.0),
             Expanded(
               child: LogTile(
@@ -118,7 +130,7 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
             onAdShown: () => logMessage("callback: rewarded ad shown."),
             onAdFailedToShow: (error) => logMessage(
                 "callback: rewarded ad failed to show: ${error.description}."),
-            onAdDismissed: () => logMessage("callback: rewarded ad dismissed."),
+            onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
             onAdClicked: () => logMessage("callback: rewarded ad clicked."),
             onAdImpression: (data) => logMessage(
                 "callback: rewarded ad impression: ${data.getRawData()}"),

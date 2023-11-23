@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:merlin/components/ads/advertisement.dart';
 
 import 'package:merlin/pages/page.dart';
 import 'package:merlin/pages/profile/profile.dart';
@@ -15,7 +14,6 @@ abstract class RouteNames {
   static const String reader = '/main/reader';
   static const String readerSettings = '/main/reader/settings';
   static const String auth = '/main/auth';
-  static const String rewardedAd = '/main/rewardedAd';
 }
 
 class AppRouter {
@@ -25,6 +23,5 @@ class AppRouter {
     RouteNames.profile: (context) => const Profile(),
     RouteNames.reader: (context) => const ReaderPage(),
     RouteNames.readerSettings: (context) => const SettingsPage(),
-    RouteNames.rewardedAd: (context) => const RewardedAdPage(),
   };
 }

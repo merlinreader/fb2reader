@@ -17,7 +17,6 @@ void main() {
     ),
   );
   handleDeeplinks();
-  MobileAds.initialize();
 }
 
 Future<void> handleDeeplinks() async {

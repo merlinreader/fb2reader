@@ -106,6 +106,21 @@ ThemeData purpleButton() => ThemeData(
               const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ));
 
+ThemeData grayButton() => ThemeData(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ButtonStyle(
+          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+            ),
+          ),
+          elevation: null,
+          backgroundColor: const MaterialStatePropertyAll(MyColors.grey),
+          textStyle:
+              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+    ));
+
 ThemeData lightTheme() => ThemeData(
     colorScheme: const ColorScheme(
         brightness: Brightness.light,
