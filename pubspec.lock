@@ -73,6 +73,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  brightness:
+    dependency: "direct main"
+    description:
+      name: brightness
+      sha256: "80e649ae896fd3242c2cc176ce3725bcf6a142aa69e131777abcd7bf248ae273"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   build:
     dependency: transitive
     description:

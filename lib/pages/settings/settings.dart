@@ -151,16 +151,12 @@ class _SettingsPageState extends State<SettingsPage> {
       brightness = bright;
     });
   }
+
   Future<void> getAvatarFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       brightness = prefs.getDouble('brightness')!;
     });
-  }
-
-  void saveBrightness(double brightness) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('brightness', brightness);
   }
 
   @override
@@ -303,7 +299,6 @@ class _SettingsPageState extends State<SettingsPage> {
                               setState(() {
                                 brightness = value;
                               });
-                              saveBrightness(brightness);
                               FlutterScreenWake.setBrightness(brightness);
                               if (brightness == 0) {
                                 toggle = true;

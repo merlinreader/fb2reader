@@ -49,9 +49,9 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePage extends State<ProfilePage> {
   late RewardedAdPage rewardedAdPage;
-  late String country;
-  late String adminArea;
-  late String locality;
+  String? selectedCountry;
+  String? selectedState;
+  String? selectedCity;
 
   String token = '';
   late String getToken;
@@ -326,19 +326,39 @@ class _ProfilePage extends State<ProfilePage> {
                 } else {
                   final locationData =
                       snapshot.data ?? 'Нет данных о местоположении';
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(width: size),
-                      Text14(text: locationData, textColor: MyColors.black),
-                      IconButton(
-                          onPressed: geo,
-                          icon: Icon(
-                            CustomIcons.pen,
-                            size: size,
-                          )),
-                    ],
-                  );
+                  return selectedCountry != '' &&
+                          selectedState != '' &&
+                          selectedCity != ''
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(width: size),
+                            Text14(
+                                text: locationData, textColor: MyColors.black),
+                            IconButton(
+                                onPressed: geo,
+                                icon: Icon(
+                                  CustomIcons.pen,
+                                  size: size,
+                                )),
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(width: size),
+                            Text14(
+                                text:
+                                    "$selectedCountry, $selectedState, $selectedCity",
+                                textColor: MyColors.black),
+                            IconButton(
+                                onPressed: geo,
+                                icon: Icon(
+                                  CustomIcons.pen,
+                                  size: size,
+                                )),
+                          ],
+                        );
                 }
               },
             )
@@ -553,11 +573,22 @@ class _ProfilePage extends State<ProfilePage> {
           alignment: Alignment.center,
           actions: [
             CSCPicker(
-              layout: Layout.vertical,
-              onCountryChanged: (country) {},
-              onStateChanged: (state) {},
-              onCityChanged: (city) {},
-            ),
+              onCountryChanged: (value) {
+                setState(() {
+                  selectedCountry = value;
+                });
+              },
+              onStateChanged: (value) {
+                setState(() {
+                  selectedState = value;
+                });
+              },
+              onCityChanged: (value) {
+                setState(() {
+                  selectedCity = value;
+                });
+              },
+            )
           ],
         ),
       ),
