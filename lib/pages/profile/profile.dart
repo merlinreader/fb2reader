@@ -138,6 +138,18 @@ class _ProfilePage extends State<ProfilePage> {
             onRewarded: (Reward reward) => saveWordsToLocalStorage(words + 5)));
   }
 
+  void saveGeo(String country, String area, String locality) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString("country", country ?? '');
+    prefs.setString("adminArea", area ?? '');
+    prefs.setString("locality", locality ?? '');
+    Map<String, String> locationData = {
+      'country': country ?? '',
+      'area': area ?? '',
+      'city': locality ?? '',
+    };
+  }
+
   Future<List<Achievement>> fetchJson() async {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
@@ -564,22 +576,46 @@ class _ProfilePage extends State<ProfilePage> {
           ),
           alignment: Alignment.center,
           actions: [
-            CSCPicker(
-              onCountryChanged: (value) {
-                setState(() {
-                  selectedCountry = value;
-                });
-              },
-              onStateChanged: (value) {
-                setState(() {
-                  selectedState = value;
-                });
-              },
-              onCityChanged: (value) {
-                setState(() {
-                  selectedCity = value;
-                });
-              },
+            Center(
+              child: Column(
+                children: [
+                  CSCPicker(
+                    layout: Layout.vertical,
+                    onCountryChanged: (value) {
+                      setState(() {
+                        selectedCountry = value;
+                      });
+                    },
+                    onStateChanged: (value) {
+                      setState(() {
+                        selectedState = value;
+                      });
+                    },
+                    onCityChanged: (value) {
+                      setState(() {
+                        selectedCity = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  Theme(
+                      data: purpleButton(),
+                      child: Button(
+                          text: 'Сохранить',
+                          width: 250,
+                          height: 44,
+                          horizontalPadding: 10,
+                          verticalPadding: 10,
+                          textColor: MyColors.white,
+                          fontSize: 14,
+                          onPressed: () {
+                            saveGeo(selectedCountry!, selectedState!,
+                                selectedCity!);
+                            Navigator.of(context).pop();
+                          },
+                          fontWeight: FontWeight.bold)),
+                ],
+              ),
             )
           ],
         ),
