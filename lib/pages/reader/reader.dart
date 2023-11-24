@@ -1324,7 +1324,7 @@ class Reader extends State {
                               data: lightTheme(),
                               child: Icon(
                                 CustomIcons.chevronLeft,
-                                size: 40,
+                                size: 30,
                                 color: Theme.of(context).iconTheme.color,
                               ))),
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -1359,7 +1359,7 @@ class Reader extends State {
                             },
                             child: Icon(
                               CustomIcons.sliders,
-                              size: 36,
+                              size: 30,
                               color: Theme.of(context).iconTheme.color,
                             ),
                           ),
