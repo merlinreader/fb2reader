@@ -565,6 +565,21 @@ class _ProfilePage extends State<ProfilePage> {
           alignment: Alignment.center,
           actions: [
             CSCPicker(
+              stateDropdownLabel: 'Область',
+              countryDropdownLabel: 'Страна',
+              cityDropdownLabel: 'Город',
+              selectedItemStyle: TextStyle(
+                  color: themeProvider.isDarkTheme
+                      ? MyColors.white
+                      : MyColors.black),
+              dropdownDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  border: Border.all(color: MyColors.lightGray)),
+              disabledDropdownDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.background,
+                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  border: Border.all(color: MyColors.lightGray)),
               onCountryChanged: (value) {
                 setState(() {
                   selectedCountry = value;
