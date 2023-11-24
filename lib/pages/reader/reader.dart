@@ -1596,10 +1596,17 @@ class Reader extends State {
                                                                   _scrollController
                                                                       .position
                                                                       .maxScrollExtent) *
-                                                              100 >
-                                                          0
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
-                                                      : "0.00%"
+                                                              100 ==
+                                                          100
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 3)}%"
+                                                      : (position /
+                                                                      _scrollController
+                                                                          .position
+                                                                          .maxScrollExtent) *
+                                                                  100 >
+                                                              0
+                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
+                                                          : "0.00%"
                                                   : "",
                                               onChanged: (value) {
                                                 setState(() {
@@ -1652,10 +1659,17 @@ class Reader extends State {
                                                                     _scrollController
                                                                         .position
                                                                         .maxScrollExtent) *
-                                                                100 >
-                                                            0
-                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
-                                                        : "0.00%"
+                                                                100 ==
+                                                            100
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 3)}%"
+                                                        : (position /
+                                                                        _scrollController
+                                                                            .position
+                                                                            .maxScrollExtent) *
+                                                                    100 >
+                                                                0
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
+                                                            : "0.00%"
                                                     : "",
                                                 textColor: MyColors.darkGray),
                                           )
