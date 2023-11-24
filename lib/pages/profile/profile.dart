@@ -1,14 +1,13 @@
-//import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
-import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/ads/network_provider.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
-import 'package:merlin/pages/profile/choose_avatar_dialog.dart';
+import 'package:merlin/pages/profile/dialogs/choose_avatar_dialog/choose_avatar_dialog.dart';
+import 'package:merlin/pages/profile/profile_view_model.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/components/button/button.dart';
@@ -57,7 +56,6 @@ class _ProfilePage extends State<ProfilePage> {
   late String getToken;
   String firstName = 'Merlin';
   List<AchievementStatus> getAchievements = [];
-  List<Color> _containerColors = List.filled(32, MyColors.white);
   late var achievements;
 
   final networks = NetworkProvider.instance.rewardedNetworks;
@@ -66,14 +64,13 @@ class _ProfilePage extends State<ProfilePage> {
   RewardedAd? _ad;
   late final RewardedAdLoader _adLoader;
   var adRequest = const AdRequest();
-  late AdRequestConfiguration _adRequestConfiguration =
+  late final AdRequestConfiguration _adRequestConfiguration =
       AdRequestConfiguration(adUnitId: adUnitId);
   var isLoading = false;
 
   // кол-во доступнх юзеру слов
   int words = 10;
   late int getWords;
-  String? selectAvatar;
 
   // ignore: unused_field
   String? _link = 'unknown';
@@ -82,7 +79,6 @@ class _ProfilePage extends State<ProfilePage> {
     super.initState();
     initUniLinks();
     getTokenFromLocalStorage();
-    getAchievementsFromJson();
     getWordsFromLocalStorage();
     getFirstName();
     MobileAds.initialize();
@@ -123,7 +119,6 @@ class _ProfilePage extends State<ProfilePage> {
       _setAdEventListener(ad);
       await ad.show();
       // logMessage('async: shown rewarded ad');
-      var reward = await ad.waitForDismiss();
       // logMessage('async: dismissed rewarded ad, '
       // 'reward: ${reward?.amount} of ${reward?.type}');
       setState(() => _ad = null);
@@ -131,7 +126,6 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   void _setAdEventListener(RewardedAd ad) async {
-    final prefs = await SharedPreferences.getInstance();
     ad.setAdEventListener(
         eventListener: RewardedAdEventListener(
             // onAdShown: () => print("callback: rewarded ad shown."),
@@ -142,7 +136,6 @@ class _ProfilePage extends State<ProfilePage> {
             // onAdImpression: (data) =>
             //     print("callback: rewarded ad impression: ${data.getRawData()}"),
             onRewarded: (Reward reward) => saveWordsToLocalStorage(words + 5)));
-    getAvatarFromLocalStorage();
   }
 
   Future<List<Achievement>> fetchJson() async {
@@ -223,14 +216,6 @@ class _ProfilePage extends State<ProfilePage> {
     await prefs.setString('token', token);
   }
 
-  Future<void> getAvatarFromLocalStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      selectAvatar = prefs.getString('avatar');
-      //idAvatar = selectAvatar;
-    });
-  }
-
   Future<void> getFirstName() async {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
@@ -267,6 +252,8 @@ class _ProfilePage extends State<ProfilePage> {
     getFirstNameFromLocalStorage();
     double size = 20;
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final avatar = context.watch<ProfileViewModel>().storedAvatar;
+    final setNewAvatar = context.read<ProfileViewModel>().setNewAvatar;
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
@@ -285,32 +272,37 @@ class _ProfilePage extends State<ProfilePage> {
           Center(
               child: Column(children: [
             Stack(
+              clipBehavior: Clip.none,
               alignment: AlignmentDirectional.center,
-              //fit: StackFit.expand,
               children: <Widget>[
-                selectAvatar == null
-                    ? const MerlinWidget()
-                    : ClipRRect(
-                        borderRadius: BorderRadius.circular(48),
-                        child: Image(
-                          image: NetworkImage(selectAvatar!),
-                          height: 96,
-                          width: 96,
-                        )),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    avatar == null
+                        ? const MerlinWidget()
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.memory(
+                              avatar,
+                              width: 100,
+                              height: 100,
+                            ))
+                  ],
+                ),
                 Positioned(
-                  left: 70,
-                  //left: 20,
-                  bottom: 0,
-                  //left: 300,
+                  bottom: -14,
+                  right: MediaQuery.of(context).size.width / 2 - 48 - 24,
                   child: IconButton(
-                      onPressed: chooseAvatar,
+                      onPressed: () async {
+                        final avatarChanged =
+                            await showChooseAvatarDialog(context);
+                        setNewAvatar(avatarChanged);
+                      },
                       icon: Icon(
                         CustomIcons.pen,
                         size: size,
                       )),
                 ),
-
-                // Text('dhweuhf')
               ],
             ),
             const SizedBox(height: 12),
@@ -594,16 +586,4 @@ class _ProfilePage extends State<ProfilePage> {
       ),
     );
   }
-
-  void chooseAvatar() {
-    setState(() {
-      showDialog(
-          context: context, builder: (context) => const ChooseAvatarDialog());
-      //.then((value) => );
-    });
-  }
 }
-/*..._achievements
-                        .map((e) => AchievementCard(achievement: e))
-                        .toList() */
-

@@ -28,8 +28,7 @@ class MerlinWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-        alignment: Alignment.center, child: SvgPicture.asset(SvgAsset.merlin));
+    return SvgPicture.asset(SvgAsset.merlin);
   }
 }
 

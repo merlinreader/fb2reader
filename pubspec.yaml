@@ -47,6 +47,7 @@ dependencies:
   yandex_mobileads: ^6.1.0
   flutter_screen_wake: ^1.0.2
   brightness: ^0.0.1
+  cached_network_image: ^3.3.0
 
 dev_dependencies:
   flutter_test:

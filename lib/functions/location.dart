@@ -41,21 +41,22 @@ Future<Map<String, String>> getLocation() async {
 Future<void> sendLocationDataToServer(
     Map<String, String> locationData, String? token) async {
   const url = 'https://fb2.cloud.leam.pro/api/account/geo';
+  try {
+    final response = await http.patch(
+      Uri.parse(url),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(locationData),
+    );
 
-  final response = await http.patch(
-    Uri.parse(url),
-    headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode(locationData),
-  );
-
-  if (response.statusCode == 200) {
-    // print('Данные успешно отправлены на сервер');
-  } else {
-    // print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
-  }
+    if (response.statusCode == 200) {
+      // print('Данные успешно отправлены на сервер');
+    } else {
+      // print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
+    }
+  } catch (_) {}
 }
 
 Future<String> getSavedLocation() async {
