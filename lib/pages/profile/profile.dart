@@ -148,6 +148,8 @@ class _ProfilePage extends State<ProfilePage> {
       'area': area ?? '',
       'city': locality ?? '',
     };
+    await sendLocationDataToServer(
+        locationData, prefs.getString('token') ?? '');
   }
 
   Future<List<Achievement>> fetchJson() async {

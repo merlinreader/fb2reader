@@ -1359,7 +1359,7 @@ class Reader extends State {
                             },
                             child: Icon(
                               CustomIcons.sliders,
-                              size: 40,
+                              size: 36,
                               color: Theme.of(context).iconTheme.color,
                             ),
                           ),
