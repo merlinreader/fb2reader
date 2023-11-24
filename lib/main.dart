@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screen_wake/flutter_screen_wake.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
@@ -16,10 +17,39 @@ void main() {
   );
 }
 
-class MerlinApp extends StatelessWidget {
+class MerlinApp extends StatefulWidget {
+  MerlinApp({super.key});
+
+  @override
+  State<MerlinApp> createState() => _MerlinAppState();
+}
+
+class _MerlinAppState extends State<MerlinApp> {
   final _router = AppRouter();
 
-  MerlinApp({super.key});
+  double brightness = 0.0;
+
+  bool toggle = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformBrightness();
+  }
+
+  Future<void> initPlatformBrightness() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      brightness = prefs.getDouble('brightness') ?? 0.0;
+    });
+
+    FlutterScreenWake.setBrightness(brightness!);
+    if (brightness == 0) {
+      toggle = true;
+    } else {
+      toggle = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/domain/data_providers/color_provider.dart';
@@ -8,6 +9,7 @@ import 'package:merlin/main.dart';
 import 'package:merlin/components/checkbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screen_wake/flutter_screen_wake.dart';
 
 const colors = [MyColors.black, MyColors.white, MyColors.mint, MyColors.beige];
 
@@ -77,6 +79,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    initPlatformBrightness();
     loadSettings();
   }
 
@@ -130,6 +133,34 @@ class _SettingsPageState extends State<SettingsPage> {
       ));
       // Обновите остальные переменные светлой темы при необходимости
     }
+  }
+
+  double brightness = 0.0;
+  bool toggle = false;
+
+  Future<void> initPlatformBrightness() async {
+    double bright;
+    try {
+      bright = await FlutterScreenWake.brightness;
+    } on PlatformException {
+      bright = 1.0;
+    }
+    if (!mounted) return;
+
+    setState(() {
+      brightness = bright;
+    });
+  }
+  Future<void> getAvatarFromLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      brightness = prefs.getDouble('brightness')!;
+    });
+  }
+
+  void saveBrightness(double brightness) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('brightness', brightness);
   }
 
   @override
@@ -243,6 +274,43 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                 ),
+                Text14(
+                  text: "Яркость",
+                  textColor: themeGrayTextColor,
+                ),
+                Container(
+                    margin: const EdgeInsets.only(right: 10),
+                    child: SliderTheme(
+                        data: SliderThemeData(
+                          trackHeight: 5.0,
+                          thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 10.0),
+                          overlayShape: const RoundSliderOverlayShape(
+                              overlayRadius: 20.0),
+                          thumbColor: isDarkTheme
+                              ? MyColors.white
+                              : const Color.fromRGBO(29, 29, 33, 1),
+                          activeTrackColor: isDarkTheme
+                              ? MyColors.white
+                              : const Color.fromRGBO(29, 29, 33, 1),
+                          inactiveTrackColor: isDarkTheme
+                              ? const Color.fromRGBO(96, 96, 96, 1)
+                              : const Color.fromRGBO(96, 96, 96, 1),
+                        ),
+                        child: Slider(
+                            value: brightness,
+                            onChanged: (value) {
+                              setState(() {
+                                brightness = value;
+                              });
+                              saveBrightness(brightness);
+                              FlutterScreenWake.setBrightness(brightness);
+                              if (brightness == 0) {
+                                toggle = true;
+                              } else {
+                                toggle = false;
+                              }
+                            }))),
               ],
             ),
           ),
