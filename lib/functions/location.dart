@@ -15,8 +15,9 @@ Future<Map<String, String>> getLocation() async {
   }
   Position position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high);
-  List<Placemark> placemarks =
-      await placemarkFromCoordinates(position.latitude, position.longitude);
+  List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude, position.longitude,
+      localeIdentifier: 'ru-RU');
   Placemark placemark = placemarks[0];
   String? country = placemark.country;
   String? area = placemark.administrativeArea;
