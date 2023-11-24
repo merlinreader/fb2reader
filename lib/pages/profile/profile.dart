@@ -577,29 +577,42 @@ class _ProfilePage extends State<ProfilePage> {
           ),
           alignment: Alignment.center,
           actions: [
-            Center(
-              child: Column(
-                children: [
-                  CSCPicker(
-                    layout: Layout.vertical,
-                    onCountryChanged: (value) {
-                      setState(() {
-                        selectedCountry = value;
-                      });
-                    },
-                    onStateChanged: (value) {
-                      setState(() {
-                        selectedState = value;
-                      });
-                    },
-                    onCityChanged: (value) {
-                      setState(() {
-                        selectedCity = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 15),
-                  Theme(
+            CSCPicker(
+              stateDropdownLabel: 'Область',
+              countryDropdownLabel: 'Страна',
+              cityDropdownLabel: 'Город',
+              selectedItemStyle: TextStyle(
+                  color: themeProvider.isDarkTheme
+                      ? MyColors.white
+                      : MyColors.black),
+              dropdownDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  border: Border.all(color: MyColors.lightGray)),
+              disabledDropdownDecoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.background,
+                  borderRadius: const BorderRadius.all(Radius.circular(5)),
+                  border: Border.all(color: MyColors.lightGray)),
+              onCountryChanged: (value) {
+                setState(() {
+                  selectedCountry = value;
+                });
+              },
+              onStateChanged: (value) {
+                setState(() {
+                  selectedState = value;
+                });
+              },
+              onCityChanged: (value) {
+                setState(() {
+                  selectedCity = value;
+                });
+              },
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
+              child: Center(
+                  child: Theme(
                       data: purpleButton(),
                       child: Button(
                           text: 'Сохранить',
@@ -614,9 +627,7 @@ class _ProfilePage extends State<ProfilePage> {
                                 selectedCity!);
                             Navigator.of(context).pop();
                           },
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
+                          fontWeight: FontWeight.bold))),
             )
           ],
         ),
