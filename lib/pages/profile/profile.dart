@@ -430,6 +430,8 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           onPressed: () {
+                            // saveWordsToLocalStorage(words + 5);
+                            // print('Added 5 words');
                             _adLoader.loadAd(
                                 adRequestConfiguration:
                                     _adRequestConfiguration);
@@ -502,10 +504,8 @@ class _ProfilePage extends State<ProfilePage> {
                           const ClipboardData(text: 'readermerlin@gmail.com'));
                       Fluttertoast.showToast(
                         msg: 'Почта скопирована',
-                        toastLength:
-                            Toast.LENGTH_SHORT, // Длительность отображения
-                        gravity:
-                            ToastGravity.BOTTOM, // Расположение уведомления
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
                       );
                     },
                     child: const Text18(

@@ -26,7 +26,7 @@ abstract class NetworkProvider {
 class _AndroidNetworkProvider extends NetworkProvider {
   @override
   final List<Network> bannerNetworks = const [
-    Network(title: 'Yandex', adUnitId: 'demo-banner-yandex'),
+    Network(title: 'Yandex', adUnitId: 'R-M-3982942-1'),
     Network(title: 'AdColony', adUnitId: 'demo-banner-adcolony'),
     Network(title: 'AdMob', adUnitId: 'demo-banner-admob'),
     Network(title: 'AppLovin', adUnitId: 'demo-banner-applovin'),
@@ -38,10 +38,10 @@ class _AndroidNetworkProvider extends NetworkProvider {
     Network(title: 'InMobi', adUnitId: 'demo-banner-inmobi'),
     Network(
       title: 'AdFox',
-      adUnitId: 'R-M-243655-8',
+      adUnitId: 'R-M-3982942-1',
       adRequest: AdRequest(
         parameters: {
-          'adf_ownerid': '270901',
+          'adf_ownerid': '3982942',
           'adf_p1': 'cqtgh',
           'adf_p2': 'fkbd',
         },
@@ -51,7 +51,7 @@ class _AndroidNetworkProvider extends NetworkProvider {
 
   @override
   final List<Network> interstitialNetworks = const [
-    Network(title: 'Yandex', adUnitId: 'demo-interstitial-yandex'),
+    Network(title: 'Yandex', adUnitId: 'R-M-3982942-1'),
     Network(title: 'AdColony', adUnitId: 'demo-interstitial-adcolony'),
     Network(title: 'AdMob', adUnitId: 'demo-interstitial-admob'),
     Network(title: 'AppLovin', adUnitId: 'demo-interstitial-applovin'),
@@ -67,10 +67,10 @@ class _AndroidNetworkProvider extends NetworkProvider {
     Network(title: 'InMobi', adUnitId: 'demo-interstitial-inmobi'),
     Network(
       title: 'AdFox',
-      adUnitId: 'R-M-243655-9',
+      adUnitId: 'R-M-3982942-1',
       adRequest: AdRequest(
         parameters: {
-          'adf_ownerid': '270901',
+          'adf_ownerid': '3982942',
           'adf_p1': 'cqtgg',
           'adf_p2': 'fhlx',
         },
@@ -80,7 +80,7 @@ class _AndroidNetworkProvider extends NetworkProvider {
 
   @override
   final List<Network> rewardedNetworks = const [
-    Network(title: 'Yandex', adUnitId: 'demo-rewarded-yandex'),
+    Network(title: 'Yandex', adUnitId: 'R-M-3982942-1'),
     Network(title: 'AdColony', adUnitId: 'demo-rewarded-adcolony'),
     Network(title: 'AdMob', adUnitId: 'demo-rewarded-admob'),
     Network(title: 'AppLovin', adUnitId: 'demo-rewarded-applovin'),
@@ -100,17 +100,17 @@ class _AndroidNetworkProvider extends NetworkProvider {
 class _IosNetworkProvider extends NetworkProvider {
   @override
   final List<Network> bannerNetworks = const [
-    Network(title: 'Yandex', adUnitId: 'demo-banner-yandex'),
+    Network(title: 'Yandex', adUnitId: 'R-M-3982942-1'),
     Network(title: 'AdMob', adUnitId: 'demo-banner-admob'),
     Network(title: 'Mintegral', adUnitId: 'demo-banner-mintegral'),
     Network(title: 'MyTarget', adUnitId: 'demo-banner-mytarget'),
     Network(title: 'InMobi', adUnitId: 'demo-banner-inmobi'),
     Network(
       title: 'AdFox',
-      adUnitId: 'R-M-243655-8',
+      adUnitId: 'R-M-3982942-1',
       adRequest: AdRequest(
         parameters: {
-          'adf_ownerid': '270901',
+          'adf_ownerid': '3982942',
           'adf_p1': 'cqtgh',
           'adf_p2': 'fkbd',
         },
@@ -120,7 +120,7 @@ class _IosNetworkProvider extends NetworkProvider {
 
   @override
   final List<Network> interstitialNetworks = const [
-    Network(title: 'Yandex', adUnitId: 'demo-interstitial-yandex'),
+    Network(title: 'Yandex', adUnitId: 'R-M-3982942-1'),
     Network(title: 'AdMob', adUnitId: 'demo-interstitial-admob'),
     Network(title: 'AppLovin', adUnitId: 'demo-interstitial-applovin'),
     Network(title: 'Mintegral', adUnitId: 'demo-interstitial-mintegral'),
@@ -130,10 +130,10 @@ class _IosNetworkProvider extends NetworkProvider {
     Network(title: 'Unity Ads', adUnitId: 'demo-interstitial-unityads'),
     Network(
       title: 'AdFox',
-      adUnitId: 'R-M-243655-9',
+      adUnitId: 'R-M-3982942-1',
       adRequest: AdRequest(
         parameters: {
-          'adf_ownerid': '270901',
+          'adf_ownerid': '3982942',
           'adf_p1': 'cqtgg',
           'adf_p2': 'fhlx',
         },
@@ -143,7 +143,7 @@ class _IosNetworkProvider extends NetworkProvider {
 
   @override
   final List<Network> rewardedNetworks = const [
-    Network(title: 'Yandex', adUnitId: 'demo-rewarded-yandex'),
+    Network(title: 'Yandex', adUnitId: 'R-M-3982942-1'),
     Network(title: 'AdMob', adUnitId: 'demo-rewarded-admob'),
     Network(title: 'AppLovin', adUnitId: 'demo-rewarded-applovin'),
     Network(title: 'Mintegral', adUnitId: 'demo-rewarded-mintegral'),
