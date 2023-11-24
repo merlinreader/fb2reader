@@ -116,7 +116,7 @@ class WordCount {
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
       // if (timeElapsed.inHours >= 24) {
       if (timeElapsed.inMicroseconds >= 1) {
-        await countWordsWithOffset(_callCount);
+        await countWordsWithOffset();
         await updateCallInfo();
       } else {
         Fluttertoast.showToast(
@@ -127,7 +127,7 @@ class WordCount {
         return;
       }
     } else {
-      await countWordsWithOffset(_callCount);
+      await countWordsWithOffset();
       await updateCallInfo();
     }
   }
@@ -228,7 +228,7 @@ class WordCount {
   //   this.wordEntries = wordEntries;
   // }
 
-  Future<void> countWordsWithOffset(int offset) async {
+  Future<void> countWordsWithOffset() async {
     final textWithoutPunctuation =
         fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
@@ -251,11 +251,22 @@ class WordCount {
     final sortedWordCounts = wordCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    final start = offset * 10;
-    var end = (offset + 1) * 10;
+    final prefs = await SharedPreferences.getInstance();
+    int getWords = prefs.getInt('words') ?? 10;
+    int start = prefs.getInt('$filePath-end') ?? 0;
+    int end = prefs.getInt('$filePath-end') ?? getWords;
+
+    print('getWords = $getWords');
 
     // Убедимся, что конец в пределах допустимого
+    end = end + getWords;
     end = min(end, sortedWordCounts.length);
+
+    print('start = $start');
+    print('end = $end');
+    print('end - start = ${end - start}');
+
+    print('sortedWordCounts.length = ${sortedWordCounts.length}');
 
     final wordEntriesFutures = <Future<WordEntry>>[];
     for (var i = start; i < end; i++) {
@@ -266,7 +277,9 @@ class WordCount {
       );
     }
     final wordEntries = await Future.wait(wordEntriesFutures);
-
+    // prefs.setInt('$filePath-start', start);
+    prefs.setInt('$filePath-end', end);
+    prefs.setInt('words', 10);
     // Присваиваем wordEntries к текущим wordEntries
     this.wordEntries = wordEntries;
   }
@@ -326,8 +339,9 @@ class WordCount {
 }
 
 class AgreementDialog extends StatelessWidget {
-  const AgreementDialog({super.key});
+  final int getWords;
 
+  const AgreementDialog({Key? key, required this.getWords}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -341,8 +355,8 @@ class AgreementDialog extends StatelessWidget {
           content: Container(
             height: 70,
             alignment: Alignment.center,
-            child: const Text(
-              'Хотите выбрать 10 слов?',
+            child: Text(
+              'Хотите выбрать $getWords слов?',
               style: TextStyle(fontSize: 16),
             ),
           ),

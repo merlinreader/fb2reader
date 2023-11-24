@@ -540,19 +540,24 @@ class Reader extends State {
                         width: MediaQuery.of(context).size.width,
                         color: Colors.transparent,
                         child: Card(
-                          child: ListView(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.all(0),
+                          child: Column(
                             children: <Widget>[
-                              IconButton(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                icon: const Icon(Icons.close),
-                                onPressed: () async {
-                                  // debugPrint("DONE");
-                                  await saveWordCountToLocalstorage(wordCount);
-                                  Navigator.pop(context);
-                                },
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    alignment: Alignment.centerRight,
+                                    padding:
+                                        const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () async {
+                                      // debugPrint("DONE");
+                                      await saveWordCountToLocalstorage(
+                                          wordCount);
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ],
                               ),
                               const Padding(
                                 padding: EdgeInsets.only(bottom: 40),
@@ -707,15 +712,18 @@ class Reader extends State {
     } else {
       timeElapsed = now.difference(oneDayMore);
     }
+    int getWords = prefs.getInt('words') ?? 10;
+    print('showEmptyTable getWords = $getWords');
     // print('lastCallTimestampStr $lastCallTimestampStr');
     // print('lastCallTimestamp $lastCallTimestamp');
     // print('now $now');
     // print('timeElapsed $timeElapsed');
-    // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= 10 ||
-    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= 10 ||
+    // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords ||
+    if (timeElapsed.inMilliseconds >= 1 &&
+            wordCount.wordEntries.length <= getWords ||
         lastCallTimestampStr == null) {
       // print('Entered');
-      String screenWord = getWordForm(10 - wordCount.wordEntries.length);
+      String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(
@@ -725,7 +733,7 @@ class Reader extends State {
           context: context,
           barrierDismissible: true,
           builder: (BuildContext context) {
-            screenWord = getWordForm(10 - wordCount.wordEntries.length);
+            screenWord = getWordForm(getWords - wordCount.wordEntries.length);
 
             return SingleChildScrollView(
               child: ConstrainedBox(
@@ -757,7 +765,7 @@ class Reader extends State {
                               child: Center(
                                 child: Text24(
                                   text: wordCount.wordEntries.length < 10
-                                      ? 'Осталось добавить ${(10 - wordCount.wordEntries.length)} $screenWord'
+                                      ? 'Осталось добавить ${(getWords - wordCount.wordEntries.length)} $screenWord'
                                       : 'Изучаемые слова',
                                   textColor: MyColors.black,
                                 ),
@@ -1072,9 +1080,13 @@ class Reader extends State {
   }
 
   void wordModeDialog(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    int getWords = prefs.getInt('words') ?? 10;
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) => const AgreementDialog(),
+      builder: (context) => AgreementDialog(
+        getWords: getWords,
+      ),
     );
 
     if (result == true) {
@@ -1197,6 +1209,8 @@ class Reader extends State {
 
   Future<void> addNewWord(
       List<WordEntry> wordEntries, WordCount wordCount, int length) async {
+    final prefs = await SharedPreferences.getInstance();
+
     List<String> words = WordCount(
             filePath: textes.first.filePath, fileText: textes.first.fileText)
         .getAllWords();
@@ -1209,6 +1223,7 @@ class Reader extends State {
     }
     String newWord = '';
     result.reversed.toList();
+    int getWords = prefs.getInt('words') ?? 10;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1246,7 +1261,7 @@ class Reader extends State {
             ),
             TextButton(
               onPressed: () async {
-                if (length < 10) {
+                if (length < getWords) {
                   if (result.contains(newWord)) {
                     WordCount wordProcessor = WordCount();
 
@@ -1703,7 +1718,30 @@ class Reader extends State {
                                         await getDataFromLocalStorage(
                                             'textKey');
                                         isBorder = false;
-                                        wordModeDialog(context);
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+
+                                        final lastCallTimestampStr = prefs
+                                            .getString('lastCallTimestamp');
+                                        var lastCallTimestamp =
+                                            lastCallTimestampStr != null
+                                                ? DateTime.parse(
+                                                    lastCallTimestampStr)
+                                                : null;
+                                        var timeElapsed = DateTime.now()
+                                            .difference(lastCallTimestamp!);
+                                        // if (timeElapsed.inHours > 24) {
+                                        if (timeElapsed.inMilliseconds > 1) {
+                                          wordModeDialog(context);
+                                        } else {
+                                          Fluttertoast.showToast(
+                                            msg:
+                                                'Новый перевод завтра в ${(lastCallTimestamp.add(const Duration(days: 1)).hour)}:${(lastCallTimestamp.add(const Duration(days: 1)).minute)}',
+                                            toastLength: Toast.LENGTH_LONG,
+                                            gravity: ToastGravity.BOTTOM,
+                                          );
+                                        }
+
                                         print('isTrans = $isTrans');
                                         break;
                                     }
