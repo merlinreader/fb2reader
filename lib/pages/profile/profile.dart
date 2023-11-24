@@ -289,20 +289,21 @@ class _ProfilePage extends State<ProfilePage> {
                             ))
                   ],
                 ),
-                Positioned(
-                  bottom: -14,
-                  right: MediaQuery.of(context).size.width / 2 - 48 - 24,
-                  child: IconButton(
-                      onPressed: () async {
-                        final avatarChanged =
-                            await showChooseAvatarDialog(context);
-                        setNewAvatar(avatarChanged);
-                      },
-                      icon: Icon(
-                        CustomIcons.pen,
-                        size: size,
-                      )),
-                ),
+                if (token != '')
+                  Positioned(
+                    bottom: -14,
+                    right: MediaQuery.of(context).size.width / 2 - 48 - 24,
+                    child: IconButton(
+                        onPressed: () async {
+                          final avatarChanged =
+                              await showChooseAvatarDialog(context);
+                          setNewAvatar(avatarChanged);
+                        },
+                        icon: Icon(
+                          CustomIcons.pen,
+                          size: size,
+                        )),
+                  )
               ],
             ),
             const SizedBox(height: 12),
