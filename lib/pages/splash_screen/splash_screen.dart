@@ -1,25 +1,25 @@
-// ignore_for_file: file_names
-
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:merlin/UI/router.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
+import 'package:merlin/pages/splash_screen/splash_screen_view_model.dart';
 import 'package:merlin/style/colors.dart';
+import 'package:provider/provider.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    Timer(const Duration(milliseconds: 1500), () {
-
-      Navigator.pushReplacementNamed(context, RouteNames.main);
-    });
     return const Scaffold(
       backgroundColor: MyColors.purple,
       body: Center(child: MerlinStart()),
+    );
+  }
+
+  static Widget create(BuildContext context) {
+    return Provider(
+      create: (context) => SplashSreenViewModel(context),
+      lazy: false,
+      child: const SplashScreen(),
     );
   }
 }

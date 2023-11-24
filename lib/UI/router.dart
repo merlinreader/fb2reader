@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:merlin/pages/page.dart';
 import 'package:merlin/pages/profile/profile.dart';
+import 'package:merlin/pages/profile/profile_view_model.dart';
 import 'package:merlin/pages/reader/reader.dart';
 import 'package:merlin/pages/settings/settings.dart';
-import 'package:merlin/pages/splashScreen/splashScreen.dart';
-import 'package:merlin/pages/profile/choose_avatar_dialog.dart';
-//import 'package:path/path.dart';
+import 'package:merlin/pages/splash_screen/splash_screen.dart';
+import 'package:provider/provider.dart';
 
 abstract class RouteNames {
   static const String splashScreen = '/';
@@ -19,9 +19,12 @@ abstract class RouteNames {
 
 class AppRouter {
   final routes = <String, Widget Function(BuildContext)>{
-    RouteNames.splashScreen: (context) => const SplashScreen(),
+    RouteNames.splashScreen: (context) => SplashScreen.create(context),
     RouteNames.main: (context) => const AppPage(),
-    RouteNames.profile: (context) => const Profile(),
+    RouteNames.profile: (context) => ChangeNotifierProvider(
+          create: (context) => ProfileViewModel(context),
+          child: const Profile(),
+        ),
     RouteNames.reader: (context) => const ReaderPage(),
     RouteNames.readerSettings: (context) => const SettingsPage(),
   };
