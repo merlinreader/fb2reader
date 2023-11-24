@@ -23,6 +23,7 @@ class AchievementsPage extends StatefulWidget {
 
 class _AchievementsPageState extends State<AchievementsPage> {
   final List<Achievement> _achievements = [];
+  int? errorCode;
   bool _isLoading = true;
 
   @override
@@ -40,6 +41,9 @@ class _AchievementsPageState extends State<AchievementsPage> {
       url,
       headers: {'Authorization': 'Bearer $token'},
     );
+    setState(() {
+      errorCode = response.statusCode;
+    });
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       final ach = GetAchievementsResponse.fromJson(jsonResponse);
@@ -51,8 +55,6 @@ class _AchievementsPageState extends State<AchievementsPage> {
         _isLoading = false;
       });
     } else {
-      // print('Ошибка запроса достижений: ${response.statusCode}');
-      // print('Токен: $token');
       setState(() {
         _isLoading = false;
       });
@@ -73,31 +75,30 @@ class _AchievementsPageState extends State<AchievementsPage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(top: 72),
-          child: _achievements.isEmpty
-              ? Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextTektur(
-                          text: "Авторизуйтесь, чтобы открыть достижения",
-                          fontsize: 16,
-                          textColor: MyColors.grey)
-                    ],
-                  ),
-                )
-              : _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(color: MyColors.purple),
-                    )
-                  : ListView(
-                      children: [
-                        ..._achievements
-                            .map((e) => AchievementCard(achievement: e))
-                            .toList()
-                      ],
-                    ),
-        )
+            padding: const EdgeInsets.only(top: 72),
+            child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(color: MyColors.purple),
+                  )
+                : errorCode != 200
+                    ? Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextTektur(
+                                text: "Авторизуйтесь, чтобы открыть достижения",
+                                fontsize: 16,
+                                textColor: MyColors.grey)
+                          ],
+                        ),
+                      )
+                    : ListView(
+                        children: [
+                          ..._achievements
+                              .map((e) => AchievementCard(achievement: e))
+                              .toList()
+                        ],
+                      ))
       ],
     );
   }

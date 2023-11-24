@@ -16,21 +16,8 @@ void main() {
       child: MerlinApp(),
     ),
   );
-  handleDeeplinks();
 }
 
-Future<void> handleDeeplinks() async {
-  try {
-    String? initialLink = await getInitialLink();
-    if (initialLink != null) {
-      // print(initialLink);
-      // Обработайте глубокую ссылку здесь
-      // Например, можно использовать Navigator для навигации
-    }
-  } on PlatformException {
-    // Ошибка при обработке глубокой ссылки
-  }
-}
 class MerlinApp extends StatelessWidget {
   final _router = AppRouter();
 
@@ -59,7 +46,7 @@ class ThemeProvider with ChangeNotifier {
   bool _isDarkTheme = false;
 
   bool get isDarkTheme => _isDarkTheme;
- 
+
   set isDarkTheme(bool value) {
     _isDarkTheme = value;
     setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -81,4 +68,3 @@ class ThemeProvider with ChangeNotifier {
     SystemChrome.setSystemUIOverlayStyle(style);
   }
 }
-

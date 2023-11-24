@@ -84,6 +84,7 @@ class _ProfilePage extends State<ProfilePage> {
     getTokenFromLocalStorage();
     getAchievementsFromJson();
     getWordsFromLocalStorage();
+    getFirstName();
     MobileAds.initialize();
     _initAds();
   }
@@ -133,13 +134,13 @@ class _ProfilePage extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     ad.setAdEventListener(
         eventListener: RewardedAdEventListener(
-            onAdShown: () => print("callback: rewarded ad shown."),
-            onAdFailedToShow: (error) => print(
-                "callback: rewarded ad failed to show: ${error.description}."),
-            onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
-            onAdClicked: () => print("callback: rewarded ad clicked."),
-            onAdImpression: (data) =>
-                print("callback: rewarded ad impression: ${data.getRawData()}"),
+            // onAdShown: () => print("callback: rewarded ad shown."),
+            // onAdFailedToShow: (error) => print(
+            //     "callback: rewarded ad failed to show: ${error.description}."),
+            // onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
+            // onAdClicked: () => print("callback: rewarded ad clicked."),
+            // onAdImpression: (data) =>
+            //     print("callback: rewarded ad impression: ${data.getRawData()}"),
             onRewarded: (Reward reward) => saveWordsToLocalStorage(words + 5)));
     getAvatarFromLocalStorage();
   }
@@ -240,21 +241,18 @@ class _ProfilePage extends State<ProfilePage> {
       headers: {'Authorization': 'Bearer $token'},
     );
     final data = json.decode(response.body);
-    print(data['firstName']);
 
     if (response.statusCode == 200) {
       if (data['firstName'].isNotEmpty) {
         fetchedName = data['firstName'];
         firstName = fetchedName.toString();
 
-        print(fetchedName.toString());
         setState(() {
           firstName = fetchedName.toString();
         });
       }
     }
     await prefs.setString('firstName', firstName);
-    print(prefs.getString('firstName'));
   }
 
   Future<void> getFirstNameFromLocalStorage() async {
@@ -404,7 +402,7 @@ class _ProfilePage extends State<ProfilePage> {
                       Theme(
                         data: purpleButton(),
                         child: Button(
-                          text: 'Получить слова ($words)',
+                          text: 'Получить 5 слов',
                           width: 312,
                           height: 48,
                           horizontalPadding: 97,
@@ -432,7 +430,7 @@ class _ProfilePage extends State<ProfilePage> {
                           height: 48,
                           horizontalPadding: 97,
                           verticalPadding: 12,
-                          textColor: MyColors.white,
+                          textColor: Theme.of(context).disabledColor,
                           fontSize: 14,
                           onPressed: () {},
                           fontWeight: FontWeight.bold,
@@ -568,7 +566,8 @@ class _ProfilePage extends State<ProfilePage> {
 
   void chooseAvatar() {
     setState(() {
-      showDialog(context: context, builder: (context) => const ChooseAvatarDialog());
+      showDialog(
+          context: context, builder: (context) => const ChooseAvatarDialog());
       //.then((value) => );
     });
   }

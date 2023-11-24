@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
 
 ThemeData darkTheme() => ThemeData(
-    //brightness: Brightness.dark,
     colorScheme: const ColorScheme(
         brightness: Brightness.dark,
         primary: MyColors.blackGray,
@@ -16,7 +15,6 @@ ThemeData darkTheme() => ThemeData(
         surface: MyColors.blackGray,
         onSurface: Colors.white,
         scrim: Colors.blue),
-    //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
         //text24
         titleLarge: TextStyle(
@@ -74,8 +72,7 @@ ThemeData darkTheme() => ThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+              borderRadius: BorderRadius.circular(0),
             ),
           ),
           backgroundColor: const MaterialStatePropertyAll(MyColors.blackBt),
@@ -96,8 +93,7 @@ ThemeData purpleButton() => ThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+              borderRadius: BorderRadius.circular(0),
             ),
           ),
           elevation: null,
@@ -109,16 +105,15 @@ ThemeData purpleButton() => ThemeData(
 ThemeData grayButton() => ThemeData(
         elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
-          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
-            ),
+        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
           ),
-          elevation: null,
-          backgroundColor: const MaterialStatePropertyAll(MyColors.grey),
-          textStyle:
-              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+        ),
+        elevation: null,
+        backgroundColor:
+            MaterialStatePropertyAll(MyColors.grey.withOpacity(0.3)),
+      ),
     ));
 
 ThemeData lightTheme() => ThemeData(
@@ -135,7 +130,6 @@ ThemeData lightTheme() => ThemeData(
         surface: MyColors.blackGray,
         onSurface: Colors.black,
         scrim: Colors.blue),
-    //primarySwatch: Colors.blue,
     textTheme: const TextTheme(
         //text24
         titleLarge: TextStyle(
@@ -193,8 +187,7 @@ ThemeData lightTheme() => ThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
             RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(
-                  0), // Установите радиус закругления на 0, чтобы убрать закругление.
+              borderRadius: BorderRadius.circular(0),
             ),
           ),
           backgroundColor: const MaterialStatePropertyAll(MyColors.bgWhite),
