@@ -583,6 +583,7 @@ class _ProfilePage extends State<ProfilePage> {
               stateDropdownLabel: 'Область',
               countryDropdownLabel: 'Страна',
               cityDropdownLabel: 'Город',
+              layout: Layout.vertical,
               selectedItemStyle: TextStyle(
                   color: themeProvider.isDarkTheme
                       ? MyColors.white
