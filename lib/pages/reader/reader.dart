@@ -1431,7 +1431,7 @@ class Reader extends State {
                       if (visible) {
                         SystemChrome.setSystemUIOverlayStyle(
                             const SystemUiOverlayStyle(
-                                systemNavigationBarColor: MyColors.white,
+                                systemNavigationBarColor: Colors.transparent,
                                 statusBarColor: Colors.transparent));
                         SystemChrome.setEnabledSystemUIMode(
                             SystemUiMode.edgeToEdge);

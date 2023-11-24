@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 import 'package:merlin/components/ads/network_provider.dart';
 
-import 'ad_info_field.dart';
+// import 'ad_info_field.dart';
 import 'load_button.dart';
 import 'log_tile.dart';
 import 'text_logger.dart';
@@ -25,13 +25,11 @@ class RewardedAdPage extends StatefulWidget {
   void callShowRewardedAd() {
     _RewardedAdPageState state = _RewardedAdPageState();
     state._showRewardedAd();
-    print('showshowshow must go on');
   }
 
   void callLoadRewardedAd() {
     _RewardedAdPageState state = _RewardedAdPageState();
     state._loadRewardedAd();
-    print('LOAD');
   }
 }
 

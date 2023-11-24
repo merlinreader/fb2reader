@@ -6,8 +6,6 @@ import 'package:merlin/UI/router.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uni_links/uni_links.dart';
-import 'package:yandex_mobileads/mobile_ads.dart';
 
 void main() {
   runApp(
