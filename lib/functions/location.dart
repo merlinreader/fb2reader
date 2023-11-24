@@ -17,7 +17,7 @@ Future<Map<String, String>> getLocation() async {
       desiredAccuracy: LocationAccuracy.high);
   List<Placemark> placemarks = await placemarkFromCoordinates(
       position.latitude, position.longitude,
-      localeIdentifier: 'ru-RU');
+      localeIdentifier: 'en-EN');
   Placemark placemark = placemarks[0];
   String? country = placemark.country;
   String? area = placemark.administrativeArea;
@@ -52,9 +52,9 @@ Future<void> sendLocationDataToServer(
     );
 
     if (response.statusCode == 200) {
-      // print('Данные успешно отправлены на сервер');
+      print('Данные успешно отправлены на сервер');
     } else {
-      // print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
+      print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
     }
   } catch (_) {}
 }

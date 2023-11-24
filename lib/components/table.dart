@@ -39,19 +39,20 @@ class _StatTableState extends State<StatTable> {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
     const url = 'https://fb2.cloud.leam.pro/api/account/';
-
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    final data = json.decode(response.body);
-    final fetchedId = data['_id'];
-    // print(fetchedId.toString());
-    if (response.statusCode == 200) {
-      setState(() {
-        id = fetchedId.toString();
-      });
-    }
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      final data = json.decode(response.body);
+      final fetchedId = data['_id'];
+      // print(fetchedId.toString());
+      if (response.statusCode == 200) {
+        setState(() {
+          id = fetchedId.toString();
+        });
+      }
+    } catch (_) {}
   }
 
   Future<List<dynamic>> fetchJson() async {
@@ -150,7 +151,13 @@ class _StatTableState extends State<StatTable> {
             //     Text('Наш сервер сейчас отдыхает, извините за неудобства: ${snapshot.error}'),
             //   ],
             // );
-            return Text('Ошибка: ${snapshot.error}');
+            return const Center(
+                child: Column(
+              children: [
+                SizedBox(height: 30),
+                Text('Проверьте подключение к Интернету'),
+              ],
+            ));
           } else {
             return const Center(
                 child: Column(children: [
