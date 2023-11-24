@@ -422,11 +422,11 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           onPressed: () {
-                            // saveWordsToLocalStorage(words + 5);
                             // print('Added 5 words');
                             _adLoader.loadAd(
                                 adRequestConfiguration:
                                     _adRequestConfiguration);
+                            saveWordsToLocalStorage(words + 5);
                             // Navigator.pushNamed(context, RouteNames.rewardedAd);
                             //rewardedAdPage.callShowRewardedAd();
                           },
