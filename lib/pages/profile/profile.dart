@@ -64,8 +64,7 @@ class _ProfilePage extends State<ProfilePage> {
   RewardedAd? _ad;
   late final RewardedAdLoader _adLoader;
   var adRequest = const AdRequest();
-  late final AdRequestConfiguration _adRequestConfiguration =
-      AdRequestConfiguration(adUnitId: adUnitId);
+  late final AdRequestConfiguration _adRequestConfiguration = AdRequestConfiguration(adUnitId: adUnitId);
   var isLoading = false;
 
   // кол-во доступнх юзеру слов
@@ -148,15 +147,13 @@ class _ProfilePage extends State<ProfilePage> {
       'area': area ?? '',
       'city': locality ?? '',
     };
-    await sendLocationDataToServer(
-        locationData, prefs.getString('token') ?? '');
+    await sendLocationDataToServer(locationData, prefs.getString('token') ?? '');
   }
 
   Future<List<Achievement>> fetchJson() async {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
-    final url =
-        Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
+    final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer $token'},
@@ -309,8 +306,7 @@ class _ProfilePage extends State<ProfilePage> {
                     right: MediaQuery.of(context).size.width / 2 - 48 - 24,
                     child: IconButton(
                         onPressed: () async {
-                          final avatarChanged =
-                              await showChooseAvatarDialog(context);
+                          final avatarChanged = await showChooseAvatarDialog(context);
                           setNewAvatar(avatarChanged);
                         },
                         icon: Icon(
@@ -331,17 +327,13 @@ class _ProfilePage extends State<ProfilePage> {
                 if (!snapshot.hasData) {
                   return const Text('Мы тебя не видим, включи геолокацию');
                 } else {
-                  final locationData =
-                      snapshot.data ?? 'Нет данных о местоположении';
-                  return selectedCountry != '' &&
-                          selectedState != '' &&
-                          selectedCity != ''
+                  final locationData = snapshot.data ?? 'Нет данных о местоположении';
+                  return selectedCountry != '' && selectedState != '' && selectedCity != ''
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(width: size),
-                            Text14(
-                                text: locationData, textColor: MyColors.black),
+                            Text14(text: locationData, textColor: MyColors.black),
                             IconButton(
                                 onPressed: geo,
                                 icon: Icon(
@@ -354,10 +346,7 @@ class _ProfilePage extends State<ProfilePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(width: size),
-                            Text14(
-                                text:
-                                    "$selectedCountry, $selectedState, $selectedCity",
-                                textColor: MyColors.black),
+                            Text14(text: "$selectedCountry, $selectedState, $selectedCity", textColor: MyColors.black),
                             IconButton(
                                 onPressed: geo,
                                 icon: Icon(
@@ -386,10 +375,8 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           onPressed: () {
-                            final tgUrl = Uri.parse(
-                                'https://t.me/merlin_auth_bot?start=1');
-                            launchUrl(tgUrl,
-                                mode: LaunchMode.externalApplication);
+                            final tgUrl = Uri.parse('https://t.me/merlin_auth_bot?start=1');
+                            launchUrl(tgUrl, mode: LaunchMode.externalApplication);
                           },
                           fontWeight: FontWeight.bold,
                         ),
@@ -401,17 +388,14 @@ class _ProfilePage extends State<ProfilePage> {
                         child: Align(
                             alignment: AlignmentDirectional.bottomCenter,
                             child: Theme(
-                              data: themeProvider.isDarkTheme
-                                  ? darkTheme()
-                                  : lightTheme(),
+                              data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
                               child: Button(
                                   text: 'Написать нам',
                                   width: 312,
                                   height: 48,
                                   horizontalPadding: 97,
                                   verticalPadding: 12,
-                                  textColor:
-                                      Theme.of(context).colorScheme.onSurface,
+                                  textColor: Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   onPressed: () {
@@ -438,10 +422,7 @@ class _ProfilePage extends State<ProfilePage> {
                           fontSize: 14,
                           onPressed: () {
                             // print('Added 5 words');
-                            _adLoader.loadAd(
-                                adRequestConfiguration:
-                                    _adRequestConfiguration);
-                            saveWordsToLocalStorage(words + 5);
+                            _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
                             // Navigator.pushNamed(context, RouteNames.rewardedAd);
                             //rewardedAdPage.callShowRewardedAd();
                           },
@@ -472,17 +453,14 @@ class _ProfilePage extends State<ProfilePage> {
                         child: Align(
                             alignment: AlignmentDirectional.bottomCenter,
                             child: Theme(
-                              data: themeProvider.isDarkTheme
-                                  ? darkTheme()
-                                  : lightTheme(),
+                              data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
                               child: Button(
                                   text: 'Написать нам',
                                   width: 312,
                                   height: 48,
                                   horizontalPadding: 97,
                                   verticalPadding: 12,
-                                  textColor:
-                                      Theme.of(context).colorScheme.onSurface,
+                                  textColor: Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   onPressed: () {
@@ -507,17 +485,14 @@ class _ProfilePage extends State<ProfilePage> {
               title: Center(
                 child: TextButton(
                     onPressed: () {
-                      Clipboard.setData(
-                          const ClipboardData(text: 'readermerlin@gmail.com'));
+                      Clipboard.setData(const ClipboardData(text: 'readermerlin@gmail.com'));
                       Fluttertoast.showToast(
                         msg: 'Почта скопирована',
                         toastLength: Toast.LENGTH_SHORT,
                         gravity: ToastGravity.BOTTOM,
                       );
                     },
-                    child: const Text18(
-                        text: 'readermerlin@gmail.com',
-                        textColor: MyColors.black)),
+                    child: const Text18(text: 'readermerlin@gmail.com', textColor: MyColors.black)),
 
                 // child: Text18(
                 //     text: 'readermerlin@gmail.com',
@@ -542,17 +517,14 @@ class _ProfilePage extends State<ProfilePage> {
                               fontWeight: FontWeight.bold)),
                       const SizedBox(height: 20),
                       Theme(
-                          data: themeProvider.isDarkTheme
-                              ? darkTheme()
-                              : lightTheme(),
+                          data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
                           child: Button(
                               text: "Отмена",
                               width: 250,
                               height: 50,
                               horizontalPadding: 10,
                               verticalPadding: 10,
-                              textColor:
-                                  Theme.of(context).colorScheme.onSurface,
+                              textColor: Theme.of(context).colorScheme.onSurface,
                               fontSize: 14,
                               onPressed: () {
                                 Navigator.of(context).pop();
@@ -572,8 +544,7 @@ class _ProfilePage extends State<ProfilePage> {
       builder: (context) => Theme(
         data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
         child: AlertDialog(
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
           title: const Center(
             child: Text20(text: 'Геолокация', textColor: MyColors.black),
           ),
@@ -584,10 +555,7 @@ class _ProfilePage extends State<ProfilePage> {
               countryDropdownLabel: 'Страна',
               cityDropdownLabel: 'Город',
               layout: Layout.vertical,
-              selectedItemStyle: TextStyle(
-                  color: themeProvider.isDarkTheme
-                      ? MyColors.white
-                      : MyColors.black),
+              selectedItemStyle: TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
               dropdownDecoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary,
                   borderRadius: const BorderRadius.all(Radius.circular(5)),
@@ -626,8 +594,7 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           onPressed: () {
-                            saveGeo(selectedCountry!, selectedState!,
-                                selectedCity!);
+                            saveGeo(selectedCountry!, selectedState!, selectedCity!);
                             Navigator.of(context).pop();
                           },
                           fontWeight: FontWeight.bold))),
