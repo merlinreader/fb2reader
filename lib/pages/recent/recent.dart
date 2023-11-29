@@ -30,12 +30,7 @@ class ImageInfo {
   String fileName;
   double progress;
 
-  ImageInfo(
-      {this.imageBytes,
-      required this.title,
-      required this.author,
-      required this.fileName,
-      required this.progress});
+  ImageInfo({this.imageBytes, required this.title, required this.author, required this.fileName, required this.progress});
 
   Map<String, dynamic> toJson() {
     return {
@@ -97,9 +92,7 @@ class RecentPageState extends State<RecentPage> {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataJson = prefs.getString(key);
     if (imageDataJson != null) {
-      images = (jsonDecode(imageDataJson) as List)
-          .map((item) => ImageInfo.fromJson(item))
-          .toList();
+      images = (jsonDecode(imageDataJson) as List).map((item) => ImageInfo.fromJson(item)).toList();
       setState(() {});
     }
     setState(() {});
@@ -110,9 +103,7 @@ class RecentPageState extends State<RecentPage> {
     String? imageDataToAdd = prefs.getString(key);
     List<ImageInfo> imageDatas = [];
     if (imageDataToAdd != null) {
-      imageDatas = (jsonDecode(imageDataToAdd) as List)
-          .map((item) => ImageInfo.fromJson(item))
-          .toList();
+      imageDatas = (jsonDecode(imageDataToAdd) as List).map((item) => ImageInfo.fromJson(item)).toList();
       imageDatas.removeWhere((element) => element.fileName == path);
       String imageDatasString = jsonEncode(imageDatas);
       await prefs.setString(key, imageDatasString);
@@ -126,9 +117,7 @@ class RecentPageState extends State<RecentPage> {
     List<BookInfo> imageDatas = [];
 
     if (imageDataToAdd != null) {
-      imageDatas = (jsonDecode(imageDataToAdd) as List)
-          .map((item) => BookInfo.fromJson(item))
-          .toList();
+      imageDatas = (jsonDecode(imageDataToAdd) as List).map((item) => BookInfo.fromJson(item)).toList();
 
       // Сначала устанавливаем позицию 0 для книги, которую удаляем
       for (var bookInfo in imageDatas) {
@@ -161,11 +150,7 @@ class RecentPageState extends State<RecentPage> {
       text.add(element.innerText.replaceAll(RegExp(r'\[.*?\]'), ''));
     }
     BookInfo bookData = BookInfo(
-        filePath: images[index].fileName,
-        fileText: text.toString(),
-        title: images[index].title,
-        author: images[index].author,
-        lastPosition: 0);
+        filePath: images[index].fileName, fileText: text.toString(), title: images[index].title, author: images[index].author, lastPosition: 0);
     bookDatas.add(bookData);
     String textDataString = jsonEncode(bookDatas);
 
@@ -176,17 +161,13 @@ class RecentPageState extends State<RecentPage> {
     }
   }
 
-  Future<void> changeDataFromLocalStorage(
-      String key, String path, String changeField, String updatedValue) async {
+  Future<void> changeDataFromLocalStorage(String key, String path, String changeField, String updatedValue) async {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataToAdd = prefs.getString('booksKey');
     List<ImageInfo> imageDatas = [];
     if (imageDataToAdd != null) {
-      imageDatas = (jsonDecode(imageDataToAdd) as List)
-          .map((item) => ImageInfo.fromJson(item))
-          .toList();
-      var index =
-          imageDatas.indexWhere((element) => element.fileName.startsWith(path));
+      imageDatas = (jsonDecode(imageDataToAdd) as List).map((item) => ImageInfo.fromJson(item)).toList();
+      var index = imageDatas.indexWhere((element) => element.fileName.startsWith(path));
       if (changeField == 'author') {
         imageDatas[index].author = updatedValue;
       } else if (changeField == 'title') {
@@ -225,27 +206,23 @@ class RecentPageState extends State<RecentPage> {
                 },
               ),
               TextButton(
-                child: const Text('Сохранить',
-                    style: TextStyle(color: Colors.blue)),
+                child: const Text('Сохранить', style: TextStyle(color: Colors.blue)),
                 onPressed: () {
                   if (updatedValue.isEmpty) {
                     Fluttertoast.showToast(
                       msg: 'Введите значение перед сохранением',
-                      toastLength:
-                          Toast.LENGTH_SHORT, // Длительность отображения
+                      toastLength: Toast.LENGTH_SHORT, // Длительность отображения
                       gravity: ToastGravity.BOTTOM, // Расположение уведомления
                     );
                   } else {
                     if (yourVariable == 'authorInput') {
-                      changeDataFromLocalStorage('booksKey',
-                          images[index].fileName, 'author', updatedValue);
+                      changeDataFromLocalStorage('booksKey', images[index].fileName, 'author', updatedValue);
                       images[index].author = updatedValue;
                       setState(() {
                         images[index].author = updatedValue;
                       });
                     } else if (yourVariable == 'bookNameInput') {
-                      changeDataFromLocalStorage('booksKey',
-                          images[index].fileName, 'title', updatedValue);
+                      changeDataFromLocalStorage('booksKey', images[index].fileName, 'title', updatedValue);
                       images[index].title = updatedValue;
                       setState(() {
                         images[index].title = updatedValue;
@@ -307,13 +284,11 @@ class RecentPageState extends State<RecentPage> {
                           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                           child: AlertDialog(
                             title: Text(images[index].title),
-                            content: const Text(
-                                "Вы уверены, что хотите удалить книгу?"),
+                            content: const Text("Вы уверены, что хотите удалить книгу?"),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(); // Закрыть диалоговое окно
+                                  Navigator.of(context).pop(); // Закрыть диалоговое окно
                                 },
                                 child: const TextForTable(
                                   text: "Отмена",
@@ -323,14 +298,11 @@ class RecentPageState extends State<RecentPage> {
                               TextButton(
                                 onPressed: () {
                                   // Выполните удаление элемента
-                                  delDataFromLocalStorage(
-                                      'booksKey', images[index].fileName);
-                                  delTextFromLocalStorage(
-                                      'textKey', images[index].fileName);
+                                  delDataFromLocalStorage('booksKey', images[index].fileName);
+                                  delTextFromLocalStorage('textKey', images[index].fileName);
                                   images.removeAt(index);
                                   setState(() {});
-                                  Navigator.of(context)
-                                      .pop(); // Закрыть диалоговое окно
+                                  Navigator.of(context).pop(); // Закрыть диалоговое окно
                                 },
                                 child: const Text(
                                   "Удалить",
@@ -380,134 +352,126 @@ class RecentPageState extends State<RecentPage> {
           Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (images.isEmpty)
-                  TextTektur(
-                      text: "Пока вы не добавили никаких книг",
-                      fontsize: 16,
-                      textColor: MyColors.grey)
-              ],
+              children: [if (images.isEmpty) TextTektur(text: "Пока вы не добавили никаких книг", fontsize: 16, textColor: MyColors.grey)],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(
-                top: 72),
-            child: DynamicHeightGridView(
-              controller: _scrollController,
-              itemCount: images.length,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              crossAxisCount: 2,
-              builder: (ctx, index) {
-                return GestureDetector(
-                  onTap: () async {
-                    if (!_isOperationInProgress) {
-                      _isOperationInProgress = true;
-                      try {
-                        await sendDataFromLocalStorage('textKey', index);
-                        if (isSended) {
-                          isSended = false;
-                          await Navigator.pushNamed(context, RouteNames.reader)
-                              .then((_) {
-                            getDataFromLocalStorage('booksKey');
-                          });
+            padding: const EdgeInsets.only(top: 72),
+            child: OrientationBuilder(builder: (context, orientation) {
+              return DynamicHeightGridView(
+                controller: _scrollController,
+                itemCount: images.length,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                crossAxisCount: orientation == Orientation.portrait ? 2 : 5,
+                builder: (ctx, index) {
+                  return GestureDetector(
+                    onTap: () async {
+                      if (!_isOperationInProgress) {
+                        _isOperationInProgress = true;
+                        try {
+                          await sendDataFromLocalStorage('textKey', index);
+                          if (isSended) {
+                            isSended = false;
+                            await Navigator.pushNamed(context, RouteNames.reader).then((_) {
+                              getDataFromLocalStorage('booksKey');
+                            });
+                          }
+                        } catch (e) {
+                          // Обработка ошибок, если необходимо
+                        } finally {
+                          _isOperationInProgress = false;
+                          getDataFromLocalStorage('booksKey');
+                          if (mounted) setState(() {});
                         }
-                      } catch (e) {
-                        // Обработка ошибок, если необходимо
-                      } finally {
-                        _isOperationInProgress = false;
-                        getDataFromLocalStorage('booksKey');
-                        if (mounted) setState(() {});
                       }
-                    }
-                  },
-
-                  onLongPress: () {
-                    onTapLongPressOne(context, index);
-                  },
-                  child: Column(
-                    children: [
-                      if (images[index].imageBytes != null)
-                        Stack(
-                          alignment: Alignment.bottomCenter,
-                          children: [
-                            images[index].imageBytes?.first != 0
-                                ?
-                            Image.memory(
-                              images[index].imageBytes!,
-                              width: MediaQuery.of(context).size.width / 2.5,
-                              fit: BoxFit.fitHeight,
-                                  )
-                                : SvgPicture.asset(
-                                    'assets/icon/no_name_book.svg',
-                                    width:
-                                        MediaQuery.of(context).size.width / 2.5,
-                                    fit: BoxFit.fitHeight,
+                    },
+                    onLongPress: () {
+                      onTapLongPressOne(context, index);
+                    },
+                    child: Column(
+                      children: [
+                        if (images[index].imageBytes != null)
+                          Stack(
+                            alignment: Alignment.bottomCenter,
+                            children: [
+                              images[index].imageBytes?.first != 0
+                                  ? Image.memory(
+                                      images[index].imageBytes!,
+                                      width: orientation == Orientation.portrait
+                                          ? MediaQuery.of(context).size.width / 2.5
+                                          : MediaQuery.of(context).size.width / 6.6,
+                                      height: orientation == Orientation.portrait
+                                          ? MediaQuery.of(context).size.height / 3.3
+                                          : MediaQuery.of(context).size.height / 2,
+                                      fit: BoxFit.fill,
+                                    )
+                                  : SvgPicture.asset(
+                                      'assets/icon/no_name_book.svg',
+                                      width: orientation == Orientation.portrait
+                                          ? MediaQuery.of(context).size.width / 2.5
+                                          : MediaQuery.of(context).size.width / 6.6,
+                                      height: orientation == Orientation.portrait
+                                          ? MediaQuery.of(context).size.height / 3.3
+                                          : MediaQuery.of(context).size.height / 2,
+                                      fit: BoxFit.fitHeight,
+                                    ),
+                              Positioned.fill(
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: Container(
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                        colors: [
+                                          Colors.black.withOpacity(0.8),
+                                          Colors.transparent,
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                            Positioned.fill(
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 10,
+                                left: 10,
+                                right: 10,
                                 child: Container(
-                                  height: 50, // Высота виньетки
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.bottomCenter,
-                                      end: Alignment.topCenter,
-                                      colors: [
-                                        Colors.black.withOpacity(0.8),
-                                        Colors.transparent,
-                                      ],
-                                    ),
+                                  height: 4,
+                                  decoration: const BoxDecoration(
+                                    color: MyColors.white,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: images[index].progress * 100 >= 99.9
+                                            ? MediaQuery.of(context).size.width / 2.846
+                                            : MediaQuery.of(context).size.width / 2.85 * images[index].progress,
+                                        height: 4,
+                                        decoration: const BoxDecoration(color: MyColors.purple),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              bottom: 10,
-                              left: 10,
-                              right: 10,
-                              child: Container(
-                                height: 4,
-                                decoration: const BoxDecoration(
-                                  color: MyColors.white,
-                                ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: images[index].progress * 100 >=
-                                              99.9
-                                          ? MediaQuery.of(context).size.width /
-                                              2.846
-                                          : MediaQuery.of(context).size.width /
-                                              2.85 *
-                                              images[index].progress,
-                                      height: 4,
-                                      decoration: const BoxDecoration(
-                                          color: MyColors.purple),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        const SizedBox(height: 4),
+                        Text(images[index].author.length > 20 ? '${images[index].author.substring(0, 20)}...' : images[index].author),
+                        Text(
+                          images[index].title.length > 20 ? '${images[index].title.substring(0, 20)}...' : images[index].title,
+                          maxLines: 1,
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      const SizedBox(height: 4),
-                      Text(images[index].author.length > 20
-                          ? '${images[index].author.substring(0, 20)}...'
-                          : images[index].author),
-                      Text(
-                        images[index].title.length > 20
-                            ? '${images[index].title.substring(0, 20)}...'
-                            : images[index].title,
-                        maxLines: 1,
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),

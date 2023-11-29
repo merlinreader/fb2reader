@@ -487,8 +487,8 @@ class Reader extends State {
                 ),
               );
             } else if (snapshot.hasError) {
-              return AlertDialog(
-                content: Text('Произошла ошибка: ${snapshot.error}'),
+              return const AlertDialog(
+                content: Text('Произошла ошибка: нет доступа к интернету'),
               );
             } else {
               if (wordCount.wordEntries.isEmpty) {
@@ -1096,7 +1096,7 @@ class Reader extends State {
       // debugPrint('updateWordInTable entry ${wordEntries[index]}');
       // debugPrint('updateWordInTable count ${wordEntries[index].count}');
       final translation = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).translateToEnglish(newWord);
-      final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation);
+      final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation!);
 
       wordEntries[index] = WordEntry(
         word: newWord,
@@ -1311,34 +1311,68 @@ class Reader extends State {
                       ),
                     ),
                   )),
-              Positioned(
-                left: MediaQuery.of(context).size.width / 6,
-                top: MediaQuery.of(context).size.height / 5,
-                child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onDoubleTap: () async {
-                      showSavedWords(context, textes.first.filePath);
-                    },
-                    onTap: () {
-                      setState(() {
-                        visible = !visible;
-                      });
-                      if (visible) {
-                        SystemChrome.setSystemUIOverlayStyle(
-                            const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent, statusBarColor: Colors.transparent));
-                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-                      } else {
-                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-                      }
-                    },
-                    child: IgnorePointer(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width / 1.5,
-                        height: MediaQuery.of(context).size.height / 2,
-                        color: const Color.fromRGBO(250, 100, 100, 0),
-                      ),
-                    )),
-              ),
+              isBorder
+                  ? Positioned(
+                      left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                      top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                      child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onDoubleTap: () async {
+                            showSavedWords(context, textes.first.filePath);
+                          },
+                          onVerticalDragEnd: (dragEndDetails) async {
+                            if (dragEndDetails.primaryVelocity! > 0) {
+                              showSavedWords(context, textes.first.filePath);
+                            }
+                          },
+                          onTap: () {
+                            setState(() {
+                              visible = !visible;
+                            });
+                            if (visible) {
+                              SystemChrome.setSystemUIOverlayStyle(
+                                  const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent, statusBarColor: Colors.transparent));
+                              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                            } else {
+                              SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+                            }
+                          },
+                          child: IgnorePointer(
+                            child: Container(
+                              width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                              height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                              color: const Color.fromRGBO(250, 100, 100, 0),
+                            ),
+                          )),
+                    )
+                  : Positioned(
+                      left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                      top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                      child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onDoubleTap: () async {
+                            showSavedWords(context, textes.first.filePath);
+                          },
+                          onTap: () {
+                            setState(() {
+                              visible = !visible;
+                            });
+                            if (visible) {
+                              SystemChrome.setSystemUIOverlayStyle(
+                                  const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent, statusBarColor: Colors.transparent));
+                              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                            } else {
+                              SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+                            }
+                          },
+                          child: IgnorePointer(
+                            child: Container(
+                              width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                              height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                              color: const Color.fromRGBO(250, 100, 100, 0),
+                            ),
+                          )),
+                    ),
               Positioned(
                 left: MediaQuery.of(context).size.width / 6,
                 child: GestureDetector(

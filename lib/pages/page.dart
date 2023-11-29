@@ -84,7 +84,7 @@ class Page extends State<AppPage> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(CustomIcons.bookOpen),
-            label: 'Проводник',
+            label: 'Книги',
           ),
           BottomNavigationBarItem(
             icon: Icon(CustomIcons.clock),
@@ -129,8 +129,7 @@ class Page extends State<AppPage> {
                   if (RecentPageState().checkImages() == true) {
                     Fluttertoast.showToast(
                       msg: 'Нет последней книги',
-                      toastLength:
-                          Toast.LENGTH_SHORT, // Длительность отображения
+                      toastLength: Toast.LENGTH_SHORT, // Длительность отображения
                       gravity: ToastGravity.BOTTOM,
                     ); // Расположение уведомления
                   } else {
@@ -146,8 +145,7 @@ class Page extends State<AppPage> {
                 }
               },
               backgroundColor: MyColors.purple,
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.zero)),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.zero)),
               autofocus: true,
               child: Icon(
                 CustomIcons.bookOpen,

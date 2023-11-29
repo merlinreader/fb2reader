@@ -26,8 +26,7 @@ class WordCount {
     this.wordEntries = const [],
   });
 
-  factory WordCount.fromJson(Map<String, dynamic> json) =>
-      _$WordCountFromJson(json);
+  factory WordCount.fromJson(Map<String, dynamic> json) => _$WordCountFromJson(json);
 
   Map<String, dynamic> toJson() => _$WordCountToJson(this);
 
@@ -41,8 +40,7 @@ class WordCount {
     _lastCallTimestamp = DateTime.now();
 
     await prefs.setInt('callCount', _callCount);
-    await prefs.setString(
-        'lastCallTimestamp', _lastCallTimestamp!.toIso8601String());
+    await prefs.setString('lastCallTimestamp', _lastCallTimestamp!.toIso8601String());
   }
 
   Future<void> loadCallInfo() async {
@@ -50,22 +48,16 @@ class WordCount {
 
     _callCount = prefs.getInt('callCount') ?? 0;
     final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
-    _lastCallTimestamp = lastCallTimestampStr != null
-        ? DateTime.parse(lastCallTimestampStr)
-        : null;
+    _lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
   }
 
   Future<String> translateToEnglish(String word) async {
-    final response = await http.get(Uri.parse(
-        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q=$word'));
+    final response = await http.get(Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q=$word'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       if (data.length >= 1 && data[0].length >= 1 && data[0][0].length >= 3) {
-        return data[0][0][0]
-            .toString()
-            .replaceAll(RegExp(r'[\[\].,;!?():]'), '')
-            .toLowerCase();
+        return data[0][0][0].toString().replaceAll(RegExp(r'[\[\].,;!?():]'), '').toLowerCase();
       } else {
         return 'Translation not available';
       }
@@ -133,17 +125,14 @@ class WordCount {
   }
 
   List<String> getAllWords() {
-    final textWithoutPunctuation =
-        fileText.replaceAll(RegExp(r'[.,;!?():"\\"]'), '');
+    final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():"\\"]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
 
     List<String> wordCounts = [];
 
     for (final word in words) {
       final normalizedWord = word.toLowerCase();
-      if (normalizedWord.length > 1 &&
-          !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
-          normalizedWord != '-') {
+      if (normalizedWord.length > 1 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
         wordCounts.add(normalizedWord);
       }
     }
@@ -151,17 +140,14 @@ class WordCount {
   }
 
   int getWordCount(String wordToCount) {
-    final textWithoutPunctuation =
-        fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+    final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
 
     final wordCounts = <String, int>{};
 
     for (final word in words) {
       final normalizedWord = word.toLowerCase();
-      if (normalizedWord.length > 1 &&
-          !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
-          normalizedWord != '-') {
+      if (normalizedWord.length > 1 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
         if (wordCounts.containsKey(normalizedWord)) {
           wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
         } else {
@@ -229,17 +215,14 @@ class WordCount {
   // }
 
   Future<void> countWordsWithOffset() async {
-    final textWithoutPunctuation =
-        fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+    final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
 
     final wordCounts = <String, int>{};
 
     for (final word in words) {
       final normalizedWord = word.toLowerCase();
-      if (normalizedWord.length > 3 &&
-          !RegExp(r'[0-9]').hasMatch(normalizedWord) &&
-          normalizedWord != '-') {
+      if (normalizedWord.length > 3 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
         if (wordCounts.containsKey(normalizedWord)) {
           wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
         } else {
@@ -248,8 +231,7 @@ class WordCount {
       }
     }
 
-    final sortedWordCounts = wordCounts.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
+    final sortedWordCounts = wordCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
     final prefs = await SharedPreferences.getInstance();
     int getWords = prefs.getInt('words') ?? 10;
@@ -299,8 +281,7 @@ class WordCount {
     );
   }
 
-  Future<List<WordEntry>> processSingleWord(
-      String newWord, List<WordEntry> wordEntries) async {
+  Future<List<WordEntry>> processSingleWord(String newWord, List<WordEntry> wordEntries) async {
     final normalizedWord = newWord.toLowerCase();
 
     // Check conditions for the word
@@ -319,8 +300,7 @@ class WordCount {
     );
 
     // Make sure the list is modifiable
-    List<WordEntry> modifiableWordEntries =
-        List<WordEntry>.of(wordEntries, growable: true);
+    List<WordEntry> modifiableWordEntries = List<WordEntry>.of(wordEntries, growable: true);
 
     // Add the new WordEntry to the list
     modifiableWordEntries.add(newWordEntry);
@@ -396,10 +376,7 @@ class AgreementDialog extends StatelessWidget {
                       },
                       child: const Text(
                         'Нет',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.red,
-                            fontFamily: 'Tektur'),
+                        style: TextStyle(fontSize: 18, color: Colors.red, fontFamily: 'Tektur'),
                       ),
                     ),
                   ),
