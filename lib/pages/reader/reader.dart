@@ -181,10 +181,8 @@ class Reader extends State {
 
   Future<void> _savePageCountToLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pageCount = ((_scrollController.position.pixels /
-                _scrollController.position.maxScrollExtent) *
-            (_scrollController.position.maxScrollExtent /
-                MediaQuery.of(context).size.height))
+    pageCount = ((_scrollController.position.pixels / _scrollController.position.maxScrollExtent) *
+            (_scrollController.position.maxScrollExtent / MediaQuery.of(context).size.height))
         .toInt();
     print(pageCount);
     prefs.setInt('pageCount-${textes.first.filePath}', pageCount);
@@ -225,20 +223,15 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataJson = prefs.getString(key);
     if (imageDataJson != null) {
-      images = (jsonDecode(imageDataJson) as List)
-          .map((item) => recent.ImageInfo.fromJson(item))
-          .toList();
+      images = (jsonDecode(imageDataJson) as List).map((item) => recent.ImageInfo.fromJson(item)).toList();
       setState(() {});
     }
   }
 
   Future<void> saveProgress() async {
     final prefs = await SharedPreferences.getInstance();
-    images
-            .firstWhere((element) => element.fileName == textes.first.filePath)
-            .progress =
-        _scrollController.position.pixels /
-            _scrollController.position.maxScrollExtent;
+    images.firstWhere((element) => element.fileName == textes.first.filePath).progress =
+        _scrollController.position.pixels / _scrollController.position.maxScrollExtent;
     setState(() {});
     await prefs.setString('booksKey', jsonEncode(images));
     // print('SUCCESS PROGRESS');
@@ -263,8 +256,7 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     final readingPositionsJson = prefs.getString('readingPositions');
     if (readingPositionsJson != null) {
-      final readingPositions =
-          Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
+      final readingPositions = Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
       if (readingPositions.containsKey(filePath)) {
         setState(() {
           position = readingPositions[filePath];
@@ -281,9 +273,7 @@ class Reader extends State {
     if (_scrollController.position.maxScrollExtent == 0) {
       return;
     }
-    double percentage = (_scrollController.position.pixels /
-            _scrollController.position.maxScrollExtent) *
-        100;
+    double percentage = (_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * 100;
     setState(() {
       _scrollPosition = percentage;
       position = _scrollController.position.pixels;
@@ -295,8 +285,7 @@ class Reader extends State {
       print('lastPageCount $lastPageCount');
       print('pageCount $pageCount');
     });
-    await saveReadingPosition(
-        _scrollController.position.pixels, textes.first.filePath);
+    await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
   }
 
   Color textColor = MyColors.black;
@@ -304,10 +293,8 @@ class Reader extends State {
   final ColorProvider _colorProvider = ColorProvider();
 
   Future<void> loadStylePreferences() async {
-    final backgroundColorFromStorage =
-        await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
-    final textColorFromStorage =
-        await _colorProvider.getColor(ColorKeys.readerTextColor);
+    final backgroundColorFromStorage = await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
+    final textColorFromStorage = await _colorProvider.getColor(ColorKeys.readerTextColor);
     final prefs = await SharedPreferences.getInstance();
 
     final fontSizeFromStorage = prefs.getDouble('fontSize');
@@ -332,9 +319,7 @@ class Reader extends State {
     final prefs = await SharedPreferences.getInstance();
     String? textDataJson = prefs.getString(key);
     if (textDataJson != null) {
-      textes = (jsonDecode(textDataJson) as List)
-          .map((item) => BookInfo.fromJson(item))
-          .toList();
+      textes = (jsonDecode(textDataJson) as List).map((item) => BookInfo.fromJson(item)).toList();
       setState(() {});
     }
     if (textes.isEmpty) {
@@ -347,11 +332,7 @@ class Reader extends State {
     }
 
     setState(() {
-      getText = textes[0]
-          .fileText
-          .toString()
-          .replaceAll(RegExp(r'\['), '')
-          .replaceAll(RegExp(r'\]'), '');
+      getText = textes[0].fileText.toString().replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
     });
   }
 
@@ -365,10 +346,8 @@ class Reader extends State {
   int currentOrientationIndex = 0;
 
   void switchOrientation() {
-    currentOrientationIndex =
-        (currentOrientationIndex + 1) % orientations.length;
-    SystemChrome.setPreferredOrientations(
-        [orientations[currentOrientationIndex]]);
+    currentOrientationIndex = (currentOrientationIndex + 1) % orientations.length;
+    SystemChrome.setPreferredOrientations([orientations[currentOrientationIndex]]);
   }
 
   // Метод для объединения прошлых и новых слов
@@ -409,15 +388,10 @@ class Reader extends State {
 
     // Загрузка и декодирование существующих данных, если они есть.
     String? storedData = prefs.getString(key);
-    List<WordCount> wordDatas = storedData != null
-        ? (jsonDecode(storedData) as List)
-            .map((item) => WordCount.fromJson(item))
-            .toList()
-        : [];
+    List<WordCount> wordDatas = storedData != null ? (jsonDecode(storedData) as List).map((item) => WordCount.fromJson(item)).toList() : [];
 
     // Поиск и обновление существующего WordCount, если он есть, иначе добавление нового.
-    int index = wordDatas
-        .indexWhere((element) => element.filePath == wordCount.filePath);
+    int index = wordDatas.indexWhere((element) => element.filePath == wordCount.filePath);
     if (index != -1) {
       wordDatas[index] = wordCount; // Обновление существующего WordCount
     } else {
@@ -449,9 +423,7 @@ class Reader extends State {
     var lastCallTranslateStr = prefs.getString('lastCallTranslate');
     if (lastCallTranslateStr != null) {
       final now = DateTime.now();
-      DateTime? lastCallTranslateStamp = lastCallTranslateStr != null
-          ? DateTime.parse(lastCallTranslateStr)
-          : null;
+      DateTime? lastCallTranslateStamp = lastCallTranslateStr != null ? DateTime.parse(lastCallTranslateStr) : null;
       final timeElapsed = now.difference(lastCallTranslateStamp!);
       if (timeElapsed.inMilliseconds >= 1) {
         await getDataFromLocalStorage('textKey');
@@ -466,8 +438,7 @@ class Reader extends State {
       print('Ищем слово: ${entry.word}');
 
       // Создаем регулярное выражение для поиска слова в тексте
-      final wordRegExp =
-          RegExp(entry.word, caseSensitive: false, unicode: true);
+      final wordRegExp = RegExp(entry.word, caseSensitive: false, unicode: true);
 
       // Ищем совпадения и заменяем каждое из них
       updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
@@ -479,8 +450,7 @@ class Reader extends State {
       });
     }
 
-    await prefs.setString(
-        'lastCallTranslate', DateTime.now().toIso8601String());
+    await prefs.setString('lastCallTranslate', DateTime.now().toIso8601String());
     isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
     print(isTrans);
     setState(() {
@@ -502,8 +472,7 @@ class Reader extends State {
     return pattern.toLowerCase();
   }
 
-  Future<void> showTableDialog(
-      BuildContext context, WordCount wordCount) async {
+  Future<void> showTableDialog(BuildContext context, WordCount wordCount) async {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -547,13 +516,11 @@ class Reader extends State {
                                 children: [
                                   IconButton(
                                     alignment: Alignment.centerRight,
-                                    padding:
-                                        const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                    padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                     icon: const Icon(Icons.close),
                                     onPressed: () async {
                                       // debugPrint("DONE");
-                                      await saveWordCountToLocalstorage(
-                                          wordCount);
+                                      await saveWordCountToLocalstorage(wordCount);
                                       Navigator.pop(context);
                                     },
                                   ),
@@ -571,9 +538,7 @@ class Reader extends State {
                               DataTable(
                                 columnSpacing: 38.0,
                                 showBottomBorder: false,
-                                dataTextStyle: const TextStyle(
-                                    fontFamily: 'Roboto',
-                                    color: MyColors.black),
+                                dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                 columns: const [
                                   DataColumn(
                                     label: Expanded(
@@ -605,8 +570,7 @@ class Reader extends State {
                                     cells: [
                                       DataCell(InkWell(
                                         onTap: () async {
-                                          await _showWordInputDialog(entry.word,
-                                              wordCount.wordEntries);
+                                          await _showWordInputDialog(entry.word, wordCount.wordEntries);
                                           setState(() {
                                             entry.word;
                                             entry.count;
@@ -621,10 +585,7 @@ class Reader extends State {
                                       DataCell(
                                         ConstrainedBox(
                                           constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.25,
+                                            maxWidth: MediaQuery.of(context).size.width * 0.25,
                                           ),
                                           child: TextForTable(
                                             text: '[ ${entry.ipa} ]',
@@ -635,15 +596,10 @@ class Reader extends State {
                                       DataCell(
                                         ConstrainedBox(
                                           constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.25,
+                                            maxWidth: MediaQuery.of(context).size.width * 0.25,
                                           ),
                                           child: TextForTable(
-                                            text: entry.translation!.isNotEmpty
-                                                ? entry.translation!
-                                                : 'N/A',
+                                            text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
                                             textColor: MyColors.black,
                                           ),
                                         ),
@@ -654,10 +610,8 @@ class Reader extends State {
                               ),
                               TextButton(
                                   onPressed: () async {
-                                    await saveWordCountToLocalstorage(
-                                        wordCount);
-                                    replaceWordsWithTranslation(
-                                        wordCount.wordEntries);
+                                    await saveWordCountToLocalstorage(wordCount);
+                                    replaceWordsWithTranslation(wordCount.wordEntries);
                                     Navigator.pop(context);
                                   },
                                   child: const Text16(
@@ -701,9 +655,7 @@ class Reader extends State {
     final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
     DateTime? lastCallTimestamp;
     Duration timeElapsed;
-    lastCallTimestamp = lastCallTimestampStr != null
-        ? DateTime.parse(lastCallTimestampStr)
-        : null;
+    lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
 
     final now = DateTime.now();
     final oneDayMore = now.add(const Duration(days: 1));
@@ -719,15 +671,12 @@ class Reader extends State {
     // print('now $now');
     // print('timeElapsed $timeElapsed');
     // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords ||
-    if (timeElapsed.inMilliseconds >= 1 &&
-            wordCount.wordEntries.length <= getWords ||
-        lastCallTimestampStr == null) {
+    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(
-          'lastCallTimestamp', lastCallTimestamp.toIso8601String());
+      await prefs.setString('lastCallTimestamp', lastCallTimestamp.toIso8601String());
 
       showDialog<void>(
           context: context,
@@ -761,7 +710,7 @@ class Reader extends State {
                               },
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 40),
+                              padding: const EdgeInsets.only(bottom: 20),
                               child: Center(
                                 child: Text24(
                                   text: wordCount.wordEntries.length < 10
@@ -774,8 +723,7 @@ class Reader extends State {
                             DataTable(
                               columnSpacing: 38.0,
                               showBottomBorder: false,
-                              dataTextStyle: const TextStyle(
-                                  fontFamily: 'Roboto', color: MyColors.black),
+                              dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                               columns: const [
                                 DataColumn(
                                   label: Expanded(
@@ -807,8 +755,7 @@ class Reader extends State {
                                   cells: [
                                     DataCell(InkWell(
                                       onTap: () async {
-                                        await _showWordInputDialog(
-                                            entry.word, wordCount.wordEntries);
+                                        await _showWordInputDialog(entry.word, wordCount.wordEntries);
                                         setState(() {
                                           entry.word;
                                           entry.count;
@@ -823,10 +770,7 @@ class Reader extends State {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: BoxConstraints(
-                                          maxWidth: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.25,
+                                          maxWidth: MediaQuery.of(context).size.width * 0.25,
                                         ),
                                         child: TextForTable(
                                           text: '[ ${entry.ipa} ]',
@@ -837,15 +781,10 @@ class Reader extends State {
                                     DataCell(
                                       ConstrainedBox(
                                         constraints: BoxConstraints(
-                                          maxWidth: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.25,
+                                          maxWidth: MediaQuery.of(context).size.width * 0.25,
                                         ),
                                         child: TextForTable(
-                                          text: entry.translation!.isNotEmpty
-                                              ? entry.translation!
-                                              : 'N/A',
+                                          text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
                                           textColor: MyColors.black,
                                         ),
                                       ),
@@ -857,10 +796,7 @@ class Reader extends State {
                             wordCount.wordEntries.length < 10
                                 ? TextButton(
                                     onPressed: () async {
-                                      await addNewWord(
-                                          wordCount.wordEntries,
-                                          wordCount,
-                                          wordCount.wordEntries.length);
+                                      await addNewWord(wordCount.wordEntries, wordCount, wordCount.wordEntries.length);
                                     },
                                     child: const Text16(
                                       text: 'Добавить',
@@ -868,10 +804,8 @@ class Reader extends State {
                                     ))
                                 : TextButton(
                                     onPressed: () async {
-                                      await saveWordCountToLocalstorage(
-                                          wordCount);
-                                      replaceWordsWithTranslation(
-                                          wordCount.wordEntries);
+                                      await saveWordCountToLocalstorage(wordCount);
+                                      replaceWordsWithTranslation(wordCount.wordEntries);
                                       Navigator.pop(context);
                                     },
                                     child: const Text16(
@@ -931,7 +865,7 @@ class Reader extends State {
                 return SingleChildScrollView(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.9,
+                      maxHeight: MediaQuery.of(context).size.height * 0.8,
                     ),
                     child: ListView(
                       shrinkWrap: true,
@@ -947,15 +881,14 @@ class Reader extends State {
                               children: <Widget>[
                                 IconButton(
                                   alignment: Alignment.centerRight,
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                  padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                   icon: const Icon(Icons.close),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
                                 ),
                                 const Padding(
-                                  padding: EdgeInsets.only(bottom: 40),
+                                  padding: EdgeInsets.only(bottom: 20),
                                   child: Center(
                                     child: Text24(
                                       text: 'Изучаемые слова',
@@ -966,9 +899,7 @@ class Reader extends State {
                                 DataTable(
                                   columnSpacing: 38.0,
                                   showBottomBorder: false,
-                                  dataTextStyle: const TextStyle(
-                                      fontFamily: 'Roboto',
-                                      color: MyColors.black),
+                                  dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                   columns: const [
                                     DataColumn(
                                       label: Expanded(
@@ -1001,10 +932,7 @@ class Reader extends State {
                                         DataCell(
                                           ConstrainedBox(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.25,
+                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
                                             ),
                                             child: TextForTable(
                                               text: entry.word,
@@ -1015,10 +943,7 @@ class Reader extends State {
                                         DataCell(
                                           ConstrainedBox(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.25,
+                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
                                             ),
                                             child: TextForTable(
                                               text: '[ ${entry.ipa} ]',
@@ -1029,16 +954,10 @@ class Reader extends State {
                                         DataCell(
                                           ConstrainedBox(
                                             constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.25,
+                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
                                             ),
                                             child: TextForTable(
-                                              text:
-                                                  entry.translation!.isNotEmpty
-                                                      ? entry.translation!
-                                                      : 'N/A',
+                                              text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
                                               textColor: MyColors.black,
                                             ),
                                           ),
@@ -1092,13 +1011,11 @@ class Reader extends State {
     if (result == true) {
       // Действие, выполняемое после нажатия "Да"
 
-      final wordCount = WordCount(
-          filePath: textes.first.filePath, fileText: textes.first.fileText);
+      final wordCount = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText);
       await showEmptyTable(context, wordCount);
     } else if (result == false) {
       // Действие, выполняемое после нажатия "Нет"
-      final wordCount = WordCount(
-          filePath: textes.first.filePath, fileText: textes.first.fileText);
+      final wordCount = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText);
       // Если нужно сбросить счётчик времени
       // await wordCount.resetCallCount();
       // await wordCount.checkCallInfo();
@@ -1106,11 +1023,8 @@ class Reader extends State {
     }
   }
 
-  Future<void> _showWordInputDialog(
-      String word, List<WordEntry> wordEntries) async {
-    List<String> words = WordCount(
-            filePath: textes.first.filePath, fileText: textes.first.fileText)
-        .getAllWords();
+  Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries) async {
+    List<String> words = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
     Set<String> uniqueSet = <String>{};
     List<String> result = [];
     for (String item in words.reversed) {
@@ -1132,14 +1046,11 @@ class Reader extends State {
                 return const Iterable<String>.empty();
               }
               String pattern = textEditingValue.text.toLowerCase();
-              final Iterable<String> matchingStart =
-                  result.where((String option) {
+              final Iterable<String> matchingStart = result.where((String option) {
                 return option.toLowerCase().startsWith(pattern);
               });
-              final Iterable<String> matchingAll =
-                  result.where((String option) {
-                return option.toLowerCase().contains(pattern) &&
-                    !option.toLowerCase().startsWith(pattern);
+              final Iterable<String> matchingAll = result.where((String option) {
+                return option.toLowerCase().contains(pattern) && !option.toLowerCase().startsWith(pattern);
               });
               return matchingStart.followedBy(matchingAll);
             },
@@ -1178,21 +1089,14 @@ class Reader extends State {
     );
   }
 
-  Future<void> updateWordInTable(
-      String oldWord, String newWord, List<WordEntry> wordEntries) async {
+  Future<void> updateWordInTable(String oldWord, String newWord, List<WordEntry> wordEntries) async {
     final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
     if (index != -1) {
-      final count = WordCount(
-              filePath: textes.first.filePath, fileText: textes.first.fileText)
-          .getWordCount(newWord);
+      final count = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getWordCount(newWord);
       // debugPrint('updateWordInTable entry ${wordEntries[index]}');
       // debugPrint('updateWordInTable count ${wordEntries[index].count}');
-      final translation = await WordCount(
-              filePath: textes.first.filePath, fileText: textes.first.fileText)
-          .translateToEnglish(newWord);
-      final ipa = await WordCount(
-              filePath: textes.first.filePath, fileText: textes.first.fileText)
-          .getIPA(translation);
+      final translation = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).translateToEnglish(newWord);
+      final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation);
 
       wordEntries[index] = WordEntry(
         word: newWord,
@@ -1207,13 +1111,10 @@ class Reader extends State {
     }
   }
 
-  Future<void> addNewWord(
-      List<WordEntry> wordEntries, WordCount wordCount, int length) async {
+  Future<void> addNewWord(List<WordEntry> wordEntries, WordCount wordCount, int length) async {
     final prefs = await SharedPreferences.getInstance();
 
-    List<String> words = WordCount(
-            filePath: textes.first.filePath, fileText: textes.first.fileText)
-        .getAllWords();
+    List<String> words = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
     Set<String> uniqueSet = <String>{};
     List<String> result = [];
     for (String item in words.reversed) {
@@ -1236,14 +1137,11 @@ class Reader extends State {
                 return const Iterable<String>.empty();
               }
               String pattern = textEditingValue.text.toLowerCase();
-              final Iterable<String> matchingStart =
-                  result.where((String option) {
+              final Iterable<String> matchingStart = result.where((String option) {
                 return option.toLowerCase().startsWith(pattern);
               });
-              final Iterable<String> matchingAll =
-                  result.where((String option) {
-                return option.toLowerCase().contains(pattern) &&
-                    !option.toLowerCase().startsWith(pattern);
+              final Iterable<String> matchingAll = result.where((String option) {
+                return option.toLowerCase().contains(pattern) && !option.toLowerCase().startsWith(pattern);
               });
               return matchingStart.followedBy(matchingAll);
             },
@@ -1265,8 +1163,7 @@ class Reader extends State {
                   if (result.contains(newWord)) {
                     WordCount wordProcessor = WordCount();
 
-                    List<WordEntry> updatedWordEntries = await wordProcessor
-                        .processSingleWord(newWord, wordCount.wordEntries);
+                    List<WordEntry> updatedWordEntries = await wordProcessor.processSingleWord(newWord, wordCount.wordEntries);
 
                     setState(() {
                       wordCount.wordEntries = updatedWordEntries;
@@ -1337,25 +1234,16 @@ class Reader extends State {
                               scrollDirection: Axis.horizontal,
                               clipBehavior: Clip.antiAlias,
                               child: Text(
-                                textes.isNotEmpty
-                                    ? '${textes[0].author.toString()}. ${textes[0].title.toString()}'
-                                    : 'Нет автора',
+                                textes.isNotEmpty ? '${textes[0].author.toString()}. ${textes[0].title.toString()}' : 'Нет автора',
                                 softWrap: false,
                                 overflow: TextOverflow.fade,
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    fontFamily: 'Tektur',
-                                    color: isDarkTheme
-                                        ? MyColors.white
-                                        : MyColors.black),
+                                style: TextStyle(fontSize: 16, fontFamily: 'Tektur', color: isDarkTheme ? MyColors.white : MyColors.black),
                               ),
                             ),
                           ),
                           GestureDetector(
                             onTap: () {
-                              Navigator.pushNamed(
-                                      context, RouteNames.readerSettings)
-                                  .then((value) => loadStylePreferences());
+                              Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
                             },
                             child: Icon(
                               CustomIcons.sliders,
@@ -1372,8 +1260,7 @@ class Reader extends State {
             decoration: BoxDecoration(
                 color: backgroundColor,
                 border: isBorder == true
-                    ? Border.all(
-                        color: const Color.fromRGBO(0, 255, 163, 1), width: 4)
+                    ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 4)
                     : Border.all(width: 0, color: Colors.transparent)),
             child: Stack(children: [
               SafeArea(
@@ -1391,11 +1278,7 @@ class Reader extends State {
                                   // textAlign: TextAlign.justify,
                                   // textAlign: TextAlign.center,
                                   softWrap: true,
-                                  style: TextStyle(
-                                      fontSize: fontSize,
-                                      color: textColor,
-                                      height: 1.41,
-                                      locale: const Locale('ru', 'RU')),
+                                  style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
                                 );
                               }()
                             : Center(
@@ -1415,11 +1298,8 @@ class Reader extends State {
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
                     // Скролл вниз / следующая страница
-                    _scrollController.animateTo(
-                        _scrollController.position.pixels +
-                            MediaQuery.of(context).size.height * 0.8,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.ease);
+                    _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.8,
+                        duration: const Duration(milliseconds: 250), curve: Curves.ease);
                   },
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
@@ -1445,14 +1325,10 @@ class Reader extends State {
                       });
                       if (visible) {
                         SystemChrome.setSystemUIOverlayStyle(
-                            const SystemUiOverlayStyle(
-                                systemNavigationBarColor: Colors.transparent,
-                                statusBarColor: Colors.transparent));
-                        SystemChrome.setEnabledSystemUIMode(
-                            SystemUiMode.edgeToEdge);
+                            const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent, statusBarColor: Colors.transparent));
+                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
                       } else {
-                        SystemChrome.setEnabledSystemUIMode(
-                            SystemUiMode.immersive);
+                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
                       }
                     },
                     child: IgnorePointer(
@@ -1469,11 +1345,8 @@ class Reader extends State {
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
                       // Сролл вверх / предыдущая страница
-                      _scrollController.animateTo(
-                          _scrollController.position.pixels -
-                              MediaQuery.of(context).size.height * 0.8,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.ease);
+                      _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.8,
+                          duration: const Duration(milliseconds: 250), curve: Curves.ease);
                     },
                     child: IgnorePointer(
                       child: Container(
@@ -1565,46 +1438,25 @@ class Reader extends State {
                           children: [
                             _scrollController.hasClients
                                 ? Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(8, 0, 28, 0),
+                                    padding: const EdgeInsets.fromLTRB(8, 0, 28, 0),
                                     child: SliderTheme(
-                                      data: const SliderThemeData(
-                                          showValueIndicator:
-                                              ShowValueIndicator.always),
+                                      data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
                                       child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
+                                        mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
                                           Expanded(
                                             child: Slider(
                                               value: position != 0
-                                                  ? position >
-                                                          _scrollController
-                                                              .position
-                                                              .maxScrollExtent
-                                                      ? _scrollController
-                                                          .position
-                                                          .maxScrollExtent
+                                                  ? position > _scrollController.position.maxScrollExtent
+                                                      ? _scrollController.position.maxScrollExtent
                                                       : position
-                                                  : _scrollController
-                                                      .position.pixels,
+                                                  : _scrollController.position.pixels,
                                               min: 0,
-                                              max: _scrollController
-                                                  .position.maxScrollExtent,
+                                              max: _scrollController.position.maxScrollExtent,
                                               label: visible
-                                                  ? (position /
-                                                                  _scrollController
-                                                                      .position
-                                                                      .maxScrollExtent) *
-                                                              100 ==
-                                                          100
+                                                  ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
                                                       ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 3)}%"
-                                                      : (position /
-                                                                      _scrollController
-                                                                          .position
-                                                                          .maxScrollExtent) *
-                                                                  100 >
-                                                              0
+                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
                                                           ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
                                                           : "0.00%"
                                                   : "",
@@ -1612,62 +1464,32 @@ class Reader extends State {
                                                 setState(() {
                                                   position = value;
                                                 });
-                                                if (_actionTimer?.isActive ??
-                                                    false) {
+                                                if (_actionTimer?.isActive ?? false) {
                                                   _actionTimer?.cancel();
                                                 }
-                                                _actionTimer = Timer(
-                                                    const Duration(
-                                                        milliseconds: 250), () {
-                                                  _scrollController
-                                                      .jumpTo(value);
+                                                _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                  _scrollController.jumpTo(value);
                                                 });
                                               },
                                               onChangeEnd: (value) {
                                                 _actionTimer?.cancel();
-                                                if (value !=
-                                                    _scrollController
-                                                        .position.pixels) {
-                                                  _scrollController
-                                                      .jumpTo(value);
+                                                if (value != _scrollController.position.pixels) {
+                                                  _scrollController.jumpTo(value);
                                                 }
                                               },
-                                              activeColor: isDarkTheme
-                                                  ? MyColors.white
-                                                  : const Color.fromRGBO(
-                                                      29, 29, 33, 1),
-                                              inactiveColor: isDarkTheme
-                                                  ? const Color.fromRGBO(
-                                                      96, 96, 96, 1)
-                                                  : const Color.fromRGBO(
-                                                      96, 96, 96, 1),
-                                              thumbColor: isDarkTheme
-                                                  ? MyColors.white
-                                                  : const Color.fromRGBO(
-                                                      29, 29, 33, 1),
+                                              activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                              inactiveColor: isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
+                                              thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
                                             ),
                                           ),
                                           Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                12,
+                                            width: MediaQuery.of(context).size.width / 12,
                                             alignment: Alignment.center,
                                             child: Text11(
                                                 text: visible
-                                                    ? (position /
-                                                                    _scrollController
-                                                                        .position
-                                                                        .maxScrollExtent) *
-                                                                100 ==
-                                                            100
+                                                    ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
                                                         ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 3)}%"
-                                                        : (position /
-                                                                        _scrollController
-                                                                            .position
-                                                                            .maxScrollExtent) *
-                                                                    100 >
-                                                                0
+                                                        : (position / _scrollController.position.maxScrollExtent) * 100 > 0
                                                             ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
                                                             : "0.00%"
                                                     : "",
@@ -1691,15 +1513,11 @@ class Reader extends State {
                                     size: 30,
                                   ),
                                 ),
-                                const Padding(
-                                    padding: EdgeInsets.only(right: 30)),
+                                const Padding(padding: EdgeInsets.only(right: 30)),
                                 InkWell(
                                   onTap: () {
-                                    final themeProvider =
-                                        Provider.of<ThemeProvider>(context,
-                                            listen: false);
-                                    themeProvider.isDarkTheme =
-                                        !themeProvider.isDarkTheme;
+                                    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+                                    themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
                                     saveSettings(themeProvider.isDarkTheme);
                                   },
                                   child: Icon(
@@ -1708,42 +1526,29 @@ class Reader extends State {
                                     size: 30,
                                   ),
                                 ),
-                                const Padding(
-                                    padding: EdgeInsets.only(right: 30)),
+                                const Padding(padding: EdgeInsets.only(right: 30)),
                                 GestureDetector(
                                   onTap: () async {
                                     switch (isBorder) {
                                       case false:
                                         if (isTrans == true) {
-                                          var temp =
-                                              await loadWordCountFromLocalStorage(
-                                                  textes.first.filePath);
-                                          print(
-                                              'temp.filePath = ${temp.filePath}');
+                                          var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
+                                          print('temp.filePath = ${temp.filePath}');
                                           if (temp.filePath != '') {
-                                            replaceWordsWithTranslation(
-                                                temp.wordEntries);
+                                            replaceWordsWithTranslation(temp.wordEntries);
                                           }
                                         } else {
                                           wordModeDialog(context);
                                         }
                                         break;
                                       default:
-                                        await getDataFromLocalStorage(
-                                            'textKey');
+                                        await getDataFromLocalStorage('textKey');
                                         isBorder = false;
-                                        final prefs = await SharedPreferences
-                                            .getInstance();
+                                        final prefs = await SharedPreferences.getInstance();
 
-                                        final lastCallTimestampStr = prefs
-                                            .getString('lastCallTimestamp');
-                                        var lastCallTimestamp =
-                                            lastCallTimestampStr != null
-                                                ? DateTime.parse(
-                                                    lastCallTimestampStr)
-                                                : null;
-                                        var timeElapsed = DateTime.now()
-                                            .difference(lastCallTimestamp!);
+                                        final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
+                                        var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
+                                        var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
                                         // if (timeElapsed.inHours > 24) {
                                         if (timeElapsed.inMilliseconds > 1) {
                                           wordModeDialog(context);
