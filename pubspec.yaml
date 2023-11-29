@@ -48,6 +48,7 @@ dependencies:
   flutter_screen_wake: ^1.0.2
   brightness: ^0.0.1
   cached_network_image: ^3.3.0
+  archive: ^3.4.9
 
 dev_dependencies:
   flutter_test:
