@@ -70,7 +70,9 @@ class Page extends State<AppPage> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(left: 6, right: 16),
-                child: SvgPicture.asset(SvgAsset.merlinLogo),
+                child: SvgPicture.asset(
+                  SvgAsset.merlinLogo,
+                ),
               ),
               const Text24(text: 'Merlin', textColor: MyColors.black),
             ],
