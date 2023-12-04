@@ -333,7 +333,7 @@ class _ProfilePage extends State<ProfilePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(width: size),
-                            Text14(text: locationData, textColor: MyColors.black),
+                            Text16(text: locationData, textColor: MyColors.black),
                             IconButton(
                                 onPressed: geo,
                                 icon: Icon(
@@ -583,21 +583,24 @@ class _ProfilePage extends State<ProfilePage> {
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
               child: Center(
-                  child: Theme(
-                      data: purpleButton(),
-                      child: Button(
-                          text: 'Сохранить',
-                          width: 250,
-                          height: 44,
-                          horizontalPadding: 10,
-                          verticalPadding: 10,
-                          textColor: MyColors.white,
-                          fontSize: 14,
-                          onPressed: () {
-                            saveGeo(selectedCountry!, selectedState!, selectedCity!);
-                            Navigator.of(context).pop();
-                          },
-                          fontWeight: FontWeight.bold))),
+                child: SizedBox(
+                  width: 400, // Увеличиваем ширину кнопки
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: MyColors.purple, // Цвет кнопки
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10), // Скругление углов
+                      ),
+                    ),
+                    onPressed: () {
+                      saveGeo(selectedCountry!, selectedState!, selectedCity!);
+                      Navigator.of(context).pop();
+                    },
+                    child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15), child: Text16(text: 'Сохранить', textColor: MyColors.white)),
+                  ),
+                ),
+              ),
             )
           ],
         ),
