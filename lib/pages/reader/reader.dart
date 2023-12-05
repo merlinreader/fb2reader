@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -184,7 +185,7 @@ class Reader extends State {
     pageCount = ((_scrollController.position.pixels / _scrollController.position.maxScrollExtent) *
             (_scrollController.position.maxScrollExtent / MediaQuery.of(context).size.height))
         .toInt();
-    print(pageCount);
+    // print(pageCount);
     prefs.setInt('pageCount-${textes.first.filePath}', pageCount);
   }
 
@@ -282,8 +283,8 @@ class Reader extends State {
       // print('max = ${_scrollController.position.maxScrollExtent}');
       // print(' ');
       _savePageCountToLocalStorage();
-      print('lastPageCount $lastPageCount');
-      print('pageCount $pageCount');
+      // print('lastPageCount $lastPageCount');
+      // print('pageCount $pageCount');
     });
     await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
   }
@@ -345,9 +346,37 @@ class Reader extends State {
 
   int currentOrientationIndex = 0;
 
-  void switchOrientation() {
-    currentOrientationIndex = (currentOrientationIndex + 1) % orientations.length;
-    SystemChrome.setPreferredOrientations([orientations[currentOrientationIndex]]);
+  double? savedPosition; // Переменная для хранения позиции скролла
+  double? savedMaxExtent; // Переменная для хранения максимальной прокрутки
+
+  Future<void> savePositionAndExtent() async {
+    savedPosition = _scrollController.position.pixels;
+    savedMaxExtent = _scrollController.position.maxScrollExtent;
+  }
+
+  void switchOrientation() async {
+    if (savedPosition != null && savedMaxExtent != null) {
+      currentOrientationIndex = (currentOrientationIndex + 1) % orientations.length;
+      SystemChrome.setPreferredOrientations([orientations[currentOrientationIndex]]);
+
+      // Дождитесь завершения изменения ориентации
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      double newMaxExtent = _scrollController.position.maxScrollExtent;
+      double newPositionRatio = savedPosition! / savedMaxExtent!;
+      double newPosition = newPositionRatio * newMaxExtent;
+
+      // Убедитесь, что новая позиция не выходит за пределы
+      newPosition = min(newPosition, newMaxExtent);
+
+      // Используйте animateTo для плавного перехода
+      // _scrollController.animateTo(
+      //   newPosition,
+      //   duration: Duration(milliseconds: 250),
+      //   curve: Curves.easeOut,
+      // );
+      _scrollController.jumpTo(newPosition);
+    }
   }
 
   // Метод для объединения прошлых и новых слов
@@ -526,6 +555,7 @@ class Reader extends State {
                                       onPressed: () async {
                                         // debugPrint("DONE");
                                         await saveWordCountToLocalstorage(wordCount);
+                                        replaceWordsWithTranslation(wordCount.wordEntries);
                                         Navigator.pop(context);
                                       },
                                     ),
@@ -677,7 +707,8 @@ class Reader extends State {
     // print('now $now');
     // print('timeElapsed $timeElapsed');
     // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords ||
-    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
@@ -1247,14 +1278,17 @@ class Reader extends State {
                               ),
                             ),
                           ),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
-                            },
-                            child: Icon(
-                              CustomIcons.sliders,
-                              size: 30,
-                              color: Theme.of(context).iconTheme.color,
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(35, 0, 0, 0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
+                              },
+                              child: Icon(
+                                CustomIcons.sliders,
+                                size: 30,
+                                color: Theme.of(context).iconTheme.color,
+                              ),
                             ),
                           ),
                         ],
@@ -1544,7 +1578,8 @@ class Reader extends State {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 GestureDetector(
-                                  onTap: () {
+                                  onTap: () async {
+                                    await savePositionAndExtent();
                                     switchOrientation();
                                   },
                                   child: Icon(
@@ -1589,8 +1624,8 @@ class Reader extends State {
                                         final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
                                         var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                         var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                        // if (timeElapsed.inHours > 24) {
-                                        if (timeElapsed.inMilliseconds > 1) {
+                                        if (timeElapsed.inHours > 24) {
+                                          // if (timeElapsed.inMilliseconds > 1) {
                                           wordModeDialog(context);
                                         } else {
                                           Fluttertoast.showToast(
