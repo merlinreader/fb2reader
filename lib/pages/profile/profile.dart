@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -134,7 +136,7 @@ class _ProfilePage extends State<ProfilePage> {
             // onAdClicked: () => print("callback: rewarded ad clicked."),
             // onAdImpression: (data) =>
             //     print("callback: rewarded ad impression: ${data.getRawData()}"),
-            onRewarded: (Reward reward) => saveWordsToLocalStorage(words + 5)));
+            onRewarded: (Reward reward) async => saveWordsToLocalStorage(words + 5)));
   }
 
   void saveGeo(String country, String area, String locality) async {
@@ -421,8 +423,12 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           onPressed: () {
+                            // print(words);
                             // print('Added 5 words');
                             _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
+                            // saveWordsToLocalStorage(words + 5);
+                            Fluttertoast.showToast(msg: 'Вам доступно $words слов', toastLength: Toast.LENGTH_LONG);
+                            // print(words);
                             // Navigator.pushNamed(context, RouteNames.rewardedAd);
                             //rewardedAdPage.callShowRewardedAd();
                           },
@@ -597,7 +603,11 @@ class _ProfilePage extends State<ProfilePage> {
                       Navigator.of(context).pop();
                     },
                     child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15), child: Text16(text: 'Сохранить', textColor: MyColors.white)),
+                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                        child: Text(
+                          'Сохранить',
+                          style: TextStyle(color: MyColors.white, fontFamily: 'Tektur', fontSize: 16),
+                        )),
                   ),
                 ),
               ),

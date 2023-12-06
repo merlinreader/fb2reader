@@ -706,9 +706,8 @@ class Reader extends State {
     // print('lastCallTimestamp $lastCallTimestamp');
     // print('now $now');
     // print('timeElapsed $timeElapsed');
-    // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords ||
-    // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+      // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
@@ -742,8 +741,14 @@ class Reader extends State {
                               alignment: Alignment.centerRight,
                               padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                               icon: const Icon(Icons.close),
-                              onPressed: () {
-                                Navigator.of(context).pop();
+                              onPressed: () async {
+                                if (wordCount.wordEntries.length == getWords) {
+                                  await saveWordCountToLocalstorage(wordCount);
+                                  replaceWordsWithTranslation(wordCount.wordEntries);
+                                  Navigator.pop(context);
+                                } else {
+                                  Fluttertoast.showToast(msg: 'Вы не добавили все слова', toastLength: Toast.LENGTH_LONG);
+                                }
                               },
                             ),
                             Padding(
@@ -1624,8 +1629,8 @@ class Reader extends State {
                                         final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
                                         var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                         var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                        if (timeElapsed.inHours > 24) {
-                                          // if (timeElapsed.inMilliseconds > 1) {
+                                        // if (timeElapsed.inHours > 24) {
+                                        if (timeElapsed.inMilliseconds > 1) {
                                           wordModeDialog(context);
                                         } else {
                                           Fluttertoast.showToast(
