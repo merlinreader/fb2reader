@@ -189,7 +189,7 @@ class RecentPageState extends State<RecentPage> {
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: AlertDialog(
-            title: const Text('Изменить значение'),
+            title: Text(yourVariable == 'authorInput' ? 'Изменить автора' : 'Изменить название'),
             content: TextField(
               onChanged: (value) {
                 updatedValue = value;
@@ -336,6 +336,112 @@ class RecentPageState extends State<RecentPage> {
     }
   }
 
+  Offset _tapPosition = Offset.zero;
+
+  void _getTapPosition(TapDownDetails tapPosition) {
+    final RenderBox renderBox = context.findRenderObject() as RenderBox;
+    setState(() {
+      _tapPosition = renderBox.globalToLocal(tapPosition.globalPosition);
+    });
+  }
+
+  void _showBlurMenu(context, int index) async {
+    final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+    final result = await showMenu(
+      context: context,
+      color: const Color.fromARGB(255, 73, 73, 73).withAlpha(200),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(
+          _tapPosition.dx,
+          _tapPosition.dy,
+          10,
+          10,
+        ),
+        Rect.fromLTWH(
+          0,
+          0,
+          overlay!.paintBounds.size.width,
+          overlay.paintBounds.size.height,
+        ),
+      ),
+      items: [
+        const PopupMenuItem(
+          value: 'change-author',
+          child: Text(
+            "Изменить автора",
+            style: TextStyle(color: MyColors.white, fontSize: 13),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'change-title',
+          child: Text(
+            "Изменить название",
+            style: TextStyle(color: MyColors.white, fontSize: 13),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'delete',
+          child: Text(
+            "Удалить",
+            style: TextStyle(color: Colors.red, fontSize: 13),
+          ),
+        ),
+      ],
+    );
+
+    switch (result) {
+      case 'change-author':
+        showInputDialog(context, 'authorInput', index);
+        break;
+      case 'change-title':
+        showInputDialog(context, 'bookNameInput', index);
+        break;
+      case 'delete':
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: AlertDialog(
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                title: Text(images[index].title),
+                content: const Text("Вы уверены, что хотите удалить книгу?"),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Закрыть диалоговое окно
+                    },
+                    child: const TextForTable(
+                      text: "Отмена",
+                      textColor: MyColors.black,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Выполните удаление элемента
+                      delDataFromLocalStorage('booksKey', images[index].fileName);
+                      delTextFromLocalStorage('textKey', images[index].fileName);
+                      images.removeAt(index);
+                      setState(() {});
+                      Navigator.of(context).pop(); // Закрыть диалоговое окно
+                    },
+                    child: const Text(
+                      "Удалить",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -386,8 +492,12 @@ class RecentPageState extends State<RecentPage> {
                         }
                       }
                     },
+                    onTapDown: (position) {
+                      _getTapPosition(position);
+                    },
                     onLongPress: () {
-                      onTapLongPressOne(context, index);
+                      // onTapLongPressOne(context, index);
+                      _showBlurMenu(context, index);
                     },
                     child: Column(
                       children: [

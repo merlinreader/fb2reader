@@ -41,9 +41,7 @@ class MySettings extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepPurple,
-            background: const Color.fromRGBO(250, 250, 250, 1)),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, background: const Color.fromRGBO(250, 250, 250, 1)),
         useMaterial3: true,
       ),
       home: const SettingsPage(),
@@ -85,10 +83,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    final backgroundColorFromStorage =
-        await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
-    final textColorFromStorage =
-        await _colorProvider.getColor(ColorKeys.readerTextColor);
+    final backgroundColorFromStorage = await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
+    final textColorFromStorage = await _colorProvider.getColor(ColorKeys.readerTextColor);
     setState(() {
       isChecked = prefs.getBool('isDarkTheme') ?? false;
       fontSize = prefs.getDouble('fontSize') ?? 18;
@@ -241,19 +237,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   child: SliderTheme(
                     data: SliderThemeData(
                       trackHeight: 5.0,
-                      thumbShape:
-                          const RoundSliderThumbShape(enabledThumbRadius: 10.0),
-                      overlayShape:
-                          const RoundSliderOverlayShape(overlayRadius: 20.0),
-                      thumbColor: isDarkTheme
-                          ? MyColors.white
-                          : const Color.fromRGBO(29, 29, 33, 1),
-                      activeTrackColor: isDarkTheme
-                          ? MyColors.white
-                          : const Color.fromRGBO(29, 29, 33, 1),
-                      inactiveTrackColor: isDarkTheme
-                          ? const Color.fromRGBO(96, 96, 96, 1)
-                          : const Color.fromRGBO(96, 96, 96, 1),
+                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0),
+                      thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                      activeTrackColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                      inactiveTrackColor: isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
                     ),
                     child: Slider(
                       value: fontSize,
@@ -278,20 +266,12 @@ class _SettingsPageState extends State<SettingsPage> {
                     margin: const EdgeInsets.only(right: 10),
                     child: SliderTheme(
                         data: SliderThemeData(
-                          trackHeight: 5.0,
-                          thumbShape: const RoundSliderThumbShape(
-                              enabledThumbRadius: 10.0),
-                          overlayShape: const RoundSliderOverlayShape(
-                              overlayRadius: 20.0),
-                          thumbColor: isDarkTheme
-                              ? MyColors.white
-                              : const Color.fromRGBO(29, 29, 33, 1),
-                          activeTrackColor: isDarkTheme
-                              ? MyColors.white
-                              : const Color.fromRGBO(29, 29, 33, 1),
-                          inactiveTrackColor: isDarkTheme
-                              ? const Color.fromRGBO(96, 96, 96, 1)
-                              : const Color.fromRGBO(96, 96, 96, 1),
+                          trackHeight: 7.0,
+                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0),
+                          thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                          activeTrackColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                          inactiveTrackColor: isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
                         ),
                         child: Slider(
                             value: brightness,
@@ -326,8 +306,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment
-                      .spaceBetween, // Этот атрибут прижмет дочерние элементы к краям
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Этот атрибут прижмет дочерние элементы к краям
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -341,12 +320,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               .map((color) => (CustomCheckbox(
                                     isChecked: color == currentTextColor,
                                     bgColor: color,
-                                    borderColor:
-                                        Theme.of(context).iconTheme.color ??
-                                            MyColors.white,
-                                    iconColor: color == MyColors.black
-                                        ? MyColors.white
-                                        : MyColors.black,
+                                    borderColor: Theme.of(context).iconTheme.color ?? MyColors.white,
+                                    iconColor: color == MyColors.black ? MyColors.white : MyColors.black,
                                     onChanged: (newValue) {
                                       setState(() {
                                         if (currentTextColor == color) {
@@ -354,8 +329,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         }
                                         if (currentBackgroundColor != color) {
                                           currentTextColor = color;
-                                          _colorProvider.setColor(
-                                              ColorKeys.readerTextColor, color);
+                                          _colorProvider.setColor(ColorKeys.readerTextColor, color);
                                         } else {
                                           Fluttertoast.showToast(
                                             msg: 'Цвета совпадают',
@@ -382,12 +356,8 @@ class _SettingsPageState extends State<SettingsPage> {
                               .map((color) => (CustomCheckbox(
                                     isChecked: color == currentBackgroundColor,
                                     bgColor: color,
-                                    borderColor:
-                                        Theme.of(context).iconTheme.color ??
-                                            MyColors.white,
-                                    iconColor: color == MyColors.black
-                                        ? MyColors.white
-                                        : MyColors.black,
+                                    borderColor: Theme.of(context).iconTheme.color ?? MyColors.white,
+                                    iconColor: color == MyColors.black ? MyColors.white : MyColors.black,
                                     onChanged: (newValue) {
                                       setState(() {
                                         if (currentBackgroundColor == color) {
@@ -395,16 +365,12 @@ class _SettingsPageState extends State<SettingsPage> {
                                         }
                                         if (currentTextColor != color) {
                                           currentBackgroundColor = color;
-                                          _colorProvider.setColor(
-                                              ColorKeys.readerBackgroundColor,
-                                              color);
+                                          _colorProvider.setColor(ColorKeys.readerBackgroundColor, color);
                                         } else {
                                           Fluttertoast.showToast(
                                             msg: 'Цвета совпадают',
-                                            toastLength: Toast
-                                                .LENGTH_SHORT, // Длительность отображения
-                                            gravity: ToastGravity
-                                                .BOTTOM, // Расположение уведомления
+                                            toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                                            gravity: ToastGravity.BOTTOM, // Расположение уведомления
                                           );
                                         }
                                       });
@@ -439,8 +405,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               color: currentTextColor,
                               fontFamily: 'Roboto',
                               fontSize: fontSize,
-                              fontWeight:
-                                  FontWeight.normal, /*PERCENT not supported*/
+                              fontWeight: FontWeight.normal, /*PERCENT not supported*/
                             ),
                           )),
                         ])))

@@ -1544,7 +1544,7 @@ class Reader extends State {
                 right: 0,
                 child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
-                    height: visible ? 90 : 0,
+                    height: visible ? 100 : 0,
                     child: Container(
                         alignment: AlignmentDirectional.topEnd,
                         color: Theme.of(context).colorScheme.primary,
@@ -1552,7 +1552,7 @@ class Reader extends State {
                           children: [
                             _scrollController.hasClients
                                 ? Padding(
-                                    padding: const EdgeInsets.fromLTRB(8, 0, 28, 0),
+                                    padding: const EdgeInsets.fromLTRB(8, 0, 28, 4),
                                     child: SliderTheme(
                                       data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
                                       child: Row(
@@ -1614,6 +1614,16 @@ class Reader extends State {
                                     ),
                                   )
                                 : const Text("Загрузка..."),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: 2,
+                                child: Container(
+                                  color: isDarkTheme ? MyColors.darkGray : MyColors.black,
+                                ),
+                              ),
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
