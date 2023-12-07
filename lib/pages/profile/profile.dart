@@ -425,8 +425,9 @@ class _ProfilePage extends State<ProfilePage> {
                           onPressed: () {
                             // print(words);
                             // print('Added 5 words');
-                            _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
-                            // saveWordsToLocalStorage(words + 5);
+                            // _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
+                            // saveWordsToLocalStorage(100);
+                            saveWordsToLocalStorage(words + 5);
                             Fluttertoast.showToast(msg: 'Вам доступно $words слов', toastLength: Toast.LENGTH_LONG);
                             // print(words);
                             // Navigator.pushNamed(context, RouteNames.rewardedAd);

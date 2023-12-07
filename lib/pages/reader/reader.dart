@@ -467,10 +467,18 @@ class Reader extends State {
       print('Ищем слово: ${entry.word}');
 
       // Создаем регулярное выражение для поиска слова в тексте
-      final wordRegExp = RegExp(entry.word, caseSensitive: false, unicode: true);
+      final wordRegExp = RegExp("\\b${entry.word}\\b", caseSensitive: false, unicode: true);
+      // final wordRegExp = RegExp(entry.word, caseSensitive: false, unicode: true);
 
       // Ищем совпадения и заменяем каждое из них
-      updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
+      updatedText = updatedText.replaceAllMapped(entry.word, (match) {
+        // Выводим найденные совпадения
+        final matchedWord = match.group(0)!;
+        print('Найдено совпадение: $matchedWord');
+        // Заменяем слово, сохраняя исходный регистр
+        return matchCase(matchedWord, entry.translation ?? '');
+      });
+      updatedText = updatedText.replaceAllMapped(entry.word[0].toUpperCase() + entry.word.substring(1).toLowerCase(), (match) {
         // Выводим найденные совпадения
         final matchedWord = match.group(0)!;
         print('Найдено совпадение: $matchedWord');
@@ -489,15 +497,20 @@ class Reader extends State {
   }
 
   String matchCase(String source, String pattern) {
+    print('source $source');
+    print('pattern $pattern');
     // Сохраняем регистр первой буквы исходного слова
     if (source[0] == source[0].toUpperCase()) {
+      print('большая буква');
       return pattern[0].toUpperCase() + pattern.substring(1).toLowerCase();
     }
     // Если весь текст в верхнем регистре - перевод тоже
     if (source.toUpperCase() == source) {
+      print('Если весь текст в верхнем регистре - перевод тоже');
       return pattern.toUpperCase();
     }
     // Иначе возвращаем перевод в нижнем регистре
+    print('Иначе возвращаем перевод в нижнем регистре');
     return pattern.toLowerCase();
   }
 
@@ -904,124 +917,146 @@ class Reader extends State {
                   Navigator.pop(context);
                   return const SizedBox.shrink();
                 }
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height * 0.8,
-                    ),
-                    child: ListView(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.all(0),
-                      children: <Widget>[
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          color: Colors.transparent,
-                          child: Card(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: <Widget>[
-                                IconButton(
-                                  alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                  icon: const Icon(Icons.close),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(bottom: 20),
-                                  child: Center(
-                                    child: Text24(
-                                      text: 'Изучаемые слова',
-                                      textColor: MyColors.black,
-                                    ),
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.6,
+                  ),
+                  child: Column(
+                    // shrinkWrap: true,
+                    // padding: const EdgeInsets.all(0),
+                    children: <Widget>[
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        color: Colors.transparent,
+                        child: Card(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              IconButton(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                icon: const Icon(Icons.close),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.only(bottom: 20),
+                                child: Center(
+                                  child: Text24(
+                                    text: 'Изучаемые слова',
+                                    textColor: MyColors.black,
                                   ),
                                 ),
-                                DataTable(
-                                  columnSpacing: 38.0,
-                                  showBottomBorder: false,
-                                  dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                                  columns: const [
-                                    DataColumn(
-                                      label: Expanded(
-                                        child: Text16(
-                                          text: 'Слово',
-                                          textColor: MyColors.black,
-                                        ),
+                              ),
+                              DataTable(
+                                columnSpacing: 38.0,
+                                showBottomBorder: false,
+                                dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                columns: const [
+                                  DataColumn(
+                                    label: Expanded(
+                                      child: Text16(
+                                        text: 'Слово',
+                                        textColor: MyColors.black,
                                       ),
                                     ),
-                                    DataColumn(
-                                      label: Expanded(
-                                        child: Text16(
-                                          text: 'Произношение',
-                                          textColor: MyColors.black,
-                                        ),
+                                  ),
+                                  DataColumn(
+                                    label: Expanded(
+                                      child: Text16(
+                                        text: 'Произношение',
+                                        textColor: MyColors.black,
                                       ),
                                     ),
-                                    DataColumn(
-                                      label: Expanded(
-                                        child: Text16(
-                                          text: 'Перевод',
-                                          textColor: MyColors.black,
-                                        ),
+                                  ),
+                                  DataColumn(
+                                    label: Expanded(
+                                      child: Text16(
+                                        text: 'Перевод',
+                                        textColor: MyColors.black,
                                       ),
                                     ),
-                                  ],
-                                  rows: wordCount.wordEntries.map((entry) {
-                                    return DataRow(
-                                      cells: [
-                                        DataCell(
-                                          ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
-                                            ),
-                                            child: TextForTable(
-                                              text: entry.word,
-                                              textColor: MyColors.black,
+                                  ),
+                                ],
+                                rows: [],
+                              ),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.vertical,
+                                  child: DataTable(
+                                    headingRowHeight: 0,
+                                    columns: const [
+                                      DataColumn(
+                                        label: Text(
+                                          ' ',
+                                          style: TextStyle(fontSize: 1),
+                                        ),
+                                      ),
+                                      DataColumn(
+                                        label: Text(' ', style: TextStyle(fontSize: 1)),
+                                      ),
+                                      DataColumn(
+                                        label: Text(' ', style: TextStyle(fontSize: 1)),
+                                      ),
+                                    ],
+                                    rows: wordCount.wordEntries.map((entry) {
+                                      return DataRow(
+                                        cells: [
+                                          DataCell(
+                                            ConstrainedBox(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                              ),
+                                              child: TextForTable(
+                                                text: entry.word,
+                                                textColor: MyColors.black,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        DataCell(
-                                          ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
-                                            ),
-                                            child: TextForTable(
-                                              text: '[ ${entry.ipa} ]',
-                                              textColor: MyColors.black,
-                                            ),
-                                          ),
-                                        ),
-                                        DataCell(
-                                          ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width * 0.25,
-                                            ),
-                                            child: TextForTable(
-                                              text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                              textColor: MyColors.black,
+                                          DataCell(
+                                            ConstrainedBox(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                              ),
+                                              child: TextForTable(
+                                                text: '[ ${entry.ipa} ]',
+                                                textColor: MyColors.black,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ],
-                                    );
-                                  }).toList(),
+                                          DataCell(
+                                            ConstrainedBox(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context).size.width * 0.25,
+                                              ),
+                                              child: TextForTable(
+                                                text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    }).toList(),
+                                  ),
                                 ),
-                                // TextButton(
-                                //     onPressed: () {
-                                //       Navigator.pop(context);
-                                //     },
-                                //     child: const Text16(
-                                //       text: 'Закрыть',
-                                //       textColor: MyColors.black,
-                                //     ))
-                              ],
-                            ),
+                              )
+                              // TextButton(
+                              //     onPressed: () {
+                              //       Navigator.pop(context);
+                              //     },
+                              //     child: const Text16(
+                              //       text: 'Закрыть',
+                              //       textColor: MyColors.black,
+                              //     ))
+                            ],
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               } else {
