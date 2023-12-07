@@ -35,8 +35,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
   Future<void> fetchJson() async {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
-    final url =
-        Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
+    final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer $token'},
@@ -84,20 +83,15 @@ class _AchievementsPageState extends State<AchievementsPage> {
                     ? Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextTektur(
-                                text: "Авторизуйтесь, чтобы открыть достижения",
-                                fontsize: 16,
-                                textColor: MyColors.grey)
-                          ],
+                          children: [TextTektur(text: "Авторизуйтесь, чтобы открыть достижения", fontsize: 16, textColor: MyColors.grey)],
                         ),
                       )
-                    : ListView(
-                        children: [
-                          ..._achievements
-                              .map((e) => AchievementCard(achievement: e))
-                              .toList()
-                        ],
+                    : ListView.separated(
+                        itemCount: _achievements.length,
+                        itemBuilder: ((context, index) => AchievementCard(achievement: _achievements[index])),
+                        separatorBuilder: (context, index) => const SizedBox(
+                          height: 8,
+                        ),
                       ))
       ],
     );
