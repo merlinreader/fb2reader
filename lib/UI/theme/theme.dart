@@ -14,60 +14,25 @@ ThemeData darkTheme() => ThemeData(
         onBackground: Colors.black,
         surface: MyColors.blackGray,
         onSurface: Colors.white,
-        scrim: Colors.blue),
+        scrim: MyColors.grayAch),
     textTheme: const TextTheme(
         //text24
-        titleLarge: TextStyle(
-            color: MyColors.bgWhite,
-            fontFamily: 'Tektur',
-            fontSize: 24,
-            fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 24, fontWeight: FontWeight.bold),
         //text20
-        labelMedium: TextStyle(
-            color: MyColors.bgWhite,
-            fontFamily: 'Tektur',
-            fontSize: 20,
-            fontWeight: FontWeight.bold),
+        labelMedium: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 20, fontWeight: FontWeight.bold),
         //Text11
-        bodySmall: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.bgWhite,
-            fontSize: 11,
-            fontWeight: FontWeight.bold),
+        bodySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 11, fontWeight: FontWeight.bold),
         //Text14
-        bodyLarge: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.bgWhite,
-            fontSize: 14,
-            fontWeight: FontWeight.normal),
+        bodyLarge: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 14, fontWeight: FontWeight.normal),
         //Text18
-        titleMedium: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.bgWhite,
-            fontSize: 18,
-            fontWeight: FontWeight.normal),
+        titleMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 18, fontWeight: FontWeight.normal),
         //Text12
-        titleSmall: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.bgWhite,
-            fontSize: 12,
-            fontWeight: FontWeight.normal),
+        titleSmall: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 12, fontWeight: FontWeight.normal),
         //Text7
-        displaySmall: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.black,
-            fontSize: 7,
-            fontWeight: FontWeight.normal),
+        displaySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 7, fontWeight: FontWeight.normal),
         //Text16
-        displayMedium: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.bgWhite,
-            fontSize: 16,
-            fontWeight: FontWeight.bold),
-        bodyMedium: TextStyle(
-            fontFamily: 'Roboto',
-            color: MyColors.bgWhite,
-            fontWeight: FontWeight.normal)),
+        displayMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 16, fontWeight: FontWeight.bold),
+        bodyMedium: TextStyle(fontFamily: 'Roboto', color: MyColors.bgWhite, fontWeight: FontWeight.normal)),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -76,16 +41,13 @@ ThemeData darkTheme() => ThemeData(
             ),
           ),
           backgroundColor: const MaterialStatePropertyAll(MyColors.blackBt),
-          textStyle:
-              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+          textStyle: const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ),
     iconTheme: const IconThemeData(color: MyColors.white),
     //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
     dataTableTheme: DataTableThemeData(
-      headingRowColor:
-          MaterialStateColor.resolveWith((states) => MyColors.darkGray),
-      dataRowColor:
-          MaterialStateColor.resolveWith((states) => MyColors.darkGray),
+      headingRowColor: MaterialStateColor.resolveWith((states) => MyColors.darkGray),
+      dataRowColor: MaterialStateColor.resolveWith((states) => MyColors.darkGray),
     ));
 
 ThemeData purpleButton() => ThemeData(
@@ -98,8 +60,7 @@ ThemeData purpleButton() => ThemeData(
           ),
           elevation: null,
           backgroundColor: const MaterialStatePropertyAll(MyColors.purple),
-          textStyle:
-              const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
+          textStyle: const MaterialStatePropertyAll(TextStyle(color: MyColors.white))),
     ));
 
 ThemeData grayButton() => ThemeData(
@@ -111,8 +72,7 @@ ThemeData grayButton() => ThemeData(
           ),
         ),
         elevation: null,
-        backgroundColor:
-            MaterialStatePropertyAll(MyColors.grey.withOpacity(0.3)),
+        backgroundColor: MaterialStatePropertyAll(MyColors.grey.withOpacity(0.3)),
       ),
     ));
 
@@ -129,60 +89,25 @@ ThemeData lightTheme() => ThemeData(
         onBackground: Colors.black,
         surface: MyColors.blackGray,
         onSurface: Colors.black,
-        scrim: Colors.blue),
+        scrim: MyColors.whiteAch),
     textTheme: const TextTheme(
         //text24
-        titleLarge: TextStyle(
-            color: MyColors.black,
-            fontFamily: 'Tektur',
-            fontSize: 24,
-            fontWeight: FontWeight.bold),
+        titleLarge: TextStyle(color: MyColors.black, fontFamily: 'Tektur', fontSize: 24, fontWeight: FontWeight.bold),
         //Text11
-        bodySmall: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.black,
-            fontSize: 11,
-            fontWeight: FontWeight.bold),
+        bodySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 11, fontWeight: FontWeight.bold),
         //Text14
-        bodyLarge: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.black,
-            fontSize: 14,
-            fontWeight: FontWeight.normal),
+        bodyLarge: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 14, fontWeight: FontWeight.normal),
         //Text18
-        titleMedium: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.normal),
+        titleMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 18, fontWeight: FontWeight.normal),
         //text20
-        labelMedium: TextStyle(
-            color: MyColors.bgWhite,
-            fontFamily: 'Tektur',
-            fontSize: 20,
-            fontWeight: FontWeight.bold),
+        labelMedium: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 20, fontWeight: FontWeight.bold),
         //Text12
-        titleSmall: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.black,
-            fontSize: 12,
-            fontWeight: FontWeight.normal),
+        titleSmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 12, fontWeight: FontWeight.normal),
         //Text7
-        displaySmall: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.bgWhite,
-            fontSize: 7,
-            fontWeight: FontWeight.normal),
+        displaySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 7, fontWeight: FontWeight.normal),
         //Text16
-        displayMedium: TextStyle(
-            fontFamily: 'Tektur',
-            color: MyColors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.bold),
-        bodyMedium: TextStyle(
-            fontFamily: 'Roboto',
-            color: MyColors.black,
-            fontWeight: FontWeight.normal)),
+        displayMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 16, fontWeight: FontWeight.bold),
+        bodyMedium: TextStyle(fontFamily: 'Roboto', color: MyColors.black, fontWeight: FontWeight.normal)),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -191,14 +116,12 @@ ThemeData lightTheme() => ThemeData(
             ),
           ),
           backgroundColor: const MaterialStatePropertyAll(MyColors.bgWhite),
-          textStyle:
-              const MaterialStatePropertyAll(TextStyle(color: MyColors.black))),
+          textStyle: const MaterialStatePropertyAll(TextStyle(color: MyColors.black))),
     ),
     iconTheme: const IconThemeData(color: MyColors.black),
     //dataTableTheme: DataTableThemeData(headingCellCursor: MaterialStateColor.resolveWith(states){return MyColors.darkGray;})
     dataTableTheme: DataTableThemeData(
-      headingRowColor:
-          MaterialStateColor.resolveWith((states) => MyColors.white),
+      headingRowColor: MaterialStateColor.resolveWith((states) => MyColors.white),
       dataRowColor: MaterialStateColor.resolveWith((states) => MyColors.white),
     ));
 

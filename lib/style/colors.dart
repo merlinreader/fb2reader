@@ -12,4 +12,6 @@ class MyColors {
   static const Color darkGray = Color.fromRGBO(55, 55, 56, 1);
   static const Color blackBt = Color.fromRGBO(21, 21, 21, 1);
   static const Color lightGray = Color.fromRGBO(233, 233, 233, 1);
+  static const Color grayAch = Color.fromRGBO(74, 74, 74, 1);
+  static const Color whiteAch = Color.fromRGBO(240, 242, 244, 1);
 }
