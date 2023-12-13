@@ -181,7 +181,7 @@ class _SettingsPageState extends State<SettingsPage> {
           style: TextStyle(
             color: Theme.of(context).iconTheme.color,
             fontFamily: 'Tektur',
-            fontSize: 16,
+            fontSize: 24,
           ),
         ),
       ),
@@ -299,7 +299,7 @@ class _SettingsPageState extends State<SettingsPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text18(
+                Text24(
                   text: "Настраиваемая тема",
                   //fontsize: 18,
                   textColor: themeTextColor,

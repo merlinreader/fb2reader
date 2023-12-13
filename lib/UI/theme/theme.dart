@@ -32,7 +32,8 @@ ThemeData darkTheme() => ThemeData(
         displaySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 7, fontWeight: FontWeight.normal),
         //Text16
         displayMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 16, fontWeight: FontWeight.bold),
-        bodyMedium: TextStyle(fontFamily: 'Roboto', color: MyColors.bgWhite, fontWeight: FontWeight.normal)),
+        bodyMedium: TextStyle(fontFamily: 'Roboto', color: MyColors.bgWhite, fontWeight: FontWeight.normal),
+        headlineSmall: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 15, fontWeight: FontWeight.bold)),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -107,7 +108,8 @@ ThemeData lightTheme() => ThemeData(
         displaySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 7, fontWeight: FontWeight.normal),
         //Text16
         displayMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 16, fontWeight: FontWeight.bold),
-        bodyMedium: TextStyle(fontFamily: 'Roboto', color: MyColors.black, fontWeight: FontWeight.normal)),
+        bodyMedium: TextStyle(fontFamily: 'Roboto', color: MyColors.black, fontWeight: FontWeight.normal),
+        headlineSmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 15, fontWeight: FontWeight.bold)),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ButtonStyle(
           shape: MaterialStateProperty.all<RoundedRectangleBorder>(

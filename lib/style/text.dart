@@ -30,6 +30,20 @@ class Text14 extends StatelessWidget {
   }
 }
 
+class Text15 extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const Text15({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text, style: Theme.of(context).textTheme.headlineSmall,
+      textAlign: TextAlign.center,
+      //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 15)
+    );
+  }
+}
+
 class Text12 extends StatelessWidget {
   final String text;
   final Color textColor;
@@ -101,9 +115,7 @@ class TextForTable extends StatelessWidget {
   const TextForTable({super.key, required this.text, required this.textColor});
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        style: Theme.of(context).textTheme.bodyMedium,
-        textAlign: TextAlign.start
+    return Text(text, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.start
         //TextStyle(fontFamily: 'Roboto', color: textColor)
         );
   }
@@ -127,12 +139,7 @@ class Text11Bold extends StatelessWidget {
   const Text11Bold({super.key, required this.text, required this.textColor});
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        style: TextStyle(
-            fontFamily: 'Tektur',
-            color: textColor,
-            fontSize: 11,
-            fontWeight: FontWeight.bold));
+    return Text(text, style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 11, fontWeight: FontWeight.bold));
   }
 }
 
@@ -158,19 +165,9 @@ class TextTektur extends StatelessWidget {
   final Color textColor;
   final double fontsize;
   FontWeight? fontWeight;
-  TextTektur(
-      {super.key,
-      required this.text,
-      required this.fontsize,
-      required this.textColor,
-      this.fontWeight});
+  TextTektur({super.key, required this.text, required this.fontsize, required this.textColor, this.fontWeight});
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        style: TextStyle(
-            fontFamily: 'Tektur',
-            color: textColor,
-            fontSize: fontsize,
-            fontWeight: fontWeight));
+    return Text(text, style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: fontsize, fontWeight: fontWeight));
   }
 }

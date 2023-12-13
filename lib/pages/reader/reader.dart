@@ -127,7 +127,7 @@ class Reader extends State {
       setState(() {
         isTrans;
       });
-      if (isTrans != null && isTrans == true) {
+      if (isTrans != null && isTrans == true && isBorder == true) {
         var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
         replaceWordsWithTranslation(temp.wordEntries);
       }
@@ -590,7 +590,7 @@ class Reader extends State {
                                   columns: const [
                                     DataColumn(
                                       label: Expanded(
-                                        child: Text16(
+                                        child: Text15(
                                           text: 'Слово',
                                           textColor: MyColors.black,
                                         ),
@@ -598,7 +598,7 @@ class Reader extends State {
                                     ),
                                     DataColumn(
                                       label: Expanded(
-                                        child: Text16(
+                                        child: Text15(
                                           text: 'Произношение',
                                           textColor: MyColors.black,
                                         ),
@@ -606,7 +606,7 @@ class Reader extends State {
                                     ),
                                     DataColumn(
                                       label: Expanded(
-                                        child: Text16(
+                                        child: Text15(
                                           text: 'Перевод',
                                           textColor: MyColors.black,
                                         ),
@@ -782,7 +782,7 @@ class Reader extends State {
                               columns: const [
                                 DataColumn(
                                   label: Expanded(
-                                    child: Text16(
+                                    child: Text15(
                                       text: 'Слово',
                                       textColor: MyColors.black,
                                     ),
@@ -790,7 +790,7 @@ class Reader extends State {
                                 ),
                                 DataColumn(
                                   label: Expanded(
-                                    child: Text16(
+                                    child: Text15(
                                       text: 'Произношение',
                                       textColor: MyColors.black,
                                     ),
@@ -798,7 +798,7 @@ class Reader extends State {
                                 ),
                                 DataColumn(
                                   label: Expanded(
-                                    child: Text16(
+                                    child: Text15(
                                       text: 'Перевод',
                                       textColor: MyColors.black,
                                     ),
@@ -958,7 +958,7 @@ class Reader extends State {
                                 columns: const [
                                   DataColumn(
                                     label: Expanded(
-                                      child: Text16(
+                                      child: Text15(
                                         text: 'Слово',
                                         textColor: MyColors.black,
                                       ),
@@ -966,7 +966,7 @@ class Reader extends State {
                                   ),
                                   DataColumn(
                                     label: Expanded(
-                                      child: Text16(
+                                      child: Text15(
                                         text: 'Произношение',
                                         textColor: MyColors.black,
                                       ),
@@ -974,7 +974,7 @@ class Reader extends State {
                                   ),
                                   DataColumn(
                                     label: Expanded(
-                                      child: Text16(
+                                      child: Text15(
                                         text: 'Перевод',
                                         textColor: MyColors.black,
                                       ),
@@ -1340,12 +1340,12 @@ class Reader extends State {
             decoration: BoxDecoration(
                 color: backgroundColor,
                 border: isBorder == true
-                    ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 4)
+                    ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 2)
                     : Border.all(width: 0, color: Colors.transparent)),
             child: Stack(children: [
               SafeArea(
                 top: false,
-                minimum: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                 child: ListView.builder(
                     controller: _scrollController,
                     itemCount: 1,
@@ -1378,7 +1378,7 @@ class Reader extends State {
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
                     // Скролл вниз / следующая страница
-                    _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.8,
+                    _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.92,
                         duration: const Duration(milliseconds: 250), curve: Curves.ease);
                   },
                   child: Padding(
@@ -1459,7 +1459,7 @@ class Reader extends State {
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
                       // Сролл вверх / предыдущая страница
-                      _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.8,
+                      _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.92,
                           duration: const Duration(milliseconds: 250), curve: Curves.ease);
                     },
                     child: IgnorePointer(
@@ -1514,8 +1514,8 @@ class Reader extends State {
                                 alignment: Alignment.topCenter,
                                 child: Text12(
                                   text: textes.isNotEmpty
-                                      ? (textes[0].title.toString().length > 28
-                                          ? '${textes[0].title.toString().substring(0, 28)}...'
+                                      ? (textes[0].title.toString().length > 30
+                                          ? '${textes[0].title.toString().substring(0, 30)}...'
                                           : textes[0].title.toString())
                                       : 'Нет названия',
                                   textColor: MyColors.black,
@@ -1529,7 +1529,7 @@ class Reader extends State {
                               width: MediaQuery.of(context).size.width / 8,
                               alignment: Alignment.topRight,
                               child: Text12(
-                                text: '${_scrollPosition.toStringAsFixed(2)}%',
+                                text: '${_scrollPosition.toStringAsFixed(1)}%',
                                 textColor: MyColors.black,
                               ),
                             ),
@@ -1559,53 +1559,60 @@ class Reader extends State {
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
                                           Expanded(
-                                            child: Slider(
-                                              value: position != 0
-                                                  ? position > _scrollController.position.maxScrollExtent
-                                                      ? _scrollController.position.maxScrollExtent
-                                                      : position
-                                                  : _scrollController.position.pixels,
-                                              min: 0,
-                                              max: _scrollController.position.maxScrollExtent,
-                                              label: visible
-                                                  ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 3)}%"
-                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
-                                                          : "0.00%"
-                                                  : "",
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  position = value;
-                                                });
-                                                if (_actionTimer?.isActive ?? false) {
+                                            child: SliderTheme(
+                                              data: const SliderThemeData(
+                                                  trackHeight: 3,
+                                                  thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                  trackShape: RectangularSliderTrackShape()),
+                                              child: Slider(
+                                                value: position != 0
+                                                    ? position > _scrollController.position.maxScrollExtent
+                                                        ? _scrollController.position.maxScrollExtent
+                                                        : position
+                                                    : _scrollController.position.pixels,
+                                                min: 0,
+                                                max: _scrollController.position.maxScrollExtent,
+                                                label: visible
+                                                    ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                        : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : "0.0%"
+                                                    : "",
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    position = value;
+                                                  });
+                                                  if (_actionTimer?.isActive ?? false) {
+                                                    _actionTimer?.cancel();
+                                                  }
+                                                  _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                    _scrollController.jumpTo(value);
+                                                  });
+                                                },
+                                                onChangeEnd: (value) {
                                                   _actionTimer?.cancel();
-                                                }
-                                                _actionTimer = Timer(const Duration(milliseconds: 250), () {
-                                                  _scrollController.jumpTo(value);
-                                                });
-                                              },
-                                              onChangeEnd: (value) {
-                                                _actionTimer?.cancel();
-                                                if (value != _scrollController.position.pixels) {
-                                                  _scrollController.jumpTo(value);
-                                                }
-                                              },
-                                              activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                              inactiveColor: isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
-                                              thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                  if (value != _scrollController.position.pixels) {
+                                                    _scrollController.jumpTo(value);
+                                                  }
+                                                },
+                                                activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                inactiveColor:
+                                                    isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
+                                                thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                              ),
                                             ),
                                           ),
                                           Container(
-                                            width: MediaQuery.of(context).size.width / 12,
+                                            width: MediaQuery.of(context).size.width / 11,
                                             alignment: Alignment.center,
                                             child: Text11(
                                                 text: visible
                                                     ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 3)}%"
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
                                                         : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toString().substring(0, 4)}%"
-                                                            : "0.00%"
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : "0.0%"
                                                     : "",
                                                 textColor: MyColors.darkGray),
                                           )
