@@ -71,8 +71,10 @@ class RecentPageState extends State<RecentPage> {
       SystemUiMode.manual,
       overlays: [
         SystemUiOverlay.top,
+        SystemUiOverlay.bottom,
       ],
     );
+
     super.initState();
 
     getDataFromLocalStorage('booksKey');
