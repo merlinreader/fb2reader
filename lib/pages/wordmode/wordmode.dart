@@ -108,11 +108,8 @@ class WordCount {
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
       // if (timeElapsed.inHours >= 24) {
       if (timeElapsed.inMicroseconds >= 1) {
-        if (confirm == false) {
-          await countWordsWithOffset();
-        } else {
-          await countWordsWithOffsetNoTrans();
-        }
+        await countWordsWithOffset();
+
         await updateCallInfo();
       } else {
         Fluttertoast.showToast(
