@@ -98,7 +98,7 @@ class WordCount {
     return 'N/A';
   }
 
-  Future<void> checkCallInfo() async {
+  Future<void> checkCallInfo(bool confirm) async {
     await loadCallInfo();
 
     if (_lastCallTimestamp != null) {
@@ -108,7 +108,11 @@ class WordCount {
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
       // if (timeElapsed.inHours >= 24) {
       if (timeElapsed.inMicroseconds >= 1) {
-        await countWordsWithOffset();
+        if (confirm == false) {
+          await countWordsWithOffset();
+        } else {
+          await countWordsWithOffsetNoTrans();
+        }
         await updateCallInfo();
       } else {
         Fluttertoast.showToast(
@@ -122,6 +126,26 @@ class WordCount {
       await countWordsWithOffset();
       await updateCallInfo();
     }
+  }
+
+  Map<String, int> getAllWordCounts() {
+    final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+    final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+
+    final wordCounts = <String, int>{};
+
+    for (final word in words) {
+      final normalizedWord = word.toLowerCase();
+      if (normalizedWord.length > 1 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
+        if (wordCounts.containsKey(normalizedWord)) {
+          wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
+        } else {
+          wordCounts[normalizedWord] = 1;
+        }
+      }
+    }
+
+    return wordCounts;
   }
 
   List<String> getAllWords() {
@@ -266,6 +290,54 @@ class WordCount {
     this.wordEntries = wordEntries;
   }
 
+  Future<void> countWordsWithOffsetNoTrans() async {
+    final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+    final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+
+    final wordCounts = <String, int>{};
+
+    for (final word in words) {
+      final normalizedWord = word.toLowerCase();
+      if (normalizedWord.length > 3 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
+        if (wordCounts.containsKey(normalizedWord)) {
+          wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
+        } else {
+          wordCounts[normalizedWord] = 1;
+        }
+      }
+    }
+
+    final sortedWordCounts = wordCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+
+    final prefs = await SharedPreferences.getInstance();
+    int getWords = prefs.getInt('words') ?? 10;
+    int start = prefs.getInt('$filePath-end') ?? 0;
+    int end = prefs.getInt('$filePath-end') ?? getWords;
+
+    print('getWords = $getWords');
+
+    // Убедимся, что конец в пределах допустимого
+    end = end + getWords;
+    end = min(end, sortedWordCounts.length);
+
+    print('start = $start');
+    print('end = $end');
+    print('end - start = ${end - start}');
+
+    print('sortedWordCounts.length = ${sortedWordCounts.length}');
+    List<WordEntry> wordEntries = [];
+    for (var i = start; i < end; i++) {
+      final entry = sortedWordCounts[i];
+
+      wordEntries.add(WordEntry(word: entry.key, count: entry.value));
+    }
+    // prefs.setInt('$filePath-start', start);
+    prefs.setInt('$filePath-end', end);
+    prefs.setInt('words', 10);
+    // Присваиваем wordEntries к текущим wordEntries
+    this.wordEntries = wordEntries;
+  }
+
   Future<WordEntry> createWordEntry(String word, int count) async {
     final translation = await translateToEnglish(word);
     final ipaWord = await getIPA(translation);
@@ -313,7 +385,12 @@ class WordCount {
     _callCount = 0;
     _lastCallTimestamp = null;
     final prefs = await SharedPreferences.getInstance();
+
     prefs.setInt('callCount', _callCount);
+
+    int getWords = prefs.getInt('words') ?? 10;
+    prefs.setInt('$filePath-end', 0 + getWords);
+    prefs.setInt('words', 10);
     prefs.remove('lastCallTimestamp');
   }
 }

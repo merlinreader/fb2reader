@@ -514,6 +514,220 @@ class Reader extends State {
     return pattern.toLowerCase();
   }
 
+  showTableDialog(BuildContext context, WordCount wordCount, bool confirm) async {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return FutureBuilder(
+          future: wordCount.checkCallInfo(confirm),
+          builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  color: MyColors.purple,
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return const AlertDialog(
+                content: Text('Произошла ошибка: нет доступа к интернету'),
+              );
+            } else {
+              if (wordCount.wordEntries.isEmpty) {
+                Navigator.pop(context);
+              }
+              return WillPopScope(
+                onWillPop: () async {
+                  // debugPrint("DONE");
+                  await saveWordCountToLocalstorage(wordCount);
+                  return true;
+                },
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.8,
+                    ),
+                    child: ListView(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.all(0),
+                      children: <Widget>[
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          color: Colors.transparent,
+                          child: Card(
+                            child: Column(
+                              children: <Widget>[
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      alignment: Alignment.centerRight,
+                                      padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                      icon: const Icon(Icons.close),
+                                      onPressed: () async {
+                                        // debugPrint("DONE");
+                                        await saveWordCountToLocalstorage(wordCount);
+                                        replaceWordsWithTranslation(wordCount.wordEntries);
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 40),
+                                  child: Center(
+                                    child: Text24(
+                                      text: 'Изучаемые слова',
+                                      textColor: MyColors.black,
+                                    ),
+                                  ),
+                                ),
+                                confirm == false
+                                    ? DataTable(
+                                        columnSpacing: 38.0,
+                                        showBottomBorder: false,
+                                        dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                        columns: const [
+                                          DataColumn(
+                                            label: Flexible(
+                                              child: Text15(
+                                                text: 'Слово',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Flexible(
+                                              child: Text15(
+                                                text: 'Произношение',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Flexible(
+                                              child: Text15(
+                                                text: 'Перевод',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                        rows: wordCount.wordEntries.map((entry) {
+                                          return DataRow(
+                                            cells: [
+                                              DataCell(
+                                                Flexible(
+                                                  child: TextForTable(
+                                                    text: entry.word,
+                                                    textColor: MyColors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              DataCell(
+                                                Flexible(
+                                                  child: TextForTable(
+                                                    text: '[ ${entry.ipa} ]',
+                                                    textColor: MyColors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              DataCell(
+                                                Flexible(
+                                                  child: TextForTable(
+                                                    text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                    textColor: MyColors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        }).toList(),
+                                      )
+                                    : FractionallySizedBox(
+                                        widthFactor: 1.0,
+                                        child: DataTable(
+                                          columnSpacing: 38.0,
+                                          showBottomBorder: false,
+                                          dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                          columns: const [
+                                            DataColumn(
+                                              label: Flexible(
+                                                child: Text15(
+                                                  text: 'Слово',
+                                                  textColor: MyColors.black,
+                                                ),
+                                              ),
+                                            ),
+                                            DataColumn(
+                                              label: Flexible(
+                                                child: Text15(
+                                                  text: 'Количество',
+                                                  textColor: MyColors.black,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          rows: wordCount.wordEntries.map((entry) {
+                                            return DataRow(
+                                              cells: [
+                                                DataCell(
+                                                  Flexible(
+                                                    child: InkWell(
+                                                      onTap: () async {
+                                                        await _showWordInputDialog(entry.word, wordCount.wordEntries);
+                                                        setState(() {
+                                                          entry.word;
+                                                          entry.count;
+                                                        });
+                                                      },
+                                                      child: TextForTable(
+                                                        text: entry.word,
+                                                        textColor: MyColors.black,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                DataCell(
+                                                  Flexible(
+                                                    child: TextForTable(
+                                                      text: '${entry.count}',
+                                                      textColor: MyColors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                // TextButton(
+                                //     onPressed: () async {
+                                //       await saveWordCountToLocalstorage(wordCount);
+                                //       replaceWordsWithTranslation(wordCount.wordEntries);
+                                //       Navigator.pop(context);
+                                //     },
+                                //     child: const Text16(
+                                //       text: 'Сохранить',
+                                //       textColor: MyColors.black,
+                                //     ))
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }
+          },
+        );
+      },
+    );
+  }
+
+  // Облачка
   // Future<void> showTableDialog(BuildContext context, WordCount wordCount) async {
   //   showDialog<void>(
   //     context: context,
@@ -536,141 +750,98 @@ class Reader extends State {
   //             if (wordCount.wordEntries.isEmpty) {
   //               Navigator.pop(context);
   //             }
+
   //             return WillPopScope(
   //               onWillPop: () async {
   //                 // debugPrint("DONE");
   //                 await saveWordCountToLocalstorage(wordCount);
   //                 return true;
   //               },
-  //               child: SingleChildScrollView(
-  //                 child: ConstrainedBox(
-  //                   constraints: BoxConstraints(
-  //                     maxHeight: MediaQuery.of(context).size.height * 0.8,
-  //                   ),
-  //                   child: ListView(
-  //                     shrinkWrap: true,
-  //                     padding: const EdgeInsets.all(0),
-  //                     children: <Widget>[
-  //                       Container(
-  //                         width: MediaQuery.of(context).size.width,
-  //                         color: Colors.transparent,
-  //                         child: Card(
-  //                           child: Column(
-  //                             children: <Widget>[
-  //                               Row(
-  //                                 mainAxisAlignment: MainAxisAlignment.end,
-  //                                 children: [
-  //                                   IconButton(
-  //                                     alignment: Alignment.centerRight,
-  //                                     padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-  //                                     icon: const Icon(Icons.close),
-  //                                     onPressed: () async {
-  //                                       // debugPrint("DONE");
-  //                                       await saveWordCountToLocalstorage(wordCount);
-  //                                       replaceWordsWithTranslation(wordCount.wordEntries);
-  //                                       Navigator.pop(context);
-  //                                     },
-  //                                   ),
-  //                                 ],
-  //                               ),
-  //                               const Padding(
-  //                                 padding: EdgeInsets.only(bottom: 40),
-  //                                 child: Center(
-  //                                   child: Text24(
-  //                                     text: 'Выберите слова',
-  //                                     textColor: MyColors.black,
-  //                                   ),
+  //               child: ConstrainedBox(
+  //                 constraints: BoxConstraints(
+  //                   maxHeight: MediaQuery.of(context).size.height * 0.8,
+  //                 ),
+  //                 child: Column(
+  //                   // shrinkWrap: true,
+  //                   // padding: const EdgeInsets.all(0),
+  //                   children: <Widget>[
+  //                     Container(
+  //                       width: MediaQuery.of(context).size.width,
+  //                       height: MediaQuery.of(context).size.height * 0.5,
+  //                       color: Colors.transparent,
+  //                       child: Card(
+  //                         child: Column(
+  //                           mainAxisAlignment: MainAxisAlignment.start,
+  //                           crossAxisAlignment: CrossAxisAlignment.stretch,
+  //                           children: <Widget>[
+  //                             IconButton(
+  //                               alignment: Alignment.centerRight,
+  //                               padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+  //                               icon: const Icon(Icons.close),
+  //                               onPressed: () async {
+  //                                 // debugPrint("DONE");
+  //                                 await saveWordCountToLocalstorage(wordCount);
+  //                                 replaceWordsWithTranslation(wordCount.wordEntries);
+  //                                 Navigator.pop(context);
+  //                               },
+  //                             ),
+  //                             const Padding(
+  //                               padding: EdgeInsets.only(bottom: 20),
+  //                               child: Center(
+  //                                 child: Text24(
+  //                                   text: 'Частые слова',
+  //                                   textColor: MyColors.black,
   //                                 ),
   //                               ),
-  //                               DataTable(
-  //                                 columnSpacing: 38.0,
-  //                                 showBottomBorder: false,
-  //                                 dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-  //                                 columns: const [
-  //                                   DataColumn(
-  //                                     label: Expanded(
-  //                                       child: Text15(
-  //                                         text: 'Слово',
-  //                                         textColor: MyColors.black,
-  //                                       ),
-  //                                     ),
-  //                                   ),
-  //                                   DataColumn(
-  //                                     label: Expanded(
-  //                                       child: Text15(
-  //                                         text: 'Произношение',
-  //                                         textColor: MyColors.black,
-  //                                       ),
-  //                                     ),
-  //                                   ),
-  //                                   DataColumn(
-  //                                     label: Expanded(
-  //                                       child: Text15(
-  //                                         text: 'Перевод',
-  //                                         textColor: MyColors.black,
-  //                                       ),
-  //                                     ),
-  //                                   ),
-  //                                 ],
-  //                                 rows: wordCount.wordEntries.map((entry) {
-  //                                   return DataRow(
-  //                                     cells: [
-  //                                       DataCell(InkWell(
-  //                                         onTap: () async {
-  //                                           await _showWordInputDialog(entry.word, wordCount.wordEntries);
-  //                                           setState(() {
-  //                                             entry.word;
-  //                                             entry.count;
-  //                                             entry.ipa;
-  //                                           });
-  //                                         },
-  //                                         child: TextForTable(
-  //                                           text: entry.word,
-  //                                           textColor: MyColors.black,
+  //                             ),
+
+  //                             Expanded(
+  //                               child: ListView.builder(
+  //                                 itemCount: wordCount.wordEntries.length,
+  //                                 itemBuilder: (context, index) {
+  //                                   var entry = wordCount.wordEntries[index];
+  //                                   return Container(
+  //                                     height: 70,
+  //                                     width: MediaQuery.of(context).size.width * 0.5, // Adjust width as needed
+  //                                     margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Adjust vertical margin as needed
+  //                                     decoration: BoxDecoration(
+  //                                         color: Colors.transparent,
+  //                                         // borderRadius: BorderRadius.circular(12),
+  //                                         border: Border.all(color: MyColors.lightGray) // Adjust border radius for rounded corners
   //                                         ),
-  //                                       )),
-  //                                       DataCell(
-  //                                         ConstrainedBox(
-  //                                           constraints: BoxConstraints(
-  //                                             maxWidth: MediaQuery.of(context).size.width * 0.25,
+  //                                     child: Padding(
+  //                                       padding: const EdgeInsets.all(8), // Adjust inner padding as needed
+  //                                       child: Column(
+  //                                         mainAxisAlignment: MainAxisAlignment.center,
+  //                                         children: [
+  //                                           TextForTable(
+  //                                             text: '${entry.word} - ${entry.translation!.isNotEmpty ? entry.translation! : 'N/A'}',
+  //                                             textColor: MyColors.black,
   //                                           ),
-  //                                           child: TextForTable(
+  //                                           TextForTable(
   //                                             text: '[ ${entry.ipa} ]',
   //                                             textColor: MyColors.black,
   //                                           ),
-  //                                         ),
+  //                                         ],
   //                                       ),
-  //                                       DataCell(
-  //                                         ConstrainedBox(
-  //                                           constraints: BoxConstraints(
-  //                                             maxWidth: MediaQuery.of(context).size.width * 0.25,
-  //                                           ),
-  //                                           child: TextForTable(
-  //                                             text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-  //                                             textColor: MyColors.black,
-  //                                           ),
-  //                                         ),
-  //                                       ),
-  //                                     ],
+  //                                     ),
   //                                   );
-  //                                 }).toList(),
+  //                                 },
   //                               ),
-  //                               // TextButton(
-  //                               //     onPressed: () async {
-  //                               //       await saveWordCountToLocalstorage(wordCount);
-  //                               //       replaceWordsWithTranslation(wordCount.wordEntries);
-  //                               //       Navigator.pop(context);
-  //                               //     },
-  //                               //     child: const Text16(
-  //                               //       text: 'Сохранить',
-  //                               //       textColor: MyColors.black,
-  //                               //     ))
-  //                             ],
-  //                           ),
+  //                             )
+  //                             // TextButton(
+  //                             //     onPressed: () {
+  //                             //       Navigator.pop(context);
+  //                             //     },
+  //                             //     child: const Text16(
+  //                             //       text: 'Закрыть',
+  //                             //       textColor: MyColors.black,
+  //                             //     ))
+  //                           ],
   //                         ),
   //                       ),
-  //                     ],
-  //                   ),
+  //                     ),
+  //                   ],
   //                 ),
   //               ),
   //             );
@@ -680,130 +851,6 @@ class Reader extends State {
   //     },
   //   );
   // }
-
-  Future<void> showTableDialog(BuildContext context, WordCount wordCount) async {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return FutureBuilder(
-          future: wordCount.checkCallInfo(),
-          builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(
-                  color: MyColors.purple,
-                ),
-              );
-            } else if (snapshot.hasError) {
-              return const AlertDialog(
-                content: Text('Произошла ошибка: нет доступа к интернету'),
-              );
-            } else {
-              if (wordCount.wordEntries.isEmpty) {
-                Navigator.pop(context);
-              }
-
-              return WillPopScope(
-                onWillPop: () async {
-                  // debugPrint("DONE");
-                  await saveWordCountToLocalstorage(wordCount);
-                  return true;
-                },
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.8,
-                  ),
-                  child: Column(
-                    // shrinkWrap: true,
-                    // padding: const EdgeInsets.all(0),
-                    children: <Widget>[
-                      Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height * 0.5,
-                        color: Colors.transparent,
-                        child: Card(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              IconButton(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                icon: const Icon(Icons.close),
-                                onPressed: () async {
-                                  // debugPrint("DONE");
-                                  await saveWordCountToLocalstorage(wordCount);
-                                  replaceWordsWithTranslation(wordCount.wordEntries);
-                                  Navigator.pop(context);
-                                },
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(bottom: 20),
-                                child: Center(
-                                  child: Text24(
-                                    text: 'Частые слова',
-                                    textColor: MyColors.black,
-                                  ),
-                                ),
-                              ),
-
-                              Expanded(
-                                child: ListView.builder(
-                                  itemCount: wordCount.wordEntries.length,
-                                  itemBuilder: (context, index) {
-                                    var entry = wordCount.wordEntries[index];
-                                    return Container(
-                                      height: 70,
-                                      width: MediaQuery.of(context).size.width * 0.5, // Adjust width as needed
-                                      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Adjust vertical margin as needed
-                                      decoration: BoxDecoration(
-                                          color: Colors.transparent,
-                                          // borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(color: MyColors.lightGray) // Adjust border radius for rounded corners
-                                          ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8), // Adjust inner padding as needed
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            TextForTable(
-                                              text: '${entry.word} - ${entry.translation!.isNotEmpty ? entry.translation! : 'N/A'}',
-                                              textColor: MyColors.black,
-                                            ),
-                                            TextForTable(
-                                              text: '[ ${entry.ipa} ]',
-                                              textColor: MyColors.black,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              )
-                              // TextButton(
-                              //     onPressed: () {
-                              //       Navigator.pop(context);
-                              //     },
-                              //     child: const Text16(
-                              //       text: 'Закрыть',
-                              //       textColor: MyColors.black,
-                              //     ))
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-          },
-        );
-      },
-    );
-  }
 
   String getWordForm(int number) {
     int lastDigit = number % 10;
@@ -1138,25 +1185,6 @@ class Reader extends State {
                                     ),
                                   ),
                                 ),
-                          wordCount.wordEntries.length < 10
-                              ? TextButton(
-                                  onPressed: () async {
-                                    await addNewWord(wordCount.wordEntries, wordCount, wordCount.wordEntries.length);
-                                  },
-                                  child: const Text16(
-                                    text: 'Добавить',
-                                    textColor: MyColors.black,
-                                  ))
-                              : TextButton(
-                                  onPressed: () async {
-                                    await saveWordCountToLocalstorage(wordCount);
-                                    replaceWordsWithTranslation(wordCount.wordEntries);
-                                    Navigator.pop(context);
-                                  },
-                                  child: const Text16(
-                                    text: 'Сохранить',
-                                    textColor: MyColors.black,
-                                  ))
                         ],
                       ),
                     ),
@@ -1509,78 +1537,196 @@ class Reader extends State {
       // Действие, выполняемое после нажатия "Да"
 
       final wordCount = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText);
-      await showEmptyTable(context, wordCount);
+      await wordCount.resetCallCount();
+      // await showEmptyTable(context, wordCount);
+      await showTableDialog(context, wordCount, true);
     } else if (result == false) {
       // Действие, выполняемое после нажатия "Нет"
       final wordCount = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText);
       // Если нужно сбросить счётчик времени
-      // await wordCount.resetCallCount();
+      await wordCount.resetCallCount();
       // await wordCount.checkCallInfo();
-      await showTableDialog(context, wordCount);
+      await showTableDialog(context, wordCount, false);
     }
   }
 
+  // Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries) async {
+  //   List<String> words = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
+  //   Set<String> uniqueSet = <String>{};
+  //   List<String> result = [];
+  //   for (String item in words.reversed) {
+  //     if (uniqueSet.add(item)) {
+  //       result.add(item);
+  //     }
+  //   }
+  //   result.reversed.toList();
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       String newWord = word;
+
+  //       return AlertDialog(
+  //         title: const Text('Изменить слово'),
+  //         content: Autocomplete<String>(
+  //           optionsBuilder: (TextEditingValue textEditingValue) {
+  //             if (textEditingValue.text == '') {
+  //               return const Iterable<String>.empty();
+  //             }
+  //             String pattern = textEditingValue.text.toLowerCase();
+  //             final Iterable<String> matchingStart = result.where((String option) {
+  //               return option.toLowerCase().startsWith(pattern);
+  //             });
+  //             final Iterable<String> matchingAll = result.where((String option) {
+  //               return option.toLowerCase().contains(pattern) && !option.toLowerCase().startsWith(pattern);
+  //             });
+  //             return matchingStart.followedBy(matchingAll);
+  //           },
+  //           onSelected: (String selection) {
+  //             // debugPrint('You just selected $selection');
+  //             newWord = selection;
+  //           },
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text16(text: 'Отмена', textColor: MyColors.black),
+  //           ),
+  //           TextButton(
+  //             onPressed: () async {
+  //               // debugPrint('Введенное слово: $newWord');
+  //               // debugPrint('onPressed word: $word');
+  //               if (result.contains(newWord)) {
+  //                 await updateWordInTable(word, newWord, wordEntries);
+  //                 Navigator.of(context).pop();
+  //               } else {
+  //                 Fluttertoast.showToast(
+  //                   msg: 'Введенного слова нет в книге',
+  //                   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+  //                   gravity: ToastGravity.BOTTOM,
+  //                 );
+  //               }
+  //             },
+  //             child: const Text16(text: 'Сохранить', textColor: MyColors.black),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
+
   Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries) async {
-    List<String> words = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
-    Set<String> uniqueSet = <String>{};
-    List<String> result = [];
-    for (String item in words.reversed) {
-      if (uniqueSet.add(item)) {
-        result.add(item);
-      }
-    }
-    result.reversed.toList();
+    var wordsMap = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWordCounts();
+    String searchText = '';
+    List<String> filteredWords = [];
+
     showDialog(
       context: context,
-      builder: (context) {
-        String newWord = word;
-
-        return AlertDialog(
-          title: const Text('Изменить слово'),
-          content: Autocomplete<String>(
-            optionsBuilder: (TextEditingValue textEditingValue) {
-              if (textEditingValue.text == '') {
-                return const Iterable<String>.empty();
-              }
-              String pattern = textEditingValue.text.toLowerCase();
-              final Iterable<String> matchingStart = result.where((String option) {
-                return option.toLowerCase().startsWith(pattern);
-              });
-              final Iterable<String> matchingAll = result.where((String option) {
-                return option.toLowerCase().contains(pattern) && !option.toLowerCase().startsWith(pattern);
-              });
-              return matchingStart.followedBy(matchingAll);
-            },
-            onSelected: (String selection) {
-              // debugPrint('You just selected $selection');
-              newWord = selection;
-            },
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(0),
+                  children: <Widget>[
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.transparent,
+                      child: Card(
+                        child: Column(
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () async {
+                                    debugPrint("DONE");
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 40),
+                              child: Center(
+                                child: Text24(
+                                  text: 'Выберите слова',
+                                  textColor: MyColors.black,
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextField(
+                                onChanged: (value) {
+                                  setState(() {
+                                    searchText = value.toLowerCase();
+                                    filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  labelText: 'Введите текст',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            FractionallySizedBox(
+                              widthFactor: 1.0,
+                              child: DataTable(
+                                columnSpacing: 38,
+                                showBottomBorder: false,
+                                dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                columns: const [
+                                  DataColumn(
+                                    label: Flexible(
+                                      child: Text15(text: 'Слово', textColor: MyColors.black),
+                                    ),
+                                  ),
+                                  DataColumn(
+                                    label: Flexible(
+                                      child: Text15(
+                                        text: 'Количество',
+                                        textColor: MyColors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                rows: List<DataRow>.generate(
+                                  filteredWords.length,
+                                  (index) => DataRow(
+                                    cells: [
+                                      DataCell(TextButton(
+                                        onPressed: () {
+                                          updateWordInTable(word, filteredWords[index], wordEntries);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: TextForTable(
+                                          text: filteredWords[index],
+                                          textColor: MyColors.black,
+                                        ),
+                                      )),
+                                      DataCell(Text('${wordsMap[filteredWords[index]] ?? 0}')),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text16(text: 'Отмена', textColor: MyColors.black),
-            ),
-            TextButton(
-              onPressed: () async {
-                // debugPrint('Введенное слово: $newWord');
-                // debugPrint('onPressed word: $word');
-                if (result.contains(newWord)) {
-                  await updateWordInTable(word, newWord, wordEntries);
-                  Navigator.of(context).pop();
-                } else {
-                  Fluttertoast.showToast(
-                    msg: 'Введенного слова нет в книге',
-                    toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-                    gravity: ToastGravity.BOTTOM,
-                  );
-                }
-              },
-              child: const Text16(text: 'Сохранить', textColor: MyColors.black),
-            ),
-          ],
         );
       },
     );
@@ -1593,7 +1739,7 @@ class Reader extends State {
       // debugPrint('updateWordInTable entry ${wordEntries[index]}');
       // debugPrint('updateWordInTable count ${wordEntries[index].count}');
       final translation = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).translateToEnglish(newWord);
-      final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation!);
+      final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation);
 
       wordEntries[index] = WordEntry(
         word: newWord,
