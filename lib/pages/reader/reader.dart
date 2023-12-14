@@ -1977,12 +1977,15 @@ class Reader extends State {
                               visible = !visible;
                             });
                             if (visible) {
-                              SystemChrome.setSystemUIOverlayStyle(
-                                  const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent, statusBarColor: Colors.transparent));
+                              SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+                                systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
+                                systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.dark,
+                              ));
                               SystemChrome.setEnabledSystemUIMode(
                                 SystemUiMode.manual,
                                 overlays: [
                                   SystemUiOverlay.top,
+                                  SystemUiOverlay.bottom,
                                 ],
                               );
                             } else {
@@ -2010,12 +2013,15 @@ class Reader extends State {
                               visible = !visible;
                             });
                             if (visible) {
-                              SystemChrome.setSystemUIOverlayStyle(
-                                  const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent, statusBarColor: Colors.transparent));
+                              SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+                                systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
+                                systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.dark,
+                              ));
                               SystemChrome.setEnabledSystemUIMode(
                                 SystemUiMode.manual,
                                 overlays: [
                                   SystemUiOverlay.top,
+                                  SystemUiOverlay.bottom,
                                 ],
                               );
                             } else {
