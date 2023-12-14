@@ -196,9 +196,9 @@ class Reader extends State {
 
   set isDarkTheme(bool value) {
     _isDarkTheme = value;
-    // setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    //   systemNavigationBarColor: value ? MyColors.blackGray : MyColors.white,
-    // ));
+    setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: value ? MyColors.blackGray : MyColors.white,
+    ));
   }
 
   void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
