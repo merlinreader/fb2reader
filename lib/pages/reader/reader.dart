@@ -1979,7 +1979,7 @@ class Reader extends State {
                             if (visible) {
                               // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
                               //   systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
-                              //   systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.light,
+                              //   systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.dark,
                               // ));
                               SystemChrome.setEnabledSystemUIMode(
                                 SystemUiMode.manual,
