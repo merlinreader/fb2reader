@@ -31,9 +31,6 @@ class _MerlinAppState extends State<MerlinApp> {
   final _router = AppRouter();
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.transparent,
-    ));
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
         return MaterialApp(
@@ -57,6 +54,7 @@ class ThemeProvider with ChangeNotifier {
     _isDarkTheme = value;
     setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor: value ? MyColors.blackGray : MyColors.white,
+      systemNavigationBarIconBrightness: value ? Brightness.light : Brightness.dark,
     ));
     notifyListeners();
   }
