@@ -105,6 +105,7 @@ class Reader extends State {
 
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     getDataFromLocalStorage('textKey');
     getImagesFromLocalStorage('booksKey');
 
@@ -1857,7 +1858,7 @@ class Reader extends State {
                   duration: const Duration(milliseconds: 250),
                   child: AppBar(
                       leading: GestureDetector(
-                          onTap: () {
+                          onTap: () async {
                             Navigator.pop(context, true);
                           },
                           child: Theme(
@@ -1978,7 +1979,12 @@ class Reader extends State {
                             if (visible) {
                               SystemChrome.setSystemUIOverlayStyle(
                                   const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent, statusBarColor: Colors.transparent));
-                              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                              SystemChrome.setEnabledSystemUIMode(
+                                SystemUiMode.manual,
+                                overlays: [
+                                  SystemUiOverlay.top,
+                                ],
+                              );
                             } else {
                               SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
                             }
@@ -2006,7 +2012,12 @@ class Reader extends State {
                             if (visible) {
                               SystemChrome.setSystemUIOverlayStyle(
                                   const SystemUiOverlayStyle(systemNavigationBarColor: Colors.transparent, statusBarColor: Colors.transparent));
-                              SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+                              SystemChrome.setEnabledSystemUIMode(
+                                SystemUiMode.manual,
+                                overlays: [
+                                  SystemUiOverlay.top,
+                                ],
+                              );
                             } else {
                               SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
                             }

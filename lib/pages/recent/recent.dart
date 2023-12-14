@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/style/text.dart';
@@ -66,7 +67,14 @@ class RecentPageState extends State<RecentPage> {
 
   @override
   void initState() {
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: [
+        SystemUiOverlay.top,
+      ],
+    );
     super.initState();
+
     getDataFromLocalStorage('booksKey');
   }
 
