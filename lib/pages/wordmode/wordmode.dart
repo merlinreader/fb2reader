@@ -52,7 +52,7 @@ class WordCount {
   }
 
   Future<String> translateToEnglish(String word) async {
-    final response = await http.get(Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=ru&tl=en&dt=t&q=$word'));
+    final response = await http.get(Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=$word'));
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
