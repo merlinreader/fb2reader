@@ -7,6 +7,7 @@ import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/ads/network_provider.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
+import 'package:merlin/domain/data_providers/avatar_provider.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/pages/profile/dialogs/choose_avatar_dialog/choose_avatar_dialog.dart';
 import 'package:merlin/pages/profile/profile_view_model.dart';
@@ -57,6 +58,7 @@ class _ProfilePage extends State<ProfilePage> {
   String token = '';
   late String getToken;
   String firstName = 'Merlin';
+  List avatar = [];
   List<AchievementStatus> getAchievements = [];
   late var achievements;
 
@@ -80,8 +82,10 @@ class _ProfilePage extends State<ProfilePage> {
     super.initState();
     initUniLinks();
     getTokenFromLocalStorage();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      getFirstName();
+    });
     getWordsFromLocalStorage();
-    getFirstName();
     MobileAds.initialize();
     _initAds();
   }
@@ -170,8 +174,6 @@ class _ProfilePage extends State<ProfilePage> {
       achievements.addAll(ach.achievements.wordModeAchievements);
       return achievements;
     } else {
-      // print('Ошибка запроса достижений: ${response.statusCode}');
-      // print('Токен: $token');
       return [];
     }
   }
@@ -230,27 +232,27 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   Future<void> getFirstName() async {
+    String firstName;
+    String avatarFromServer;
+    Uint8List? saveAvatar;
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
-    const url = 'https://fb2.cloud.leam.pro/api/account/';
-    final fetchedName;
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    final data = json.decode(response.body);
-
-    if (response.statusCode == 200) {
-      if (data['firstName'].isNotEmpty) {
-        fetchedName = data['firstName'];
-        firstName = fetchedName.toString();
-
-        setState(() {
-          firstName = fetchedName.toString();
-        });
-      }
+    if (token != '') {
+      String url = 'https://fb2.cloud.leam.pro/api/account/';
+      final data = json.decode((await http.get(Uri.parse(url), headers: {
+        'Authorization': 'Bearer $token',
+      }))
+          .body);
+      firstName = data['firstName'].toString();
+      avatarFromServer = data['avatar']['picture'];
+      await prefs.setString('firstName', firstName);
+      try {
+        await AvatarProvider.setAvatarUrl(avatarFromServer);
+        final response = await http.get(Uri.parse(avatarFromServer));
+        await AvatarProvider.setAvatarBytes(response.bodyBytes);
+        saveAvatar = response.bodyBytes;
+      } catch (_) {}
     }
-    await prefs.setString('firstName', firstName);
   }
 
   Future<void> getFirstNameFromLocalStorage() async {
@@ -379,6 +381,7 @@ class _ProfilePage extends State<ProfilePage> {
                           onPressed: () {
                             final tgUrl = Uri.parse('https://t.me/merlin_auth_bot?start=1');
                             launchUrl(tgUrl, mode: LaunchMode.externalApplication);
+                            SystemChannels.platform.invokeMethod('SystemNavigator.pop');
                           },
                           fontWeight: FontWeight.bold,
                         ),
@@ -423,15 +426,8 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           onPressed: () {
-                            // print(words);
-                            // print('Added 5 words');
                             _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
-                            // saveWordsToLocalStorage(100);
-                            // saveWordsToLocalStorage(words + 5);
                             Fluttertoast.showToast(msg: 'Вам доступно $words слов', toastLength: Toast.LENGTH_LONG);
-                            // print(words);
-                            // Navigator.pushNamed(context, RouteNames.rewardedAd);
-                            //rewardedAdPage.callShowRewardedAd();
                           },
                           fontWeight: FontWeight.bold,
                         ),
@@ -500,10 +496,6 @@ class _ProfilePage extends State<ProfilePage> {
                       );
                     },
                     child: const Text18(text: 'readermerlin@gmail.com', textColor: MyColors.black)),
-
-                // child: Text18(
-                //     text: 'readermerlin@gmail.com',
-                //     textColor: MyColors.black)
               ),
               alignment: Alignment.center,
               actions: [
