@@ -58,7 +58,6 @@ class _ProfilePage extends State<ProfilePage> {
   String token = '';
   late String getToken;
   String firstName = 'Merlin';
-  List avatar = [];
   List<AchievementStatus> getAchievements = [];
   late var achievements;
 
