@@ -81,9 +81,9 @@ class _ProfilePage extends State<ProfilePage> {
     super.initState();
     initUniLinks();
     getTokenFromLocalStorage();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      getFirstName();
-    });
+
+    getFirstNameFromLocalStorage();
+
     getWordsFromLocalStorage();
     MobileAds.initialize();
     _initAds();
@@ -230,40 +230,17 @@ class _ProfilePage extends State<ProfilePage> {
     await prefs.setString('token', token);
   }
 
-  Future<void> getFirstName() async {
-    String firstName;
-    String avatarFromServer;
-    Uint8List? saveAvatar;
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
-    if (token != '') {
-      String url = 'https://fb2.cloud.leam.pro/api/account/';
-      final data = json.decode((await http.get(Uri.parse(url), headers: {
-        'Authorization': 'Bearer $token',
-      }))
-          .body);
-      firstName = data['firstName'].toString();
-      avatarFromServer = data['avatar']['picture'];
-      await prefs.setString('firstName', firstName);
-      try {
-        await AvatarProvider.setAvatarUrl(avatarFromServer);
-        final response = await http.get(Uri.parse(avatarFromServer));
-        await AvatarProvider.setAvatarBytes(response.bodyBytes);
-        saveAvatar = response.bodyBytes;
-      } catch (_) {}
-    }
-  }
-
   Future<void> getFirstNameFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      firstName = prefs.getString('firstName') ?? firstName;
+      var getFirstName = prefs.getString('firstName') ?? firstName;
+      firstName = getFirstName;
+      print(firstName);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    getFirstNameFromLocalStorage();
     double size = 20;
     final themeProvider = Provider.of<ThemeProvider>(context);
     final avatar = context.watch<ProfileViewModel>().storedAvatar;
@@ -380,7 +357,8 @@ class _ProfilePage extends State<ProfilePage> {
                           onPressed: () {
                             final tgUrl = Uri.parse('https://t.me/merlin_auth_bot?start=1');
                             launchUrl(tgUrl, mode: LaunchMode.externalApplication);
-                            SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+                            //exit(0);
+                            SystemNavigator.pop();
                           },
                           fontWeight: FontWeight.bold,
                         ),
