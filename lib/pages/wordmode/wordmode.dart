@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:merlin/functions/all_words.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -108,7 +109,8 @@ class WordCount {
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
       // if (timeElapsed.inHours >= 24) {
       if (timeElapsed.inMicroseconds >= 1) {
-        await countWordsWithOffset();
+        List<String> dictionary = GlobalData().wordsList;
+        await countWordsWithOffset(dictionary);
 
         await updateCallInfo();
       } else {
@@ -120,7 +122,9 @@ class WordCount {
         return;
       }
     } else {
-      await countWordsWithOffset();
+      List<String> dictionary = GlobalData().wordsList;
+
+      await countWordsWithOffset(dictionary);
       await updateCallInfo();
     }
   }
@@ -128,16 +132,20 @@ class WordCount {
   Map<String, int> getAllWordCounts() {
     final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+    List<String> dictionary = GlobalData().wordsList;
 
     final wordCounts = <String, int>{};
 
     for (final word in words) {
       final normalizedWord = word.toLowerCase();
       if (normalizedWord.length > 1 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
-        if (wordCounts.containsKey(normalizedWord)) {
-          wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
-        } else {
-          wordCounts[normalizedWord] = 1;
+        if (dictionary.contains(normalizedWord)) {
+          // Проверяем, есть ли слово в словаре
+          if (wordCounts.containsKey(normalizedWord)) {
+            wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
+          } else {
+            wordCounts[normalizedWord] = 1;
+          }
         }
       }
     }
@@ -235,8 +243,8 @@ class WordCount {
   //   this.wordEntries = wordEntries;
   // }
 
-  Future<void> countWordsWithOffset() async {
-    final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
+  Future<void> countWordsWithOffset(List<String> dictionary) async {
+    final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():\[\]«»]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
 
     final wordCounts = <String, int>{};
@@ -272,14 +280,41 @@ class WordCount {
     print('sortedWordCounts.length = ${sortedWordCounts.length}');
 
     final wordEntriesFutures = <Future<WordEntry>>[];
+    Set<String> addedWords = <String>{};
+
     for (var i = start; i < end; i++) {
       final entry = sortedWordCounts[i];
 
-      wordEntriesFutures.add(
-        createWordEntry(entry.key, entry.value),
-      );
+      if (dictionary.contains(entry.key) && !addedWords.contains(entry.key)) {
+        wordEntriesFutures.add(
+          createWordEntry(entry.key, entry.value),
+        );
+        addedWords.add(entry.key); // Добавляем слово в Set добавленных слов
+      } else {
+        // Ищем первое слово из sortedWordCounts, которое есть в словаре
+        for (var j = i + 1; j < sortedWordCounts.length; j++) {
+          if (dictionary.contains(sortedWordCounts[j].key) && !addedWords.contains(sortedWordCounts[j].key)) {
+            wordEntriesFutures.add(
+              createWordEntry(sortedWordCounts[j].key, sortedWordCounts[j].value),
+            );
+            addedWords.add(sortedWordCounts[j].key); // Добавляем слово в Set добавленных слов
+            break; // Нашли слово, добавили в список и выходим из цикла
+          }
+        }
+      }
     }
+
     final wordEntries = await Future.wait(wordEntriesFutures);
+
+    // final wordEntriesFutures = <Future<WordEntry>>[];
+    // for (var i = start; i < end; i++) {
+    //   final entry = sortedWordCounts[i];
+
+    //   wordEntriesFutures.add(
+    //     createWordEntry(entry.key, entry.value),
+    //   );
+    // }
+    // final wordEntries = await Future.wait(wordEntriesFutures);
     // prefs.setInt('$filePath-start', start);
     prefs.setInt('$filePath-end', end);
     prefs.setInt('words', 10);

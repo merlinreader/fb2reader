@@ -7,6 +7,7 @@ import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/ads/network_provider.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
+import 'package:merlin/domain/data_providers/avatar_provider.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/pages/profile/dialogs/choose_avatar_dialog/choose_avatar_dialog.dart';
 import 'package:merlin/pages/profile/profile_view_model.dart';
@@ -80,8 +81,10 @@ class _ProfilePage extends State<ProfilePage> {
     super.initState();
     initUniLinks();
     getTokenFromLocalStorage();
+
+    getFirstNameFromLocalStorage();
+
     getWordsFromLocalStorage();
-    getFirstName();
     MobileAds.initialize();
     _initAds();
   }
@@ -127,16 +130,17 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   void _setAdEventListener(RewardedAd ad) async {
-    ad.setAdEventListener(
-        eventListener: RewardedAdEventListener(
-            // onAdShown: () => print("callback: rewarded ad shown."),
-            // onAdFailedToShow: (error) => print(
-            //     "callback: rewarded ad failed to show: ${error.description}."),
-            // onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
-            // onAdClicked: () => print("callback: rewarded ad clicked."),
-            // onAdImpression: (data) =>
-            //     print("callback: rewarded ad impression: ${data.getRawData()}"),
-            onRewarded: (Reward reward) async => saveWordsToLocalStorage(words + 5)));
+    ad.setAdEventListener(eventListener: RewardedAdEventListener(
+        // onAdShown: () => print("callback: rewarded ad shown."),
+        // onAdFailedToShow: (error) => print(
+        //     "callback: rewarded ad failed to show: ${error.description}."),
+        // onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
+        // onAdClicked: () => print("callback: rewarded ad clicked."),
+        // onAdImpression: (data) =>
+        //     print("callback: rewarded ad impression: ${data.getRawData()}"),
+        onRewarded: (Reward reward) async {
+      saveWordsToLocalStorage(words + 5);
+    }));
   }
 
   void saveGeo(String country, String area, String locality) async {
@@ -170,8 +174,6 @@ class _ProfilePage extends State<ProfilePage> {
       achievements.addAll(ach.achievements.wordModeAchievements);
       return achievements;
     } else {
-      // print('Ошибка запроса достижений: ${response.statusCode}');
-      // print('Токен: $token');
       return [];
     }
   }
@@ -229,40 +231,17 @@ class _ProfilePage extends State<ProfilePage> {
     await prefs.setString('token', token);
   }
 
-  Future<void> getFirstName() async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
-    const url = 'https://fb2.cloud.leam.pro/api/account/';
-    final fetchedName;
-    final response = await http.get(
-      Uri.parse(url),
-      headers: {'Authorization': 'Bearer $token'},
-    );
-    final data = json.decode(response.body);
-
-    if (response.statusCode == 200) {
-      if (data['firstName'].isNotEmpty) {
-        fetchedName = data['firstName'];
-        firstName = fetchedName.toString();
-
-        setState(() {
-          firstName = fetchedName.toString();
-        });
-      }
-    }
-    await prefs.setString('firstName', firstName);
-  }
-
   Future<void> getFirstNameFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      firstName = prefs.getString('firstName') ?? firstName;
+      var getFirstName = prefs.getString('firstName') ?? firstName;
+      firstName = getFirstName;
+      print(firstName);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    getFirstNameFromLocalStorage();
     double size = 20;
     final themeProvider = Provider.of<ThemeProvider>(context);
     final avatar = context.watch<ProfileViewModel>().storedAvatar;
@@ -379,6 +358,8 @@ class _ProfilePage extends State<ProfilePage> {
                           onPressed: () {
                             final tgUrl = Uri.parse('https://t.me/merlin_auth_bot?start=1');
                             launchUrl(tgUrl, mode: LaunchMode.externalApplication);
+                            //exit(0);
+                            SystemNavigator.pop();
                           },
                           fontWeight: FontWeight.bold,
                         ),
@@ -423,15 +404,8 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           onPressed: () {
-                            // print(words);
-                            // print('Added 5 words');
                             _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
-                            // saveWordsToLocalStorage(100);
-                            // saveWordsToLocalStorage(words + 5);
-                            Fluttertoast.showToast(msg: 'Вам доступно $words слов', toastLength: Toast.LENGTH_LONG);
-                            // print(words);
-                            // Navigator.pushNamed(context, RouteNames.rewardedAd);
-                            //rewardedAdPage.callShowRewardedAd();
+                            // Fluttertoast.showToast(msg: 'Вам доступно $words слов', toastLength: Toast.LENGTH_LONG);
                           },
                           fontWeight: FontWeight.bold,
                         ),
@@ -500,10 +474,6 @@ class _ProfilePage extends State<ProfilePage> {
                       );
                     },
                     child: const Text18(text: 'readermerlin@gmail.com', textColor: MyColors.black)),
-
-                // child: Text18(
-                //     text: 'readermerlin@gmail.com',
-                //     textColor: MyColors.black)
               ),
               alignment: Alignment.center,
               actions: [
