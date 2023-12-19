@@ -31,8 +31,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
-    final url =
-        Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
+    final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     try {
       final response = await http.get(
         url,
@@ -46,10 +45,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
         achievements.add(ach.achievements.spell);
         achievements.addAll(ach.achievements.simpleModeAchievements);
         achievements.addAll(ach.achievements.wordModeAchievements);
-        avatarsList = achievements
-            .where((achievement) => achievement.isReceived)
-            .map((achievement) => achievement.picture)
-            .toList();
+        avatarsList = achievements.where((achievement) => achievement.isReceived).map((achievement) => achievement.picture).toList();
       }
     } catch (_) {}
     isLoading = false;
@@ -69,10 +65,26 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
         final response = await http.get(Uri.parse(selectedAvatar!));
         await AvatarProvider.setAvatarBytes(response.bodyBytes);
         storedAvatar = response.bodyBytes;
+        String? url = selectedAvatar;
+        List<String> parts = url!.split('/');
+        String avatarName = parts.last.split('.').first;
+        sendAvatar(avatarName);
       } catch (_) {}
     }
-
     Navigator.pop(context, true);
+  }
+
+  Future<void> sendAvatar(avatarName) async {
+    final prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    String url = 'https://fb2.cloud.leam.pro/api/account/avatar';
+    var res = await http.patch(Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: '{"name": "$avatarName"}');
+    print(res.statusCode);
   }
 
   Future<void> onResetClick() async {
