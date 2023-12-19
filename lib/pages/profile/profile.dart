@@ -130,16 +130,17 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   void _setAdEventListener(RewardedAd ad) async {
-    ad.setAdEventListener(
-        eventListener: RewardedAdEventListener(
-            // onAdShown: () => print("callback: rewarded ad shown."),
-            // onAdFailedToShow: (error) => print(
-            //     "callback: rewarded ad failed to show: ${error.description}."),
-            // onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
-            // onAdClicked: () => print("callback: rewarded ad clicked."),
-            // onAdImpression: (data) =>
-            //     print("callback: rewarded ad impression: ${data.getRawData()}"),
-            onRewarded: (Reward reward) async => saveWordsToLocalStorage(words + 5)));
+    ad.setAdEventListener(eventListener: RewardedAdEventListener(
+        // onAdShown: () => print("callback: rewarded ad shown."),
+        // onAdFailedToShow: (error) => print(
+        //     "callback: rewarded ad failed to show: ${error.description}."),
+        // onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
+        // onAdClicked: () => print("callback: rewarded ad clicked."),
+        // onAdImpression: (data) =>
+        //     print("callback: rewarded ad impression: ${data.getRawData()}"),
+        onRewarded: (Reward reward) async {
+      saveWordsToLocalStorage(words + 5);
+    }));
   }
 
   void saveGeo(String country, String area, String locality) async {
@@ -404,7 +405,7 @@ class _ProfilePage extends State<ProfilePage> {
                           fontSize: 14,
                           onPressed: () {
                             _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
-                            Fluttertoast.showToast(msg: 'Вам доступно $words слов', toastLength: Toast.LENGTH_LONG);
+                            // Fluttertoast.showToast(msg: 'Вам доступно $words слов', toastLength: Toast.LENGTH_LONG);
                           },
                           fontWeight: FontWeight.bold,
                         ),

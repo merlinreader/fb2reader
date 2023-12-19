@@ -10,6 +10,7 @@ import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/domain/data_providers/color_provider.dart';
+import 'package:merlin/functions/all_words.dart';
 import 'package:merlin/functions/post_statistic.dart';
 import 'package:merlin/main.dart';
 import 'package:merlin/pages/wordmode/models/word_entry.dart';
@@ -523,6 +524,7 @@ class Reader extends State {
   }
 
   showTableDialog(BuildContext context, WordCount wordCount, bool confirm) async {
+    var wordsMap = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWordCounts();
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -597,23 +599,27 @@ class Reader extends State {
                                       Container(
                                         width: MediaQuery.of(context).size.width,
                                         child: DataTable(
-                                          columnSpacing: 38.0,
+                                          columnSpacing: forTable == false ? 15 : 0,
                                           showBottomBorder: false,
                                           dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                           clipBehavior: Clip.hardEdge,
+                                          horizontalMargin: 10,
                                           columns: [
                                             DataColumn(
                                               label: forTable == false
-                                                  ? const Text(
-                                                      'Слово',
-                                                      style: TextStyle(
-                                                        fontFamily: 'Tektur',
-                                                        fontSize: 15,
+                                                  ? SizedBox(
+                                                      width: MediaQuery.of(context).size.width * 0.19,
+                                                      child: const Text(
+                                                        'Слово',
+                                                        style: TextStyle(
+                                                          fontFamily: 'Tektur',
+                                                          fontSize: 15,
+                                                        ),
+                                                        textAlign: TextAlign.left,
                                                       ),
-                                                      textAlign: TextAlign.left,
                                                     )
                                                   : SizedBox(
-                                                      width: MediaQuery.of(context).size.width * 0.3,
+                                                      width: MediaQuery.of(context).size.width * 0.315,
                                                       child: const Text(
                                                         'Слово',
                                                         style: TextStyle(
@@ -626,17 +632,15 @@ class Reader extends State {
                                             ),
                                             DataColumn(
                                               label: forTable == false
-                                                  ? const Expanded(
-                                                      child: Text('Произношение',
-                                                          style: TextStyle(
-                                                            fontFamily: 'Tektur',
-                                                            fontSize: 15,
-                                                          ),
-                                                          textAlign: TextAlign.left),
-                                                    )
+                                                  ? const Text('Транскрипция',
+                                                      style: TextStyle(
+                                                        fontFamily: 'Tektur',
+                                                        fontSize: 15,
+                                                      ),
+                                                      textAlign: TextAlign.left)
                                                   : SizedBox(
-                                                      width: MediaQuery.of(context).size.width * 0.28,
-                                                      child: const Text('Произношение',
+                                                      width: MediaQuery.of(context).size.width * 0.345,
+                                                      child: const Text('Транскрипция',
                                                           style: TextStyle(
                                                             fontFamily: 'Tektur',
                                                             fontSize: 15,
@@ -645,45 +649,44 @@ class Reader extends State {
                                                     ),
                                             ),
                                             DataColumn(
-                                              label: Expanded(
-                                                child: forTable == false
-                                                    ? Text(
+                                              label: forTable == false
+                                                  ? Text(
+                                                      'Перевод',
+                                                      style: const TextStyle(
+                                                        fontFamily: 'Tektur',
+                                                        fontSize: 15,
+                                                      ),
+                                                      textAlign: forTable == false ? TextAlign.right : TextAlign.left,
+                                                    )
+                                                  : SizedBox(
+                                                      width: MediaQuery.of(context).size.width * 0.3,
+                                                      child: Text(
                                                         'Перевод',
                                                         style: const TextStyle(
                                                           fontFamily: 'Tektur',
                                                           fontSize: 15,
                                                         ),
                                                         textAlign: forTable == false ? TextAlign.right : TextAlign.left,
-                                                      )
-                                                    : SizedBox(
-                                                        width: MediaQuery.of(context).size.width * 0.3,
-                                                        child: Text(
-                                                          'Перевод',
-                                                          style: const TextStyle(
-                                                            fontFamily: 'Tektur',
-                                                            fontSize: 15,
-                                                          ),
-                                                          textAlign: forTable == false ? TextAlign.right : TextAlign.left,
-                                                        ),
                                                       ),
-                                              ),
+                                                    ),
                                             ),
                                           ],
                                           rows: [],
                                         ),
                                       ),
                                       Container(
-                                        // width: MediaQuery.of(context).size.width * 0.9,
+                                        width: forTable == true ? MediaQuery.of(context).size.width : null,
                                         height:
                                             forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.43,
                                         child: SingleChildScrollView(
                                           scrollDirection: Axis.vertical,
                                           child: DataTable(
-                                            columnSpacing: 30.0,
+                                            columnSpacing: forTable == false ? 33 : 0,
                                             showBottomBorder: false,
                                             dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                             clipBehavior: Clip.hardEdge,
                                             headingRowHeight: 0,
+                                            horizontalMargin: 10,
                                             columns: const [
                                               DataColumn(
                                                 label: Flexible(
@@ -721,7 +724,7 @@ class Reader extends State {
                                                     // ),
                                                     forTable == false
                                                         ? SizedBox(
-                                                            width: MediaQuery.of(context).size.width * 0.22,
+                                                            width: MediaQuery.of(context).size.width * 0.23,
                                                             child: Text(
                                                               entry.word,
                                                               style: TextStyle(
@@ -729,14 +732,11 @@ class Reader extends State {
                                                                   color: isDarkTheme ? MyColors.white : MyColors.black),
                                                             ),
                                                           )
-                                                        : SizedBox(
-                                                            width: MediaQuery.of(context).size.width * 0.3,
-                                                            child: Text(
-                                                              entry.word,
-                                                              style: TextStyle(
-                                                                  overflow: TextOverflow.ellipsis,
-                                                                  color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                            ),
+                                                        : Text(
+                                                            entry.word,
+                                                            style: TextStyle(
+                                                                overflow: TextOverflow.ellipsis,
+                                                                color: isDarkTheme ? MyColors.white : MyColors.black),
                                                           ),
                                                     // TextForTable(
                                                     //   text: entry.word,
@@ -751,7 +751,7 @@ class Reader extends State {
                                                     // ),
                                                     forTable == false
                                                         ? SizedBox(
-                                                            width: MediaQuery.of(context).size.width * 0.22,
+                                                            width: MediaQuery.of(context).size.width * 0.275,
                                                             child: Text(
                                                               '[ ${entry.ipa} ]',
                                                               style: TextStyle(
@@ -760,7 +760,7 @@ class Reader extends State {
                                                             ),
                                                           )
                                                         : SizedBox(
-                                                            width: MediaQuery.of(context).size.width * 0.3,
+                                                            width: MediaQuery.of(context).size.width * 0.14,
                                                             child: Text(
                                                               '[ ${entry.ipa} ]',
                                                               style: TextStyle(
@@ -782,19 +782,19 @@ class Reader extends State {
                                                     //   ),
                                                     // ),
                                                     forTable == false
-                                                        ? SizedBox(
-                                                            width: MediaQuery.of(context).size.width * 0.3,
-                                                            child: Text(
-                                                              entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                              style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                        ? Padding(
+                                                            padding: const EdgeInsets.only(left: 10),
+                                                            child: SizedBox(
+                                                              width: MediaQuery.of(context).size.width * 0.5,
+                                                              child: Text(
+                                                                entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                                style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                              ),
                                                             ),
                                                           )
-                                                        : SizedBox(
-                                                            width: MediaQuery.of(context).size.width * 0.3,
-                                                            child: Text(
-                                                              entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                              style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                            ),
+                                                        : Text(
+                                                            entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                            style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                           ),
                                                   ),
                                                 ],
@@ -883,7 +883,7 @@ class Reader extends State {
                                                   Flexible(
                                                     child: InkWell(
                                                       onTap: () async {
-                                                        await _showWordInputDialog(entry.word, wordCount.wordEntries);
+                                                        await _showWordInputDialog(entry.word, wordCount.wordEntries, wordsMap);
                                                         setState(() {
                                                           entry.word;
                                                           entry.count;
@@ -976,7 +976,7 @@ class Reader extends State {
                   //                             DataColumn(
                   //                               label: Flexible(
                   //                                 child: Text15(
-                  //                                   text: 'Произношение',
+                  //                                   text: 'Транскрипция',
                   //                                   textColor: MyColors.black,
                   //                                 ),
                   //                               ),
@@ -1343,7 +1343,7 @@ class Reader extends State {
   //                               DataColumn(
   //                                 label: Expanded(
   //                                   child: Text15(
-  //                                     text: 'Произношение',
+  //                                     text: 'Транскрипция',
   //                                     textColor: MyColors.black,
   //                                   ),
   //                                 ),
@@ -1660,23 +1660,27 @@ class Reader extends State {
                               Container(
                                 width: MediaQuery.of(context).size.width,
                                 child: DataTable(
-                                  columnSpacing: 38.0,
+                                  columnSpacing: forTable == false ? 15 : 0,
                                   showBottomBorder: false,
                                   dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                   clipBehavior: Clip.hardEdge,
+                                  horizontalMargin: 10,
                                   columns: [
                                     DataColumn(
                                       label: forTable == false
-                                          ? const Text(
-                                              'Слово',
-                                              style: TextStyle(
-                                                fontFamily: 'Tektur',
-                                                fontSize: 15,
+                                          ? SizedBox(
+                                              width: MediaQuery.of(context).size.width * 0.19,
+                                              child: const Text(
+                                                'Слово',
+                                                style: TextStyle(
+                                                  fontFamily: 'Tektur',
+                                                  fontSize: 15,
+                                                ),
+                                                textAlign: TextAlign.left,
                                               ),
-                                              textAlign: TextAlign.left,
                                             )
                                           : SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.3,
+                                              width: MediaQuery.of(context).size.width * 0.315,
                                               child: const Text(
                                                 'Слово',
                                                 style: TextStyle(
@@ -1689,17 +1693,15 @@ class Reader extends State {
                                     ),
                                     DataColumn(
                                       label: forTable == false
-                                          ? const Expanded(
-                                              child: Text('Произношение',
-                                                  style: TextStyle(
-                                                    fontFamily: 'Tektur',
-                                                    fontSize: 15,
-                                                  ),
-                                                  textAlign: TextAlign.left),
-                                            )
+                                          ? const Text('Транскрипция',
+                                              style: TextStyle(
+                                                fontFamily: 'Tektur',
+                                                fontSize: 15,
+                                              ),
+                                              textAlign: TextAlign.left)
                                           : SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.28,
-                                              child: const Text('Произношение',
+                                              width: MediaQuery.of(context).size.width * 0.345,
+                                              child: const Text('Транскрипция',
                                                   style: TextStyle(
                                                     fontFamily: 'Tektur',
                                                     fontSize: 15,
@@ -1708,44 +1710,43 @@ class Reader extends State {
                                             ),
                                     ),
                                     DataColumn(
-                                      label: Expanded(
-                                        child: forTable == false
-                                            ? Text(
+                                      label: forTable == false
+                                          ? Text(
+                                              'Перевод',
+                                              style: const TextStyle(
+                                                fontFamily: 'Tektur',
+                                                fontSize: 15,
+                                              ),
+                                              textAlign: forTable == false ? TextAlign.right : TextAlign.left,
+                                            )
+                                          : SizedBox(
+                                              width: MediaQuery.of(context).size.width * 0.3,
+                                              child: Text(
                                                 'Перевод',
                                                 style: const TextStyle(
                                                   fontFamily: 'Tektur',
                                                   fontSize: 15,
                                                 ),
                                                 textAlign: forTable == false ? TextAlign.right : TextAlign.left,
-                                              )
-                                            : SizedBox(
-                                                width: MediaQuery.of(context).size.width * 0.3,
-                                                child: Text(
-                                                  'Перевод',
-                                                  style: const TextStyle(
-                                                    fontFamily: 'Tektur',
-                                                    fontSize: 15,
-                                                  ),
-                                                  textAlign: forTable == false ? TextAlign.right : TextAlign.left,
-                                                ),
                                               ),
-                                      ),
+                                            ),
                                     ),
                                   ],
                                   rows: [],
                                 ),
                               ),
                               Container(
-                                // width: MediaQuery.of(context).size.width * 0.9,
+                                width: forTable == true ? MediaQuery.of(context).size.width : null,
                                 height: forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.43,
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.vertical,
                                   child: DataTable(
-                                    columnSpacing: 30.0,
+                                    columnSpacing: forTable == false ? 33 : 0,
                                     showBottomBorder: false,
                                     dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                     clipBehavior: Clip.hardEdge,
                                     headingRowHeight: 0,
+                                    horizontalMargin: 10,
                                     columns: const [
                                       DataColumn(
                                         label: Flexible(
@@ -1783,20 +1784,17 @@ class Reader extends State {
                                             // ),
                                             forTable == false
                                                 ? SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.22,
+                                                    width: MediaQuery.of(context).size.width * 0.23,
                                                     child: Text(
                                                       entry.word,
                                                       style: TextStyle(
                                                           overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
                                                   )
-                                                : SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.3,
-                                                    child: Text(
-                                                      entry.word,
-                                                      style: TextStyle(
-                                                          overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                    ),
+                                                : Text(
+                                                    entry.word,
+                                                    style: TextStyle(
+                                                        overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                   ),
                                             // TextForTable(
                                             //   text: entry.word,
@@ -1811,7 +1809,7 @@ class Reader extends State {
                                             // ),
                                             forTable == false
                                                 ? SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.22,
+                                                    width: MediaQuery.of(context).size.width * 0.275,
                                                     child: Text(
                                                       '[ ${entry.ipa} ]',
                                                       style: TextStyle(
@@ -1819,7 +1817,7 @@ class Reader extends State {
                                                     ),
                                                   )
                                                 : SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.3,
+                                                    width: MediaQuery.of(context).size.width * 0.14,
                                                     child: Text(
                                                       '[ ${entry.ipa} ]',
                                                       style: TextStyle(
@@ -1840,19 +1838,19 @@ class Reader extends State {
                                             //   ),
                                             // ),
                                             forTable == false
-                                                ? SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.3,
-                                                    child: Text(
-                                                      entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                      style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                ? Padding(
+                                                    padding: const EdgeInsets.only(left: 10),
+                                                    child: SizedBox(
+                                                      width: MediaQuery.of(context).size.width * 0.5,
+                                                      child: Text(
+                                                        entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                        style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                      ),
                                                     ),
                                                   )
-                                                : SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.3,
-                                                    child: Text(
-                                                      entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                      style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                    ),
+                                                : Text(
+                                                    entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                    style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                   ),
                                           ),
                                         ],
@@ -2109,8 +2107,7 @@ class Reader extends State {
   //   );
   // }
 
-  Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries) async {
-    var wordsMap = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWordCounts();
+  Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries, Map<String, int> wordsMap) async {
     String searchText = '';
     List<String> filteredWords = [];
 
@@ -2416,7 +2413,7 @@ class Reader extends State {
             child: Stack(children: [
               SafeArea(
                 top: false,
-                minimum: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                minimum: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                 child: ListView.builder(
                     controller: _scrollController,
                     itemCount: 1,
