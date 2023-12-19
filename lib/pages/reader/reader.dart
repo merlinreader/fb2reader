@@ -68,7 +68,7 @@ class ReaderPage extends StatefulWidget {
   Reader createState() => Reader();
 }
 
-class Reader extends State {
+class Reader extends State with WidgetsBindingObserver {
   final Battery _battery = Battery();
   int _batteryLevel = 0;
   final ScrollController _scrollController = ScrollController();
@@ -111,7 +111,7 @@ class Reader extends State {
 
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
-
+    WidgetsBinding.instance!.addObserver(this);
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -158,10 +158,23 @@ class Reader extends State {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
+      print('Приложение свернуто');
+      await saveProgress();
+      await _savePageCountToLocalStorage();
+      await getPageCount();
+    } else if (state == AppLifecycleState.resumed) {
+      print('Приложение открыто');
+    }
+  }
+
+  @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([orientations[0]]);
     getPageCount();
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 

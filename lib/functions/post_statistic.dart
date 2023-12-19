@@ -34,9 +34,7 @@ getPageCount() async {
   String? imageDataJson = prefs.getString('booksKey');
   List<ImageInfo> books = [];
   if (imageDataJson != null) {
-    books = (jsonDecode(imageDataJson) as List)
-        .map((item) => ImageInfo.fromJson(item))
-        .toList();
+    books = (jsonDecode(imageDataJson) as List).map((item) => ImageInfo.fromJson(item)).toList();
   }
   List<WordCount> wordCounts = [];
   for (final entry in books) {
@@ -52,16 +50,14 @@ getPageCount() async {
   int index = 0;
   for (final entry in books) {
     int countFromStorage = prefs.getInt('pageCount-${entry.fileName}') ?? 0;
-    int lastCountFromStorage =
-        prefs.getInt('lastPageCount-${entry.fileName}') ?? 0;
+    int lastCountFromStorage = prefs.getInt('lastPageCount-${entry.fileName}') ?? 0;
     int diff = countFromStorage - lastCountFromStorage;
     diff = diff < 0 ? 0 : diff;
 
     if (wordCounts.isNotEmpty) {
       if (entry.fileName == wordCounts[index].filePath) {
         if (countFromStorage > 0) {
-          if (lastCountFromStorage != 0 &&
-              countFromStorage > lastCountFromStorage) {
+          if (lastCountFromStorage != 0 && countFromStorage > lastCountFromStorage) {
             final dataToAdd = <int, bool>{diff: true};
             dataToSend.addEntries(dataToAdd.entries);
           } else {
@@ -71,8 +67,7 @@ getPageCount() async {
         }
       }
     } else {
-      if (lastCountFromStorage != 0 &&
-          countFromStorage > lastCountFromStorage) {
+      if (lastCountFromStorage != 0 && countFromStorage > lastCountFromStorage) {
         final dataToAdd = <int, bool>{diff: false};
         dataToSend.addEntries(dataToAdd.entries);
       } else {
@@ -91,8 +86,7 @@ getPageCount() async {
   print('differenceInSeconds = $differenceInSeconds');
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
-  String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00")
-      .format(DateTime.now().toUtc());
+  String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
       double speed = pageSize / differenceInSeconds;
@@ -129,11 +123,9 @@ getPageCount() async {
     if (prefs.getString("deviceId") == null) {
       saveDeviceIdToLocalStorage();
     }
-    await postAnonymStatisticData(
-        pageCountSimpleMode, pageCountWordMode, nowDataUTC);
+    await postAnonymStatisticData(pageCountSimpleMode, pageCountWordMode, nowDataUTC);
   } else {
-    await postUserStatisticData(
-        token, pageCountSimpleMode, pageCountWordMode, nowDataUTC);
+    await postUserStatisticData(token, pageCountSimpleMode, pageCountWordMode, nowDataUTC);
   }
 }
 
@@ -144,8 +136,7 @@ void saveDeviceIdToLocalStorage() async {
   await prefs.setString('deviceId', deviceId);
 }
 
-Future<void> postUserStatisticData(String token, int pageCountSimpleMode,
-    int pageCountWordMode, String nowDataUTC) async {
+Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
   final Map<String, dynamic> data = {
     "pageCountSimpleMode": pageCountSimpleMode,
     "pageCountWordMode": pageCountWordMode,
@@ -162,16 +153,18 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode,
     },
     body: jsonEncode(data),
   );
-  print(jsonEncode(data));
-  // if (response.statusCode == 200) {
-  //   print('Данные отправлены успешно!');
-  // } else {
-  //   print('Ошибка при отправке данных: ${response.statusCode}');
-  // }
+  print(response.body);
+  if (response.statusCode == 200) {
+    print('Данные статистики ЮЗЕРА отправлены успешно!');
+  }
+  if (response.statusCode == 201) {
+    print('Данные статистики ЮЗЕРА отправлены успешно!');
+  } else {
+    print('Ошибка при отправке данных статистики ЮЗЕРА: ${response.reasonPhrase} (${response.statusCode})');
+  }
 }
 
-Future<void> postAnonymStatisticData(
-    int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
+Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
   final prefs = await SharedPreferences.getInstance();
   getLocation();
   final Map<String, dynamic> data = {
@@ -194,8 +187,11 @@ Future<void> postAnonymStatisticData(
   );
   print(response.body);
   if (response.statusCode == 200) {
-    print('Данные отправлены успешно!');
+    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
+  }
+  if (response.statusCode == 201) {
+    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
   } else {
-    print('Ошибка при отправке данных: ${response.statusCode}');
+    print('Ошибка при отправке данных статистики и местоположения МЕРЛИНА: ${response.reasonPhrase} (${response.statusCode})');
   }
 }
