@@ -149,11 +149,7 @@ class Country extends StatelessWidget {
             }
           }
 
-          return Center(
-              child: TextTektur(
-                  text: 'Нет данных о местоположении',
-                  fontsize: 16,
-                  textColor: MyColors.grey));
+          return Center(child: TextTektur(text: 'Нет данных о местоположении', fontsize: 16, textColor: MyColors.grey));
         }
         return const CircularProgressIndicator(
           color: MyColors.purple,
@@ -210,11 +206,7 @@ class Region extends StatelessWidget {
             }
           }
 
-          return Center(
-              child: TextTektur(
-                  text: 'Нет данных о местоположении',
-                  fontsize: 16,
-                  textColor: MyColors.grey));
+          return Center(child: TextTektur(text: 'Нет данных о местоположении', fontsize: 16, textColor: MyColors.grey));
         }
         return const CircularProgressIndicator(
           color: MyColors.purple,
@@ -272,11 +264,7 @@ class City extends StatelessWidget {
             }
           }
 
-          return Center(
-              child: TextTektur(
-                  text: 'Нет данных о местоположении',
-                  fontsize: 16,
-                  textColor: MyColors.grey));
+          return Center(child: TextTektur(text: 'Нет данных о местоположении', fontsize: 16, textColor: MyColors.grey));
         }
         return const CircularProgressIndicator(
           color: MyColors.purple,
@@ -304,12 +292,8 @@ class Swipe extends StatefulWidget {
 
   @override
   // ignore: no_logic_in_create_state
-  SwipeState createState() => SwipeState(
-      statDay: statDay,
-      statWeek: statWeek,
-      statMonth: statMonth,
-      statSemiAnnual: statSemiAnnual,
-      statAnnual: statAnnual);
+  SwipeState createState() =>
+      SwipeState(statDay: statDay, statWeek: statWeek, statMonth: statMonth, statSemiAnnual: statSemiAnnual, statAnnual: statAnnual);
 }
 
 class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
@@ -355,24 +339,17 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        tabButton,
-        isActive
-            ? Container(
-                height: 2,
-                color: MyColors.purple,
-                width: currentIndex == 0
-                    ? 28
-                    : currentIndex == 1
-                        ? 41
-                        : currentIndex == 2
-                            ? 35
-                            : currentIndex == 3
-                                ? 46
-                                : currentIndex == 4
-                                    ? 20
-                                    : 0,
-              )
-            : Container(),
+        Container(
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                width: 2.0,
+                color: isActive ? MyColors.purple : Colors.transparent,
+              ),
+            ),
+          ),
+          child: tabButton,
+        ),
       ],
     );
   }
@@ -386,7 +363,6 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // const SizedBox(width: 24),
               buildTab(
                 Container(
                   //width: 28,
@@ -400,14 +376,12 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                     },
                     child: Text14Bold(
                       text: 'День',
-                      textColor:
-                          currentIndex == 0 ? MyColors.black : MyColors.grey,
+                      textColor: currentIndex == 0 ? MyColors.black : MyColors.grey,
                     ),
                   ),
                 ),
                 currentIndex == 0,
               ),
-              // const SizedBox(width: 16),
               buildTab(
                 Container(
                   //width: 43,
@@ -421,14 +395,12 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                     },
                     child: Text14Bold(
                       text: 'Неделя',
-                      textColor:
-                          currentIndex == 1 ? MyColors.black : MyColors.grey,
+                      textColor: currentIndex == 1 ? MyColors.black : MyColors.grey,
                     ),
                   ),
                 ),
                 currentIndex == 1,
               ),
-              // const SizedBox(width: 16),
               buildTab(
                 Container(
                   //width: 37,
@@ -442,14 +414,12 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                     },
                     child: Text14Bold(
                       text: 'Месяц',
-                      textColor:
-                          currentIndex == 2 ? MyColors.black : MyColors.grey,
+                      textColor: currentIndex == 2 ? MyColors.black : MyColors.grey,
                     ),
                   ),
                 ),
                 currentIndex == 2,
               ),
-              // const SizedBox(width: 16),
               buildTab(
                 Container(
                   //width: 50,
@@ -463,14 +433,12 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                     },
                     child: Text14Bold(
                       text: 'Полгода',
-                      textColor:
-                          currentIndex == 3 ? MyColors.black : MyColors.grey,
+                      textColor: currentIndex == 3 ? MyColors.black : MyColors.grey,
                     ),
                   ),
                 ),
                 currentIndex == 3,
               ),
-              // const SizedBox(width: 16),
               buildTab(
                 Container(
                   width: 20,
@@ -484,8 +452,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                     },
                     child: Text14Bold(
                       text: 'Год',
-                      textColor:
-                          currentIndex == 4 ? MyColors.black : MyColors.grey,
+                      textColor: currentIndex == 4 ? MyColors.black : MyColors.grey,
                     ),
                   ),
                 ),
