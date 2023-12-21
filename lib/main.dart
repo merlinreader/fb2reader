@@ -8,6 +8,7 @@ import 'package:merlin/UI/router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uni_links/uni_links.dart';
+import 'package:merlin/domain/data_providers/token_provider.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 import 'package:brightness/brightness.dart';
 
@@ -29,6 +30,13 @@ class MerlinApp extends StatefulWidget {
 
 class _MerlinAppState extends State<MerlinApp> {
   final _router = AppRouter();
+  String? _link = 'unknown';
+  @override
+  void initState() {
+    super.initState();
+    initUniLinks();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
@@ -42,6 +50,40 @@ class _MerlinAppState extends State<MerlinApp> {
         );
       },
     );
+  }
+
+  Future<void> initUniLinks() async {
+    // Подписываемся на поток приходящих ссылок
+    linkStream.listen((String? link) {
+      // Если ссылка есть, обновляем состояние приложения
+      if (!mounted) return;
+      setState(() {
+        _link = link;
+      });
+    }, onError: (err) {
+      // Обработка ошибок
+      if (!mounted) return;
+      setState(() {
+        _link = 'Failed to get latest link: $err';
+      });
+    });
+
+    // Получение начальной ссылки
+    try {
+      String? initialLink = await getInitialLink();
+      if (initialLink != null) {
+        setState(() {
+          Uri uri = Uri.parse(initialLink);
+          //token = uri.queryParameters['token']!;
+          TokenProvider().setToken(uri.queryParameters['token']!);
+          print('СОХРАНЯЮ ТАКОЙ ТОКЕН В ЛОКАЛКУ: ${TokenProvider().getToken}');
+        });
+      }
+    } catch (err) {
+      setState(() {
+        _link = 'Failed to get initial link: $err';
+      });
+    }
   }
 }
 

@@ -8,6 +8,7 @@ import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/ads/network_provider.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
 import 'package:merlin/domain/data_providers/avatar_provider.dart';
+import 'package:merlin/domain/data_providers/token_provider.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/pages/profile/dialogs/choose_avatar_dialog/choose_avatar_dialog.dart';
 import 'package:merlin/pages/profile/profile_view_model.dart';
@@ -56,7 +57,6 @@ class _ProfilePage extends State<ProfilePage> {
   String? selectedCity;
 
   String token = '';
-  late String getToken;
   String firstName = 'Merlin';
   List<AchievementStatus> getAchievements = [];
   late var achievements;
@@ -70,18 +70,18 @@ class _ProfilePage extends State<ProfilePage> {
   late final AdRequestConfiguration _adRequestConfiguration = AdRequestConfiguration(adUnitId: adUnitId);
   var isLoading = false;
 
-  // кол-во доступнх юзеру слов
+  // кол-во доступных юзеру слов
   int words = 10;
   late int getWords;
 
   // ignore: unused_field
   String? _link = 'unknown';
+
   @override
   void initState() {
     super.initState();
-    initUniLinks();
+    //initUniLinks();
     getTokenFromLocalStorage();
-
     getFirstNameFromLocalStorage();
 
     getWordsFromLocalStorage();
@@ -115,6 +115,14 @@ class _ProfilePage extends State<ProfilePage> {
         //     'code: ${error.code}, description: ${error.description}');
       },
     );
+  }
+
+  Future<void> getTokenFromLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString('token') ?? token;
+      print('ТОКЕН ИЗ ЛОКЛКИ: $token');
+    });
   }
 
   Future<void> _showRewardedAd() async {
@@ -185,58 +193,12 @@ class _ProfilePage extends State<ProfilePage> {
     }
   }
 
-  Future<void> getTokenFromLocalStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      getToken = prefs.getString('token') ?? '';
-      token = getToken;
-    });
-  }
-
-  Future<void> initUniLinks() async {
-    // Подписываемся на поток приходящих ссылок
-    linkStream.listen((String? link) {
-      // Если ссылка есть, обновляем состояние приложения
-      if (!mounted) return;
-      setState(() {
-        _link = link;
-      });
-    }, onError: (err) {
-      // Обработка ошибок
-      if (!mounted) return;
-      setState(() {
-        _link = 'Failed to get latest link: $err';
-      });
-    });
-
-    // Получение начальной ссылки
-    try {
-      String? initialLink = await getInitialLink();
-      if (initialLink != null) {
-        setState(() {
-          Uri uri = Uri.parse(initialLink);
-          token = uri.queryParameters['token']!;
-          saveTokenToLocalStorage(token);
-        });
-      }
-    } catch (err) {
-      setState(() {
-        _link = 'Failed to get initial link: $err';
-      });
-    }
-  }
-
-  void saveTokenToLocalStorage(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('token', token);
-  }
-
   Future<void> getFirstNameFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       var getFirstName = prefs.getString('firstName') ?? firstName;
       firstName = getFirstName;
-      print(firstName);
+      print('имя из локалки $firstName');
     });
   }
 
@@ -303,11 +265,8 @@ class _ProfilePage extends State<ProfilePage> {
               textColor: MyColors.black,
             ),
             FutureBuilder(
-              future: getSavedLocation(),
-              builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-                if (!snapshot.hasData) {
-                  return const Text('Мы тебя не видим, включи геолокацию');
-                } else {
+                future: getSavedLocation(),
+                builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
                   final locationData = snapshot.data ?? 'Нет данных о местоположении';
                   return selectedCountry != '' && selectedState != '' && selectedCity != ''
                       ? Row(
@@ -336,9 +295,7 @@ class _ProfilePage extends State<ProfilePage> {
                                 )),
                           ],
                         );
-                }
-              },
-            )
+                })
           ])),
           const SizedBox(height: 81),
           token == ''
