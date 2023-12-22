@@ -10,7 +10,6 @@ import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/domain/data_providers/color_provider.dart';
-import 'package:merlin/functions/all_words.dart';
 import 'package:merlin/functions/post_statistic.dart';
 import 'package:merlin/main.dart';
 import 'package:merlin/pages/wordmode/models/word_entry.dart';
@@ -489,8 +488,7 @@ class Reader extends State with WidgetsBindingObserver {
       print('Ищем слово: ${entry.word}');
 
       // Создаем регулярное выражение для поиска слова в тексте
-      final wordRegExp = RegExp("\\b${entry.word}\\b", caseSensitive: false, unicode: true);
-      // final wordRegExp = RegExp(entry.word, caseSensitive: false, unicode: true);
+      final wordRegExp = RegExp(" ${entry.word} ", caseSensitive: false, unicode: true);
 
       // Ищем совпадения и заменяем каждое из них
       updatedText = updatedText.replaceAllMapped(entry.word, (match) {
@@ -537,7 +535,7 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   showTableDialog(BuildContext context, WordCount wordCount, bool confirm) async {
-    var wordsMap = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWordCounts();
+    var wordsMap = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWordCounts();
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -2172,7 +2170,13 @@ class Reader extends State with WidgetsBindingObserver {
                                   onChanged: (value) {
                                     setState(() {
                                       searchText = value.toLowerCase();
+                                      // filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
                                       filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
+
+                                      filteredWords.sort((a, b) => a.compareTo(b)); // Сортировка по вводу пользователя
+
+                                      // Сортировка по убыванию количества повторений
+                                      filteredWords.sort((a, b) => wordsMap[b]!.compareTo(wordsMap[a]!));
                                     });
                                   },
                                   decoration: InputDecoration(
@@ -2272,7 +2276,7 @@ class Reader extends State with WidgetsBindingObserver {
   Future<void> addNewWord(List<WordEntry> wordEntries, WordCount wordCount, int length) async {
     final prefs = await SharedPreferences.getInstance();
 
-    List<String> words = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
+    List<String> words = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
     Set<String> uniqueSet = <String>{};
     List<String> result = [];
     for (String item in words.reversed) {

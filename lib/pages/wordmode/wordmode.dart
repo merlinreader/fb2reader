@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:merlin/functions/all_words.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -33,6 +32,7 @@ class WordCount {
 
   int _callCount = 0;
   DateTime? _lastCallTimestamp;
+  List<String> allNouns = [];
 
   Future<void> updateCallInfo() async {
     final prefs = await SharedPreferences.getInstance();
@@ -109,8 +109,7 @@ class WordCount {
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
       // if (timeElapsed.inHours >= 24) {
       if (timeElapsed.inMicroseconds >= 1) {
-        List<String> dictionary = GlobalData().wordsList;
-        await countWordsWithOffset(dictionary);
+        await countWordsWithOffset();
 
         await updateCallInfo();
       } else {
@@ -122,24 +121,25 @@ class WordCount {
         return;
       }
     } else {
-      List<String> dictionary = GlobalData().wordsList;
-
-      await countWordsWithOffset(dictionary);
+      await countWordsWithOffset();
       await updateCallInfo();
     }
   }
 
-  Map<String, int> getAllWordCounts() {
+  Future<Map<String, int>> getAllWordCounts() async {
     final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
-    final words = textWithoutPunctuation.split(RegExp(r'\s+'));
-    List<String> dictionary = GlobalData().wordsList;
+    final wordsDirt = textWithoutPunctuation.split(RegExp(r'\s+'));
+    final words = await getAllNouns();
 
     final wordCounts = <String, int>{};
 
-    for (final word in words) {
-      final normalizedWord = word.toLowerCase();
-      if (normalizedWord.length > 1 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
-        if (dictionary.contains(normalizedWord)) {
+    for (final dirtyWord in wordsDirt) {
+      final normalizedDirtyWord = dirtyWord.toLowerCase();
+
+      if (words.contains(normalizedDirtyWord)) {
+        final normalizedWord = normalizedDirtyWord.toLowerCase();
+
+        if (normalizedWord.length > 1 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
           // Проверяем, есть ли слово в словаре
           if (wordCounts.containsKey(normalizedWord)) {
             wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
@@ -153,7 +153,7 @@ class WordCount {
     return wordCounts;
   }
 
-  List<String> getAllWords() {
+  Future<List<String>> getAllWords() async {
     final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():"\\"]'), '');
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
 
@@ -243,22 +243,41 @@ class WordCount {
   //   this.wordEntries = wordEntries;
   // }
 
-  Future<void> countWordsWithOffset(List<String> dictionary) async {
-    final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():\[\]«»]'), '');
-    final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+  Future<List<String>> getAllNouns() async {
+    final words = await getAllWords();
+    print('words = $words');
+    print('words.length = ${words.length}');
+    String url = 'https://fb2.cloud.leam.pro/api/account/words/nouns';
 
-    final wordCounts = <String, int>{};
+    var response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'words': words}), // Преобразуйте объект в JSON-строку
+    );
+    print('------');
+    print(response.body);
 
-    for (final word in words) {
-      final normalizedWord = word.toLowerCase();
-      if (normalizedWord.length > 3 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
-        if (wordCounts.containsKey(normalizedWord)) {
-          wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
-        } else {
-          wordCounts[normalizedWord] = 1;
-        }
-      }
+    if (response.statusCode == 200) {
+      // Преобразование ответа в Map<String, dynamic>
+      Map<String, dynamic> responseData = json.decode(response.body);
+      // Получение списка существительных из ключа "words"
+      List<String> nouns = List<String>.from(responseData['words']);
+      print('\tnouns = $nouns');
+      return nouns;
+    } else {
+      // Обработка ошибки, например, вывод сообщения об ошибке
+      throw Exception('Failed to load nouns');
     }
+  }
+
+  Future<void> countWordsWithOffset() async {
+    // final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():\[\]«»]'), '');
+    // final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+
+    final wordCounts = await getAllWordCounts();
 
     final sortedWordCounts = wordCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
@@ -280,42 +299,15 @@ class WordCount {
     print('sortedWordCounts.length = ${sortedWordCounts.length}');
 
     final wordEntriesFutures = <Future<WordEntry>>[];
-    Set<String> addedWords = <String>{};
-
     for (var i = start; i < end; i++) {
       final entry = sortedWordCounts[i];
 
-      if (dictionary.contains(entry.key) && !addedWords.contains(entry.key)) {
-        wordEntriesFutures.add(
-          createWordEntry(entry.key, entry.value),
-        );
-        addedWords.add(entry.key); // Добавляем слово в Set добавленных слов
-      } else {
-        // Ищем первое слово из sortedWordCounts, которое есть в словаре
-        for (var j = i + 1; j < sortedWordCounts.length; j++) {
-          if (dictionary.contains(sortedWordCounts[j].key) && !addedWords.contains(sortedWordCounts[j].key)) {
-            wordEntriesFutures.add(
-              createWordEntry(sortedWordCounts[j].key, sortedWordCounts[j].value),
-            );
-            addedWords.add(sortedWordCounts[j].key); // Добавляем слово в Set добавленных слов
-            break; // Нашли слово, добавили в список и выходим из цикла
-          }
-        }
-      }
+      wordEntriesFutures.add(
+        createWordEntry(entry.key, entry.value),
+      );
     }
-
     final wordEntries = await Future.wait(wordEntriesFutures);
 
-    // final wordEntriesFutures = <Future<WordEntry>>[];
-    // for (var i = start; i < end; i++) {
-    //   final entry = sortedWordCounts[i];
-
-    //   wordEntriesFutures.add(
-    //     createWordEntry(entry.key, entry.value),
-    //   );
-    // }
-    // final wordEntries = await Future.wait(wordEntriesFutures);
-    // prefs.setInt('$filePath-start', start);
     prefs.setInt('$filePath-end', end);
     prefs.setInt('words', 10);
     // Присваиваем wordEntries к текущим wordEntries
@@ -421,7 +413,7 @@ class WordCount {
     prefs.setInt('callCount', _callCount);
 
     int getWords = prefs.getInt('words') ?? 10;
-    prefs.setInt('$filePath-end', 0 + getWords);
+    prefs.setInt('$filePath-end', 0);
     prefs.setInt('words', 10);
     prefs.remove('lastCallTimestamp');
   }
