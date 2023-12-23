@@ -115,9 +115,10 @@ class TextForTable extends StatelessWidget {
   const TextForTable({super.key, required this.text, required this.textColor});
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.start,
-        //TextStyle(fontFamily: 'Roboto', color: textColor)
-        );
+    return Text(
+      text, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.left,
+      //TextStyle(fontFamily: 'Roboto', color: textColor)
+    );
   }
 }
 

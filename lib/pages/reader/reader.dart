@@ -863,6 +863,7 @@ class Reader extends State with WidgetsBindingObserver {
                                         child: DataTable(
                                           columnSpacing: 30.0,
                                           showBottomBorder: false,
+                                          horizontalMargin: 10,
                                           dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                           columns: const [
                                             DataColumn(
@@ -2191,6 +2192,7 @@ class Reader extends State with WidgetsBindingObserver {
                                   child: DataTable(
                                     columnSpacing: 38,
                                     showBottomBorder: false,
+                                    horizontalMargin: 10,
                                     dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                     columns: const [
                                       DataColumn(
@@ -2212,6 +2214,7 @@ class Reader extends State with WidgetsBindingObserver {
                                       (index) => DataRow(
                                         cells: [
                                           DataCell(TextButton(
+                                            style: const ButtonStyle(alignment: Alignment.centerLeft),
                                             onPressed: () async {
                                               List<String> test = [filteredWords[index]];
                                               print(test);
