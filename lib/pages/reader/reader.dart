@@ -479,32 +479,25 @@ class Reader extends State with WidgetsBindingObserver {
         await getDataFromLocalStorage('textKey');
       }
     }
-    // Копируем исходный текст в мутабельную переменную для замен
     String updatedText = getText;
 
-    // Перебираем список слов
     for (var entry in wordEntries) {
-      // Печатаем, какое слово мы ищем
       print('Ищем слово: ${entry.word}');
 
-      // Создаем регулярное выражение для поиска слова в тексте
-      final wordRegExp = RegExp(" ${entry.word} ", caseSensitive: false, unicode: true);
+      var escapedWord = RegExp.escape(entry.word);
+      var pattern = '(?<!\\p{L})$escapedWord(?!\\p{L})';
+      var wordRegExp = RegExp(pattern, caseSensitive: false, unicode: true);
 
-      // Ищем совпадения и заменяем каждое из них
-      updatedText = updatedText.replaceAllMapped(entry.word, (match) {
-        // Выводим найденные совпадения
+      updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
         final matchedWord = match.group(0)!;
         print('Найдено совпадение: $matchedWord');
-        // Заменяем слово, сохраняя исходный регистр
         return matchCase(matchedWord, entry.translation ?? '');
       });
-      updatedText = updatedText.replaceAllMapped(entry.word[0].toUpperCase() + entry.word.substring(1).toLowerCase(), (match) {
-        // Выводим найденные совпадения
-        final matchedWord = match.group(0)!;
-        print('Найдено совпадение: $matchedWord');
-        // Заменяем слово, сохраняя исходный регистр
-        return matchCase(matchedWord, entry.translation ?? '');
-      });
+      // updatedText = updatedText.replaceAllMapped(entry.word[0].toUpperCase() + entry.word.substring(1).toLowerCase(), (match) {
+      //   final matchedWord = match.group(0)!;
+      //   print('Найдено совпадение: ${matchedWord.characters}');
+      //   return matchCase(matchedWord, entry.translation ?? '');
+      // });
     }
 
     await prefs.setString('lastCallTranslate', DateTime.now().toIso8601String());
