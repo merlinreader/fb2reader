@@ -129,7 +129,8 @@ class WordCount {
   Future<Map<String, int>> getAllWordCounts() async {
     final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
     final wordsDirt = textWithoutPunctuation.split(RegExp(r'\s+'));
-    final words = await getAllNouns();
+    final words = textWithoutPunctuation.split(RegExp(r'\s+'));
+    // final words = await getAllNouns();
 
     final wordCounts = <String, int>{};
 
@@ -243,6 +244,27 @@ class WordCount {
   //   this.wordEntries = wordEntries;
   // }
 
+  Future<List<String>> getNounsByList(List<String> inputWords) async {
+    print('getNounsByList inputWords $inputWords');
+    String url = 'https://fb2.cloud.leam.pro/api/account/words/nouns';
+    var response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'words': inputWords}), // Преобразуйте объект в JSON-строку
+    );
+    print('getNounsByList response ${response.body}');
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseData = json.decode(response.body);
+      List<String> nouns = List<String>.from(responseData['words']);
+      return nouns;
+    } else {
+      throw Exception('Failed to load nouns');
+    }
+  }
+
   Future<List<String>> getAllNouns() async {
     final words = await getAllWords();
     print('words = $words');
@@ -274,44 +296,61 @@ class WordCount {
   }
 
   Future<void> countWordsWithOffset() async {
-    // final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():\[\]«»]'), '');
-    // final words = textWithoutPunctuation.split(RegExp(r'\s+'));
-
     final wordCounts = await getAllWordCounts();
-
     final sortedWordCounts = wordCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
 
     final prefs = await SharedPreferences.getInstance();
     int getWords = prefs.getInt('words') ?? 10;
     int start = prefs.getInt('$filePath-end') ?? 0;
-    int end = prefs.getInt('$filePath-end') ?? getWords;
-
-    print('getWords = $getWords');
-
-    // Убедимся, что конец в пределах допустимого
-    end = end + getWords;
+    int end = start + getWords;
     end = min(end, sortedWordCounts.length);
 
+    print('getWords = $getWords');
     print('start = $start');
     print('end = $end');
     print('end - start = ${end - start}');
-
     print('sortedWordCounts.length = ${sortedWordCounts.length}');
 
-    final wordEntriesFutures = <Future<WordEntry>>[];
-    for (var i = start; i < end; i++) {
-      final entry = sortedWordCounts[i];
+    List<String> checkWords = [];
+    int currentIndex = start;
 
-      wordEntriesFutures.add(
-        createWordEntry(entry.key, entry.value),
-      );
+    while (checkWords.length < end - start && currentIndex < sortedWordCounts.length) {
+      List<String> newWords = [];
+
+      for (; currentIndex < sortedWordCounts.length && newWords.length < (end - start - checkWords.length); currentIndex++) {
+        newWords.add(sortedWordCounts[currentIndex].key);
+      }
+
+      List<String> newNouns = await getNounsByList(newWords);
+      checkWords.addAll(newNouns);
+
+      // Если новых существительных нет, и все слова были проверены, прерываем цикл
+      if (newNouns.isEmpty && currentIndex >= sortedWordCounts.length) {
+        break;
+      }
     }
+
+    checkWords = checkWords.sublist(0, min(checkWords.length, end - start)); // Обрезаем список до нужной длины
+ 
+    final wordEntriesFutures = <Future<WordEntry>>[];
+    for (var noun in checkWords) {
+      var correspondingEntry = sortedWordCounts.firstWhere(
+        (entry) => entry.key == noun,
+        orElse: () => MapEntry<String, int>("NotFound", -1),
+      );
+
+      if (correspondingEntry.key != "NotFound") {
+        wordEntriesFutures.add(createWordEntry(noun, correspondingEntry.value));
+      } else {
+        print("No matching entry for noun: $noun");
+      }
+    }
+
     final wordEntries = await Future.wait(wordEntriesFutures);
 
-    prefs.setInt('$filePath-end', end);
-    prefs.setInt('words', 10);
-    // Присваиваем wordEntries к текущим wordEntries
-    this.wordEntries = wordEntries;
+    prefs.setInt('$filePath-end', min(end, sortedWordCounts.length));
+    prefs.setInt('words', getWords);
+    this.wordEntries = wordEntries; // Присваиваем wordEntries к текущим wordEntries
   }
 
   Future<void> countWordsWithOffsetNoTrans() async {
@@ -438,7 +477,7 @@ class AgreementDialog extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               'Хотите выбрать $getWords слов?',
-              style: TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16),
             ),
           ),
           actions: [
