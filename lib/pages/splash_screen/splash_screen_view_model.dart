@@ -47,7 +47,6 @@ class SplashSreenViewModel {
           .body);
       firstName = data['firstName'].toString();
       print('имя из запроса $firstName');
-      Fluttertoast.showToast(msg: 'имя из запроса $firstName');
       avatarFromServer = data['avatar']['picture'];
       prefs.setString('firstName', firstName);
       try {
