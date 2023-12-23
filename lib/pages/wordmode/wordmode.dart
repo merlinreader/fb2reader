@@ -128,25 +128,17 @@ class WordCount {
 
   Future<Map<String, int>> getAllWordCounts() async {
     final textWithoutPunctuation = fileText.replaceAll(RegExp(r'[.,;!?():]'), '');
-    final wordsDirt = textWithoutPunctuation.split(RegExp(r'\s+'));
     final words = textWithoutPunctuation.split(RegExp(r'\s+'));
-    // final words = await getAllNouns();
 
     final wordCounts = <String, int>{};
 
-    for (final dirtyWord in wordsDirt) {
-      final normalizedDirtyWord = dirtyWord.toLowerCase();
-
-      if (words.contains(normalizedDirtyWord)) {
-        final normalizedWord = normalizedDirtyWord.toLowerCase();
-
-        if (normalizedWord.length > 1 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
-          // Проверяем, есть ли слово в словаре
-          if (wordCounts.containsKey(normalizedWord)) {
-            wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
-          } else {
-            wordCounts[normalizedWord] = 1;
-          }
+    for (final word in words) {
+      final normalizedWord = word.toLowerCase();
+      if (normalizedWord.length > 1 && !RegExp(r'[0-9]').hasMatch(normalizedWord) && normalizedWord != '-') {
+        if (wordCounts.containsKey(normalizedWord)) {
+          wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
+        } else {
+          wordCounts[normalizedWord] = 1;
         }
       }
     }
@@ -331,7 +323,7 @@ class WordCount {
     }
 
     checkWords = checkWords.sublist(0, min(checkWords.length, end - start)); // Обрезаем список до нужной длины
- 
+
     final wordEntriesFutures = <Future<WordEntry>>[];
     for (var noun in checkWords) {
       var correspondingEntry = sortedWordCounts.firstWhere(

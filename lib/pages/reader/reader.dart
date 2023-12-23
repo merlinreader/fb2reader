@@ -591,6 +591,8 @@ class Reader extends State with WidgetsBindingObserver {
                                             padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                             icon: const Icon(Icons.close),
                                             onPressed: () async {
+                                              await saveWordCountToLocalstorage(wordCount);
+                                              replaceWordsWithTranslation(wordCount.wordEntries);
                                               Navigator.pop(context);
                                             },
                                           ),
@@ -2218,8 +2220,17 @@ class Reader extends State with WidgetsBindingObserver {
                                         cells: [
                                           DataCell(TextButton(
                                             onPressed: () async {
-                                              await updateWordInTable(word, filteredWords[index], wordEntries);
-                                              Navigator.of(context).pop();
+                                              List<String> test = [filteredWords[index]];
+                                              print(test);
+                                              test = await WordCount().getNounsByList(test);
+                                              print('after $test');
+                                              if (test.length != 1) {
+                                                Fluttertoast.showToast(msg: 'Данное слово не существительное');
+                                                return;
+                                              } else {
+                                                await updateWordInTable(word, filteredWords[index], wordEntries);
+                                                Navigator.of(context).pop();
+                                              }
                                             },
                                             child: TextForTable(
                                               text: filteredWords[index],
