@@ -69,9 +69,6 @@ class _ProfilePage extends State<ProfilePage> {
   int words = 10;
   late int getWords;
 
-  // ignore: unused_field
-  final String _link = 'unknown';
-
   @override
   void initState() {
     super.initState();

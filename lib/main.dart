@@ -6,8 +6,6 @@ import 'package:merlin/UI/router.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uni_links/uni_links.dart';
-import 'package:merlin/domain/data_providers/token_provider.dart';
 
 void main() {
   runApp(
@@ -28,11 +26,11 @@ class MerlinApp extends StatefulWidget {
 class _MerlinAppState extends State<MerlinApp> {
   final _router = AppRouter();
   // ignore: unused_field
-  String? _link = 'unknown';
+
   @override
   void initState() {
     super.initState();
-    initUniLinks();
+    //initUniLinks();
   }
 
   @override
@@ -48,40 +46,6 @@ class _MerlinAppState extends State<MerlinApp> {
         );
       },
     );
-  }
-
-  Future<void> initUniLinks() async {
-    // Подписываемся на поток приходящих ссылок
-    linkStream.listen((String? link) {
-      // Если ссылка есть, обновляем состояние приложения
-      if (!mounted) return;
-      setState(() {
-        _link = link;
-      });
-    }, onError: (err) {
-      // Обработка ошибок
-      if (!mounted) return;
-      setState(() {
-        _link = 'Failed to get latest link: $err';
-      });
-    });
-
-    // Получение начальной ссылки
-    try {
-      String? initialLink = await getInitialLink();
-      if (initialLink != null) {
-        setState(() {
-          Uri uri = Uri.parse(initialLink);
-          //token = uri.queryParameters['token']!;
-          TokenProvider().setToken(uri.queryParameters['token']!);
-          debugPrint('СОХРАНЯЮ ТАКОЙ ТОКЕН В ЛОКАЛКУ: ${TokenProvider().getToken}');
-        });
-      }
-    } catch (err) {
-      setState(() {
-        _link = 'Failed to get initial link: $err';
-      });
-    }
   }
 }
 

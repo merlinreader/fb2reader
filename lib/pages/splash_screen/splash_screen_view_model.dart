@@ -10,6 +10,7 @@ import 'package:merlin/domain/data_providers/avatar_provider.dart';
 import 'package:merlin/domain/data_providers/token_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:uni_links/uni_links.dart';
 
 class SplashSreenViewModel {
   final BuildContext context;
@@ -19,13 +20,49 @@ class SplashSreenViewModel {
   }
 
   Future<void> _initAsync() async {
+    await initUniLinks();
     await AvatarProvider.initAsync();
     await TokenProvider().initAsync();
     debugPrint('загрузка');
     await getFirstName();
     debugPrint('сейчас я на загрузке');
-    //await Future.delayed(Duration(seconds: 5));
+    await Future.delayed(Duration(seconds: 2));
     Navigator.pushReplacementNamed(context, RouteNames.main);
+  }
+
+  String? _link = 'unknown';
+  Future<void> initUniLinks() async {
+    // Подписываемся на поток приходящих ссылок
+    linkStream.listen((String? link) {
+      // Если ссылка есть, обновляем состояние приложения
+      _link = link;
+    }, onError: (err) {
+      // Обработка ошибок
+      _link = 'Failed to get latest link: $err';
+    });
+
+    // Получение начальной ссылки
+    try {
+      String? initialLink = await getInitialLink();
+      // Fluttertoast.showToast(
+      //   msg: 'LINK: $initialLink',
+      //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+      //   gravity: ToastGravity.BOTTOM,
+      // );
+      if (initialLink != null) {
+        Uri uri = Uri.parse(initialLink);
+        //token = uri.queryParameters['token']!;
+        TokenProvider().setToken(uri.queryParameters['token']!);
+        // Fluttertoast.showToast(
+        //   msg: 'СОХРАНЯЮ ТАКОЙ ТОКЕН В ЛОКАЛКУ: ${uri.queryParameters['token']!}',
+        //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        //   gravity: ToastGravity.BOTTOM,
+        // );
+        debugPrint('СОХРАНЯЮ ТАКОЙ ТОКЕН В ЛОКАЛКУ: ${TokenProvider().getToken}');
+      }
+    } catch (err) {
+      _link = 'Failed to get initial link: $err';
+    }
   }
 
   Future<void> getFirstName() async {
@@ -36,6 +73,11 @@ class SplashSreenViewModel {
     final prefs = await SharedPreferences.getInstance();
     String? token = await TokenProvider().getToken();
     debugPrint('сейчас я на запросе');
+    // Fluttertoast.showToast(
+    //   msg: 'сейчас я на запросе, токен: $token',
+    //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+    //   gravity: ToastGravity.BOTTOM,
+    // );
     debugPrint('вот токен::::::::::::::::::::::::::::::::::::::::::::::::::::::::=$token');
     if (token != null) {
       String url = 'https://fb2.cloud.leam.pro/api/account/';
@@ -45,6 +87,11 @@ class SplashSreenViewModel {
           .body);
       firstName = data['firstName'].toString();
       debugPrint('имя из запроса $firstName');
+      // Fluttertoast.showToast(
+      //   msg: 'имя из запроса $firstName',
+      //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+      //   gravity: ToastGravity.BOTTOM,
+      // );
       avatarFromServer = data['avatar']['picture'];
       prefs.setString('firstName', firstName);
       try {
