@@ -280,7 +280,7 @@ class Reader extends State with WidgetsBindingObserver {
     }
   }
 
-  void _updateScrollPercentage() async {
+  void _updateScrollPercentage() {
     if (_scrollController.position.maxScrollExtent == 0) {
       return;
     }
@@ -296,7 +296,6 @@ class Reader extends State with WidgetsBindingObserver {
       // print('lastPageCount $lastPageCount');
       // print('pageCount $pageCount');
     });
-    await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
   }
 
   Color textColor = MyColors.black;
@@ -2488,99 +2487,13 @@ class Reader extends State with WidgetsBindingObserver {
     await prefs.setBool('isDarkTheme', isDarkTheme);
   }
 
-  Future<void> saveData(BuildContext context) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withAlpha(50),
-      builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: Center(
-            child: Container(
-              padding: const EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: const Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(right: 16),
-                        child: Text16(text: 'Сохраняется прогресс...', textColor: MyColors.black),
-                      ),
-                      CircularProgressIndicator(
-                        color: MyColors.purple,
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-
-    await saveProgress();
-    await _savePageCountToLocalStorage();
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Замена диалогового окна на галочку
-    Navigator.pop(context); // Закрыть диалог загрузки
-
-    // Показать окно с галочкой
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black.withAlpha(50),
-      builder: (BuildContext context) {
-        return Center(
-          child: Container(
-            padding: const EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(right: 16),
-                      child: Text16(
-                        text: 'Данные сохранены',
-                        textColor: MyColors.black,
-                      ),
-                    ),
-                    Icon(Icons.check, size: 36, color: Colors.green),
-                  ],
-                )
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    // Ждем некоторое время, чтобы пользователь мог увидеть окно с галочкой
-    await Future.delayed(const Duration(seconds: 1));
-
-    // Закрыть окно с галочкой
-    Navigator.pop(context, true);
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        await saveData(context);
+        await saveProgress();
+        await _savePageCountToLocalStorage();
+        await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
         Navigator.pop(context, true);
         return true;
       },
@@ -2593,7 +2506,9 @@ class Reader extends State with WidgetsBindingObserver {
                   child: AppBar(
                       leading: GestureDetector(
                           onTap: () async {
-                            await saveData(context);
+                            await saveProgress();
+                            await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
+                            await _savePageCountToLocalStorage();
                             Navigator.pop(context, true);
                           },
                           child: Theme(
