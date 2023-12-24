@@ -1547,8 +1547,8 @@ class Reader extends State with WidgetsBindingObserver {
     // print('lastCallTimestamp $lastCallTimestamp');
     // print('now $now');
     // print('timeElapsed $timeElapsed');
-    // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+      // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
@@ -2927,8 +2927,8 @@ class Reader extends State with WidgetsBindingObserver {
                                           final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
                                           var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                           var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                          if (timeElapsed.inHours > 24) {
-                                            // if (timeElapsed.inMilliseconds > 1) {
+                                          // if (timeElapsed.inHours > 24) {
+                                          if (timeElapsed.inMilliseconds > 1) {
                                             wordModeDialog(context);
                                           } else {
                                             Fluttertoast.showToast(

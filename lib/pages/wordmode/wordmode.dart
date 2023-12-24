@@ -107,8 +107,8 @@ class WordCount {
       final timeElapsed = now.difference(_lastCallTimestamp!);
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
-      if (timeElapsed.inHours >= 24) {
-      // if (timeElapsed.inMicroseconds >= 1) {
+      // if (timeElapsed.inHours >= 24) {
+      if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset();
 
         await updateCallInfo();
@@ -287,6 +287,18 @@ class WordCount {
     }
   }
 
+  Future<WordCount> loadWordCountFromLocalStorage(String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? storedData = prefs.getString('$filePath-words');
+    if (storedData != null) {
+      List<dynamic> decodedData = jsonDecode(storedData);
+      WordCount wordCount = WordCount.fromJson(decodedData[0]);
+      return wordCount;
+    } else {
+      return WordCount();
+    }
+  }
+
   Future<void> countWordsWithOffset() async {
     final wordCounts = await getAllWordCounts();
     final sortedWordCounts = wordCounts.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
@@ -306,18 +318,25 @@ class WordCount {
     List<String> checkWords = [];
     int currentIndex = start;
 
-    while (checkWords.length < end - start && currentIndex < sortedWordCounts.length) {
+    var temp = await loadWordCountFromLocalStorage(filePath);
+    String? wordInTemp = temp.wordEntries.isNotEmpty ? temp.wordEntries.first.word : null;
+
+    List<MapEntry<String, int>> filteredSortedWordCounts = sortedWordCounts.where((entry) {
+      return entry.key != wordInTemp && !temp.wordEntries.any((tempEntry) => tempEntry.word == entry.key);
+    }).toList();
+
+    while (checkWords.length < end - start && currentIndex < filteredSortedWordCounts.length) {
       List<String> newWords = [];
 
-      for (; currentIndex < sortedWordCounts.length && newWords.length < (end - start - checkWords.length); currentIndex++) {
-        newWords.add(sortedWordCounts[currentIndex].key);
+      for (; currentIndex < filteredSortedWordCounts.length && newWords.length < (end - start - checkWords.length); currentIndex++) {
+        newWords.add(filteredSortedWordCounts[currentIndex].key);
       }
 
       List<String> newNouns = await getNounsByList(newWords);
       checkWords.addAll(newNouns);
 
       // Если новых существительных нет, и все слова были проверены, прерываем цикл
-      if (newNouns.isEmpty && currentIndex >= sortedWordCounts.length) {
+      if (newNouns.isEmpty && currentIndex >= filteredSortedWordCounts.length) {
         break;
       }
     }
