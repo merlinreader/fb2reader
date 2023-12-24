@@ -5,10 +5,8 @@ import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/domain/data_providers/color_provider.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
-import 'package:merlin/main.dart';
 import 'package:merlin/components/checkbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_screen_wake/flutter_screen_wake.dart';
 
 const colors = [MyColors.black, MyColors.white, MyColors.mint, MyColors.beige];
@@ -224,7 +222,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     //       isChecked = newValue;
                     //       saveSettings(isChecked);
                     //       saveSettings(themeProvider.isDarkTheme);
-                    //       // print('settings $newValue');
+                    //       // debugPrint('settings $newValue');
                     //     });
                     //   },
                     //   iconColor:

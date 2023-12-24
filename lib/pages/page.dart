@@ -55,6 +55,7 @@ class Page extends State<AppPage> {
         _widgetOptions[1];
       });
       var temp = await getIndex();
+      var tempPro;
       print(temp);
       await getDataFromLocalStorage('booksKey');
       if (temp != 0) {
@@ -64,9 +65,10 @@ class Page extends State<AppPage> {
       }
 
       await Navigator.pushNamed(context, RouteNames.reader).then((_) {
-        Reader().saveProgress();
+        recent.RecentPageState().getDataFromLocalStorage('booksKey');
       });
       print('GOVNOOO');
+      print('tempPro $tempPro');
     }
   }
 
@@ -79,6 +81,10 @@ class Page extends State<AppPage> {
     String? imageDataJson = prefs.getString(key);
     if (imageDataJson != null) {
       tempImages = (jsonDecode(imageDataJson) as List).map((item) => recent.ImageInfo.fromJson(item)).toList();
+    }
+    for (var e in tempImages) {
+      print(e.title);
+      print(e.progress);
     }
   }
 

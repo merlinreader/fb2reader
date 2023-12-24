@@ -52,7 +52,7 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             // AdInfoField(
             //   networks: networks,
             //   onChanged: (id, request) => setState(() {
@@ -63,7 +63,7 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
             //     _updateAdRequestConfiguration(id, request);
             //   }),
             // ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Expanded(
               child: LogTile(
                 log: log,
@@ -126,25 +126,22 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
     ad.setAdEventListener(
         eventListener: RewardedAdEventListener(
             onAdShown: () => logMessage("callback: rewarded ad shown."),
-            onAdFailedToShow: (error) => logMessage(
-                "callback: rewarded ad failed to show: ${error.description}."),
-            onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
+            onAdFailedToShow: (error) => logMessage("callback: rewarded ad failed to show: ${error.description}."),
+            onAdDismissed: () => debugPrint("\ncallback: rewarded ad dismissed.\n"),
             onAdClicked: () => logMessage("callback: rewarded ad clicked."),
-            onAdImpression: (data) => logMessage(
-                "callback: rewarded ad impression: ${data.getRawData()}"),
-            onRewarded: (Reward reward) => logMessage(
-                'callback: reward: ${reward.amount} of ${reward.type}')));
+            onAdImpression: (data) => logMessage("callback: rewarded ad impression: ${data.getRawData()}"),
+            onRewarded: (Reward reward) => logMessage('callback: reward: ${reward.amount} of ${reward.type}')));
   }
 
-  void _updateAdRequestConfiguration(String adUnitId, AdRequest configuration) {
-    _adRequestConfiguration = AdRequestConfiguration(
-        adUnitId: adUnitId,
-        age: configuration.age,
-        contextQuery: configuration.contextQuery,
-        contextTags: configuration.contextTags,
-        gender: configuration.gender,
-        location: configuration.location,
-        parameters: configuration.parameters,
-        preferredTheme: configuration.preferredTheme);
-  }
+  // void _updateAdRequestConfiguration(String adUnitId, AdRequest configuration) {
+  //   _adRequestConfiguration = AdRequestConfiguration(
+  //       adUnitId: adUnitId,
+  //       age: configuration.age,
+  //       contextQuery: configuration.contextQuery,
+  //       contextTags: configuration.contextTags,
+  //       gender: configuration.gender,
+  //       location: configuration.location,
+  //       parameters: configuration.parameters,
+  //       preferredTheme: configuration.preferredTheme);
+  // }
 }

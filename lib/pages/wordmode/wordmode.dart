@@ -79,7 +79,7 @@ class WordCount {
         return partOfSpeech;
       }
     }
-    // print('Не удалось определить часть речи $word');
+    // debugPrint('Не удалось определить часть речи $word');
     return 'N/A';
   }
 
@@ -95,7 +95,7 @@ class WordCount {
         return ipaText;
       }
     }
-    // print('Не удалось получить IPA произношения $word');
+    // debugPrint('Не удалось получить IPA произношения $word');
     return 'N/A';
   }
 
@@ -222,7 +222,7 @@ class WordCount {
   //     final translation = await translateToEnglish(word);
   //     final ipaWord = await getIPA(translation);
   //     // final partOfSpeechWord = await getPartOfSpeech(translation);
-  //     print('"$word" - "$translation" - [$ipaWord]');
+  //     debugPrint('"$word" - "$translation" - [$ipaWord]');
 
   //     wordEntries.add(WordEntry(
   //       word: word,
@@ -237,7 +237,7 @@ class WordCount {
   // }
 
   Future<List<String>> getNounsByList(List<String> inputWords) async {
-    print('getNounsByList inputWords $inputWords');
+    debugPrint('getNounsByList inputWords $inputWords');
     String url = 'https://fb2.cloud.leam.pro/api/account/words/nouns';
     var response = await http.post(
       Uri.parse(url),
@@ -247,7 +247,7 @@ class WordCount {
       },
       body: jsonEncode({'words': inputWords}), // Преобразуйте объект в JSON-строку
     );
-    print('getNounsByList response ${response.body}');
+    debugPrint('getNounsByList response ${response.body}');
     if (response.statusCode == 200) {
       Map<String, dynamic> responseData = json.decode(response.body);
       List<String> nouns = List<String>.from(responseData['words']);
@@ -259,8 +259,8 @@ class WordCount {
 
   Future<List<String>> getAllNouns() async {
     final words = await getAllWords();
-    print('words = $words');
-    print('words.length = ${words.length}');
+    debugPrint('words = $words');
+    debugPrint('words.length = ${words.length}');
     String url = 'https://fb2.cloud.leam.pro/api/account/words/nouns';
 
     var response = await http.post(
@@ -271,15 +271,15 @@ class WordCount {
       },
       body: jsonEncode({'words': words}), // Преобразуйте объект в JSON-строку
     );
-    print('------');
-    print(response.body);
+    debugPrint('------');
+    debugPrint(response.body);
 
     if (response.statusCode == 200) {
       // Преобразование ответа в Map<String, dynamic>
       Map<String, dynamic> responseData = json.decode(response.body);
       // Получение списка существительных из ключа "words"
       List<String> nouns = List<String>.from(responseData['words']);
-      print('\tnouns = $nouns');
+      debugPrint('\tnouns = $nouns');
       return nouns;
     } else {
       // Обработка ошибки, например, вывод сообщения об ошибке
@@ -297,11 +297,11 @@ class WordCount {
     int end = start + getWords;
     end = min(end, sortedWordCounts.length);
 
-    print('getWords = $getWords');
-    print('start = $start');
-    print('end = $end');
-    print('end - start = ${end - start}');
-    print('sortedWordCounts.length = ${sortedWordCounts.length}');
+    debugPrint('getWords = $getWords');
+    debugPrint('start = $start');
+    debugPrint('end = $end');
+    debugPrint('end - start = ${end - start}');
+    debugPrint('sortedWordCounts.length = ${sortedWordCounts.length}');
 
     List<String> checkWords = [];
     int currentIndex = start;
@@ -334,7 +334,7 @@ class WordCount {
       if (correspondingEntry.key != "NotFound") {
         wordEntriesFutures.add(createWordEntry(noun, correspondingEntry.value));
       } else {
-        print("No matching entry for noun: $noun");
+        debugPrint("No matching entry for noun: $noun");
       }
     }
 
@@ -369,17 +369,17 @@ class WordCount {
     int start = prefs.getInt('$filePath-end') ?? 0;
     int end = prefs.getInt('$filePath-end') ?? getWords;
 
-    print('getWords = $getWords');
+    debugPrint('getWords = $getWords');
 
     // Убедимся, что конец в пределах допустимого
     end = end + getWords;
     end = min(end, sortedWordCounts.length);
 
-    print('start = $start');
-    print('end = $end');
-    print('end - start = ${end - start}');
+    debugPrint('start = $start');
+    debugPrint('end = $end');
+    debugPrint('end - start = ${end - start}');
 
-    print('sortedWordCounts.length = ${sortedWordCounts.length}');
+    debugPrint('sortedWordCounts.length = ${sortedWordCounts.length}');
     List<WordEntry> wordEntries = [];
     for (var i = start; i < end; i++) {
       final entry = sortedWordCounts[i];
@@ -397,7 +397,7 @@ class WordCount {
     final translation = await translateToEnglish(word);
     final ipaWord = await getIPA(translation);
     // final partOfSpeechWord = await getPartOfSpeech(translation);
-    // print('"$word" - "$translation" - [$ipaWord]');
+    // debugPrint('"$word" - "$translation" - [$ipaWord]');
 
     return WordEntry(
       word: word,
@@ -443,7 +443,6 @@ class WordCount {
 
     prefs.setInt('callCount', _callCount);
 
-    int getWords = prefs.getInt('words') ?? 10;
     prefs.setInt('$filePath-end', 0);
     prefs.setInt('words', 10);
     prefs.remove('lastCallTimestamp');

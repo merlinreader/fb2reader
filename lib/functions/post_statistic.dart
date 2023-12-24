@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:location/location.dart';
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/pages/wordmode/wordmode.dart';
 import 'package:shared_preferences/shared_preferences.dart';

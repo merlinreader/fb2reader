@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_screen_wake/flutter_screen_wake.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/UI/router.dart';
@@ -9,20 +8,18 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uni_links/uni_links.dart';
 import 'package:merlin/domain/data_providers/token_provider.dart';
-import 'package:yandex_mobileads/mobile_ads.dart';
-import 'package:brightness/brightness.dart';
 
 void main() {
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(), // Создание экземпляра ThemeProvider
-      child: MerlinApp(),
+      child: const MerlinApp(),
     ),
   );
 }
 
 class MerlinApp extends StatefulWidget {
-  MerlinApp({super.key});
+  const MerlinApp({super.key});
 
   @override
   State<MerlinApp> createState() => _MerlinAppState();
@@ -30,6 +27,7 @@ class MerlinApp extends StatefulWidget {
 
 class _MerlinAppState extends State<MerlinApp> {
   final _router = AppRouter();
+  // ignore: unused_field
   String? _link = 'unknown';
   @override
   void initState() {
@@ -76,7 +74,7 @@ class _MerlinAppState extends State<MerlinApp> {
           Uri uri = Uri.parse(initialLink);
           //token = uri.queryParameters['token']!;
           TokenProvider().setToken(uri.queryParameters['token']!);
-          print('СОХРАНЯЮ ТАКОЙ ТОКЕН В ЛОКАЛКУ: ${TokenProvider().getToken}');
+          debugPrint('СОХРАНЯЮ ТАКОЙ ТОКЕН В ЛОКАЛКУ: ${TokenProvider().getToken}');
         });
       }
     } catch (err) {

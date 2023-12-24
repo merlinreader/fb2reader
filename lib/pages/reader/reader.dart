@@ -111,7 +111,7 @@ class Reader extends State with WidgetsBindingObserver {
 
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -174,7 +174,7 @@ class Reader extends State with WidgetsBindingObserver {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([orientations[0]]);
     getPageCount();
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -203,16 +203,7 @@ class Reader extends State with WidgetsBindingObserver {
     prefs.setInt('pageCount-${textes.first.filePath}', pageCount);
   }
 
-  bool _isDarkTheme = false;
-
-  bool get isDarkTheme => _isDarkTheme;
-
-  set isDarkTheme(bool value) {
-    _isDarkTheme = value;
-    // setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    //   systemNavigationBarColor: value ? MyColors.blackGray : MyColors.white,
-    // ));
-  }
+  bool isDarkTheme = false;
 
   void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     SystemChrome.setSystemUIOverlayStyle(style);
@@ -248,8 +239,13 @@ class Reader extends State with WidgetsBindingObserver {
     images.firstWhere((element) => element.fileName == textes.first.filePath).progress =
         _scrollController.position.pixels / _scrollController.position.maxScrollExtent;
     setState(() {});
+    print("SAVING PROGRESS ${_scrollController.position.pixels / _scrollController.position.maxScrollExtent}");
     await prefs.setString('booksKey', jsonEncode(images));
-    // print('SUCCESS PROGRESS');
+    print('SUCCESS PROGRESS');
+  }
+
+  double getProgress() {
+    return _scrollController.position.pixels / _scrollController.position.maxScrollExtent;
   }
 
   Future<void> saveReadingPosition(double position, String filePath) async {
@@ -473,8 +469,8 @@ class Reader extends State with WidgetsBindingObserver {
     var lastCallTranslateStr = prefs.getString('lastCallTranslate');
     if (lastCallTranslateStr != null) {
       final now = DateTime.now();
-      DateTime? lastCallTranslateStamp = lastCallTranslateStr != null ? DateTime.parse(lastCallTranslateStr) : null;
-      final timeElapsed = now.difference(lastCallTranslateStamp!);
+      DateTime? lastCallTranslateStamp = DateTime.parse(lastCallTranslateStr);
+      final timeElapsed = now.difference(lastCallTranslateStamp);
       if (timeElapsed.inMilliseconds >= 1) {
         await getDataFromLocalStorage('textKey');
       }
@@ -677,7 +673,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                     ),
                                             ),
                                           ],
-                                          rows: [],
+                                          rows: const [],
                                         ),
                                       ),
                                       Container(
@@ -867,7 +863,7 @@ class Reader extends State with WidgetsBindingObserver {
                                           dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                           columns: const [
                                             DataColumn(
-                                              label: Flexible(
+                                              label: SizedBox(
                                                 child: Text15(
                                                   text: 'Слово',
                                                   textColor: MyColors.black,
@@ -875,7 +871,7 @@ class Reader extends State with WidgetsBindingObserver {
                                               ),
                                             ),
                                             DataColumn(
-                                              label: Flexible(
+                                              label: SizedBox(
                                                 child: Text15(
                                                   text: 'Количество',
                                                   textColor: MyColors.black,
@@ -887,7 +883,7 @@ class Reader extends State with WidgetsBindingObserver {
                                             return DataRow(
                                               cells: [
                                                 DataCell(
-                                                  Flexible(
+                                                  SizedBox(
                                                     child: InkWell(
                                                       onTap: () async {
                                                         await _showWordInputDialog(entry.word, wordCount.wordEntries, wordsMap);
@@ -904,7 +900,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                   ),
                                                 ),
                                                 DataCell(
-                                                  Flexible(
+                                                  SizedBox(
                                                     child: TextForTable(
                                                       text: '${entry.count}',
                                                       textColor: MyColors.black,
@@ -1739,7 +1735,7 @@ class Reader extends State with WidgetsBindingObserver {
                                             ),
                                     ),
                                   ],
-                                  rows: [],
+                                  rows: const [],
                                 ),
                               ),
                               Container(
@@ -2384,6 +2380,8 @@ class Reader extends State with WidgetsBindingObserver {
                   child: AppBar(
                       leading: GestureDetector(
                           onTap: () async {
+                            await saveProgress();
+                            await _savePageCountToLocalStorage();
                             Navigator.pop(context, true);
                           },
                           child: Theme(
@@ -2653,168 +2651,170 @@ class Reader extends State with WidgetsBindingObserver {
                 child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
                     height: visible ? 100 : 0,
-                    child: Container(
-                        alignment: AlignmentDirectional.topEnd,
-                        color: Theme.of(context).colorScheme.primary,
-                        child: Column(
-                          children: [
-                            _scrollController.hasClients
-                                ? Padding(
-                                    padding: const EdgeInsets.fromLTRB(8, 0, 28, 4),
-                                    child: SliderTheme(
-                                      data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          Expanded(
-                                            child: SliderTheme(
-                                              data: const SliderThemeData(
-                                                  trackHeight: 3,
-                                                  thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
-                                                  trackShape: RectangularSliderTrackShape()),
-                                              child: Slider(
-                                                value: position != 0
-                                                    ? position > _scrollController.position.maxScrollExtent
-                                                        ? _scrollController.position.maxScrollExtent
-                                                        : position
-                                                    : _scrollController.position.pixels,
-                                                min: 0,
-                                                max: _scrollController.position.maxScrollExtent,
-                                                label: visible
-                                                    ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                        : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                            : "0.0%"
-                                                    : "",
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    position = value;
-                                                  });
-                                                  if (_actionTimer?.isActive ?? false) {
+                    child: SingleChildScrollView(
+                      child: Container(
+                          alignment: AlignmentDirectional.topEnd,
+                          color: Theme.of(context).colorScheme.primary,
+                          child: Column(
+                            children: [
+                              _scrollController.hasClients
+                                  ? Padding(
+                                      padding: const EdgeInsets.fromLTRB(8, 0, 28, 4),
+                                      child: SliderTheme(
+                                        data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            Expanded(
+                                              child: SliderTheme(
+                                                data: const SliderThemeData(
+                                                    trackHeight: 3,
+                                                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                    trackShape: RectangularSliderTrackShape()),
+                                                child: Slider(
+                                                  value: position != 0
+                                                      ? position > _scrollController.position.maxScrollExtent
+                                                          ? _scrollController.position.maxScrollExtent
+                                                          : position
+                                                      : _scrollController.position.pixels,
+                                                  min: 0,
+                                                  max: _scrollController.position.maxScrollExtent,
+                                                  label: visible
+                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                          : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                              : "0.0%"
+                                                      : "",
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      position = value;
+                                                    });
+                                                    if (_actionTimer?.isActive ?? false) {
+                                                      _actionTimer?.cancel();
+                                                    }
+                                                    _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                      _scrollController.jumpTo(value);
+                                                    });
+                                                  },
+                                                  onChangeEnd: (value) {
                                                     _actionTimer?.cancel();
-                                                  }
-                                                  _actionTimer = Timer(const Duration(milliseconds: 250), () {
-                                                    _scrollController.jumpTo(value);
-                                                  });
-                                                },
-                                                onChangeEnd: (value) {
-                                                  _actionTimer?.cancel();
-                                                  if (value != _scrollController.position.pixels) {
-                                                    _scrollController.jumpTo(value);
-                                                  }
-                                                },
-                                                activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                inactiveColor:
-                                                    isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
-                                                thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                    if (value != _scrollController.position.pixels) {
+                                                      _scrollController.jumpTo(value);
+                                                    }
+                                                  },
+                                                  activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                  inactiveColor:
+                                                      isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
+                                                  thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                ),
                                               ),
                                             ),
-                                          ),
-                                          Container(
-                                            width: MediaQuery.of(context).size.width / 11,
-                                            alignment: Alignment.center,
-                                            child: Text11(
-                                                text: visible
-                                                    ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                        : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                            : "0.0%"
-                                                    : "",
-                                                textColor: MyColors.darkGray),
-                                          )
-                                        ],
+                                            Container(
+                                              width: MediaQuery.of(context).size.width / 11,
+                                              alignment: Alignment.center,
+                                              child: Text11(
+                                                  text: visible
+                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                          : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                              : "0.0%"
+                                                      : "",
+                                                  textColor: MyColors.darkGray),
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                : const Text("Загрузка..."),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                height: 2,
-                                child: Container(
-                                  color: isDarkTheme ? MyColors.darkGray : MyColors.black,
+                                    )
+                                  : const Text("Загрузка..."),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 2,
+                                  child: Container(
+                                    color: isDarkTheme ? MyColors.darkGray : MyColors.black,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    await savePositionAndExtent();
-                                    switchOrientation();
-                                  },
-                                  child: Icon(
-                                    CustomIcons.turn,
-                                    color: Theme.of(context).iconTheme.color,
-                                    size: 30,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () async {
+                                      await savePositionAndExtent();
+                                      switchOrientation();
+                                    },
+                                    child: Icon(
+                                      CustomIcons.turn,
+                                      color: Theme.of(context).iconTheme.color,
+                                      size: 30,
+                                    ),
                                   ),
-                                ),
-                                const Padding(padding: EdgeInsets.only(right: 30)),
-                                InkWell(
-                                  onTap: () {
-                                    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-                                    themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
-                                    saveSettings(themeProvider.isDarkTheme);
-                                  },
-                                  child: Icon(
-                                    CustomIcons.theme,
-                                    color: Theme.of(context).iconTheme.color,
-                                    size: 30,
+                                  const Padding(padding: EdgeInsets.only(right: 30)),
+                                  InkWell(
+                                    onTap: () {
+                                      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+                                      themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
+                                      saveSettings(themeProvider.isDarkTheme);
+                                    },
+                                    child: Icon(
+                                      CustomIcons.theme,
+                                      color: Theme.of(context).iconTheme.color,
+                                      size: 30,
+                                    ),
                                   ),
-                                ),
-                                const Padding(padding: EdgeInsets.only(right: 30)),
-                                GestureDetector(
-                                  onTap: () async {
-                                    switch (isBorder) {
-                                      case false:
-                                        if (isTrans == true) {
-                                          var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
-                                          print('temp.filePath = ${temp.filePath}');
-                                          if (temp.filePath != '') {
-                                            replaceWordsWithTranslation(temp.wordEntries);
+                                  const Padding(padding: EdgeInsets.only(right: 30)),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      switch (isBorder) {
+                                        case false:
+                                          if (isTrans == true) {
+                                            var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
+                                            print('temp.filePath = ${temp.filePath}');
+                                            if (temp.filePath != '') {
+                                              replaceWordsWithTranslation(temp.wordEntries);
+                                            }
+                                          } else {
+                                            wordModeDialog(context);
                                           }
-                                        } else {
-                                          wordModeDialog(context);
-                                        }
-                                        break;
-                                      default:
-                                        await getDataFromLocalStorage('textKey');
-                                        isBorder = false;
-                                        final prefs = await SharedPreferences.getInstance();
+                                          break;
+                                        default:
+                                          await getDataFromLocalStorage('textKey');
+                                          isBorder = false;
+                                          final prefs = await SharedPreferences.getInstance();
 
-                                        final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
-                                        var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
-                                        var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                        // if (timeElapsed.inHours > 24) {
-                                        if (timeElapsed.inMilliseconds > 1) {
-                                          wordModeDialog(context);
-                                        } else {
-                                          Fluttertoast.showToast(
-                                            msg:
-                                                'Новый перевод завтра в ${(lastCallTimestamp.add(const Duration(days: 1)).hour)}:${(lastCallTimestamp.add(const Duration(days: 1)).minute)}',
-                                            toastLength: Toast.LENGTH_LONG,
-                                            gravity: ToastGravity.BOTTOM,
-                                          );
-                                        }
+                                          final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
+                                          var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
+                                          var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
+                                          // if (timeElapsed.inHours > 24) {
+                                          if (timeElapsed.inMilliseconds > 1) {
+                                            wordModeDialog(context);
+                                          } else {
+                                            Fluttertoast.showToast(
+                                              msg:
+                                                  'Новый перевод завтра в ${(lastCallTimestamp.add(const Duration(days: 1)).hour)}:${(lastCallTimestamp.add(const Duration(days: 1)).minute)}',
+                                              toastLength: Toast.LENGTH_LONG,
+                                              gravity: ToastGravity.BOTTOM,
+                                            );
+                                          }
 
-                                        print('isTrans = $isTrans');
-                                        break;
-                                    }
-                                  },
-                                  child: Icon(
-                                    CustomIcons.wm,
-                                    color: Theme.of(context).iconTheme.color,
-                                    size: 30,
-                                  ),
-                                )
-                              ],
-                            )
-                          ],
-                        ))),
+                                          print('isTrans = $isTrans');
+                                          break;
+                                      }
+                                    },
+                                    child: Icon(
+                                      CustomIcons.wm,
+                                      color: Theme.of(context).iconTheme.color,
+                                      size: 30,
+                                    ),
+                                  )
+                                ],
+                              )
+                            ],
+                          )),
+                    )),
               )
             ],
           ),

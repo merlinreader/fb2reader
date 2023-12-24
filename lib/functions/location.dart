@@ -13,11 +13,8 @@ Future<Map<String, String>> getLocation() async {
       openAppSettings();
     }
   }
-  Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high);
-  List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude, position.longitude,
-      localeIdentifier: 'en-US');
+  Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude, localeIdentifier: 'en-US');
   Placemark placemark = placemarks[0];
   String? country = placemark.country;
   String? area = placemark.administrativeArea;
@@ -38,10 +35,10 @@ Future<Map<String, String>> getLocation() async {
   return locationData;
 }
 
-Future<void> sendLocationDataToServer(
-    Map<String, String> locationData, String? token) async {
+Future<void> sendLocationDataToServer(Map<String, String> locationData, String? token) async {
   const url = 'https://fb2.cloud.leam.pro/api/account/geo';
   try {
+    // ignore: unused_local_variable
     final response = await http.patch(
       Uri.parse(url),
       headers: {
@@ -51,11 +48,11 @@ Future<void> sendLocationDataToServer(
       body: jsonEncode(locationData),
     );
 
-    if (response.statusCode == 200) {
-      print('Данные успешно отправлены на сервер');
-    } else {
-      print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
-    }
+    // if (response.statusCode == 200) {
+    //   debugPrint('Данные успешно отправлены на сервер');
+    // } else {
+    //   debugPrint('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
+    // }
   } catch (_) {}
 }
 

@@ -3,7 +3,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:merlin/components/achievement.dart';
-import 'package:intl/intl.dart';
 
 class AvatarList extends StatelessWidget {
   final Achievement achievement;

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -7,8 +5,6 @@ import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/ads/network_provider.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
-import 'package:merlin/domain/data_providers/avatar_provider.dart';
-import 'package:merlin/domain/data_providers/token_provider.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/pages/profile/dialogs/choose_avatar_dialog/choose_avatar_dialog.dart';
 import 'package:merlin/pages/profile/profile_view_model.dart';
@@ -22,7 +18,6 @@ import 'package:merlin/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:uni_links/uni_links.dart';
 import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -121,7 +116,7 @@ class _ProfilePage extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       token = prefs.getString('token') ?? token;
-      print('ТОКЕН ИЗ ЛОКЛКИ: $token');
+      debugPrint('ТОКЕН ИЗ ЛОКЛКИ: $token');
     });
   }
 
@@ -139,13 +134,13 @@ class _ProfilePage extends State<ProfilePage> {
 
   void _setAdEventListener(RewardedAd ad) async {
     ad.setAdEventListener(eventListener: RewardedAdEventListener(
-        // onAdShown: () => print("callback: rewarded ad shown."),
-        // onAdFailedToShow: (error) => print(
+        // onAdShown: () => debugPrint("callback: rewarded ad shown."),
+        // onAdFailedToShow: (error) => debugPrint(
         //     "callback: rewarded ad failed to show: ${error.description}."),
-        // onAdDismissed: () => print("\ncallback: rewarded ad dismissed.\n"),
-        // onAdClicked: () => print("callback: rewarded ad clicked."),
+        // onAdDismissed: () => debugPrint("\ncallback: rewarded ad dismissed.\n"),
+        // onAdClicked: () => debugPrint("callback: rewarded ad clicked."),
         // onAdImpression: (data) =>
-        //     print("callback: rewarded ad impression: ${data.getRawData()}"),
+        //     debugPrint("callback: rewarded ad impression: ${data.getRawData()}"),
         onRewarded: (Reward reward) async {
       saveWordsToLocalStorage(words + 5);
     }));
@@ -153,13 +148,13 @@ class _ProfilePage extends State<ProfilePage> {
 
   void saveGeo(String country, String area, String locality) async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString("country", country ?? '');
-    prefs.setString("adminArea", area ?? '');
-    prefs.setString("locality", locality ?? '');
+    prefs.setString("country", country);
+    prefs.setString("adminArea", area);
+    prefs.setString("locality", locality);
     Map<String, String> locationData = {
-      'country': country ?? '',
-      'area': area ?? '',
-      'city': locality ?? '',
+      'country': country,
+      'area': area,
+      'city': locality,
     };
     await sendLocationDataToServer(locationData, prefs.getString('token') ?? '');
   }
@@ -198,7 +193,7 @@ class _ProfilePage extends State<ProfilePage> {
     setState(() {
       var getFirstName = prefs.getString('firstName') ?? firstName;
       firstName = getFirstName;
-      print('имя из локалки $firstName');
+      debugPrint('имя из локалки $firstName');
     });
   }
 

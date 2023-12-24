@@ -21,7 +21,7 @@ class _StatisticPageState extends State<StatisticPage> {
     return Column(
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
+          padding: const EdgeInsets.fromLTRB(18, 20, 24, 16),
           child: Column(
             children: <Widget>[
               const Row(

@@ -35,7 +35,7 @@ class MerlinWidget extends StatelessWidget {
 class AvatarWidget extends StatelessWidget {
   final AvatarWidget baby;
 
-  const AvatarWidget({
+  const AvatarWidget({super.key, 
     required this.baby,
   });
 

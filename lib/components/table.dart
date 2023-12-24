@@ -46,7 +46,7 @@ class _StatTableState extends State<StatTable> {
       );
       final data = json.decode(response.body);
       final fetchedId = data['_id'];
-      // print(fetchedId.toString());
+      // debugPrint(fetchedId.toString());
       if (response.statusCode == 200) {
         setState(() {
           id = fetchedId.toString();
@@ -117,24 +117,18 @@ class _StatTableState extends State<StatTable> {
                                 : dataList[index]['firstName']?.length > 10
                                     ? '${dataList[index]['firstName']?.substring(0, 10)}...'
                                     : dataList[index]['firstName'] ?? '',
-                            textColor: dataList[index]['_id'] == id
-                                ? MyColors.purple
-                                : MyColors.black,
+                            textColor: dataList[index]['_id'] == id ? MyColors.purple : MyColors.black,
                           ),
                         ),
                         DataCell(
                           Text11(
-                            text: dataList[index]['totalPageCountSimpleMode']
-                                    ?.toString() ??
-                                '',
+                            text: dataList[index]['totalPageCountSimpleMode']?.toString() ?? '',
                             textColor: MyColors.black,
                           ),
                         ),
                         DataCell(
                           Text11(
-                            text: dataList[index]['totalPageCountWordMode']
-                                    ?.toString() ??
-                                '',
+                            text: dataList[index]['totalPageCountWordMode']?.toString() ?? '',
                             textColor: MyColors.black,
                           ),
                         ),

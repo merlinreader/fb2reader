@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:intl/intl.dart';
-import 'package:merlin/style/colors.dart';
 
 class AchievementCard extends StatelessWidget {
   final Achievement achievement;
