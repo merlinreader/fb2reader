@@ -88,6 +88,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
   }
 
   Future<void> onResetClick() async {
+    await sendAvatar("default_avatar");
     await AvatarProvider.removeAvatarBytes();
     await AvatarProvider.removeAvatarUrl();
     Navigator.pop(context, false);

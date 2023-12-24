@@ -26,7 +26,7 @@ class SplashSreenViewModel {
     debugPrint('загрузка');
     await getFirstName();
     debugPrint('сейчас я на загрузке');
-    await Future.delayed(const Duration(seconds: 2));
+    // await Future.delayed(const Duration(seconds: 2));
     Navigator.pushReplacementNamed(context, RouteNames.main);
   }
 

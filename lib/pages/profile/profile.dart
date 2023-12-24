@@ -266,7 +266,13 @@ class _ProfilePage extends State<ProfilePage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(width: size),
-                            Text16(text: locationData, textColor: MyColors.black),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.7,
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Text16(text: locationData, textColor: MyColors.black),
+                              ),
+                            ),
                             IconButton(
                                 onPressed: geo,
                                 icon: Icon(

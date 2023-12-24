@@ -107,8 +107,8 @@ class WordCount {
       final timeElapsed = now.difference(_lastCallTimestamp!);
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
-      // if (timeElapsed.inHours >= 24) {
-      if (timeElapsed.inMicroseconds >= 1) {
+      if (timeElapsed.inHours >= 24) {
+      // if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset();
 
         await updateCallInfo();
