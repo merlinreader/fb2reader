@@ -235,11 +235,11 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   Future<void> saveProgress() async {
-    final prefs = await SharedPreferences.getInstance();
     images.firstWhere((element) => element.fileName == textes.first.filePath).progress =
         _scrollController.position.pixels / _scrollController.position.maxScrollExtent;
-    setState(() {});
+    // setState(() {});
     print("SAVING PROGRESS ${_scrollController.position.pixels / _scrollController.position.maxScrollExtent}");
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setString('booksKey', jsonEncode(images));
     print('SUCCESS PROGRESS');
   }
@@ -280,7 +280,7 @@ class Reader extends State with WidgetsBindingObserver {
     }
   }
 
-  void _updateScrollPercentage() async {
+  void _updateScrollPercentage() {
     if (_scrollController.position.maxScrollExtent == 0) {
       return;
     }
@@ -296,7 +296,6 @@ class Reader extends State with WidgetsBindingObserver {
       // print('lastPageCount $lastPageCount');
       // print('pageCount $pageCount');
     });
-    await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
   }
 
   Color textColor = MyColors.black;
@@ -2494,6 +2493,7 @@ class Reader extends State with WidgetsBindingObserver {
       onWillPop: () async {
         await saveProgress();
         await _savePageCountToLocalStorage();
+        await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
         Navigator.pop(context, true);
         return true;
       },
@@ -2507,6 +2507,7 @@ class Reader extends State with WidgetsBindingObserver {
                       leading: GestureDetector(
                           onTap: () async {
                             await saveProgress();
+                            await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
                             await _savePageCountToLocalStorage();
                             Navigator.pop(context, true);
                           },
