@@ -118,10 +118,10 @@ class Reader extends State with WidgetsBindingObserver {
       final prefs = await SharedPreferences.getInstance();
       lastPageCount = prefs.getInt('pageCount-${textes.first.filePath}') ?? 0;
       prefs.setInt('lastPageCount-${textes.first.filePath}', lastPageCount);
-      print('initState lastPageCount $lastPageCount');
+      // print('initState lastPageCount $lastPageCount');
       final filePath = textes.first.filePath;
       pageSize = MediaQuery.of(context).size.height;
-      print('pageSize = $pageSize');
+      // print('pageSize = $pageSize');
       saveDateTime(pageSize);
       final readingPositionsJson = prefs.getString('readingPositions');
       isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
@@ -160,13 +160,15 @@ class Reader extends State with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
-      print('Приложение свернуто');
+      // print('Приложение свернуто');
       await saveProgress();
       await _savePageCountToLocalStorage();
+      await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
       await getPageCount();
-    } else if (state == AppLifecycleState.resumed) {
-      print('Приложение открыто');
     }
+    // else if (state == AppLifecycleState.resumed) {
+    //   print('Приложение открыто');
+    // }
   }
 
   @override
@@ -238,10 +240,10 @@ class Reader extends State with WidgetsBindingObserver {
     images.firstWhere((element) => element.fileName == textes.first.filePath).progress =
         _scrollController.position.pixels / _scrollController.position.maxScrollExtent;
     // setState(() {});
-    print("SAVING PROGRESS ${_scrollController.position.pixels / _scrollController.position.maxScrollExtent}");
+    // print("SAVING PROGRESS ${_scrollController.position.pixels / _scrollController.position.maxScrollExtent}");
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('booksKey', jsonEncode(images));
-    print('SUCCESS PROGRESS');
+    // print('SUCCESS PROGRESS');
   }
 
   double getProgress() {
@@ -477,7 +479,7 @@ class Reader extends State with WidgetsBindingObserver {
     String updatedText = getText;
 
     for (var entry in wordEntries) {
-      print('Ищем слово: ${entry.word}');
+      // print('Ищем слово: ${entry.word}');
 
       var escapedWord = RegExp.escape(entry.word);
       var pattern = '(?<!\\p{L})$escapedWord(?!\\p{L})';
@@ -485,7 +487,7 @@ class Reader extends State with WidgetsBindingObserver {
 
       updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
         final matchedWord = match.group(0)!;
-        print('Найдено совпадение: $matchedWord');
+        // print('Найдено совпадение: $matchedWord');
         return matchCase(matchedWord, entry.translation ?? '');
       });
       // updatedText = updatedText.replaceAllMapped(entry.word[0].toUpperCase() + entry.word.substring(1).toLowerCase(), (match) {
@@ -497,7 +499,7 @@ class Reader extends State with WidgetsBindingObserver {
 
     await prefs.setString('lastCallTranslate', DateTime.now().toIso8601String());
     isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
-    print(isTrans);
+    // print(isTrans);
     setState(() {
       getText = updatedText;
       isTrans;
@@ -505,20 +507,20 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   String matchCase(String source, String pattern) {
-    print('source $source');
-    print('pattern $pattern');
+    // print('source $source');
+    // print('pattern $pattern');
     // Сохраняем регистр первой буквы исходного слова
     if (source[0] == source[0].toUpperCase()) {
-      print('большая буква');
+      // print('большая буква');
       return pattern[0].toUpperCase() + pattern.substring(1).toLowerCase();
     }
     // Если весь текст в верхнем регистре - перевод тоже
     if (source.toUpperCase() == source) {
-      print('Если весь текст в верхнем регистре - перевод тоже');
+      // print('Если весь текст в верхнем регистре - перевод тоже');
       return pattern.toUpperCase();
     }
     // Иначе возвращаем перевод в нижнем регистре
-    print('Иначе возвращаем перевод в нижнем регистре');
+    // print('Иначе возвращаем перевод в нижнем регистре');
     return pattern.toLowerCase();
   }
 
@@ -538,7 +540,7 @@ class Reader extends State with WidgetsBindingObserver {
                 ),
               );
             } else if (snapshot.hasError) {
-              print(wordCount.wordEntries);
+              // print(wordCount.wordEntries);
               return const AlertDialog(
                 content: Text('Произошла ошибка: нет доступа к интернету'),
               );
@@ -1540,7 +1542,7 @@ class Reader extends State with WidgetsBindingObserver {
       timeElapsed = now.difference(oneDayMore);
     }
     int getWords = prefs.getInt('words') ?? 10;
-    print('showEmptyTable getWords = $getWords');
+    // print('showEmptyTable getWords = $getWords');
     // print('lastCallTimestampStr $lastCallTimestampStr');
     // print('lastCallTimestamp $lastCallTimestamp');
     // print('now $now');
@@ -1675,7 +1677,7 @@ class Reader extends State with WidgetsBindingObserver {
   Future<void> showSavedWords(BuildContext context, String filePath) async {
     showDialog<void>(
       context: context,
-      barrierDismissible: true,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return FutureBuilder<WordCount>(
           future: loadWordCountFromLocalStorage(filePath),
@@ -1703,250 +1705,255 @@ class Reader extends State with WidgetsBindingObserver {
                   Navigator.pop(context);
                   return const SizedBox.shrink();
                 }
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
-                    ),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
-                      color: Colors.transparent,
-                      child: Card(
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: forTable == false ? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.7,
-                          child: Column(
-                            // mainAxisAlignment: MainAxisAlignment.start,
-                            // crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    alignment: Alignment.centerRight,
-                                    padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () async {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 0),
-                                child: Center(
-                                  child: forTable == false
-                                      ? const Text24(
-                                          text: 'Изучаемые слова',
-                                          textColor: MyColors.black,
-                                        )
-                                      : const Text20(text: 'Изучаемые слова', textColor: MyColors.black),
-                                ),
-                              ),
-                              Container(
-                                width: MediaQuery.of(context).size.width,
-                                child: DataTable(
-                                  columnSpacing: forTable == false ? 15 : 0,
-                                  showBottomBorder: false,
-                                  dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                                  clipBehavior: Clip.hardEdge,
-                                  horizontalMargin: 10,
-                                  columns: [
-                                    DataColumn(
-                                      label: forTable == false
-                                          ? SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.19,
-                                              child: const Text(
-                                                'Слово',
-                                                style: TextStyle(
-                                                  fontFamily: 'Tektur',
-                                                  fontSize: 15,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            )
-                                          : SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.315,
-                                              child: const Text(
-                                                'Слово',
-                                                style: TextStyle(
-                                                  fontFamily: 'Tektur',
-                                                  fontSize: 15,
-                                                ),
-                                                textAlign: TextAlign.left,
-                                              ),
-                                            ),
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
+                      ),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
+                        color: Colors.transparent,
+                        child: Card(
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: forTable == false ? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.7,
+                            child: Column(
+                              // mainAxisAlignment: MainAxisAlignment.start,
+                              // crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      alignment: Alignment.centerRight,
+                                      padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                      icon: const Icon(Icons.close),
+                                      onPressed: () async {
+                                        Navigator.pop(context);
+                                      },
                                     ),
-                                    DataColumn(
-                                      label: forTable == false
-                                          ? const Text('Транскрипция',
-                                              style: TextStyle(
-                                                fontFamily: 'Tektur',
-                                                fontSize: 15,
-                                              ),
-                                              textAlign: TextAlign.left)
-                                          : SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.345,
-                                              child: const Text('Транскрипция',
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 0),
+                                  child: Center(
+                                    child: forTable == false
+                                        ? const Text24(
+                                            text: 'Изучаемые слова',
+                                            textColor: MyColors.black,
+                                          )
+                                        : const Text20(text: 'Изучаемые слова', textColor: MyColors.black),
+                                  ),
+                                ),
+                                Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  child: DataTable(
+                                    columnSpacing: forTable == false ? 15 : 0,
+                                    showBottomBorder: false,
+                                    dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                    clipBehavior: Clip.hardEdge,
+                                    horizontalMargin: 10,
+                                    columns: [
+                                      DataColumn(
+                                        label: forTable == false
+                                            ? SizedBox(
+                                                width: MediaQuery.of(context).size.width * 0.19,
+                                                child: const Text(
+                                                  'Слово',
                                                   style: TextStyle(
                                                     fontFamily: 'Tektur',
                                                     fontSize: 15,
                                                   ),
-                                                  textAlign: TextAlign.left),
-                                            ),
-                                    ),
-                                    DataColumn(
-                                      label: forTable == false
-                                          ? Text(
-                                              'Перевод',
-                                              style: const TextStyle(
-                                                fontFamily: 'Tektur',
-                                                fontSize: 15,
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              )
+                                            : SizedBox(
+                                                width: MediaQuery.of(context).size.width * 0.315,
+                                                child: const Text(
+                                                  'Слово',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Tektur',
+                                                    fontSize: 15,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
                                               ),
-                                              textAlign: forTable == false ? TextAlign.right : TextAlign.left,
-                                            )
-                                          : SizedBox(
-                                              width: MediaQuery.of(context).size.width * 0.3,
-                                              child: Text(
+                                      ),
+                                      DataColumn(
+                                        label: forTable == false
+                                            ? const Text('Транскрипция',
+                                                style: TextStyle(
+                                                  fontFamily: 'Tektur',
+                                                  fontSize: 15,
+                                                ),
+                                                textAlign: TextAlign.left)
+                                            : SizedBox(
+                                                width: MediaQuery.of(context).size.width * 0.345,
+                                                child: const Text('Транскрипция',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Tektur',
+                                                      fontSize: 15,
+                                                    ),
+                                                    textAlign: TextAlign.left),
+                                              ),
+                                      ),
+                                      DataColumn(
+                                        label: forTable == false
+                                            ? Text(
                                                 'Перевод',
                                                 style: const TextStyle(
                                                   fontFamily: 'Tektur',
                                                   fontSize: 15,
                                                 ),
                                                 textAlign: forTable == false ? TextAlign.right : TextAlign.left,
+                                              )
+                                            : SizedBox(
+                                                width: MediaQuery.of(context).size.width * 0.3,
+                                                child: Text(
+                                                  'Перевод',
+                                                  style: const TextStyle(
+                                                    fontFamily: 'Tektur',
+                                                    fontSize: 15,
+                                                  ),
+                                                  textAlign: forTable == false ? TextAlign.right : TextAlign.left,
+                                                ),
                                               ),
-                                            ),
-                                    ),
-                                  ],
-                                  rows: const [],
-                                ),
-                              ),
-                              Container(
-                                width: forTable == true ? MediaQuery.of(context).size.width : null,
-                                height: forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.43,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.vertical,
-                                  child: DataTable(
-                                    columnSpacing: forTable == false ? 33 : 0,
-                                    showBottomBorder: false,
-                                    dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                                    clipBehavior: Clip.hardEdge,
-                                    headingRowHeight: 0,
-                                    horizontalMargin: 10,
-                                    columns: const [
-                                      DataColumn(
-                                        label: Flexible(
-                                          child: Text15(
-                                            text: '',
-                                            textColor: MyColors.black,
-                                          ),
-                                        ),
-                                      ),
-                                      DataColumn(
-                                        label: Flexible(
-                                          child: Text15(
-                                            text: '',
-                                            textColor: MyColors.black,
-                                          ),
-                                        ),
-                                      ),
-                                      DataColumn(
-                                        label: Flexible(
-                                          child: Text15(
-                                            text: '',
-                                            textColor: MyColors.black,
-                                          ),
-                                        ),
                                       ),
                                     ],
-                                    rows: wordCount.wordEntries.map((entry) {
-                                      return DataRow(
-                                        cells: [
-                                          DataCell(
-                                            // Text(
-                                            //   entry.word,
-                                            //   style: TextStyle(
-                                            //       overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                            // ),
-                                            forTable == false
-                                                ? SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.23,
-                                                    child: Text(
+                                    rows: const [],
+                                  ),
+                                ),
+                                Container(
+                                  width: forTable == true ? MediaQuery.of(context).size.width : null,
+                                  height: forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.43,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.vertical,
+                                    child: DataTable(
+                                      columnSpacing: forTable == false ? 33 : 0,
+                                      showBottomBorder: false,
+                                      dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                      clipBehavior: Clip.hardEdge,
+                                      headingRowHeight: 0,
+                                      horizontalMargin: 10,
+                                      columns: const [
+                                        DataColumn(
+                                          label: Flexible(
+                                            child: Text15(
+                                              text: '',
+                                              textColor: MyColors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        DataColumn(
+                                          label: Flexible(
+                                            child: Text15(
+                                              text: '',
+                                              textColor: MyColors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        DataColumn(
+                                          label: Flexible(
+                                            child: Text15(
+                                              text: '',
+                                              textColor: MyColors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                      rows: wordCount.wordEntries.map((entry) {
+                                        return DataRow(
+                                          cells: [
+                                            DataCell(
+                                              // Text(
+                                              //   entry.word,
+                                              //   style: TextStyle(
+                                              //       overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
+                                              // ),
+                                              forTable == false
+                                                  ? SizedBox(
+                                                      width: MediaQuery.of(context).size.width * 0.23,
+                                                      child: Text(
+                                                        entry.word,
+                                                        style: TextStyle(
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                      ),
+                                                    )
+                                                  : Text(
                                                       entry.word,
                                                       style: TextStyle(
                                                           overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
-                                                  )
-                                                : Text(
-                                                    entry.word,
-                                                    style: TextStyle(
-                                                        overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                  ),
-                                            // TextForTable(
-                                            //   text: entry.word,
-                                            //   textColor: MyColors.black,
-                                            // ),
-                                          ),
-                                          DataCell(
-                                            // Text(
-                                            //   '[ ${entry.ipa} ]',
-                                            //   style: TextStyle(
-                                            //       overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                            // ),
-                                            forTable == false
-                                                ? SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.275,
-                                                    child: Text(
-                                                      '[ ${entry.ipa} ]',
-                                                      style: TextStyle(
-                                                          overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                    ),
-                                                  )
-                                                : SizedBox(
-                                                    width: MediaQuery.of(context).size.width * 0.14,
-                                                    child: Text(
-                                                      '[ ${entry.ipa} ]',
-                                                      style: TextStyle(
-                                                          overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                    ),
-                                                  ),
-                                            // TextForTable(
-                                            //   text: '[ ${entry.ipa} ]',
-                                            //   textColor: MyColors.black,
-                                            // ),
-                                          ),
-                                          DataCell(
-                                            // SizedBox(
-                                            //   width: MediaQuery.of(context).size.width * 0.275,
-                                            //   child: Text(
-                                            //     entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                            //     style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
-                                            //   ),
-                                            // ),
-                                            forTable == false
-                                                ? Padding(
-                                                    padding: const EdgeInsets.only(left: 10),
-                                                    child: SizedBox(
-                                                      width: MediaQuery.of(context).size.width * 0.5,
+                                              // TextForTable(
+                                              //   text: entry.word,
+                                              //   textColor: MyColors.black,
+                                              // ),
+                                            ),
+                                            DataCell(
+                                              // Text(
+                                              //   '[ ${entry.ipa} ]',
+                                              //   style: TextStyle(
+                                              //       overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
+                                              // ),
+                                              forTable == false
+                                                  ? SizedBox(
+                                                      width: MediaQuery.of(context).size.width * 0.275,
                                                       child: Text(
-                                                        entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                        style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                        '[ ${entry.ipa} ]',
+                                                        style: TextStyle(
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                      ),
+                                                    )
+                                                  : SizedBox(
+                                                      width: MediaQuery.of(context).size.width * 0.14,
+                                                      child: Text(
+                                                        '[ ${entry.ipa} ]',
+                                                        style: TextStyle(
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     ),
-                                                  )
-                                                : Text(
-                                                    entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                    style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                  ),
-                                          ),
-                                        ],
-                                      );
-                                    }).toList(),
+                                              // TextForTable(
+                                              //   text: '[ ${entry.ipa} ]',
+                                              //   textColor: MyColors.black,
+                                              // ),
+                                            ),
+                                            DataCell(
+                                              // SizedBox(
+                                              //   width: MediaQuery.of(context).size.width * 0.275,
+                                              //   child: Text(
+                                              //     entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                              //     style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                              //   ),
+                                              // ),
+                                              forTable == false
+                                                  ? Padding(
+                                                      padding: const EdgeInsets.only(left: 10),
+                                                      child: SizedBox(
+                                                        width: MediaQuery.of(context).size.width * 0.5,
+                                                        child: Text(
+                                                          entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                          style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : Text(
+                                                      entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                      style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                    ),
+                                            ),
+                                          ],
+                                        );
+                                      }).toList(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -2331,9 +2338,9 @@ class Reader extends State with WidgetsBindingObserver {
                                                           style: const ButtonStyle(alignment: Alignment.centerLeft),
                                                           onPressed: () async {
                                                             List<String> test = [filteredWords[index]];
-                                                            print(test);
+                                                            // print(test);
                                                             test = await WordCount().getNounsByList(test);
-                                                            print('after $test');
+                                                            // print('after $test');
                                                             if (test.length != 1) {
                                                               Fluttertoast.showToast(msg: 'Данное слово не существительное');
                                                               return;
@@ -2342,9 +2349,14 @@ class Reader extends State with WidgetsBindingObserver {
                                                               Navigator.of(context).pop();
                                                             }
                                                           },
-                                                          child: TextForTable(
-                                                            text: filteredWords[index],
-                                                            textColor: MyColors.black,
+                                                          child: Text(
+                                                            filteredWords[index],
+                                                            style: TextStyle(
+                                                                fontFamily: 'Roboto',
+                                                                fontSize: 15,
+                                                                fontWeight: FontWeight.normal,
+                                                                overflow: TextOverflow.ellipsis,
+                                                                color: isDarkTheme ? MyColors.white : MyColors.black),
                                                           ),
                                                         ),
                                                       ),
@@ -2899,7 +2911,7 @@ class Reader extends State with WidgetsBindingObserver {
                                         case false:
                                           if (isTrans == true) {
                                             var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
-                                            print('temp.filePath = ${temp.filePath}');
+                                            // print('temp.filePath = ${temp.filePath}');
                                             if (temp.filePath != '') {
                                               replaceWordsWithTranslation(temp.wordEntries);
                                             }
@@ -2927,7 +2939,7 @@ class Reader extends State with WidgetsBindingObserver {
                                             );
                                           }
 
-                                          print('isTrans = $isTrans');
+                                          // print('isTrans = $isTrans');
                                           break;
                                       }
                                     },

@@ -26,10 +26,11 @@ class SplashSreenViewModel {
     debugPrint('загрузка');
     await getFirstName();
     debugPrint('сейчас я на загрузке');
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     Navigator.pushReplacementNamed(context, RouteNames.main);
   }
 
+  // ignore: unused_field
   String? _link = 'unknown';
   Future<void> initUniLinks() async {
     // Подписываемся на поток приходящих ссылок

@@ -84,7 +84,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
           'Content-Type': 'application/json',
         },
         body: '{"name": "$avatarName"}');
-    print(res.statusCode);
+    // print(res.statusCode);
   }
 
   Future<void> onResetClick() async {

@@ -50,8 +50,7 @@ class Page extends State<AppPage> {
     if (index == 0) {
       await ImageLoader().loadImage();
       var temp = await getIndex();
-      var tempPro;
-      print(temp);
+      // print(temp);
       await getDataFromLocalStorage('booksKey');
       if (temp != 0) {
         await sendData('textKey', temp - 1);
@@ -62,8 +61,7 @@ class Page extends State<AppPage> {
       await Navigator.pushNamed(context, RouteNames.reader).then((_) {
         getDataFromLocalStorage('booksKey');
       });
-      print('GOVNOOO');
-      print('tempPro $tempPro');
+      // print('tempPro $tempPro');
       setState(() {
         profile = false;
         _selectedPage = 1;
@@ -82,10 +80,10 @@ class Page extends State<AppPage> {
     if (imageDataJson != null) {
       tempImages = (jsonDecode(imageDataJson) as List).map((item) => recent.ImageInfo.fromJson(item)).toList();
     }
-    for (var e in tempImages) {
-      print(e.title);
-      print(e.progress);
-    }
+    // for (var e in tempImages) {
+    //   print(e.title);
+    //   print(e.progress);
+    // }
     await prefs.setString('booksKey', jsonEncode(tempImages));
   }
 

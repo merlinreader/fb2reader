@@ -54,6 +54,7 @@ class _ProfilePage extends State<ProfilePage> {
   String token = '';
   String firstName = 'Merlin';
   List<AchievementStatus> getAchievements = [];
+  // ignore: prefer_typing_uninitialized_variables
   late var achievements;
 
   final networks = NetworkProvider.instance.rewardedNetworks;

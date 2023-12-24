@@ -79,34 +79,34 @@ getPageCount() async {
   DateTime nowDateTime = DateTime.now();
   Duration difference = nowDateTime.difference(savedDateTime);
   int differenceInSeconds = difference.inSeconds;
-  print('pageSize = $pageSize');
-  print('savedDateTime = $savedDateTime');
-  print('differenceInSeconds = $differenceInSeconds');
+  // print('pageSize = $pageSize');
+  // print('savedDateTime = $savedDateTime');
+  // print('differenceInSeconds = $differenceInSeconds');
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
   String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
       double speed = pageSize / differenceInSeconds;
-      print('WM entry.key = ${entry.key}');
-      print('speed WM = $speed sym/sec');
+      // print('WM entry.key = ${entry.key}');
+      // print('speed WM = $speed sym/sec');
       if (33.3 > speed) {
         pageCountWordMode = pageCountWordMode + entry.key;
       }
     }
     if (entry.value == false) {
       double speed = pageSize / differenceInSeconds;
-      print('SM entry.key = ${entry.key}');
-      print('speed SM = $speed sym/sec');
+      // print('SM entry.key = ${entry.key}');
+      // print('speed SM = $speed sym/sec');
       if (33.3 > speed) {
         pageCountSimpleMode = pageCountSimpleMode + entry.key;
       }
     }
   }
-  print('pageCountWordMode $pageCountWordMode');
-  print('pageCountSimpleMode $pageCountSimpleMode');
-  print('nowDataUTC $nowDataUTC');
-  print(dataToSend);
+  // print('pageCountWordMode $pageCountWordMode');
+  // print('pageCountSimpleMode $pageCountSimpleMode');
+  // print('nowDataUTC $nowDataUTC');
+  // print(dataToSend);
   // for (final entry in dataToSend.entries) {
   //   int number = entry.key;
   //   bool value = entry.value;
@@ -140,9 +140,10 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pa
     "pageCountWordMode": pageCountWordMode,
     "date": nowDataUTC,
   };
-  print(token);
-  print(data);
+  // print(token);
+  // print(data);
   final url = Uri.parse('https://fb2.cloud.leam.pro/api/statistic/user');
+  // ignore: unused_local_variable
   final response = await http.post(
     url,
     headers: <String, String>{
@@ -151,15 +152,15 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pa
     },
     body: jsonEncode(data),
   );
-  print(response.body);
-  if (response.statusCode == 200) {
-    print('Данные статистики ЮЗЕРА отправлены успешно!');
-  }
-  if (response.statusCode == 201) {
-    print('Данные статистики ЮЗЕРА отправлены успешно!');
-  } else {
-    print('Ошибка при отправке данных статистики ЮЗЕРА: ${response.reasonPhrase} (${response.statusCode})');
-  }
+  // print(response.body);
+  // if (response.statusCode == 200) {
+  //   print('Данные статистики ЮЗЕРА отправлены успешно!');
+  // }
+  // if (response.statusCode == 201) {
+  //   print('Данные статистики ЮЗЕРА отправлены успешно!');
+  // } else {
+  //   print('Ошибка при отправке данных статистики ЮЗЕРА: ${response.reasonPhrase} (${response.statusCode})');
+  // }
 }
 
 Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
@@ -174,8 +175,9 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
     "pageCountWordMode": pageCountSimpleMode,
     "date": nowDataUTC,
   };
-  print(data);
+  // print(data);
   final url = Uri.parse('https://fb2.cloud.leam.pro/api/statistic/anonym');
+  // ignore: unused_local_variable
   final response = await http.post(
     url,
     headers: <String, String>{
@@ -183,13 +185,13 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
     },
     body: jsonEncode(data),
   );
-  print(response.body);
-  if (response.statusCode == 200) {
-    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
-  }
-  if (response.statusCode == 201) {
-    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
-  } else {
-    print('Ошибка при отправке данных статистики и местоположения МЕРЛИНА: ${response.reasonPhrase} (${response.statusCode})');
-  }
+  // print(response.body);
+  // if (response.statusCode == 200) {
+  //   print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
+  // }
+  // if (response.statusCode == 201) {
+  //   print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
+  // } else {
+  //   print('Ошибка при отправке данных статистики и местоположения МЕРЛИНА: ${response.reasonPhrase} (${response.statusCode})');
+  // }
 }

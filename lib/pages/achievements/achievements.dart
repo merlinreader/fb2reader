@@ -62,7 +62,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
 
   @override
   Widget build(BuildContext context) {
-    print(_achievements);
+    // print(_achievements);
     return Stack(
       children: [
         const Padding(

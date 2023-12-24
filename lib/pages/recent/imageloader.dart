@@ -57,10 +57,10 @@ class ImageLoader {
       if (result?.files.first.extension == 'zip') {
         path = await extractFB2FromZip(result!.files.single.path!);
         if (path != '') {
-          print('НАЙДЕН FB2');
+          // print('НАЙДЕН FB2');
           fileContent = utf8.decode((File(path).readAsBytesSync()));
         } else {
-          print("Файл fb2 не найден в архиве");
+          // print("Файл fb2 не найден в архиве");
           return;
         }
       } else {
@@ -84,7 +84,7 @@ class ImageLoader {
         );
         return;
       }
-      print('start');
+      // print('start');
       XmlDocument document = XmlDocument.parse(fileContent);
       try {
         final XmlElement binaryInfo = document.findAllElements('binary').first;
@@ -204,12 +204,12 @@ class ImageLoader {
           File fb2File = File(filePath);
           fb2File = await fb2File.create(recursive: true);
           await fb2File.writeAsBytes(file.content);
-          print('Найден файл FB2: $fileName, путь: $filePath');
+          // print('Найден файл FB2: $fileName, путь: $filePath');
           return filePath;
         }
       }
     } catch (e) {
-      print('Error extracting FB2 from zip: $e');
+      // print('Error extracting FB2 from zip: $e');
     }
 
     return null;
