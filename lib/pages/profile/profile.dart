@@ -70,7 +70,7 @@ class _ProfilePage extends State<ProfilePage> {
   late int getWords;
 
   // ignore: unused_field
-  String? _link = 'unknown';
+  final String _link = 'unknown';
 
   @override
   void initState() {

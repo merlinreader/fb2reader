@@ -40,7 +40,7 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
   RewardedAd? _ad;
   late final Future<RewardedAdLoader> _adLoader = _createRewardedAdLoader();
   var adRequest = const AdRequest();
-  late var _adRequestConfiguration = AdRequestConfiguration(adUnitId: adUnitId);
+  late final _adRequestConfiguration = AdRequestConfiguration(adUnitId: adUnitId);
   var isLoading = false;
 
   @override

@@ -328,7 +328,7 @@ class WordCount {
     for (var noun in checkWords) {
       var correspondingEntry = sortedWordCounts.firstWhere(
         (entry) => entry.key == noun,
-        orElse: () => MapEntry<String, int>("NotFound", -1),
+        orElse: () => const MapEntry<String, int>("NotFound", -1),
       );
 
       if (correspondingEntry.key != "NotFound") {
