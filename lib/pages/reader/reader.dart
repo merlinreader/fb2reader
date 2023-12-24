@@ -815,16 +815,16 @@ class Reader extends State with WidgetsBindingObserver {
                       : SingleChildScrollView(
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxHeight: MediaQuery.of(context).size.height * 0.6,
+                              maxHeight: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
                             ),
                             child: Container(
                               width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height * 0.6,
+                              height: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
                               color: Colors.transparent,
                               child: Card(
                                 child: SizedBox(
                                   width: MediaQuery.of(context).size.width,
-                                  height: MediaQuery.of(context).size.height * 0.5,
+                                  height: forTable == false ? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.7,
                                   child: Column(
                                     // mainAxisAlignment: MainAxisAlignment.start,
                                     // crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -844,74 +844,159 @@ class Reader extends State with WidgetsBindingObserver {
                                           ),
                                         ],
                                       ),
-                                      const Padding(
-                                        padding: EdgeInsets.only(bottom: 40),
+                                      Padding(
+                                        padding: const EdgeInsets.only(bottom: 20),
                                         child: Center(
-                                          child: Text24(
-                                            text: 'Изучаемые слова',
-                                            textColor: MyColors.black,
-                                          ),
+                                          child: forTable == false
+                                              ? const Text24(
+                                                  text: 'Изучаемые слова',
+                                                  textColor: MyColors.black,
+                                                )
+                                              : const Text20(text: 'Изучаемые слова', textColor: MyColors.black),
                                         ),
                                       ),
                                       Container(
                                         width: MediaQuery.of(context).size.width,
-                                        height: MediaQuery.of(context).size.height * 0.37,
+                                        // height: MediaQuery.of(context).size.height * 0.37,
                                         child: DataTable(
-                                          columnSpacing: 30.0,
+                                          columnSpacing: forTable == false ? 0 : 30,
                                           showBottomBorder: false,
-                                          horizontalMargin: 10,
                                           dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                                          columns: const [
+                                          clipBehavior: Clip.hardEdge,
+                                          horizontalMargin: 10,
+                                          columns: [
                                             DataColumn(
-                                              label: SizedBox(
-                                                child: Text15(
-                                                  text: 'Слово',
-                                                  textColor: MyColors.black,
-                                                ),
-                                              ),
+                                              label: forTable == false
+                                                  ? SizedBox(
+                                                      width: MediaQuery.of(context).size.width * 0.6,
+                                                      child: const Text(
+                                                        'Слово',
+                                                        style: TextStyle(
+                                                          fontFamily: 'Tektur',
+                                                          fontSize: 15,
+                                                        ),
+                                                        textAlign: TextAlign.left,
+                                                      ),
+                                                    )
+                                                  : SizedBox(
+                                                      width: MediaQuery.of(context).size.width * 0.3,
+                                                      child: const Text(
+                                                        'Слово',
+                                                        style: TextStyle(
+                                                          fontFamily: 'Tektur',
+                                                          fontSize: 15,
+                                                        ),
+                                                        textAlign: TextAlign.left,
+                                                      ),
+                                                    ),
                                             ),
                                             DataColumn(
-                                              label: SizedBox(
-                                                child: Text15(
-                                                  text: 'Количество',
-                                                  textColor: MyColors.black,
-                                                ),
-                                              ),
+                                              label: forTable == false
+                                                  ? Text(
+                                                      'Количество',
+                                                      style: const TextStyle(
+                                                        fontFamily: 'Tektur',
+                                                        fontSize: 15,
+                                                      ),
+                                                      textAlign: forTable == false ? TextAlign.right : TextAlign.left,
+                                                    )
+                                                  : Text(
+                                                      'Количество',
+                                                      style: const TextStyle(
+                                                        fontFamily: 'Tektur',
+                                                        fontSize: 15,
+                                                      ),
+                                                      textAlign: forTable == false ? TextAlign.right : TextAlign.left,
+                                                    ),
                                             ),
                                           ],
-                                          rows: wordCount.wordEntries.map((entry) {
-                                            return DataRow(
-                                              cells: [
-                                                DataCell(
-                                                  SizedBox(
-                                                    child: InkWell(
-                                                      onTap: () async {
-                                                        await _showWordInputDialog(entry.word, wordCount.wordEntries, wordsMap);
-                                                        setState(() {
-                                                          entry.word;
-                                                          entry.count;
-                                                        });
-                                                      },
-                                                      child: TextForTable(
-                                                        text: entry.word,
-                                                        textColor: MyColors.black,
-                                                      ),
+                                          rows: const [],
+                                        ),
+                                      ),
+                                      Container(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: forTable == false
+                                              ? MediaQuery.of(context).size.height * 0.41
+                                              : MediaQuery.of(context).size.height * 0.35,
+                                          child: SingleChildScrollView(
+                                            scrollDirection: Axis.vertical,
+                                            child: DataTable(
+                                              columnSpacing: 0,
+                                              showBottomBorder: false,
+                                              dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                              clipBehavior: Clip.hardEdge,
+                                              headingRowHeight: 0,
+                                              horizontalMargin: 10,
+                                              columns: const [
+                                                DataColumn(
+                                                  label: Flexible(
+                                                    child: Text15(
+                                                      text: '',
+                                                      textColor: MyColors.black,
                                                     ),
                                                   ),
                                                 ),
-                                                DataCell(
-                                                  SizedBox(
-                                                    child: TextForTable(
-                                                      text: '${entry.count}',
+                                                DataColumn(
+                                                  label: Flexible(
+                                                    child: Text15(
+                                                      text: '',
                                                       textColor: MyColors.black,
                                                     ),
                                                   ),
                                                 ),
                                               ],
-                                            );
-                                          }).toList(),
-                                        ),
-                                      ),
+                                              rows: wordCount.wordEntries.map((entry) {
+                                                return DataRow(
+                                                  cells: [
+                                                    DataCell(
+                                                      forTable == false
+                                                          ? SizedBox(
+                                                              width: MediaQuery.of(context).size.width * 0.6,
+                                                              child: InkWell(
+                                                                onTap: () async {
+                                                                  await _showWordInputDialog(entry.word, wordCount.wordEntries, wordsMap);
+                                                                  setState(() {
+                                                                    entry.word;
+                                                                    entry.count;
+                                                                  });
+                                                                },
+                                                                child: TextForTable(
+                                                                  text: entry.word,
+                                                                  textColor: MyColors.black,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : SizedBox(
+                                                              width: MediaQuery.of(context).size.width * 0.43,
+                                                              child: InkWell(
+                                                                onTap: () async {
+                                                                  await _showWordInputDialog(entry.word, wordCount.wordEntries, wordsMap);
+                                                                  setState(() {
+                                                                    entry.word;
+                                                                    entry.count;
+                                                                  });
+                                                                },
+                                                                child: TextForTable(
+                                                                  text: entry.word,
+                                                                  textColor: MyColors.black,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                    ),
+                                                    DataCell(
+                                                      SizedBox(
+                                                        width: MediaQuery.of(context).size.width * 0.2,
+                                                        child: TextForTable(
+                                                          text: '${entry.count}',
+                                                          textColor: MyColors.black,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              }).toList(),
+                                            ),
+                                          )),
                                     ],
                                   ),
                                 ),
@@ -2122,126 +2207,167 @@ class Reader extends State with WidgetsBindingObserver {
             constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-                return ListView(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.all(0),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.transparent,
-                      child: Card(
-                        child: Expanded(
-                          child: Column(
-                            children: <Widget>[
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    alignment: Alignment.centerRight,
-                                    padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                    icon: const Icon(Icons.close),
-                                    onPressed: () async {
-                                      debugPrint("DONE");
-                                      Navigator.pop(context);
+                    Card(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                icon: const Icon(Icons.close),
+                                onPressed: () async {
+                                  debugPrint("DONE");
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ],
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 0),
+                            child: Center(
+                              child: Text24(
+                                text: 'Выберите слова',
+                                textColor: MyColors.black,
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 1,
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                  child: TextField(
+                                    onChanged: (value) {
+                                      setState(() {
+                                        searchText = value.toLowerCase();
+                                        filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
+                                        filteredWords.sort((a, b) => a.compareTo(b));
+                                        filteredWords.sort((a, b) => wordsMap[b]!.compareTo(wordsMap[a]!));
+                                      });
                                     },
-                                  ),
-                                ],
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(bottom: 40),
-                                child: Center(
-                                  child: Text24(
-                                    text: 'Выберите слова',
-                                    textColor: MyColors.black,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: TextField(
-                                  onChanged: (value) {
-                                    setState(() {
-                                      searchText = value.toLowerCase();
-                                      // filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
-                                      filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
-
-                                      filteredWords.sort((a, b) => a.compareTo(b)); // Сортировка по вводу пользователя
-
-                                      // Сортировка по убыванию количества повторений
-                                      filteredWords.sort((a, b) => wordsMap[b]!.compareTo(wordsMap[a]!));
-                                    });
-                                  },
-                                  decoration: InputDecoration(
+                                    decoration: InputDecoration(
                                       labelText: 'Введите текст',
                                       border: const OutlineInputBorder(),
                                       disabledBorder: const OutlineInputBorder(),
                                       focusedBorder: const OutlineInputBorder(),
                                       focusColor: MyColors.purple,
                                       floatingLabelStyle:
-                                          isDarkTheme ? const TextStyle(color: MyColors.white) : const TextStyle(color: MyColors.black)),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                                child: FractionallySizedBox(
-                                  widthFactor: 0.95,
-                                  child: DataTable(
-                                    columnSpacing: 38,
-                                    showBottomBorder: false,
-                                    horizontalMargin: 10,
-                                    dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                                    columns: const [
-                                      DataColumn(
-                                        label: Flexible(
-                                          child: Text15(text: 'Слово', textColor: MyColors.black),
-                                        ),
-                                      ),
-                                      DataColumn(
-                                        label: Flexible(
-                                          child: Text15(
-                                            text: 'Количество',
-                                            textColor: MyColors.black,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                    rows: List<DataRow>.generate(
-                                      filteredWords.length,
-                                      (index) => DataRow(
-                                        cells: [
-                                          DataCell(TextButton(
-                                            style: const ButtonStyle(alignment: Alignment.centerLeft),
-                                            onPressed: () async {
-                                              List<String> test = [filteredWords[index]];
-                                              print(test);
-                                              test = await WordCount().getNounsByList(test);
-                                              print('after $test');
-                                              if (test.length != 1) {
-                                                Fluttertoast.showToast(msg: 'Данное слово не существительное');
-                                                return;
-                                              } else {
-                                                await updateWordInTable(word, filteredWords[index], wordEntries);
-                                                Navigator.of(context).pop();
-                                              }
-                                            },
-                                            child: TextForTable(
-                                              text: filteredWords[index],
-                                              textColor: MyColors.black,
-                                            ),
-                                          )),
-                                          DataCell(TextForTable(
-                                            text: '${wordsMap[filteredWords[index]] ?? 0}',
-                                            textColor: MyColors.black,
-                                          )),
-                                        ],
-                                      ),
+                                          isDarkTheme ? const TextStyle(color: MyColors.white) : const TextStyle(color: MyColors.black),
                                     ),
                                   ),
                                 ),
-                              )
-                            ],
+                                Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  child: DataTable(
+                                      columnSpacing: 45.0,
+                                      showBottomBorder: false,
+                                      horizontalMargin: 20,
+                                      dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                      columns: const [
+                                        DataColumn(
+                                          label: SizedBox(
+                                            child: Text15(text: 'Слово', textColor: MyColors.black),
+                                          ),
+                                        ),
+                                        DataColumn(
+                                          label: SizedBox(
+                                            child: Text15(
+                                              text: 'Количество',
+                                              textColor: MyColors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                      rows: const []),
+                                ),
+                                Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.2,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
+                                      child: DataTable(
+                                        columnSpacing: 0.0,
+                                        showBottomBorder: false,
+                                        dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                        clipBehavior: Clip.hardEdge,
+                                        headingRowHeight: 0,
+                                        horizontalMargin: 10,
+                                        columns: const [
+                                          DataColumn(
+                                            label: Flexible(
+                                              child: Text15(
+                                                text: '',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Flexible(
+                                              child: Text15(
+                                                text: '',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                        rows: searchText.isEmpty
+                                            ? const <DataRow>[]
+                                            : List<DataRow>.generate(
+                                                filteredWords.length,
+                                                (index) => DataRow(
+                                                  cells: [
+                                                    DataCell(
+                                                      SizedBox(
+                                                        width: MediaQuery.of(context).size.width * 0.3,
+                                                        child: TextButton(
+                                                          style: const ButtonStyle(alignment: Alignment.centerLeft),
+                                                          onPressed: () async {
+                                                            List<String> test = [filteredWords[index]];
+                                                            print(test);
+                                                            test = await WordCount().getNounsByList(test);
+                                                            print('after $test');
+                                                            if (test.length != 1) {
+                                                              Fluttertoast.showToast(msg: 'Данное слово не существительное');
+                                                              return;
+                                                            } else {
+                                                              await updateWordInTable(word, filteredWords[index], wordEntries);
+                                                              Navigator.of(context).pop();
+                                                            }
+                                                          },
+                                                          child: TextForTable(
+                                                            text: filteredWords[index],
+                                                            textColor: MyColors.black,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    DataCell(
+                                                      SizedBox(
+                                                        width: MediaQuery.of(context).size.width * 0.3,
+                                                        child: TextForTable(
+                                                          text: '${wordsMap[filteredWords[index]] ?? 0}',
+                                                          textColor: MyColors.black,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                      ),
+                                    ))
+                              ],
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   ],
