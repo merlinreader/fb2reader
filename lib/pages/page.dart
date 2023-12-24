@@ -49,11 +49,6 @@ class Page extends State<AppPage> {
     });
     if (index == 0) {
       await ImageLoader().loadImage();
-      setState(() {
-        profile = false;
-        _selectedPage = 1;
-        _widgetOptions[1];
-      });
       var temp = await getIndex();
       var tempPro;
       print(temp);
@@ -65,10 +60,15 @@ class Page extends State<AppPage> {
       }
 
       await Navigator.pushNamed(context, RouteNames.reader).then((_) {
-        recent.RecentPageState().getDataFromLocalStorage('booksKey');
+        getDataFromLocalStorage('booksKey');
       });
       print('GOVNOOO');
       print('tempPro $tempPro');
+      setState(() {
+        profile = false;
+        _selectedPage = 1;
+        _widgetOptions[1];
+      });
     }
   }
 
@@ -86,6 +86,7 @@ class Page extends State<AppPage> {
       print(e.title);
       print(e.progress);
     }
+    await prefs.setString('booksKey', jsonEncode(tempImages));
   }
 
   Future<void> sendData(String key, int index) async {
