@@ -18,6 +18,8 @@ ThemeData darkTheme() => ThemeData(
     textTheme: const TextTheme(
         //text24
         titleLarge: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 24, fontWeight: FontWeight.bold),
+        //text22
+        displayLarge: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 22, fontWeight: FontWeight.bold),
         //text20
         labelMedium: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 20, fontWeight: FontWeight.bold),
         //Text11
@@ -94,6 +96,8 @@ ThemeData lightTheme() => ThemeData(
     textTheme: const TextTheme(
         //text24
         titleLarge: TextStyle(color: MyColors.black, fontFamily: 'Tektur', fontSize: 24, fontWeight: FontWeight.bold),
+        //text22
+        displayLarge: TextStyle(color: MyColors.black, fontFamily: 'Tektur', fontSize: 22, fontWeight: FontWeight.bold),
         //Text11
         bodySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 11, fontWeight: FontWeight.bold),
         //Text14

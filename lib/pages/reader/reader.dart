@@ -2607,7 +2607,7 @@ class Reader extends State with WidgetsBindingObserver {
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
                     // Скролл вниз / следующая страница
-                    _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.92,
+                    _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.97,
                         duration: const Duration(milliseconds: 250), curve: Curves.ease);
                   },
                   child: Padding(
@@ -2888,7 +2888,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       CustomIcons.turn,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 30,
+                                      size: 27,
                                     ),
                                   ),
                                   const Padding(padding: EdgeInsets.only(right: 30)),
@@ -2901,7 +2901,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       CustomIcons.theme,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 30,
+                                      size: 27,
                                     ),
                                   ),
                                   const Padding(padding: EdgeInsets.only(right: 30)),
@@ -2946,7 +2946,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       CustomIcons.wm,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 30,
+                                      size: 27,
                                     ),
                                   )
                                 ],

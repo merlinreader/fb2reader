@@ -16,6 +16,16 @@ class Text24 extends StatelessWidget {
   }
 }
 
+class Text22 extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const Text22({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: Theme.of(context).textTheme.displayLarge);
+  }
+}
+
 class Text14 extends StatelessWidget {
   final String text;
   final Color textColor;
