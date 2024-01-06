@@ -16,6 +16,8 @@ ThemeData darkTheme() => ThemeData(
         onSurface: Colors.white,
         scrim: MyColors.grayAch),
     textTheme: const TextTheme(
+        //text10
+        labelSmall: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 24, fontWeight: FontWeight.bold),
         //text24
         titleLarge: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 24, fontWeight: FontWeight.bold),
         //text20
@@ -29,7 +31,7 @@ ThemeData darkTheme() => ThemeData(
         //Text12
         titleSmall: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 12, fontWeight: FontWeight.normal),
         //Text7
-        displaySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 7, fontWeight: FontWeight.normal),
+        displaySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 10, fontWeight: FontWeight.normal),
         //Text16
         displayMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 16, fontWeight: FontWeight.bold),
         bodyMedium: TextStyle(fontFamily: 'Roboto', color: MyColors.bgWhite, fontSize: 16, fontWeight: FontWeight.normal),
@@ -92,20 +94,23 @@ ThemeData lightTheme() => ThemeData(
         onSurface: Colors.black,
         scrim: MyColors.whiteAch),
     textTheme: const TextTheme(
+        labelSmall: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 24, fontWeight: FontWeight.bold),
         //text24
         titleLarge: TextStyle(color: MyColors.black, fontFamily: 'Tektur', fontSize: 24, fontWeight: FontWeight.bold),
         //Text11
         bodySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 11, fontWeight: FontWeight.bold),
         //Text14
         bodyLarge: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 14, fontWeight: FontWeight.normal),
+        //Text14.1
+        labelLarge: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 14, fontWeight: FontWeight.normal),
         //Text18
         titleMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 18, fontWeight: FontWeight.normal),
         //text20
         labelMedium: TextStyle(color: MyColors.bgWhite, fontFamily: 'Tektur', fontSize: 20, fontWeight: FontWeight.bold),
         //Text12
-        titleSmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 12, fontWeight: FontWeight.normal),
+        titleSmall: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 14, fontWeight: FontWeight.normal),
         //Text7
-        displaySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 7, fontWeight: FontWeight.normal),
+        displaySmall: TextStyle(fontFamily: 'Tektur', color: MyColors.bgWhite, fontSize: 10, fontWeight: FontWeight.normal),
         //Text16
         displayMedium: TextStyle(fontFamily: 'Tektur', color: MyColors.black, fontSize: 16, fontWeight: FontWeight.bold),
         bodyMedium: TextStyle(fontFamily: 'Roboto', color: MyColors.black, fontSize: 16, fontWeight: FontWeight.normal),

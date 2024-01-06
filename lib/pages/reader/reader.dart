@@ -2741,7 +2741,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       Icons.battery_full,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 24,
+                                      size: 30,
                                     ),
                                   ),
                                   Text7(

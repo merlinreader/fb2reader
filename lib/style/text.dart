@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merlin/style/colors.dart';
 
 class Text24 extends StatelessWidget {
   final String text;
@@ -51,6 +52,18 @@ class Text12 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(text, style: Theme.of(context).textTheme.titleSmall
+        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
+        );
+  }
+}
+
+class Text10 extends StatelessWidget {
+  final String text;
+  final Color textColor;
+  const Text10({super.key, required this.text, required this.textColor});
+  @override
+  Widget build(BuildContext context) {
+    return Text(text, style: Theme.of(context).textTheme.labelSmall
         //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
         );
   }
