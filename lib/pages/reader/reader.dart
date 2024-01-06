@@ -1547,8 +1547,8 @@ class Reader extends State with WidgetsBindingObserver {
     // print('lastCallTimestamp $lastCallTimestamp');
     // print('now $now');
     // print('timeElapsed $timeElapsed');
-    // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+      // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
@@ -2607,7 +2607,7 @@ class Reader extends State with WidgetsBindingObserver {
                   behavior: HitTestBehavior.translucent,
                   onTap: () {
                     // Скролл вниз / следующая страница
-                    _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.92,
+                    _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.97,
                         duration: const Duration(milliseconds: 250), curve: Curves.ease);
                   },
                   child: Padding(
@@ -2888,7 +2888,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       CustomIcons.turn,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 30,
+                                      size: 27,
                                     ),
                                   ),
                                   const Padding(padding: EdgeInsets.only(right: 30)),
@@ -2901,7 +2901,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       CustomIcons.theme,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 30,
+                                      size: 27,
                                     ),
                                   ),
                                   const Padding(padding: EdgeInsets.only(right: 30)),
@@ -2927,8 +2927,8 @@ class Reader extends State with WidgetsBindingObserver {
                                           final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
                                           var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                           var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                          if (timeElapsed.inHours > 24) {
-                                            // if (timeElapsed.inMilliseconds > 1) {
+                                          // if (timeElapsed.inHours > 24) {
+                                          if (timeElapsed.inMilliseconds > 1) {
                                             wordModeDialog(context);
                                           } else {
                                             Fluttertoast.showToast(
@@ -2946,7 +2946,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       CustomIcons.wm,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 30,
+                                      size: 27,
                                     ),
                                   )
                                 ],

@@ -170,7 +170,7 @@ class _SettingsPageState extends State<SettingsPage> {
           },
           child: Icon(
             CustomIcons.chevronLeft,
-            size: 40,
+            size: 30,
             color: Theme.of(context).iconTheme.color,
           ),
         ),
@@ -179,7 +179,7 @@ class _SettingsPageState extends State<SettingsPage> {
           style: TextStyle(
             color: Theme.of(context).iconTheme.color,
             fontFamily: 'Tektur',
-            fontSize: 24,
+            fontSize: 22,
           ),
         ),
       ),
@@ -194,7 +194,7 @@ class _SettingsPageState extends State<SettingsPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                const Text24(text: "Система", textColor: MyColors.black),
+                const Text22(text: "Система", textColor: MyColors.black),
                 // TextTektur(
                 //   text: "Система",
                 //   fontsize: 18,
@@ -203,7 +203,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 16),
                 Row(
                   children: <Widget>[
-                    Text14(
+                    Text15(
                       text: "Размер шрифта",
                       textColor: themeGrayTextColor,
                     ),
@@ -256,7 +256,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                 ),
-                Text14(
+                Text15(
                   text: "Яркость",
                   textColor: themeGrayTextColor,
                 ),
@@ -297,7 +297,7 @@ class _SettingsPageState extends State<SettingsPage> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text24(
+                Text22(
                   text: "Настраиваемая тема",
                   //fontsize: 18,
                   textColor: themeTextColor,
@@ -309,7 +309,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text14(
+                        Text15(
                           text: "Цвет текста",
                           textColor: themeGrayTextColor,
                         ),
@@ -345,7 +345,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Text14(
+                        Text15(
                           text: "Цвет фона",
                           textColor: themeGrayTextColor,
                         ),
