@@ -318,28 +318,29 @@ class WordCount {
     debugPrint('end - start = ${end - start}');
     debugPrint('sortedWordCounts.length = ${sortedWordCounts.length}');
 
+    // Загрузка исторических слов
+    String historyKey = 'WMWORDS_HISTORY';
+    String? historyData = prefs.getString(historyKey);
+    List<String> historyWords = historyData != null ? List<String>.from(jsonDecode(historyData)) : [];
+
     List<String> checkWords = [];
     int currentIndex = start;
 
-    var temp = await loadWordCountFromLocalStorage(filePath);
-    String? wordInTemp = temp.wordEntries.isNotEmpty ? temp.wordEntries.first.word : null;
-
-    List<MapEntry<String, int>> filteredSortedWordCounts = sortedWordCounts.where((entry) {
-      return entry.key != wordInTemp && !temp.wordEntries.any((tempEntry) => tempEntry.word == entry.key);
-    }).toList();
-
-    while (checkWords.length < end - start && currentIndex < filteredSortedWordCounts.length) {
+    while (checkWords.length < end - start && currentIndex < sortedWordCounts.length) {
       List<String> newWords = [];
 
-      for (; currentIndex < filteredSortedWordCounts.length && newWords.length < (end - start - checkWords.length); currentIndex++) {
-        newWords.add(filteredSortedWordCounts[currentIndex].key);
+      for (; currentIndex < sortedWordCounts.length && newWords.length < (end - start - checkWords.length); currentIndex++) {
+        var currentWord = sortedWordCounts[currentIndex].key;
+        if (!historyWords.contains(currentWord)) {
+          newWords.add(currentWord);
+        }
       }
 
       List<String> newNouns = await getNounsByList(newWords);
       checkWords.addAll(newNouns);
 
       // Если новых существительных нет, и все слова были проверены, прерываем цикл
-      if (newNouns.isEmpty && currentIndex >= filteredSortedWordCounts.length) {
+      if (newNouns.isEmpty && currentIndex >= sortedWordCounts.length) {
         break;
       }
     }
@@ -347,16 +348,17 @@ class WordCount {
     checkWords = checkWords.sublist(0, min(checkWords.length, end - start)); // Обрезаем список до нужной длины
 
     final wordEntriesFutures = <Future<WordEntry>>[];
-    for (var noun in checkWords) {
+    for (var word in checkWords) {
       var correspondingEntry = sortedWordCounts.firstWhere(
-        (entry) => entry.key == noun,
+        (entry) => entry.key == word,
         orElse: () => const MapEntry<String, int>("NotFound", -1),
       );
 
       if (correspondingEntry.key != "NotFound") {
-        wordEntriesFutures.add(createWordEntry(noun, correspondingEntry.value));
+        wordEntriesFutures.add(createWordEntry(word, correspondingEntry.value));
+        historyWords.add(word); // Добавление слова в историю
       } else {
-        debugPrint("No matching entry for noun: $noun");
+        debugPrint("No matching entry for word: $word");
       }
     }
 
@@ -365,6 +367,9 @@ class WordCount {
     prefs.setInt('$filePath-end', min(end, sortedWordCounts.length));
     prefs.setInt('words', getWords);
     this.wordEntries = wordEntries; // Присваиваем wordEntries к текущим wordEntries
+
+    // Сохранение обновленной истории слов
+    prefs.setString(historyKey, jsonEncode(historyWords));
   }
 
   Future<void> countWordsWithOffsetNoTrans() async {

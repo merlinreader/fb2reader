@@ -431,34 +431,21 @@ class Reader extends State with WidgetsBindingObserver {
 
   Future<void> saveWordCountToLocalstorage(WordCount wordCount) async {
     final prefs = await SharedPreferences.getInstance();
-    // String key = '${wordCount.filePath}-words';
     String key = 'WMWORDS';
 
-    // Загрузка и декодирование существующих данных, если они есть.
-    String? storedData = prefs.getString(key);
-    List<WordCount> wordDatas = storedData != null ? (jsonDecode(storedData) as List).map((item) => WordCount.fromJson(item)).toList() : [];
-
-    // Поиск и обновление существующего WordCount, если он есть, иначе добавление нового.
-    int index = wordDatas.indexWhere((element) => element.filePath == wordCount.filePath);
-    if (index != -1) {
-      wordDatas[index] = wordCount; // Обновление существующего WordCount
-    } else {
-      wordDatas.add(wordCount); // Добавление нового WordCount
-    }
-
-    // Сериализация обновлённого списка в JSON и сохранение.
-    String wordDatasString = jsonEncode(wordDatas);
-    await prefs.setString(key, wordDatasString);
+    // Сериализация WordCount в JSON и сохранение.
+    String wordCountString = jsonEncode(wordCount.toJson());
+    await prefs.setString(key, wordCountString);
   }
 
   Future<WordCount> loadWordCountFromLocalStorage(String filePath) async {
     final prefs = await SharedPreferences.getInstance();
-    // String? storedData = prefs.getString('$filePath-words');
     String key = 'WMWORDS';
     String? storedData = prefs.getString(key);
+    print('reader loadwCounts $storedData');
     if (storedData != null) {
-      List<dynamic> decodedData = jsonDecode(storedData);
-      WordCount wordCount = WordCount.fromJson(decodedData[0]);
+      Map<String, dynamic> decodedData = jsonDecode(storedData);
+      WordCount wordCount = WordCount.fromJson(decodedData);
       return wordCount;
     } else {
       return WordCount();
@@ -482,7 +469,7 @@ class Reader extends State with WidgetsBindingObserver {
     String updatedText = getText;
 
     for (var entry in wordEntries) {
-      // print('Ищем слово: ${entry.word}');
+      print('Ищем слово: ${entry.word}');
 
       var escapedWord = RegExp.escape(entry.word);
       var pattern = '(?<!\\p{L})$escapedWord(?!\\p{L})';
@@ -490,7 +477,7 @@ class Reader extends State with WidgetsBindingObserver {
 
       updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
         final matchedWord = match.group(0)!;
-        // print('Найдено совпадение: $matchedWord');
+        print('Найдено совпадение: $matchedWord');
         return matchCase(matchedWord, entry.translation ?? '');
       });
       // updatedText = updatedText.replaceAllMapped(entry.word[0].toUpperCase() + entry.word.substring(1).toLowerCase(), (match) {
