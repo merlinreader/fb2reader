@@ -431,7 +431,8 @@ class Reader extends State with WidgetsBindingObserver {
 
   Future<void> saveWordCountToLocalstorage(WordCount wordCount) async {
     final prefs = await SharedPreferences.getInstance();
-    String key = '${wordCount.filePath}-words';
+    // String key = '${wordCount.filePath}-words';
+    String key = 'WMWORDS';
 
     // Загрузка и декодирование существующих данных, если они есть.
     String? storedData = prefs.getString(key);
@@ -452,7 +453,9 @@ class Reader extends State with WidgetsBindingObserver {
 
   Future<WordCount> loadWordCountFromLocalStorage(String filePath) async {
     final prefs = await SharedPreferences.getInstance();
-    String? storedData = prefs.getString('$filePath-words');
+    // String? storedData = prefs.getString('$filePath-words');
+    String key = 'WMWORDS';
+    String? storedData = prefs.getString(key);
     if (storedData != null) {
       List<dynamic> decodedData = jsonDecode(storedData);
       WordCount wordCount = WordCount.fromJson(decodedData[0]);
@@ -1556,8 +1559,8 @@ class Reader extends State with WidgetsBindingObserver {
     // print('lastCallTimestamp $lastCallTimestamp');
     // print('now $now');
     // print('timeElapsed $timeElapsed');
-    // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+      // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
@@ -2732,7 +2735,7 @@ class Reader extends State with WidgetsBindingObserver {
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                height: visible ? 100 : 25,
+                height: visible ? 90 : 20,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2751,13 +2754,21 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       Icons.battery_full,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 24,
+                                      size: 20,
                                     ),
                                   ),
-                                  Text7(
-                                    text: '${_batteryLevel.toString()} ',
-                                    textColor: MyColors.white,
+                                  Text(
+                                    '${_batteryLevel.toString()}%',
+                                    style: TextStyle(
+                                        color: !isDarkTheme ? MyColors.white : MyColors.black,
+                                        fontSize: 7,
+                                        fontFamily: 'Tektur',
+                                        fontWeight: FontWeight.bold),
                                   ),
+                                  // Text7(
+                                  //   text: '${_batteryLevel.toString()}%',
+                                  //   textColor: MyColors.white,
+                                  // ),
                                 ],
                               ),
                             ),
@@ -2783,7 +2794,7 @@ class Reader extends State with WidgetsBindingObserver {
                             child: Container(
                               width: MediaQuery.of(context).size.width / 8,
                               alignment: Alignment.topRight,
-                              child: Text12(
+                              child: Text11(
                                 text: '${_scrollPosition.toStringAsFixed(1)}%',
                                 textColor: MyColors.black,
                               ),
@@ -2799,7 +2810,7 @@ class Reader extends State with WidgetsBindingObserver {
                 right: 0,
                 child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
-                    height: visible ? 100 : 0,
+                    height: visible ? 90 : 0,
                     child: SingleChildScrollView(
                       child: Container(
                           alignment: AlignmentDirectional.topEnd,
@@ -2808,7 +2819,7 @@ class Reader extends State with WidgetsBindingObserver {
                             children: [
                               _scrollController.hasClients
                                   ? Padding(
-                                      padding: const EdgeInsets.fromLTRB(8, 0, 28, 4),
+                                      padding: const EdgeInsets.fromLTRB(8, 0, 28, 0),
                                       child: SliderTheme(
                                         data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
                                         child: Row(
@@ -2919,12 +2930,9 @@ class Reader extends State with WidgetsBindingObserver {
                                     onTap: () async {
                                       switch (isBorder) {
                                         case false:
-                                          if (isTrans == true) {
-                                            var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
-                                            // print('temp.filePath = ${temp.filePath}');
-                                            if (temp.filePath != '') {
-                                              replaceWordsWithTranslation(temp.wordEntries);
-                                            }
+                                          var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
+                                          if (temp.filePath != '') {
+                                            replaceWordsWithTranslation(temp.wordEntries);
                                           } else {
                                             wordModeDialog(context);
                                           }
@@ -2937,8 +2945,8 @@ class Reader extends State with WidgetsBindingObserver {
                                           final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
                                           var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                           var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                          if (timeElapsed.inHours > 24) {
-                                            // if (timeElapsed.inMilliseconds > 1) {
+                                          // if (timeElapsed.inHours > 24) {
+                                          if (timeElapsed.inMilliseconds > 1) {
                                             wordModeDialog(context);
                                           } else {
                                             Fluttertoast.showToast(

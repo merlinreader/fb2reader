@@ -107,8 +107,8 @@ class WordCount {
       final timeElapsed = now.difference(_lastCallTimestamp!);
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
-      if (timeElapsed.inHours >= 24) {
-        // if (timeElapsed.inMicroseconds >= 1) {
+      // if (timeElapsed.inHours >= 24) {
+      if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset();
 
         await updateCallInfo();
@@ -289,7 +289,10 @@ class WordCount {
 
   Future<WordCount> loadWordCountFromLocalStorage(String filePath) async {
     final prefs = await SharedPreferences.getInstance();
-    String? storedData = prefs.getString('$filePath-words');
+    // String? storedData = prefs.getString('$filePath-words');
+    String key = 'WMWORDS';
+
+    String? storedData = prefs.getString(key);
     if (storedData != null) {
       List<dynamic> decodedData = jsonDecode(storedData);
       WordCount wordCount = WordCount.fromJson(decodedData[0]);
