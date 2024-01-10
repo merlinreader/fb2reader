@@ -2580,11 +2580,11 @@ class Reader extends State with WidgetsBindingObserver {
                 border: isBorder == true
                     ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 2)
                     : Border.all(width: 0, color: Colors.transparent)),
-            child: Stack(children: [
-              SafeArea(
-                top: false,
-                minimum: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-                child: ListView.builder(
+            child: SafeArea(
+              top: true,
+              minimum: visible ? EdgeInsets.only(top: 0, left: 8, right: 8) : EdgeInsets.only(top: 40, left: 8, right: 8),
+              child: Stack(children: [
+                ListView.builder(
                     controller: _scrollController,
                     itemCount: 1,
                     itemBuilder: (context, index) {
@@ -2611,127 +2611,128 @@ class Reader extends State with WidgetsBindingObserver {
                       }
                       return null;
                     }),
-              ),
-              GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    // Скролл вниз / следующая страница
-                    _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.97,
-                        duration: const Duration(milliseconds: 250), curve: Curves.ease);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                    child: IgnorePointer(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        color: const Color.fromRGBO(100, 150, 100, 0),
-                      ),
-                    ),
-                  )),
-              isBorder
-                  ? Positioned(
-                      left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
-                      top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
-                      child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onDoubleTap: () async {
-                            showSavedWords(context, textes.first.filePath);
-                          },
-                          onVerticalDragEnd: (dragEndDetails) async {
-                            if (dragEndDetails.primaryVelocity! > 0) {
-                              showSavedWords(context, textes.first.filePath);
-                            }
-                          },
-                          onTap: () {
-                            setState(() {
-                              visible = !visible;
-                            });
-                            if (visible) {
-                              // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-                              //   systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
-                              //   systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.light,
-                              // ));
-                              SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.manual,
-                                overlays: [
-                                  SystemUiOverlay.top,
-                                  SystemUiOverlay.bottom,
-                                ],
-                              );
-                            } else {
-                              SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-                            }
-                          },
-                          child: IgnorePointer(
-                            child: Container(
-                              width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
-                              height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
-                              color: const Color.fromRGBO(250, 100, 100, 0),
-                            ),
-                          )),
-                    )
-                  : Positioned(
-                      left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
-                      top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
-                      child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onDoubleTap: () async {
-                            showSavedWords(context, textes.first.filePath);
-                          },
-                          onTap: () {
-                            setState(() {
-                              visible = !visible;
-                            });
-                            if (visible) {
-                              // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-                              //   systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
-                              //   systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.dark,
-                              // ));
-                              SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.manual,
-                                overlays: [
-                                  SystemUiOverlay.top,
-                                  SystemUiOverlay.bottom,
-                                ],
-                              );
-                            } else {
-                              SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-                            }
-                          },
-                          child: IgnorePointer(
-                            child: Container(
-                              width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
-                              height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
-                              color: const Color.fromRGBO(250, 100, 100, 0),
-                            ),
-                          )),
-                    ),
-              Positioned(
-                left: MediaQuery.of(context).size.width / 6,
-                child: GestureDetector(
+                GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
-                      // Сролл вверх / предыдущая страница
-                      _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.92,
+                      // Скролл вниз / следующая страница
+                      _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.97,
                           duration: const Duration(milliseconds: 250), curve: Curves.ease);
                     },
-                    child: IgnorePointer(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width / 1.5,
-                        height: MediaQuery.of(context).size.height / 5,
-                        color: const Color.fromRGBO(100, 150, 200, 0),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      child: IgnorePointer(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          color: const Color.fromRGBO(100, 150, 100, 0),
+                        ),
                       ),
                     )),
-              ),
-            ])),
+                isBorder
+                    ? Positioned(
+                        left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                        top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                        child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onDoubleTap: () async {
+                              showSavedWords(context, textes.first.filePath);
+                            },
+                            onVerticalDragEnd: (dragEndDetails) async {
+                              if (dragEndDetails.primaryVelocity! > 0) {
+                                showSavedWords(context, textes.first.filePath);
+                              }
+                            },
+                            onTap: () {
+                              setState(() {
+                                visible = !visible;
+                              });
+                              if (visible) {
+                                // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+                                //   systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
+                                //   systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.light,
+                                // ));
+                                SystemChrome.setEnabledSystemUIMode(
+                                  SystemUiMode.manual,
+                                  overlays: [
+                                    SystemUiOverlay.top,
+                                    SystemUiOverlay.bottom,
+                                  ],
+                                );
+                              } else {
+                                SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+                              }
+                            },
+                            child: IgnorePointer(
+                              child: Container(
+                                width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                                height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                                color: const Color.fromRGBO(250, 100, 100, 0),
+                              ),
+                            )),
+                      )
+                    : Positioned(
+                        left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                        top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                        child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onDoubleTap: () async {
+                              showSavedWords(context, textes.first.filePath);
+                            },
+                            onTap: () {
+                              setState(() {
+                                visible = !visible;
+                              });
+                              if (visible) {
+                                // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+                                //   systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
+                                //   systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.dark,
+                                // ));
+                                SystemChrome.setEnabledSystemUIMode(
+                                  SystemUiMode.manual,
+                                  overlays: [
+                                    SystemUiOverlay.top,
+                                    SystemUiOverlay.bottom,
+                                  ],
+                                );
+                              } else {
+                                // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+                                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+                              }
+                            },
+                            child: IgnorePointer(
+                              child: Container(
+                                width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                                height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                                color: const Color.fromRGBO(250, 100, 100, 0),
+                              ),
+                            )),
+                      ),
+                Positioned(
+                  left: MediaQuery.of(context).size.width / 6,
+                  child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        // Сролл вверх / предыдущая страница
+                        _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.92,
+                            duration: const Duration(milliseconds: 250), curve: Curves.ease);
+                      },
+                      child: IgnorePointer(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 1.5,
+                          height: MediaQuery.of(context).size.height / 5,
+                          color: const Color.fromRGBO(100, 150, 200, 0),
+                        ),
+                      )),
+                ),
+              ]),
+            )),
         bottomNavigationBar: BottomAppBar(
           color: Theme.of(context).colorScheme.primary,
           child: Stack(
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                height: visible ? 100 : 30,
+                height: visible ? 100 : 25,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -2750,11 +2751,11 @@ class Reader extends State with WidgetsBindingObserver {
                                     child: Icon(
                                       Icons.battery_full,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 30,
+                                      size: 24,
                                     ),
                                   ),
                                   Text7(
-                                    text: '${_batteryLevel.toString()}%',
+                                    text: '${_batteryLevel.toString()} ',
                                     textColor: MyColors.white,
                                   ),
                                 ],
