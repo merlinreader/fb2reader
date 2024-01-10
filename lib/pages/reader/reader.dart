@@ -1546,8 +1546,8 @@ class Reader extends State with WidgetsBindingObserver {
     // print('lastCallTimestamp $lastCallTimestamp');
     // print('now $now');
     // print('timeElapsed $timeElapsed');
-    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-      // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+      if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
@@ -2572,7 +2572,12 @@ class Reader extends State with WidgetsBindingObserver {
                     : Border.all(width: 0, color: Colors.transparent)),
             child: SafeArea(
               top: true,
-              minimum: visible ? EdgeInsets.only(top: 0, left: 8, right: 8) : EdgeInsets.only(top: 40, left: 8, right: 8),
+              minimum: visible
+                  ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                  : orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                          orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                      ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                      : const EdgeInsets.only(top: 40, left: 8, right: 8),
               child: Stack(children: [
                 ListView.builder(
                     controller: _scrollController,
@@ -2734,24 +2739,25 @@ class Reader extends State with WidgetsBindingObserver {
                               width: MediaQuery.of(context).size.width / 8,
                               alignment: Alignment.topLeft,
                               child: Stack(
-                                alignment: Alignment.center,
+                                alignment: Alignment.centerLeft,
                                 children: [
                                   Transform.rotate(
                                     angle: 90 * 3.14159265 / 180,
                                     child: Icon(
                                       Icons.battery_full,
                                       color: Theme.of(context).iconTheme.color,
-                                      size: 20,
+                                      size: 26,
                                     ),
                                   ),
                                   Text(
-                                    '${_batteryLevel.toString()}%',
+                                    ' ${_batteryLevel.toString()}%',
                                     style: TextStyle(
                                         color: !isDarkTheme ? MyColors.white : MyColors.black,
                                         fontSize: 7,
                                         fontFamily: 'Tektur',
                                         fontWeight: FontWeight.bold),
                                   ),
+
                                   // Text7(
                                   //   text: '${_batteryLevel.toString()}%',
                                   //   textColor: MyColors.white,
@@ -2932,8 +2938,8 @@ class Reader extends State with WidgetsBindingObserver {
                                           final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
                                           var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                           var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                          // if (timeElapsed.inHours > 24) {
-                                          if (timeElapsed.inMilliseconds > 1) {
+                                          if (timeElapsed.inHours > 24) {
+                                          // if (timeElapsed.inMilliseconds > 1) {
                                             wordModeDialog(context);
                                           } else {
                                             Fluttertoast.showToast(
