@@ -478,7 +478,7 @@ class RecentPageState extends State<RecentPage> {
                 itemCount: images.length,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                crossAxisCount: orientation == Orientation.portrait ? 2 : 5,
+                crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
                 builder: (ctx, index) {
                   return GestureDetector(
                     onTap: () async {
@@ -566,8 +566,12 @@ class RecentPageState extends State<RecentPage> {
                                     children: [
                                       Container(
                                         width: images[index].progress * 100 >= 99.9
-                                            ? MediaQuery.of(context).size.width / 2.846
-                                            : MediaQuery.of(context).size.width / 2.85 * images[index].progress,
+                                            ? orientation == Orientation.portrait
+                                                ? MediaQuery.of(context).size.width / 2.846
+                                                : MediaQuery.of(context).size.width / 7.715
+                                            : orientation == Orientation.portrait
+                                                ? MediaQuery.of(context).size.width / 2.85 * images[index].progress
+                                                : MediaQuery.of(context).size.width / 8.6 * images[index].progress,
                                         height: 4,
                                         decoration: const BoxDecoration(color: MyColors.purple),
                                       ),
@@ -578,9 +582,15 @@ class RecentPageState extends State<RecentPage> {
                             ],
                           ),
                         const SizedBox(height: 4),
-                        Text(images[index].author.length > 20 ? '${images[index].author.substring(0, 20)}...' : images[index].author),
+                        Text(images[index].author.length > 15
+                            ? '${images[index].author.substring(0, images[index].author.length ~/ 1.5)}...'
+                            : images[index].author),
                         Text(
-                          images[index].title.length > 20 ? '${images[index].title.substring(0, 20)}...' : images[index].title,
+                          images[index].title.length > 20
+                              ? images[index].title.length > 15
+                                  ? '${images[index].title.substring(0, images[index].title.length ~/ 2.5)}...'
+                                  : '${images[index].title.substring(0, images[index].title.length ~/ 2)}...'
+                              : images[index].title,
                           maxLines: 1,
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,

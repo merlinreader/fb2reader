@@ -26,7 +26,7 @@ Future<double?> getPageSize() async {
 }
 
 // метод который составляет список прочитанных страниц
-getPageCount() async {
+getPageCount(String inputFilePath, bool isWM) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token') ?? '';
   String? imageDataJson = prefs.getString('booksKey');
@@ -52,16 +52,15 @@ getPageCount() async {
     int diff = countFromStorage - lastCountFromStorage;
     diff = diff < 0 ? 0 : diff;
 
-    if (wordCounts.isNotEmpty) {
-      if (entry.fileName == wordCounts[index].filePath) {
-        if (countFromStorage > 0) {
-          if (lastCountFromStorage != 0 && countFromStorage > lastCountFromStorage) {
-            final dataToAdd = <int, bool>{diff: true};
-            dataToSend.addEntries(dataToAdd.entries);
-          } else {
-            final dataToAdd = <int, bool>{0: true};
-            dataToSend.addEntries(dataToAdd.entries);
-          }
+    print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.fileName}');
+    if (isWM == true && entry.fileName == inputFilePath) {
+      if (countFromStorage > 0) {
+        if (lastCountFromStorage != 0 && countFromStorage > lastCountFromStorage) {
+          final dataToAdd = <int, bool>{diff: true};
+          dataToSend.addEntries(dataToAdd.entries);
+        } else {
+          final dataToAdd = <int, bool>{0: true};
+          dataToSend.addEntries(dataToAdd.entries);
         }
       }
     } else {
@@ -79,42 +78,42 @@ getPageCount() async {
   DateTime nowDateTime = DateTime.now();
   Duration difference = nowDateTime.difference(savedDateTime);
   int differenceInSeconds = difference.inSeconds;
-  // print('pageSize = $pageSize');
-  // print('savedDateTime = $savedDateTime');
-  // print('differenceInSeconds = $differenceInSeconds');
+  print('pageSize = $pageSize');
+  print('savedDateTime = $savedDateTime');
+  print('differenceInSeconds = $differenceInSeconds');
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
   String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
       double speed = pageSize / differenceInSeconds;
-      // print('WM entry.key = ${entry.key}');
-      // print('speed WM = $speed sym/sec');
+      print('WM entry.key = ${entry.key}');
+      print('speed WM = $speed sym/sec');
       if (33.3 > speed) {
         pageCountWordMode = pageCountWordMode + entry.key;
       }
     }
     if (entry.value == false) {
       double speed = pageSize / differenceInSeconds;
-      // print('SM entry.key = ${entry.key}');
-      // print('speed SM = $speed sym/sec');
+      print('SM entry.key = ${entry.key}');
+      print('speed SM = $speed sym/sec');
       if (33.3 > speed) {
         pageCountSimpleMode = pageCountSimpleMode + entry.key;
       }
     }
   }
-  // print('pageCountWordMode $pageCountWordMode');
-  // print('pageCountSimpleMode $pageCountSimpleMode');
-  // print('nowDataUTC $nowDataUTC');
-  // print(dataToSend);
-  // for (final entry in dataToSend.entries) {
-  //   int number = entry.key;
-  //   bool value = entry.value;
-  //   pageCountSimpleMode += number;
-  //   if (value) {
-  //     pageCountWordMode += number;
-  //   }
-  // }
+  print('pageCountWordMode $pageCountWordMode');
+  print('pageCountSimpleMode $pageCountSimpleMode');
+  print('nowDataUTC $nowDataUTC');
+  print(dataToSend);
+  for (final entry in dataToSend.entries) {
+    int number = entry.key;
+    bool value = entry.value;
+    pageCountSimpleMode += number;
+    if (value) {
+      pageCountWordMode += number;
+    }
+  }
 
 // Присвоение значений переменным data
   if (token == '') {

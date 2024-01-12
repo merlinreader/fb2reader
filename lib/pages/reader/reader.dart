@@ -164,7 +164,7 @@ class Reader extends State with WidgetsBindingObserver {
       await saveProgress();
       await _savePageCountToLocalStorage();
       await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
-      await getPageCount();
+      await getPageCount(textes.first.filePath, isBorder);
     }
     // else if (state == AppLifecycleState.resumed) {
     //   print('Приложение открыто');
@@ -172,10 +172,10 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   @override
-  void dispose() {
+  void dispose() async {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([orientations[0]]);
-    getPageCount();
+    getPageCount(textes.first.filePath, isBorder);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -186,6 +186,11 @@ class Reader extends State with WidgetsBindingObserver {
     isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
     loadStylePreferences();
     super.didChangeDependencies();
+  }
+
+  Future<void> isWM() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isWM-${textes.first.filePath}', isBorder);
   }
 
   Future<void> _loadPageCountFromLocalStorage() async {
@@ -619,7 +624,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                         ),
                                                       )
                                                     : SizedBox(
-                                                        width: MediaQuery.of(context).size.width * 0.315,
+                                                        width: MediaQuery.of(context).size.width * 0.285,
                                                         child: const Text(
                                                           'Слово',
                                                           style: TextStyle(
@@ -1546,8 +1551,8 @@ class Reader extends State with WidgetsBindingObserver {
     // print('lastCallTimestamp $lastCallTimestamp');
     // print('now $now');
     // print('timeElapsed $timeElapsed');
-    // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-      if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+      // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
@@ -1772,7 +1777,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                 ),
                                               )
                                             : SizedBox(
-                                                width: MediaQuery.of(context).size.width * 0.315,
+                                                width: MediaQuery.of(context).size.width * 0.285,
                                                 child: const Text(
                                                   'Слово',
                                                   style: TextStyle(
@@ -2554,7 +2559,7 @@ class Reader extends State with WidgetsBindingObserver {
                               },
                               child: Icon(
                                 CustomIcons.sliders,
-                                size: 30,
+                                size: 28,
                                 color: Theme.of(context).iconTheme.color,
                               ),
                             ),
@@ -2610,7 +2615,7 @@ class Reader extends State with WidgetsBindingObserver {
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
                       // Скролл вниз / следующая страница
-                      _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.97,
+                      _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.92,
                           duration: const Duration(milliseconds: 250), curve: Curves.ease);
                     },
                     child: Padding(
@@ -2722,19 +2727,20 @@ class Reader extends State with WidgetsBindingObserver {
               ]),
             )),
         bottomNavigationBar: BottomAppBar(
-          color: Theme.of(context).colorScheme.primary,
+          // color: Theme.of(context).colorScheme.primary,
+          color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
           child: Stack(
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
-                height: visible ? 90 : 20,
+                height: visible ? 85 : 20,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: !visible
                       ? [
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 0, 0, 0),
+                            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                             child: Container(
                               width: MediaQuery.of(context).size.width / 8,
                               alignment: Alignment.topLeft,
@@ -2745,17 +2751,32 @@ class Reader extends State with WidgetsBindingObserver {
                                     angle: 90 * 3.14159265 / 180,
                                     child: Icon(
                                       Icons.battery_full,
-                                      color: Theme.of(context).iconTheme.color,
-                                      size: 26,
+                                      // color: Theme.of(context).iconTheme.color,
+                                      color: isDarkTheme
+                                          ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black
+                                          : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white,
+                                      size: 28,
                                     ),
                                   ),
                                   Text(
-                                    ' ${_batteryLevel.toString()}%',
+                                    _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
                                     style: TextStyle(
-                                        color: !isDarkTheme ? MyColors.white : MyColors.black,
-                                        fontSize: 7,
-                                        fontFamily: 'Tektur',
-                                        fontWeight: FontWeight.bold),
+                                      color: isDarkTheme
+                                          ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white
+                                          : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black,
+                                      fontSize: 7,
+                                      fontFamily: 'Tektur',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
 
                                   // Text7(
@@ -2771,25 +2792,48 @@ class Reader extends State with WidgetsBindingObserver {
                               padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
                               child: Align(
                                 alignment: Alignment.topCenter,
-                                child: Text11(
-                                  text: textes.isNotEmpty
-                                      ? (textes[0].title.toString().length > 30
-                                          ? '${textes[0].title.toString().substring(0, 30)}...'
-                                          : textes[0].title.toString())
+                                child: Text(
+                                  textes.isNotEmpty
+                                      ? (textes[0].title.toString().length + textes[0].author.toString().length > 30
+                                          ? textes[0].author.toString().length > 19
+                                              ? '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, textes[0].title.toString().length ~/ 4.5)}...'
+                                              : '${textes[0].author.toString()}. ${textes[0].title.toString().substring(0, textes[0].title.toString().length ~/ 1.5)}...'
+                                          : '${textes[0].author.toString()}. ${textes[0].title.toString()}')
                                       : 'Нет названия',
-                                  textColor: MyColors.black,
+                                  style: TextStyle(
+                                      color: isDarkTheme
+                                          ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black
+                                          : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white,
+                                      fontFamily: 'Tektur',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 3, 24, 0),
+                            padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
                             child: Container(
                               width: MediaQuery.of(context).size.width / 8,
                               alignment: Alignment.topRight,
-                              child: Text11(
-                                text: '${_scrollPosition.toStringAsFixed(1)}%',
-                                textColor: MyColors.black,
+                              child: Text(
+                                '${_scrollPosition.toStringAsFixed(1)}%',
+                                style: TextStyle(
+                                    color: isDarkTheme
+                                        ? backgroundColor.value == 0xff1d1d21
+                                            ? MyColors.white
+                                            : MyColors.black
+                                        : backgroundColor.value != 0xff1d1d21
+                                            ? MyColors.black
+                                            : MyColors.white,
+                                    fontFamily: 'Tektur',
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
@@ -2803,7 +2847,7 @@ class Reader extends State with WidgetsBindingObserver {
                 right: 0,
                 child: AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
-                    height: visible ? 90 : 0,
+                    height: visible ? 85 : 0,
                     child: SingleChildScrollView(
                       child: Container(
                           alignment: AlignmentDirectional.topEnd,
@@ -2811,73 +2855,74 @@ class Reader extends State with WidgetsBindingObserver {
                           child: Column(
                             children: [
                               _scrollController.hasClients
-                                  ? Padding(
-                                      padding: const EdgeInsets.fromLTRB(8, 0, 28, 0),
-                                      child: SliderTheme(
-                                        data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: [
-                                            Expanded(
-                                              child: SliderTheme(
-                                                data: const SliderThemeData(
-                                                    trackHeight: 3,
-                                                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
-                                                    trackShape: RectangularSliderTrackShape()),
-                                                child: Slider(
-                                                  value: position != 0
-                                                      ? position > _scrollController.position.maxScrollExtent
-                                                          ? _scrollController.position.maxScrollExtent
-                                                          : position
-                                                      : _scrollController.position.pixels,
-                                                  min: 0,
-                                                  max: _scrollController.position.maxScrollExtent,
-                                                  label: visible
-                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                          : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                              : "0.0%"
-                                                      : "",
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      position = value;
-                                                    });
-                                                    if (_actionTimer?.isActive ?? false) {
-                                                      _actionTimer?.cancel();
-                                                    }
-                                                    _actionTimer = Timer(const Duration(milliseconds: 250), () {
-                                                      _scrollController.jumpTo(value);
-                                                    });
-                                                  },
-                                                  onChangeEnd: (value) {
+                                  ? SliderTheme(
+                                      data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          SliderTheme(
+                                            data: const SliderThemeData(
+                                                trackHeight: 3,
+                                                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                trackShape: RectangularSliderTrackShape()),
+                                            child: Container(
+                                              width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                                                      orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                                                  ? MediaQuery.of(context).size.width / 1.19
+                                                  : MediaQuery.of(context).size.width / 1.12,
+                                              child: Slider(
+                                                value: position != 0
+                                                    ? position > _scrollController.position.maxScrollExtent
+                                                        ? _scrollController.position.maxScrollExtent
+                                                        : position
+                                                    : _scrollController.position.pixels,
+                                                min: 0,
+                                                max: _scrollController.position.maxScrollExtent,
+                                                label: visible
+                                                    ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                        : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : "0.0%"
+                                                    : "",
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    position = value;
+                                                  });
+                                                  if (_actionTimer?.isActive ?? false) {
                                                     _actionTimer?.cancel();
-                                                    if (value != _scrollController.position.pixels) {
-                                                      _scrollController.jumpTo(value);
-                                                    }
-                                                  },
-                                                  activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                  inactiveColor:
-                                                      isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
-                                                  thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                ),
+                                                  }
+                                                  _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                    _scrollController.jumpTo(value);
+                                                  });
+                                                },
+                                                onChangeEnd: (value) {
+                                                  _actionTimer?.cancel();
+                                                  if (value != _scrollController.position.pixels) {
+                                                    _scrollController.jumpTo(value);
+                                                  }
+                                                },
+                                                activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                inactiveColor:
+                                                    isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
+                                                thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
                                               ),
                                             ),
-                                            Container(
-                                              width: MediaQuery.of(context).size.width / 11,
-                                              alignment: Alignment.center,
-                                              child: Text11(
-                                                  text: visible
-                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                          : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                              : "0.0%"
-                                                      : "",
-                                                  textColor: MyColors.darkGray),
-                                            )
-                                          ],
-                                        ),
+                                          ),
+                                          Container(
+                                            width: MediaQuery.of(context).size.width / 11,
+                                            alignment: Alignment.center,
+                                            child: Text11(
+                                                text: visible
+                                                    ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                        : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : "0.0%"
+                                                    : "",
+                                                textColor: MyColors.darkGray),
+                                          )
+                                        ],
                                       ),
                                     )
                                   : const Text("Загрузка..."),
@@ -2938,8 +2983,8 @@ class Reader extends State with WidgetsBindingObserver {
                                           final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
                                           var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                           var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                          if (timeElapsed.inHours > 24) {
-                                          // if (timeElapsed.inMilliseconds > 1) {
+                                          // if (timeElapsed.inHours > 24) {
+                                          if (timeElapsed.inMilliseconds > 1) {
                                             wordModeDialog(context);
                                           } else {
                                             Fluttertoast.showToast(

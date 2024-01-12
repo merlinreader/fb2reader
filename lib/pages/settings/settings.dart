@@ -42,7 +42,7 @@ class MySettings extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple, background: const Color.fromRGBO(250, 250, 250, 1)),
         useMaterial3: true,
       ),
-      home: const SettingsPage(),
+      home: const SafeArea(child: SettingsPage()),
     );
   }
 }
@@ -183,88 +183,60 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
       ),
-      body: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                const Text22(text: "Система", textColor: MyColors.black),
-                // TextTektur(
-                //   text: "Система",
-                //   fontsize: 18,
-                //   textColor: themeTextColor,
-                // ),
-                const SizedBox(height: 16),
-                Row(
+      body: SingleChildScrollView(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text15(
-                      text: "Размер шрифта",
-                      textColor: themeGrayTextColor,
-                    ),
-                    const Spacer(),
-                    // CustomCheckbox(
-                    //   isChecked: isChecked,
-                    //   bgColor: Theme.of(context).colorScheme.primary,
-                    //   borderColor:
-                    //       Theme.of(context).iconTheme.color ?? MyColors.white,
-                    //   onChanged: (newValue) {
-                    //     final themeProvider =
-                    //         Provider.of<ThemeProvider>(context, listen: false);
-                    //     setState(() {
-                    //       themeProvider.isDarkTheme = newValue;
-
-                    //       isChecked = newValue;
-                    //       saveSettings(isChecked);
-                    //       saveSettings(themeProvider.isDarkTheme);
-                    //       // debugPrint('settings $newValue');
-                    //     });
-                    //   },
-                    //   iconColor:
-                    //       Theme.of(context).iconTheme.color ?? MyColors.white,
+                    const Text22(text: "Система", textColor: MyColors.black),
+                    // TextTektur(
+                    //   text: "Система",
+                    //   fontsize: 18,
+                    //   textColor: themeTextColor,
                     // ),
-                  ],
-                ),
-                Container(
-                  margin: const EdgeInsets.only(right: 10),
-                  child: SliderTheme(
-                    data: SliderThemeData(
-                      trackHeight: 5.0,
-                      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
-                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0),
-                      thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                      activeTrackColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                      inactiveTrackColor: isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: <Widget>[
+                        Text15(
+                          text: "Размер шрифта",
+                          textColor: themeGrayTextColor,
+                        ),
+                        const Spacer(),
+                        // CustomCheckbox(
+                        //   isChecked: isChecked,
+                        //   bgColor: Theme.of(context).colorScheme.primary,
+                        //   borderColor:
+                        //       Theme.of(context).iconTheme.color ?? MyColors.white,
+                        //   onChanged: (newValue) {
+                        //     final themeProvider =
+                        //         Provider.of<ThemeProvider>(context, listen: false);
+                        //     setState(() {
+                        //       themeProvider.isDarkTheme = newValue;
+
+                        //       isChecked = newValue;
+                        //       saveSettings(isChecked);
+                        //       saveSettings(themeProvider.isDarkTheme);
+                        //       // debugPrint('settings $newValue');
+                        //     });
+                        //   },
+                        //   iconColor:
+                        //       Theme.of(context).iconTheme.color ?? MyColors.white,
+                        // ),
+                      ],
                     ),
-                    child: Slider(
-                      value: fontSize,
-                      onChanged: (double s) {
-                        setState(() {
-                          fontSize = s;
-                          saveSettings(fontSize);
-                        });
-                      },
-                      divisions: 10,
-                      min: 10.0,
-                      max: 30.0,
-                      label: fontSize.round().toString(),
-                    ),
-                  ),
-                ),
-                Text15(
-                  text: "Яркость",
-                  textColor: themeGrayTextColor,
-                ),
-                Container(
-                    margin: const EdgeInsets.only(right: 10),
-                    child: SliderTheme(
+                    Container(
+                      margin: const EdgeInsets.only(right: 10),
+                      child: SliderTheme(
                         data: SliderThemeData(
-                          trackHeight: 7.0,
+                          trackHeight: 5.0,
                           thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
                           overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0),
                           thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
@@ -272,145 +244,177 @@ class _SettingsPageState extends State<SettingsPage> {
                           inactiveTrackColor: isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
                         ),
                         child: Slider(
-                            value: brightness,
-                            onChanged: (value) {
-                              setState(() {
-                                brightness = value;
-                              });
-                              FlutterScreenWake.setBrightness(brightness);
-                              if (brightness == 0) {
-                                toggle = true;
-                              } else {
-                                toggle = false;
-                              }
-                            }))),
-              ],
-            ),
-          ),
-          Container(
-            margin: const EdgeInsets.only(top: 8.0),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text22(
-                  text: "Настраиваемая тема",
-                  //fontsize: 18,
-                  textColor: themeTextColor,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween, // Этот атрибут прижмет дочерние элементы к краям
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text15(
-                          text: "Цвет текста",
-                          textColor: themeGrayTextColor,
+                          value: fontSize,
+                          onChanged: (double s) {
+                            setState(() {
+                              fontSize = s;
+                              saveSettings(fontSize);
+                            });
+                          },
+                          divisions: 10,
+                          min: 10.0,
+                          max: 30.0,
+                          label: fontSize.round().toString(),
                         ),
-                        Row(
-                          children: colors
-                              .map((color) => (CustomCheckbox(
-                                    isChecked: color == currentTextColor,
-                                    bgColor: color,
-                                    borderColor: Theme.of(context).iconTheme.color ?? MyColors.white,
-                                    iconColor: color == MyColors.black ? MyColors.white : MyColors.black,
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        if (currentTextColor == color) {
-                                          return;
-                                        }
-                                        if (currentBackgroundColor != color) {
-                                          currentTextColor = color;
-                                          _colorProvider.setColor(ColorKeys.readerTextColor, color);
-                                        } else {
-                                          Fluttertoast.showToast(
-                                            msg: 'Цвета совпадают',
-                                            toastLength: Toast.LENGTH_SHORT,
-                                            gravity: ToastGravity.BOTTOM,
-                                          );
-                                        }
-                                      });
-                                    },
-                                  )))
-                              .toList(),
-                        )
-                      ],
+                      ),
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text15(
-                          text: "Цвет фона",
-                          textColor: themeGrayTextColor,
-                        ),
-                        Row(
-                          children: colors
-                              .map((color) => (CustomCheckbox(
-                                    isChecked: color == currentBackgroundColor,
-                                    bgColor: color,
-                                    borderColor: Theme.of(context).iconTheme.color ?? MyColors.white,
-                                    iconColor: color == MyColors.black ? MyColors.white : MyColors.black,
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        if (currentBackgroundColor == color) {
-                                          return;
-                                        }
-                                        if (currentTextColor != color) {
-                                          currentBackgroundColor = color;
-                                          _colorProvider.setColor(ColorKeys.readerBackgroundColor, color);
-                                        } else {
-                                          Fluttertoast.showToast(
-                                            msg: 'Цвета совпадают',
-                                            toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-                                            gravity: ToastGravity.BOTTOM, // Расположение уведомления
-                                          );
-                                        }
-                                      });
-                                    },
-                                  )))
-                              .toList(),
-                        ),
-                      ],
+                    Text15(
+                      text: "Яркость",
+                      textColor: themeGrayTextColor,
                     ),
+                    Container(
+                        margin: const EdgeInsets.only(right: 10),
+                        child: SliderTheme(
+                            data: SliderThemeData(
+                              trackHeight: 7.0,
+                              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10.0),
+                              overlayShape: const RoundSliderOverlayShape(overlayRadius: 20.0),
+                              thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                              activeTrackColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                              inactiveTrackColor: isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
+                            ),
+                            child: Slider(
+                                value: brightness,
+                                onChanged: (value) {
+                                  setState(() {
+                                    brightness = value;
+                                  });
+                                  FlutterScreenWake.setBrightness(brightness);
+                                  if (brightness == 0) {
+                                    toggle = true;
+                                  } else {
+                                    toggle = false;
+                                  }
+                                }))),
                   ],
                 ),
-                Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: 56,
-                        decoration: const BoxDecoration(),
-                        child: Stack(children: <Widget>[
-                          Center(
-                              child: Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  height: 64,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: MyColors.black),
-                                    color: currentBackgroundColor,
-                                  ))),
-                          Center(
-                              child: Text(
-                            'Тестовый текст темы',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: currentTextColor,
-                              fontFamily: 'Roboto',
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.normal, /*PERCENT not supported*/
+              ),
+              Container(
+                margin: const EdgeInsets.only(top: 8.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text22(
+                      text: "Настраиваемая тема",
+                      //fontsize: 18,
+                      textColor: themeTextColor,
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween, // Этот атрибут прижмет дочерние элементы к краям
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text15(
+                              text: "Цвет текста",
+                              textColor: themeGrayTextColor,
                             ),
-                          )),
-                        ])))
-              ],
-            ),
+                            Row(
+                              children: colors
+                                  .map((color) => (CustomCheckbox(
+                                        isChecked: color == currentTextColor,
+                                        bgColor: color,
+                                        borderColor: Theme.of(context).iconTheme.color ?? MyColors.white,
+                                        iconColor: color == MyColors.black ? MyColors.white : MyColors.black,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            if (currentTextColor == color) {
+                                              return;
+                                            }
+                                            if (currentBackgroundColor != color) {
+                                              currentTextColor = color;
+                                              _colorProvider.setColor(ColorKeys.readerTextColor, color);
+                                            } else {
+                                              Fluttertoast.showToast(
+                                                msg: 'Цвета совпадают',
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                              );
+                                            }
+                                          });
+                                        },
+                                      )))
+                                  .toList(),
+                            )
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text15(
+                              text: "Цвет фона",
+                              textColor: themeGrayTextColor,
+                            ),
+                            Row(
+                              children: colors
+                                  .map((color) => (CustomCheckbox(
+                                        isChecked: color == currentBackgroundColor,
+                                        bgColor: color,
+                                        borderColor: Theme.of(context).iconTheme.color ?? MyColors.white,
+                                        iconColor: color == MyColors.black ? MyColors.white : MyColors.black,
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            if (currentBackgroundColor == color) {
+                                              return;
+                                            }
+                                            if (currentTextColor != color) {
+                                              currentBackgroundColor = color;
+                                              _colorProvider.setColor(ColorKeys.readerBackgroundColor, color);
+                                            } else {
+                                              Fluttertoast.showToast(
+                                                msg: 'Цвета совпадают',
+                                                toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                                                gravity: ToastGravity.BOTTOM, // Расположение уведомления
+                                              );
+                                            }
+                                          });
+                                        },
+                                      )))
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(top: 16),
+                        child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: 56,
+                            decoration: const BoxDecoration(),
+                            child: Stack(children: <Widget>[
+                              Center(
+                                  child: Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 64,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: MyColors.black),
+                                        color: currentBackgroundColor,
+                                      ))),
+                              Center(
+                                  child: Text(
+                                'Тестовый текст темы',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: currentTextColor,
+                                  fontFamily: 'Roboto',
+                                  fontSize: fontSize,
+                                  fontWeight: FontWeight.normal, /*PERCENT not supported*/
+                                ),
+                              )),
+                            ])))
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

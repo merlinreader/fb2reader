@@ -39,17 +39,17 @@ class _StatisticPageState extends State<StatisticPage> {
                   ElevatedButton(
                     style: getButtonStyle(
                       context,
-                      isPressed: _currentPageIndex == 0,
+                      isPressed: _currentPageIndex == 2,
                     ),
                     onPressed: () async {
                       // await getPageCountSimpleMode();
 
                       setState(() {
-                        _currentPageIndex = 0;
+                        _currentPageIndex = 2;
                       });
                     },
                     child: Text11Bold(
-                      text: 'Страна',
+                      text: 'Город',
                       textColor: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
@@ -71,15 +71,15 @@ class _StatisticPageState extends State<StatisticPage> {
                   ElevatedButton(
                     style: getButtonStyle(
                       context,
-                      isPressed: _currentPageIndex == 2,
+                      isPressed: _currentPageIndex == 0,
                     ),
                     onPressed: () {
                       setState(() {
-                        _currentPageIndex = 2;
+                        _currentPageIndex = 0;
                       });
                     },
                     child: Text11Bold(
-                      text: 'Город',
+                      text: 'Страна',
                       textColor: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
