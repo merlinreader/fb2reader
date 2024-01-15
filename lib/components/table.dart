@@ -111,13 +111,27 @@ class _StatTableState extends State<StatTable> {
                     (index) => DataRow(
                       cells: [
                         DataCell(
-                          Text11(
-                            text: dataList[index]['_id'] == id
-                                ? '> Вы'
-                                : dataList[index]['firstName']?.length > 10
-                                    ? '${dataList[index]['firstName']?.substring(0, 10)}...'
-                                    : dataList[index]['firstName'] ?? '',
-                            textColor: dataList[index]['_id'] == id ? MyColors.purple : MyColors.black,
+                          Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(24),
+                                child: Image.network(
+                                  dataList[index]['picture'],
+                                  width: 24,
+                                  height: 24,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              SizedBox(width: 8), // Добавьте необходимый отступ между изображением и текстом
+                              Text11(
+                                text: dataList[index]['_id'] == id
+                                    ? '> Вы'
+                                    : dataList[index]['firstName']?.length > 10
+                                        ? '${dataList[index]['firstName']?.substring(0, 10)}...'
+                                        : dataList[index]['firstName'] ?? '',
+                                textColor: dataList[index]['_id'] == id ? MyColors.purple : MyColors.black,
+                              ),
+                            ],
                           ),
                         ),
                         DataCell(
