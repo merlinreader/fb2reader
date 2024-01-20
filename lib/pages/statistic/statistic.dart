@@ -361,7 +361,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               buildTab(
                 Container(

@@ -101,7 +101,7 @@ class _StatTableState extends State<StatTable> {
                     ),
                     DataColumn(
                       label: Text11(
-                        text: 'Страниц в\nрежиме слова',
+                        text: 'Страниц в\nрежиме "Слово"',
                         textColor: MyColors.grey,
                       ),
                     ),
