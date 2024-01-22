@@ -453,6 +453,9 @@ class RecentPageState extends State<RecentPage> {
 
   @override
   Widget build(BuildContext context) {
+    double bookWidth = MediaQuery.of(context).size.shortestSide > 600 ? 150 * 1.5 : 150;
+    double bookHeight = MediaQuery.of(context).size.shortestSide > 600 ? 230 * 1.5 : 230;
+    int booksInWidth = ((MediaQuery.of(context).size.width - 2 * 18 + 10) / (bookWidth + 10)).floor();
     return Scaffold(
       body: Stack(
         children: [
@@ -478,7 +481,7 @@ class RecentPageState extends State<RecentPage> {
                 itemCount: images.length,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                crossAxisCount: orientation == Orientation.portrait ? 2 : 4,
+                crossAxisCount: booksInWidth,
                 builder: (ctx, index) {
                   return GestureDetector(
                     onTap: () async {
@@ -517,22 +520,14 @@ class RecentPageState extends State<RecentPage> {
                               images[index].imageBytes?.first != 0
                                   ? Image.memory(
                                       images[index].imageBytes!,
-                                      width: orientation == Orientation.portrait
-                                          ? MediaQuery.of(context).size.width / 2.5
-                                          : MediaQuery.of(context).size.width / 6.6,
-                                      height: orientation == Orientation.portrait
-                                          ? MediaQuery.of(context).size.height / 3.3
-                                          : MediaQuery.of(context).size.height / 2,
+                                      width: bookWidth,
+                                      height: bookHeight,
                                       fit: BoxFit.fill,
                                     )
                                   : SvgPicture.asset(
                                       'assets/icon/no_name_book.svg',
-                                      width: orientation == Orientation.portrait
-                                          ? MediaQuery.of(context).size.width / 2.5
-                                          : MediaQuery.of(context).size.width / 6.6,
-                                      height: orientation == Orientation.portrait
-                                          ? MediaQuery.of(context).size.height / 3.3
-                                          : MediaQuery.of(context).size.height / 2,
+                                      width: bookWidth,
+                                      height: bookHeight,
                                       fit: BoxFit.fitHeight,
                                     ),
                               Positioned.fill(

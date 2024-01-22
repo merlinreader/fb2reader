@@ -51,8 +51,16 @@ class _StatTableState extends State<StatTable> {
         setState(() {
           id = fetchedId.toString();
         });
+      } else {
+        setState(() {
+          id = prefs.getString('deviceId');
+        });
       }
-    } catch (_) {}
+    } catch (_) {
+      setState(() {
+        id = prefs.getString('deviceId');
+      });
+    }
   }
 
   Future<List<dynamic>> fetchJson() async {
@@ -122,7 +130,7 @@ class _StatTableState extends State<StatTable> {
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              SizedBox(width: 8), // Добавьте необходимый отступ между изображением и текстом
+                              const SizedBox(width: 8),
                               Text11(
                                 text: dataList[index]['_id'] == id
                                     ? '> Вы'
@@ -153,12 +161,6 @@ class _StatTableState extends State<StatTable> {
               ),
             );
           } else if (snapshot.hasError) {
-            // return const Row(
-            //   children: [
-            //     SizedBox(width: 20),
-            //     Text('Наш сервер сейчас отдыхает, извините за неудобства: ${snapshot.error}'),
-            //   ],
-            // );
             return const Center(
                 child: Column(
               children: [
