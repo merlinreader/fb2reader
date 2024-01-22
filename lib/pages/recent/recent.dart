@@ -457,147 +457,149 @@ class RecentPageState extends State<RecentPage> {
     double bookHeight = MediaQuery.of(context).size.shortestSide > 600 ? 230 * 1.5 : 230;
     int booksInWidth = ((MediaQuery.of(context).size.width - 2 * 18 + 10) / (bookWidth + 10)).floor();
     return Scaffold(
-      body: Stack(
-        children: [
-          const Padding(
-            padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
-            child: Text24(
-              text: "Последнее",
-              textColor: MyColors.black,
-              //fontWeight: FontWeight.w600,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
+              child: Text24(
+                text: "Последнее",
+                textColor: MyColors.black,
+                //fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [if (images.isEmpty) TextTektur(text: "Пока вы не добавили никаких книг", fontsize: 16, textColor: MyColors.grey)],
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [if (images.isEmpty) TextTektur(text: "Пока вы не добавили никаких книг", fontsize: 16, textColor: MyColors.grey)],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 72),
-            child: OrientationBuilder(builder: (context, orientation) {
-              return DynamicHeightGridView(
-                controller: _scrollController,
-                itemCount: images.length,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                crossAxisCount: booksInWidth,
-                builder: (ctx, index) {
-                  return GestureDetector(
-                    onTap: () async {
-                      if (!_isOperationInProgress) {
-                        _isOperationInProgress = true;
-                        try {
-                          await sendDataFromLocalStorage('textKey', index);
-                          if (isSended) {
-                            isSended = false;
-                            await Navigator.pushNamed(context, RouteNames.reader).then((_) {
-                              getDataFromLocalStorage('booksKey');
-                            });
+            Padding(
+              padding: const EdgeInsets.only(top: 72),
+              child: OrientationBuilder(builder: (context, orientation) {
+                return DynamicHeightGridView(
+                  controller: _scrollController,
+                  itemCount: images.length,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  crossAxisCount: booksInWidth,
+                  builder: (ctx, index) {
+                    return GestureDetector(
+                      onTap: () async {
+                        if (!_isOperationInProgress) {
+                          _isOperationInProgress = true;
+                          try {
+                            await sendDataFromLocalStorage('textKey', index);
+                            if (isSended) {
+                              isSended = false;
+                              await Navigator.pushNamed(context, RouteNames.reader).then((_) {
+                                getDataFromLocalStorage('booksKey');
+                              });
+                            }
+                          } catch (e) {
+                            // Обработка ошибок, если необходимо
+                          } finally {
+                            _isOperationInProgress = false;
+                            getDataFromLocalStorage('booksKey');
+                            if (mounted) setState(() {});
                           }
-                        } catch (e) {
-                          // Обработка ошибок, если необходимо
-                        } finally {
-                          _isOperationInProgress = false;
-                          getDataFromLocalStorage('booksKey');
-                          if (mounted) setState(() {});
                         }
-                      }
-                    },
-                    onTapDown: (position) {
-                      _getTapPosition(position);
-                    },
-                    onLongPress: () {
-                      // onTapLongPressOne(context, index);
-                      _showBlurMenu(context, index);
-                    },
-                    child: Column(
-                      children: [
-                        if (images[index].imageBytes != null)
-                          Stack(
-                            alignment: Alignment.bottomCenter,
-                            children: [
-                              images[index].imageBytes?.first != 0
-                                  ? Image.memory(
-                                      images[index].imageBytes!,
-                                      width: bookWidth,
-                                      height: bookHeight,
-                                      fit: BoxFit.fill,
-                                    )
-                                  : SvgPicture.asset(
-                                      'assets/icon/no_name_book.svg',
-                                      width: bookWidth,
-                                      height: bookHeight,
-                                      fit: BoxFit.fitHeight,
+                      },
+                      onTapDown: (position) {
+                        _getTapPosition(position);
+                      },
+                      onLongPress: () {
+                        // onTapLongPressOne(context, index);
+                        _showBlurMenu(context, index);
+                      },
+                      child: Column(
+                        children: [
+                          if (images[index].imageBytes != null)
+                            Stack(
+                              alignment: Alignment.bottomCenter,
+                              children: [
+                                images[index].imageBytes?.first != 0
+                                    ? Image.memory(
+                                        images[index].imageBytes!,
+                                        width: bookWidth,
+                                        height: bookHeight,
+                                        fit: BoxFit.fill,
+                                      )
+                                    : SvgPicture.asset(
+                                        'assets/icon/no_name_book.svg',
+                                        width: bookWidth,
+                                        height: bookHeight,
+                                        fit: BoxFit.fitHeight,
+                                      ),
+                                Positioned.fill(
+                                  child: Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.bottomCenter,
+                                          end: Alignment.topCenter,
+                                          colors: [
+                                            Colors.black.withOpacity(0.8),
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
                                     ),
-                              Positioned.fill(
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 10,
+                                  left: 10,
+                                  right: 10,
                                   child: Container(
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.bottomCenter,
-                                        end: Alignment.topCenter,
-                                        colors: [
-                                          Colors.black.withOpacity(0.8),
-                                          Colors.transparent,
-                                        ],
-                                      ),
+                                    height: 4,
+                                    decoration: const BoxDecoration(
+                                      color: MyColors.white,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: images[index].progress * 100 >= 99.9
+                                              ? orientation == Orientation.portrait
+                                                  ? MediaQuery.of(context).size.width / 2.846
+                                                  : MediaQuery.of(context).size.width / 7.715
+                                              : orientation == Orientation.portrait
+                                                  ? MediaQuery.of(context).size.width / 2.85 * images[index].progress
+                                                  : MediaQuery.of(context).size.width / 8.6 * images[index].progress,
+                                          height: 4,
+                                          decoration: const BoxDecoration(color: MyColors.purple),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ),
-                              Positioned(
-                                bottom: 10,
-                                left: 10,
-                                right: 10,
-                                child: Container(
-                                  height: 4,
-                                  decoration: const BoxDecoration(
-                                    color: MyColors.white,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: images[index].progress * 100 >= 99.9
-                                            ? orientation == Orientation.portrait
-                                                ? MediaQuery.of(context).size.width / 2.846
-                                                : MediaQuery.of(context).size.width / 7.715
-                                            : orientation == Orientation.portrait
-                                                ? MediaQuery.of(context).size.width / 2.85 * images[index].progress
-                                                : MediaQuery.of(context).size.width / 8.6 * images[index].progress,
-                                        height: 4,
-                                        decoration: const BoxDecoration(color: MyColors.purple),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
+                              ],
+                            ),
+                          const SizedBox(height: 4),
+                          Text(images[index].author.length > 15
+                              ? '${images[index].author.substring(0, images[index].author.length ~/ 1.5)}...'
+                              : images[index].author),
+                          Text(
+                            images[index].title.length > 20
+                                ? images[index].title.length > 15
+                                    ? '${images[index].title.substring(0, images[index].title.length ~/ 2.5)}...'
+                                    : '${images[index].title.substring(0, images[index].title.length ~/ 2)}...'
+                                : images[index].title,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        const SizedBox(height: 4),
-                        Text(images[index].author.length > 15
-                            ? '${images[index].author.substring(0, images[index].author.length ~/ 1.5)}...'
-                            : images[index].author),
-                        Text(
-                          images[index].title.length > 20
-                              ? images[index].title.length > 15
-                                  ? '${images[index].title.substring(0, images[index].title.length ~/ 2.5)}...'
-                                  : '${images[index].title.substring(0, images[index].title.length ~/ 2)}...'
-                              : images[index].title,
-                          maxLines: 1,
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              );
-            }),
-          ),
-        ],
+                        ],
+                      ),
+                    );
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
