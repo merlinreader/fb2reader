@@ -441,7 +441,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
               ),
               buildTab(
                 Container(
-                  width: 20,
+                  //width: 20,
                   height: 24,
                   child: InkWell(
                     onTap: () {
