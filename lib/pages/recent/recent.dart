@@ -550,31 +550,15 @@ class RecentPageState extends State<RecentPage> {
                                   ),
                                 ),
                                 Positioned(
-                                  bottom: 10,
-                                  left: 10,
-                                  right: 10,
-                                  child: Container(
-                                    height: 4,
-                                    decoration: const BoxDecoration(
-                                      color: MyColors.white,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Container(
-                                          width: images[index].progress * 100 >= 99.9
-                                              ? orientation == Orientation.portrait
-                                                  ? MediaQuery.of(context).size.width / 2.846
-                                                  : MediaQuery.of(context).size.width / 7.715
-                                              : orientation == Orientation.portrait
-                                                  ? MediaQuery.of(context).size.width / 2.85 * images[index].progress
-                                                  : MediaQuery.of(context).size.width / 8.6 * images[index].progress,
-                                          height: 4,
-                                          decoration: const BoxDecoration(color: MyColors.purple),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                                    bottom: 10,
+                                    left: 10,
+                                    right: 10,
+                                    child: LinearProgressIndicator(
+                                      minHeight: 4,
+                                      value: images[index].progress,
+                                      backgroundColor: Colors.white,
+                                      valueColor: const AlwaysStoppedAnimation<Color>(MyColors.purple),
+                                    )),
                               ],
                             ),
                           const SizedBox(height: 4),

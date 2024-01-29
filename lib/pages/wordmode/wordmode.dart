@@ -237,7 +237,7 @@ class WordCount {
   // }
 
   Future<List<String>> getNounsByList(List<String> inputWords) async {
-    debugPrint('getNounsByList inputWords $inputWords');
+    // debugPrint('getNounsByList inputWords $inputWords');
     String url = 'https://fb2.cloud.leam.pro/api/account/words/nouns';
     var response = await http.post(
       Uri.parse(url),
@@ -247,7 +247,7 @@ class WordCount {
       },
       body: jsonEncode({'words': inputWords}), // Преобразуйте объект в JSON-строку
     );
-    debugPrint('getNounsByList response ${response.body}');
+    // debugPrint('getNounsByList response ${response.body}');
     if (response.statusCode == 200) {
       Map<String, dynamic> responseData = json.decode(response.body);
       List<String> nouns = List<String>.from(responseData['words']);
@@ -259,8 +259,8 @@ class WordCount {
 
   Future<List<String>> getAllNouns() async {
     final words = await getAllWords();
-    debugPrint('words = $words');
-    debugPrint('words.length = ${words.length}');
+    // debugPrint('words = $words');
+    // debugPrint('words.length = ${words.length}');
     String url = 'https://fb2.cloud.leam.pro/api/account/words/nouns';
 
     var response = await http.post(
@@ -271,15 +271,15 @@ class WordCount {
       },
       body: jsonEncode({'words': words}), // Преобразуйте объект в JSON-строку
     );
-    debugPrint('------');
-    debugPrint(response.body);
+    // debugPrint('------');
+    // debugPrint(response.body);
 
     if (response.statusCode == 200) {
       // Преобразование ответа в Map<String, dynamic>
       Map<String, dynamic> responseData = json.decode(response.body);
       // Получение списка существительных из ключа "words"
       List<String> nouns = List<String>.from(responseData['words']);
-      debugPrint('\tnouns = $nouns');
+      // debugPrint('\tnouns = $nouns');
       return nouns;
     } else {
       // Обработка ошибки, например, вывод сообщения об ошибке
@@ -312,11 +312,11 @@ class WordCount {
     int end = start + getWords;
     end = min(end, sortedWordCounts.length);
 
-    debugPrint('getWords = $getWords');
-    debugPrint('start = $start');
-    debugPrint('end = $end');
-    debugPrint('end - start = ${end - start}');
-    debugPrint('sortedWordCounts.length = ${sortedWordCounts.length}');
+    // debugPrint('getWords = $getWords');
+    // debugPrint('start = $start');
+    // debugPrint('end = $end');
+    // debugPrint('end - start = ${end - start}');
+    /// debugPrint('sortedWordCounts.length = ${sortedWordCounts.length}');
 
     // Загрузка исторических слов
     String historyKey = 'WMWORDS_HISTORY';
@@ -358,7 +358,7 @@ class WordCount {
         wordEntriesFutures.add(createWordEntry(word, correspondingEntry.value));
         historyWords.add(word); // Добавление слова в историю
       } else {
-        debugPrint("No matching entry for word: $word");
+        // debugPrint("No matching entry for word: $word");
       }
     }
 
@@ -396,17 +396,17 @@ class WordCount {
     int start = prefs.getInt('$filePath-end') ?? 0;
     int end = prefs.getInt('$filePath-end') ?? getWords;
 
-    debugPrint('getWords = $getWords');
+    // debugPrint('getWords = $getWords');
 
     // Убедимся, что конец в пределах допустимого
     end = end + getWords;
     end = min(end, sortedWordCounts.length);
 
-    debugPrint('start = $start');
-    debugPrint('end = $end');
-    debugPrint('end - start = ${end - start}');
+    // debugPrint('start = $start');
+    // debugPrint('end = $end');
+    // debugPrint('end - start = ${end - start}');
 
-    debugPrint('sortedWordCounts.length = ${sortedWordCounts.length}');
+    // debugPrint('sortedWordCounts.length = ${sortedWordCounts.length}');
     List<WordEntry> wordEntries = [];
     for (var i = start; i < end; i++) {
       final entry = sortedWordCounts[i];

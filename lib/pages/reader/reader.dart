@@ -447,7 +447,7 @@ class Reader extends State with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     String key = 'WMWORDS';
     String? storedData = prefs.getString(key);
-    print('reader loadwCounts $storedData');
+    // print('reader loadwCounts $storedData');
     if (storedData != null) {
       Map<String, dynamic> decodedData = jsonDecode(storedData);
       WordCount wordCount = WordCount.fromJson(decodedData);
@@ -474,7 +474,7 @@ class Reader extends State with WidgetsBindingObserver {
     String updatedText = getText;
 
     for (var entry in wordEntries) {
-      print('Ищем слово: ${entry.word}');
+      // print('Ищем слово: ${entry.word}');
 
       var escapedWord = RegExp.escape(entry.word);
       var pattern = '(?<!\\p{L})$escapedWord(?!\\p{L})';
@@ -482,7 +482,7 @@ class Reader extends State with WidgetsBindingObserver {
 
       updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
         final matchedWord = match.group(0)!;
-        print('Найдено совпадение: $matchedWord');
+        // print('Найдено совпадение: $matchedWord');
         return matchCase(matchedWord, entry.translation ?? '');
       });
       // updatedText = updatedText.replaceAllMapped(entry.word[0].toUpperCase() + entry.word.substring(1).toLowerCase(), (match) {
@@ -2234,7 +2234,7 @@ class Reader extends State with WidgetsBindingObserver {
                                 padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                 icon: const Icon(Icons.close),
                                 onPressed: () async {
-                                  debugPrint("DONE");
+                                  // debugPrint("DONE");
                                   Navigator.pop(context);
                                 },
                               ),

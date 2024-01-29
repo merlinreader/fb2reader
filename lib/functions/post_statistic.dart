@@ -45,14 +45,14 @@ getPageCount(String inputFilePath, bool isWM) async {
   }
 
   Map<int, bool> dataToSend = {};
-  int index = 0;
+  // int index = 0;
   for (final entry in books) {
     int countFromStorage = prefs.getInt('pageCount-${entry.fileName}') ?? 0;
     int lastCountFromStorage = prefs.getInt('lastPageCount-${entry.fileName}') ?? 0;
     int diff = countFromStorage - lastCountFromStorage;
     diff = diff < 0 ? 0 : diff;
 
-    print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.fileName}');
+    // print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.fileName}');
     if (isWM == true && entry.fileName == inputFilePath) {
       if (countFromStorage > 0) {
         if (lastCountFromStorage != 0 && countFromStorage > lastCountFromStorage) {
@@ -78,34 +78,34 @@ getPageCount(String inputFilePath, bool isWM) async {
   DateTime nowDateTime = DateTime.now();
   Duration difference = nowDateTime.difference(savedDateTime);
   int differenceInSeconds = difference.inSeconds;
-  print('pageSize = $pageSize');
-  print('savedDateTime = $savedDateTime');
-  print('differenceInSeconds = $differenceInSeconds');
+  // print('pageSize = $pageSize');
+  // print('savedDateTime = $savedDateTime');
+  // print('differenceInSeconds = $differenceInSeconds');
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
   String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
       double speed = pageSize / differenceInSeconds;
-      print('WM entry.key = ${entry.key}');
-      print('speed WM = $speed sym/sec');
+      // print('WM entry.key = ${entry.key}');
+      // print('speed WM = $speed sym/sec');
       if (33.3 > speed) {
         pageCountWordMode = pageCountWordMode + entry.key;
       }
     }
     if (entry.value == false) {
       double speed = pageSize / differenceInSeconds;
-      print('SM entry.key = ${entry.key}');
-      print('speed SM = $speed sym/sec');
+      // print('SM entry.key = ${entry.key}');
+      // print('speed SM = $speed sym/sec');
       if (33.3 > speed) {
         pageCountSimpleMode = pageCountSimpleMode + entry.key;
       }
     }
   }
-  print('pageCountWordMode $pageCountWordMode');
-  print('pageCountSimpleMode $pageCountSimpleMode');
-  print('nowDataUTC $nowDataUTC');
-  print(dataToSend);
+  // print('pageCountWordMode $pageCountWordMode');
+  // print('pageCountSimpleMode $pageCountSimpleMode');
+  // print('nowDataUTC $nowDataUTC');
+  // print(dataToSend);
   for (final entry in dataToSend.entries) {
     int number = entry.key;
     bool value = entry.value;
