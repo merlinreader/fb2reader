@@ -78,6 +78,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
     String url = 'https://fb2.cloud.leam.pro/api/account/avatar';
+    // ignore: unused_local_variable
     var res = await http.patch(Uri.parse(url),
         headers: {
           'Authorization': 'Bearer $token',

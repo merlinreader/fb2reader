@@ -23,9 +23,7 @@ class SplashSreenViewModel {
     await initUniLinks();
     await AvatarProvider.initAsync();
     await TokenProvider().initAsync();
-    debugPrint('загрузка');
     await getFirstName();
-    debugPrint('сейчас я на загрузке');
     // await Future.delayed(const Duration(seconds: 2));
     Navigator.pushReplacementNamed(context, RouteNames.main);
   }
@@ -59,7 +57,7 @@ class SplashSreenViewModel {
         //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
         //   gravity: ToastGravity.BOTTOM,
         // );
-        debugPrint('СОХРАНЯЮ ТАКОЙ ТОКЕН В ЛОКАЛКУ: ${TokenProvider().getToken}');
+        // debugPrint('СОХРАНЯЮ ТАКОЙ ТОКЕН В ЛОКАЛКУ: ${TokenProvider().getToken}');
       }
     } catch (err) {
       _link = 'Failed to get initial link: $err';
@@ -73,13 +71,13 @@ class SplashSreenViewModel {
     Uint8List? saveAvatar;
     final prefs = await SharedPreferences.getInstance();
     String? token = await TokenProvider().getToken();
-    debugPrint('сейчас я на запросе');
+    // debugPrint('сейчас я на запросе');
     // Fluttertoast.showToast(
     //   msg: 'сейчас я на запросе, токен: $token',
     //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
     //   gravity: ToastGravity.BOTTOM,
     // );
-    debugPrint('вот токен::::::::::::::::::::::::::::::::::::::::::::::::::::::::=$token');
+    // debugPrint('вот токен::::::::::::::::::::::::::::::::::::::::::::::::::::::::=$token');
     if (token != null) {
       String url = 'https://fb2.cloud.leam.pro/api/account/';
       final data = json.decode((await http.get(Uri.parse(url), headers: {
@@ -87,7 +85,7 @@ class SplashSreenViewModel {
       }))
           .body);
       firstName = data['firstName'].toString();
-      debugPrint('имя из запроса $firstName');
+      // debugPrint('имя из запроса $firstName');
       // Fluttertoast.showToast(
       //   msg: 'имя из запроса $firstName',
       //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения

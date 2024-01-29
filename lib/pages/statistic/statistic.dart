@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, sized_box_for_whitespace
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
