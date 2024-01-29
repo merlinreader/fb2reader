@@ -119,6 +119,7 @@ class Page extends State<AppPage> {
       dynamic data = json.decode(imageDataJson);
       // Подсчитываем количество объектов
       int count = countObjects(data);
+      //data.dispons();
       return count;
     } else {
       // Если JSON не найден, возвращаем 0 или выбрасываем исключение

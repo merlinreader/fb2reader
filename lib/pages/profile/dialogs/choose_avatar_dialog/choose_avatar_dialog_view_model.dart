@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/domain/data_providers/avatar_provider.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
@@ -29,8 +30,10 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
   Future<void> getAvatars() async {
     isLoading = true;
     notifyListeners();
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+    String token = _secureStorage.read(key: 'token') as String ?? '';
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     try {
       final response = await http.get(
@@ -75,8 +78,10 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
   }
 
   Future<void> sendAvatar(avatarName) async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+    String token = _secureStorage.read(key: 'token') as String ?? '';
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     String url = 'https://fb2.cloud.leam.pro/api/account/avatar';
     var res = await http.patch(Uri.parse(url),
         headers: {

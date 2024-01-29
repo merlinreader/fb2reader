@@ -1552,7 +1552,7 @@ class Reader extends State with WidgetsBindingObserver {
     // print('now $now');
     // print('timeElapsed $timeElapsed');
     // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-      if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
       // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
@@ -2525,6 +2525,7 @@ class Reader extends State with WidgetsBindingObserver {
                             await saveProgress();
                             await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
                             await _savePageCountToLocalStorage();
+                            //тут нужно сделать очистку оперативы
                             Navigator.pop(context, true);
                           },
                           child: Theme(
@@ -2984,7 +2985,7 @@ class Reader extends State with WidgetsBindingObserver {
                                           var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                           var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
                                           if (timeElapsed.inHours > 24) {
-                                          // if (timeElapsed.inMilliseconds > 1) {
+                                            // if (timeElapsed.inMilliseconds > 1) {
                                             wordModeDialog(context);
                                           } else {
                                             Fluttertoast.showToast(

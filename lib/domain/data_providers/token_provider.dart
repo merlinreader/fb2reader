@@ -1,43 +1,29 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
-
-class _TokenKeys {
-  static String token = 'token';
-}
 
 class TokenProvider {
   static final TokenProvider _instance = TokenProvider._();
+  factory TokenProvider() => _instance;
 
-  factory TokenProvider() {
-    return _instance;
-  }
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
 
   String? _token = '';
+  final StreamController<String?> _tokenController = StreamController<String?>.broadcast();
+  Stream<String?> get onTokenChanged => _tokenController.stream;
 
   TokenProvider._();
 
-  final _tokenController = StreamController<String?>.broadcast();
-  Stream<String?> get onTokenChanged => _tokenController.stream;
-
   Future<void> initAsync() async {
-    final prefs = await SharedPreferences.getInstance();
-    _token = prefs.getString(_TokenKeys.token);
+    _token = await _secureStorage.read(key: 'token');
   }
 
   Future<String?> getToken() async {
     return _token;
   }
 
-  // Future<void> setToken(String token) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   prefs.setString(_TokenKeys.token, token);
-  //   _token = token;
-  // }
   Future<void> setToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString(_TokenKeys.token, token);
+    await _secureStorage.write(key: 'token', value: token);
     _token = token;
-
     _tokenController.add(token);
   }
 }

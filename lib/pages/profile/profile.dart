@@ -23,6 +23,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AchievementStatus {
   Achievement achievement;
@@ -111,9 +112,11 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   Future<void> getTokenFromLocalStorage() async {
+    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      token = prefs.getString('token') ?? token;
+      token = _secureStorage.read(key: 'token') as String ?? token;
+      //token = prefs.getString('token') ?? token;
       debugPrint('ТОКЕН ИЗ ЛОКЛКИ: $token');
     });
   }
@@ -158,8 +161,11 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   Future<List<Achievement>> fetchJson() async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+    String token = await _secureStorage.read(key: 'token') as String ?? '';
+
+    // final prefs = await SharedPreferences.getInstance();
+    // String token = prefs.getString('token') ?? '';
     final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(
       url,
