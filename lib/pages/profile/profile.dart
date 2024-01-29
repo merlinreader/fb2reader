@@ -112,12 +112,15 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   Future<void> getTokenFromLocalStorage() async {
-    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-    final prefs = await SharedPreferences.getInstance();
+    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    //final prefs = await SharedPreferences.getInstance();
+
+    String? token = await secureStorage.read(key: 'token');
+    //token = prefs.getString('token') ?? token;
+
+    print('ТОКЕН ИЗ ЛОКЛКИ: $token');
     setState(() {
-      token = _secureStorage.read(key: 'token') as String ?? token;
-      //token = prefs.getString('token') ?? token;
-      debugPrint('ТОКЕН ИЗ ЛОКЛКИ: $token');
+      this.token = token!;
     });
   }
 
@@ -148,6 +151,7 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   void saveGeo(String country, String area, String locality) async {
+    const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("country", country);
     prefs.setString("adminArea", area);
@@ -157,13 +161,13 @@ class _ProfilePage extends State<ProfilePage> {
       'area': area,
       'city': locality,
     };
-    await sendLocationDataToServer(locationData, prefs.getString('token') ?? '');
+    await sendLocationDataToServer(locationData, _secureStorage.read(key: 'token') as String ?? '');
   }
 
   Future<List<Achievement>> fetchJson() async {
-    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-    String token = await _secureStorage.read(key: 'token') as String ?? '';
-
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    String token = await secureStorage.read(key: 'token') as String;
+    print('ТОКЕН ${token}');
     // final prefs = await SharedPreferences.getInstance();
     // String token = prefs.getString('token') ?? '';
     final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
