@@ -32,19 +32,19 @@ class MerlinWidget extends StatelessWidget {
   }
 }
 
-class AvatarWidget extends StatelessWidget {
-  final AvatarWidget baby;
+// class AvatarWidget extends StatelessWidget {
+//   final AvatarWidget baby;
 
-  const AvatarWidget({super.key, 
-    required this.baby,
-  });
+//   const AvatarWidget({super.key, 
+//     required this.baby,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-        alignment: Alignment.center, child: SvgPicture.asset(SvgAsset.dragon1));
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Align(
+//         alignment: Alignment.center, child: SvgPicture.asset(SvgAsset.dragon1));
+//   }
+// }
 
 class MerlinStart extends StatelessWidget {
   const MerlinStart({super.key});

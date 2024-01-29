@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:merlin/style/colors.dart';
 
 class Text24 extends StatelessWidget {
   final String text;

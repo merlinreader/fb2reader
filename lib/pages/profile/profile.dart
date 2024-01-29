@@ -114,7 +114,7 @@ class _ProfilePage extends State<ProfilePage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       token = prefs.getString('token') ?? token;
-      debugPrint('ТОКЕН ИЗ ЛОКЛКИ: $token');
+      // debugPrint('ТОКЕН ИЗ ЛОКЛКИ: $token');
     });
   }
 
@@ -191,15 +191,15 @@ class _ProfilePage extends State<ProfilePage> {
     setState(() {
       var getFirstName = prefs.getString('firstName') ?? firstName;
       firstName = getFirstName;
-      debugPrint('имя из локалки $firstName');
+      // debugPrint('имя из локалки $firstName');
     });
   }
 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
-    print('ШИРИНА');
-    print(width);
+    // print('ШИРИНА');
+    // print(width);
     // double height = MediaQuery.of(context).size.height;
     // double aspectRatio = height/width;
     double size = 20;
