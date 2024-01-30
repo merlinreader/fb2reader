@@ -28,7 +28,7 @@ class ImageInfo {
   String title;
   String author;
   String fileName;
-  double progress;
+  double progress; // маяк ImageInfo
 
   ImageInfo({this.imageBytes, required this.title, required this.author, required this.fileName, required this.progress});
 
@@ -164,7 +164,7 @@ class RecentPageState extends State<RecentPage> {
     String textDataString = jsonEncode(bookDatas);
 
     final prefs = await SharedPreferences.getInstance();
-    bool success = await prefs.setString(key, textDataString);
+    bool success = await prefs.setString(key, textDataString); // маяк текста
     if (success == true) {
       isSended = true;
     }

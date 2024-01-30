@@ -6,6 +6,9 @@ import 'dart:typed_data';
 import 'dart:async';
 
 // для получаения картинки из файла книги
+import 'package:merlin/domain/data_providers/book_provider.dart';
+import 'package:merlin/functions/book.dart';
+import 'package:merlin/pages/reader/reader.dart';
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:xml/xml.dart';
@@ -129,18 +132,18 @@ class ImageLoader {
       }
 
       ImageInfo imageData = ImageInfo(imageBytes: decodedBytes, title: title, author: name, fileName: path, progress: 0.0);
-      imageDatas.add(imageData);
+      imageDatas.add(imageData); // маяк извлеченных данных
 
       String imageDatasString = jsonEncode(imageDatas);
       await prefs.setString('booksKey', imageDatasString);
 
-      // BookInfo bookData = BookInfo(
-      //     filePath: path,
-      //     fileText: text.toString(),
-      //     title: title,
-      //     author: name,
-      //     lastPosition: 0);
-      // bookDatas.add(bookData);
+      BookInfo bookData = BookInfo(filePath: path, fileText: text.toString(), title: title, author: name, lastPosition: 0);
+      Book book = Book.combine(bookData, imageData);
+      print('Это наш новый бук: \n$book');
+      Map<String, dynamic> jsonData = book.toJson();
+      await book.saveJsonToFile(jsonData, title);
+      Future<String?> bookname = BookProvider().getTitle(title);
+      print('Это название книги: \n$bookname');
 
       // String textDataString = jsonEncode(bookDatas);
       // await prefs.setString('textKey', textDataString);

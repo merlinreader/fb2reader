@@ -10,6 +10,7 @@ import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/domain/data_providers/color_provider.dart';
+import 'package:merlin/functions/book.dart';
 import 'package:merlin/functions/post_statistic.dart';
 import 'package:merlin/main.dart';
 import 'package:merlin/pages/wordmode/models/word_entry.dart';
@@ -26,7 +27,7 @@ class BookInfo {
   String fileText;
   String title;
   String author;
-  double lastPosition = 0;
+  double lastPosition = 0; // маяк BookInfo
 
   BookInfo({
     required this.filePath,
@@ -113,7 +114,7 @@ class Reader extends State with WidgetsBindingObserver {
     _scrollController.addListener(_updateScrollPercentage);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
-
+    
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
       lastPageCount = prefs.getInt('pageCount-${textes.first.filePath}') ?? 0;
