@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:merlin/UI/router.dart';
+import 'package:merlin/functions/book.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart';
+import 'package:path_provider/path_provider.dart';
 
 // для получаения картинки из файла книги
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
@@ -58,6 +60,7 @@ class RecentPageState extends State<RecentPage> {
   final ScrollController _scrollController = ScrollController();
   Uint8List? imageBytes;
   List<ImageInfo> images = [];
+  List<Book> books = [];
   String? firstName;
   String? lastName;
   String? name;
@@ -74,9 +77,10 @@ class RecentPageState extends State<RecentPage> {
       ],
     );
 
+    _initData();
     super.initState();
 
-    getDataFromLocalStorage('booksKey');
+    // getDataFromLocalStorage('booksKey');
   }
 
   @override
@@ -95,6 +99,46 @@ class RecentPageState extends State<RecentPage> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initData() async {
+    await processFiles();
+    setState(() {});
+  }
+
+  Future<void> processFiles() async {
+    print('Start');
+    String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
+
+    List<FileSystemEntity> files = Directory(path).listSync();
+    List<Future<Book>> futures = [];
+
+    for (FileSystemEntity file in files) {
+      if (file is File) {
+        print(file);
+
+        Future<Book> futureBook = _readBookFromFile(file);
+        futures.add(futureBook);
+      }
+    }
+
+    List<Book> loadedBooks = await Future.wait(futures);
+
+    books.addAll(loadedBooks);
+
+    print('Длина списка с книжками ${books.length}');
+  }
+
+  Future<Book> _readBookFromFile(File file) async {
+    try {
+      String content = await file.readAsString();
+      Map<String, dynamic> jsonMap = jsonDecode(content);
+      Book book = Book.fromJson(jsonMap);
+      return book;
+    } catch (e) {
+      print('Error reading file: $e');
+      return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0);
+    }
   }
 
   Future<void> getDataFromLocalStorage(String key) async {
@@ -471,7 +515,7 @@ class RecentPageState extends State<RecentPage> {
             Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [if (images.isEmpty) TextTektur(text: "Пока вы не добавили никаких книг", fontsize: 16, textColor: MyColors.grey)],
+                children: [if (books.isEmpty) TextTektur(text: "Пока вы не добавили никаких книг", fontsize: 16, textColor: MyColors.grey)],
               ),
             ),
             Padding(
@@ -479,7 +523,7 @@ class RecentPageState extends State<RecentPage> {
               child: OrientationBuilder(builder: (context, orientation) {
                 return DynamicHeightGridView(
                   controller: _scrollController,
-                  itemCount: images.length,
+                  itemCount: books.length,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,
                   crossAxisCount: booksInWidth,
@@ -514,13 +558,13 @@ class RecentPageState extends State<RecentPage> {
                       },
                       child: Column(
                         children: [
-                          if (images[index].imageBytes != null)
+                          if (books[index].imageBytes != null)
                             Stack(
                               alignment: Alignment.bottomCenter,
                               children: [
-                                images[index].imageBytes?.first != 0
+                                books[index].imageBytes?.first != 0
                                     ? Image.memory(
-                                        images[index].imageBytes!,
+                                        books[index].imageBytes!,
                                         width: bookWidth,
                                         height: bookHeight,
                                         fit: BoxFit.fill,
@@ -555,22 +599,22 @@ class RecentPageState extends State<RecentPage> {
                                     right: 10,
                                     child: LinearProgressIndicator(
                                       minHeight: 4,
-                                      value: images[index].progress,
+                                      value: books[index].progress,
                                       backgroundColor: Colors.white,
                                       valueColor: const AlwaysStoppedAnimation<Color>(MyColors.purple),
                                     )),
                               ],
                             ),
                           const SizedBox(height: 4),
-                          Text(images[index].author.length > 15
-                              ? '${images[index].author.substring(0, images[index].author.length ~/ 1.5)}...'
-                              : images[index].author),
+                          Text(books[index].author.length > 15
+                              ? '${books[index].author.substring(0, books[index].author.length ~/ 1.5)}...'
+                              : books[index].author),
                           Text(
-                            images[index].title.length > 20
-                                ? images[index].title.length > 15
-                                    ? '${images[index].title.substring(0, images[index].title.length ~/ 2.5)}...'
-                                    : '${images[index].title.substring(0, images[index].title.length ~/ 2)}...'
-                                : images[index].title,
+                            books[index].title.length > 20
+                                ? books[index].title.length > 15
+                                    ? '${books[index].title.substring(0, books[index].title.length ~/ 2.5)}...'
+                                    : '${books[index].title.substring(0, books[index].title.length ~/ 2)}...'
+                                : books[index].title,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,

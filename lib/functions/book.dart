@@ -50,9 +50,21 @@ class Book {
       'title': title,
       'author': author,
       'lastPosition': lastPosition,
-      'imageBytes': imageBytes,
+      'imageBytes': imageBytes?.toList(),
       'progress': progress,
     };
+  }
+
+  factory Book.fromJson(Map<String, dynamic> json) {
+    return Book(
+      filePath: json['filePath'],
+      text: json['text'],
+      title: json['title'],
+      author: json['author'],
+      lastPosition: json['lastPosition'],
+      imageBytes: json['imageBytes'] != null ? Uint8List.fromList(json['imageBytes'].cast<int>()) : null,
+      progress: json['progress'],
+    );
   }
 
   Future<void> saveJsonToFile(Map<String, dynamic> jsonData, String fileName) async {
@@ -67,6 +79,102 @@ class Book {
       print('Файл успешно сохранен по пути: $filePath');
     } catch (e) {
       print('Ошибка при сохранении файла: $e');
+    }
+  }
+
+  Future<void> updateTextInFile(String newText) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/${this.filePath}.json';
+
+      final file = File(filePath);
+      String content = await file.readAsString();
+      Map<String, dynamic> jsonMap = jsonDecode(content);
+
+      // Изменяем значение текста внутри JSON
+      jsonMap['text'] = newText;
+
+      // Записываем обновленные данные обратно в файл
+      await file.writeAsString(jsonEncode(jsonMap));
+    } catch (e) {
+      print('Ошибка при обновлении текста в файле: $e');
+    }
+  }
+
+  Future<void> updateTitleInFile(String newTitle) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/${this.filePath}.json';
+
+      final file = File(filePath);
+      String content = await file.readAsString();
+      Map<String, dynamic> jsonMap = jsonDecode(content);
+
+      // Изменяем значение заголовка внутри JSON
+      jsonMap['title'] = newTitle;
+
+      // Записываем обновленные данные обратно в файл
+      await file.writeAsString(jsonEncode(jsonMap));
+    } catch (e) {
+      print('Ошибка при обновлении заголовка в файле: $e');
+    }
+  }
+
+  Future<void> updateAuthorInFile(String newAuthor) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/${this.filePath}.json';
+
+      final file = File(filePath);
+      String content = await file.readAsString();
+      Map<String, dynamic> jsonMap = jsonDecode(content);
+
+      // Изменяем значение автора внутри JSON
+      jsonMap['author'] = newAuthor;
+
+      // Записываем обновленные данные обратно в файл
+      await file.writeAsString(jsonEncode(jsonMap));
+    } catch (e) {
+      print('Ошибка при обновлении автора в файле: $e');
+    }
+  }
+
+  Future<void> updateLastPositionInFile(double newLastPosition) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/${this.filePath}.json';
+
+      final file = File(filePath);
+      String content = await file.readAsString();
+      Map<String, dynamic> jsonMap = jsonDecode(content);
+
+      // Изменяем значение последней позиции внутри JSON
+      jsonMap['lastPosition'] = newLastPosition;
+
+      // Записываем обновленные данные обратно в файл
+      await file.writeAsString(jsonEncode(jsonMap));
+    } catch (e) {
+      print('Ошибка при обновлении последней позиции в файле: $e');
+    }
+  }
+
+  Future<void> updateProgressInFile(double newProgress) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/$title.json';
+      print(filePath);
+
+      final file = File(filePath);
+      String content = await file.readAsString();
+      Map<String, dynamic> jsonMap = jsonDecode(content);
+
+      // Изменяем значение прогресса внутри JSON
+      jsonMap['progress'] = newProgress;
+
+      // Записываем обновленные данные обратно в файл
+      await file.writeAsString(jsonEncode(jsonMap));
+    } catch (e) {
+      print('Ошибка при обновлении прогресса в файле: $e');
     }
   }
 }
