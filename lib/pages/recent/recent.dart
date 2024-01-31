@@ -214,6 +214,14 @@ class RecentPageState extends State<RecentPage> {
     }
   }
 
+  Future<void> sendFileTitle(String title) async {
+    final prefs = await SharedPreferences.getInstance();
+    bool success = await prefs.setString('fileTitle', title); // маяк текста
+    if (success == true) {
+      isSended = true;
+    }
+  }
+
   Future<void> changeDataFromLocalStorage(String key, String path, String changeField, String updatedValue) async {
     final prefs = await SharedPreferences.getInstance();
     String? imageDataToAdd = prefs.getString('booksKey');
@@ -533,12 +541,11 @@ class RecentPageState extends State<RecentPage> {
                         if (!_isOperationInProgress) {
                           _isOperationInProgress = true;
                           try {
-                            await sendDataFromLocalStorage('textKey', index);
+                            // await sendDataFromLocalStorage('textKey', index);
+                            await sendFileTitle(books[index].title);
                             if (isSended) {
                               isSended = false;
-                              await Navigator.pushNamed(context, RouteNames.reader).then((_) {
-                                getDataFromLocalStorage('booksKey');
-                              });
+                              await Navigator.pushNamed(context, RouteNames.reader);
                             }
                           } catch (e) {
                             // Обработка ошибок, если необходимо

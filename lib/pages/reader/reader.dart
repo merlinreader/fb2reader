@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -63,7 +64,7 @@ class BookInfo {
 }
 
 class ReaderPage extends StatefulWidget {
-  const ReaderPage({Key? key}) : super(key: key);
+  const ReaderPage({Key? key, String? fileTitle}) : super(key: key);
 
   @override
   Reader createState() => Reader();
@@ -89,6 +90,7 @@ class Reader extends State with WidgetsBindingObserver {
   bool visible = false;
 
   double fontSize = 18;
+  String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
 
   void _getBatteryLevel() async {
     final batteryLevel = await _battery.batteryLevel;
@@ -107,54 +109,55 @@ class Reader extends State with WidgetsBindingObserver {
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    getDataFromLocalStorage('textKey');
+    //getDataFromLocalStorage('textKey');
+    getFileTitle();
     getImagesFromLocalStorage('booksKey');
 
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
     WidgetsBinding.instance.addObserver(this);
     super.initState();
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final prefs = await SharedPreferences.getInstance();
-      lastPageCount = prefs.getInt('pageCount-${textes.first.filePath}') ?? 0;
-      prefs.setInt('lastPageCount-${textes.first.filePath}', lastPageCount);
-      // print('initState lastPageCount $lastPageCount');
-      final filePath = textes.first.filePath;
-      pageSize = MediaQuery.of(context).size.height;
-      // print('pageSize = $pageSize');
-      saveDateTime(pageSize);
-      final readingPositionsJson = prefs.getString('readingPositions');
-      isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
-      setState(() {
-        isTrans;
-      });
-      if (isTrans != null && isTrans == true && isBorder == true) {
-        var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
-        replaceWordsWithTranslation(temp.wordEntries);
-      }
-      if (readingPositionsJson != null) {
-        final readingPositions = jsonDecode(readingPositionsJson);
-        if (readingPositions.containsKey(filePath)) {
-          lastPosition = readingPositions[filePath];
-          Future.delayed(const Duration(milliseconds: 200), () {
-            if (_scrollController.hasClients) {
-              // _scrollController.animateTo(
-              //   lastPosition,
-              //   duration: const Duration(milliseconds: 100),
-              //   curve: Curves.linear,
-              // );
-              _scrollController.jumpTo(lastPosition);
-            }
-          });
-          setState(() {
-            isLast = true;
-            pageSize = MediaQuery.of(context).size.height / 5.35;
-            position = _scrollController.position.pixels;
-          });
-        }
-      }
-      _loadPageCountFromLocalStorage();
+      // final prefs = await SharedPreferences.getInstance();
+      // lastPageCount = prefs.getInt('pageCount-${textes.first.filePath}') ?? 0;
+      // prefs.setInt('lastPageCount-${textes.first.filePath}', lastPageCount);
+      // // print('initState lastPageCount $lastPageCount');
+      // final filePath = textes.first.filePath;
+      // pageSize = MediaQuery.of(context).size.height;
+      // // print('pageSize = $pageSize');
+      // saveDateTime(pageSize);
+      // final readingPositionsJson = prefs.getString('readingPositions');
+      // isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
+      // setState(() {
+      //   isTrans;
+      // });
+      // if (isTrans != null && isTrans == true && isBorder == true) {
+      //   var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
+      //   replaceWordsWithTranslation(temp.wordEntries);
+      // }
+      // if (readingPositionsJson != null) {
+      //   final readingPositions = jsonDecode(readingPositionsJson);
+      //   if (readingPositions.containsKey(filePath)) {
+      //     lastPosition = readingPositions[filePath];
+      //     Future.delayed(const Duration(milliseconds: 200), () {
+      //       if (_scrollController.hasClients) {
+      //         // _scrollController.animateTo(
+      //         //   lastPosition,
+      //         //   duration: const Duration(milliseconds: 100),
+      //         //   curve: Curves.linear,
+      //         // );
+      //         _scrollController.jumpTo(lastPosition);
+      //       }
+      //     });
+      //     setState(() {
+      //       isLast = true;
+      //       pageSize = MediaQuery.of(context).size.height / 5.35;
+      //       position = _scrollController.position.pixels;
+      //     });
+      //   }
+      // }
+      // _loadPageCountFromLocalStorage();
     });
   }
 
@@ -332,26 +335,65 @@ class Reader extends State with WidgetsBindingObserver {
   String getText = "";
   List<BookInfo> textes = [];
 
-  Future<void> getDataFromLocalStorage(String key) async {
-    getText = "";
-    final prefs = await SharedPreferences.getInstance();
-    String? textDataJson = prefs.getString(key);
-    if (textDataJson != null) {
-      textes = (jsonDecode(textDataJson) as List).map((item) => BookInfo.fromJson(item)).toList();
-      setState(() {});
-    }
-    if (textes.isEmpty) {
-      Navigator.pop(context);
-      Fluttertoast.showToast(
-        msg: 'Нет последней книги',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.BOTTOM,
-      );
-    }
+  // Future<void> getDataFromLocalStorage(String key) async {
+  //   getText = "";
+  //   final prefs = await SharedPreferences.getInstance();
+  //   String? textDataJson = prefs.getString(key);
+  //   if (textDataJson != null) {
+  //     textes = (jsonDecode(textDataJson) as List).map((item) => BookInfo.fromJson(item)).toList();
+  //     setState(() {});
+  //   }
+  //   if (textes.isEmpty) {
+  //     Navigator.pop(context);
+  //     Fluttertoast.showToast(
+  //       msg: 'Нет последней книги',
+  //       toastLength: Toast.LENGTH_SHORT,
+  //       gravity: ToastGravity.BOTTOM,
+  //     );
+  //   }
 
-    setState(() {
-      getText = textes[0].fileText.toString().replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
-    });
+  //   setState(() {
+  //     getText = textes[0].fileText.toString().replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
+  //   });
+  // }
+  Future<void> getFileTitle() async {
+    final prefs = await SharedPreferences.getInstance();
+    getText = "";
+    String? fileTitle = prefs.getString('fileTitle');
+    print(fileTitle);
+    if (fileTitle != null) {
+      List<FileSystemEntity> files = Directory(path).listSync();
+      String targetFileName = '$fileTitle.json';
+
+      FileSystemEntity? targetFile = files.firstWhere(
+        (file) => file is File && file.uri.pathSegments.last == targetFileName,
+      );
+      if (targetFile == null) {
+        Navigator.pop(context);
+        Fluttertoast.showToast(
+          msg: 'Файл не найден',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        return;
+      }
+      try {
+        String content = await (targetFile as File).readAsString();
+        Map<String, dynamic> jsonMap = jsonDecode(content);
+        Book book = Book.fromJson(jsonMap);
+        setState(() {
+          getText = book.text;
+        });
+      } catch (e) {
+        print('Error reading file: $e');
+        Navigator.pop(context);
+        Fluttertoast.showToast(
+          msg: 'Ошибка чтения файла',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+      }
+    }
   }
 
   List<DeviceOrientation> orientations = [
@@ -469,7 +511,7 @@ class Reader extends State with WidgetsBindingObserver {
       DateTime? lastCallTranslateStamp = DateTime.parse(lastCallTranslateStr);
       final timeElapsed = now.difference(lastCallTranslateStamp);
       if (timeElapsed.inMilliseconds >= 1) {
-        await getDataFromLocalStorage('textKey');
+        //await getDataFromLocalStorage('textKey');
       }
     }
     String updatedText = getText;
@@ -724,11 +766,6 @@ class Reader extends State with WidgetsBindingObserver {
                                                 return DataRow(
                                                   cells: [
                                                     DataCell(
-                                                      // Text(
-                                                      //   entry.word,
-                                                      //   style: TextStyle(
-                                                      //       overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                      // ),
                                                       forTable == false
                                                           ? SizedBox(
                                                               width: MediaQuery.of(context).size.width * 0.23,
@@ -745,17 +782,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                                   overflow: TextOverflow.ellipsis,
                                                                   color: isDarkTheme ? MyColors.white : MyColors.black),
                                                             ),
-                                                      // TextForTable(
-                                                      //   text: entry.word,
-                                                      //   textColor: MyColors.black,
-                                                      // ),
                                                     ),
                                                     DataCell(
-                                                      // Text(
-                                                      //   '[ ${entry.ipa} ]',
-                                                      //   style: TextStyle(
-                                                      //       overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                      // ),
                                                       forTable == false
                                                           ? SizedBox(
                                                               width: MediaQuery.of(context).size.width * 0.275,
@@ -775,19 +803,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                                     color: isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             ),
-                                                      // TextForTable(
-                                                      //   text: '[ ${entry.ipa} ]',
-                                                      //   textColor: MyColors.black,
-                                                      // ),
                                                     ),
                                                     DataCell(
-                                                      // SizedBox(
-                                                      //   width: MediaQuery.of(context).size.width * 0.275,
-                                                      //   child: Text(
-                                                      //     entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                      //     style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
-                                                      //   ),
-                                                      // ),
                                                       forTable == false
                                                           ? Padding(
                                                               padding: const EdgeInsets.only(left: 10),
@@ -831,8 +848,6 @@ class Reader extends State with WidgetsBindingObserver {
                                     width: MediaQuery.of(context).size.width,
                                     height: forTable == false ? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.7,
                                     child: Column(
-                                      // mainAxisAlignment: MainAxisAlignment.start,
-                                      // crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: <Widget>[
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.end,
@@ -862,7 +877,6 @@ class Reader extends State with WidgetsBindingObserver {
                                         ),
                                         Container(
                                           width: MediaQuery.of(context).size.width,
-                                          // height: MediaQuery.of(context).size.height * 0.37,
                                           child: DataTable(
                                             columnSpacing: forTable == false ? 0 : 30,
                                             showBottomBorder: false,
@@ -1009,324 +1023,13 @@ class Reader extends State with WidgetsBindingObserver {
                               ),
                             ),
                           ),
-                  )
-
-                  // SingleChildScrollView(
-                  //   child: ConstrainedBox(
-                  //     constraints: BoxConstraints(
-                  //       maxHeight: MediaQuery.of(context).size.height * 0.8,
-                  //     ),
-                  //     child: ListView(
-                  //       shrinkWrap: true,
-                  //       padding: const EdgeInsets.all(0),
-                  //       children: <Widget>[
-                  //         Container(
-                  //           width: MediaQuery.of(context).size.width,
-                  //           color: Colors.transparent,
-                  //           child: Card(
-                  //             child: Column(
-                  //               children: <Widget>[
-                  //                 Row(
-                  //                   mainAxisAlignment: MainAxisAlignment.end,
-                  //                   children: [
-                  //                     IconButton(
-                  //                       alignment: Alignment.centerRight,
-                  //                       padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                  //                       icon: const Icon(Icons.close),
-                  //                       onPressed: () async {
-                  //                         // debugPrint("DONE");
-                  //                         await saveWordCountToLocalstorage(wordCount);
-                  //                         replaceWordsWithTranslation(wordCount.wordEntries);
-                  //                         Navigator.pop(context);
-                  //                       },
-                  //                     ),
-                  //                   ],
-                  //                 ),
-                  //                 const Padding(
-                  //                   padding: EdgeInsets.only(bottom: 40),
-                  //                   child: Center(
-                  //                     child: Text24(
-                  //                       text: 'Изучаемые слова',
-                  //                       textColor: MyColors.black,
-                  //                     ),
-                  //                   ),
-                  //                 ),
-                  //                 confirm == false
-                  //                     ? Padding(
-                  //                         padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                  //                         child: DataTable(
-                  //                           columnSpacing: 30.0,
-                  //                           showBottomBorder: false,
-                  //                           dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                  //                           columns: const [
-                  //                             DataColumn(
-                  //                               label: Flexible(
-                  //                                 child: Text15(
-                  //                                   text: 'Слово',
-                  //                                   textColor: MyColors.black,
-                  //                                 ),
-                  //                               ),
-                  //                             ),
-                  //                             DataColumn(
-                  //                               label: Flexible(
-                  //                                 child: Text15(
-                  //                                   text: 'Транскрипция',
-                  //                                   textColor: MyColors.black,
-                  //                                 ),
-                  //                               ),
-                  //                             ),
-                  //                             DataColumn(
-                  //                               label: Flexible(
-                  //                                 child: Text15(
-                  //                                   text: 'Перевод',
-                  //                                   textColor: MyColors.black,
-                  //                                 ),
-                  //                               ),
-                  //                             ),
-                  //                           ],
-                  //                           rows: wordCount.wordEntries.map((entry) {
-                  //                             return DataRow(
-                  //                               cells: [
-                  //                                 DataCell(
-                  //                                   Flexible(
-                  //                                     child: TextForTable(
-                  //                                       text: entry.word,
-                  //                                       textColor: MyColors.black,
-                  //                                     ),
-                  //                                   ),
-                  //                                 ),
-                  //                                 DataCell(
-                  //                                   Flexible(
-                  //                                     child: TextForTable(
-                  //                                       text: '[ ${entry.ipa} ]',
-                  //                                       textColor: MyColors.black,
-                  //                                     ),
-                  //                                   ),
-                  //                                 ),
-                  //                                 DataCell(
-                  //                                   Flexible(
-                  //                                     child: TextForTable(
-                  //                                       text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                  //                                       textColor: MyColors.black,
-                  //                                     ),
-                  //                                   ),
-                  //                                 ),
-                  //                               ],
-                  //                             );
-                  //                           }).toList(),
-                  //                         ),
-                  //                       )
-                  //                     : Padding(
-                  //                         padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                  //                         child: FractionallySizedBox(
-                  //                           widthFactor: 0.95,
-                  //                           child:
-                  // DataTable(
-                  //                             columnSpacing: 30.0,
-                  //                             showBottomBorder: false,
-                  //                             dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                  //                             columns: const [
-                  //                               DataColumn(
-                  //                                 label: Flexible(
-                  //                                   child: Text15(
-                  //                                     text: 'Слово',
-                  //                                     textColor: MyColors.black,
-                  //                                   ),
-                  //                                 ),
-                  //                               ),
-                  //                               DataColumn(
-                  //                                 label: Flexible(
-                  //                                   child: Text15(
-                  //                                     text: 'Количество',
-                  //                                     textColor: MyColors.black,
-                  //                                   ),
-                  //                                 ),
-                  //                               ),
-                  //                             ],
-                  //                             rows: wordCount.wordEntries.map((entry) {
-                  //                               return DataRow(
-                  //                                 cells: [
-                  //                                   DataCell(
-                  //                                     Flexible(
-                  //                                       child: InkWell(
-                  //                                         onTap: () async {
-                  //                                           await _showWordInputDialog(entry.word, wordCount.wordEntries);
-                  //                                           setState(() {
-                  //                                             entry.word;
-                  //                                             entry.count;
-                  //                                           });
-                  //                                         },
-                  //                                         child: TextForTable(
-                  //                                           text: entry.word,
-                  //                                           textColor: MyColors.black,
-                  //                                         ),
-                  //                                       ),
-                  //                                     ),
-                  //                                   ),
-                  //                                   DataCell(
-                  //                                     Flexible(
-                  //                                       child: TextForTable(
-                  //                                         text: '${entry.count}',
-                  //                                         textColor: MyColors.black,
-                  //                                       ),
-                  //                                     ),
-                  //                                   ),
-                  //                                 ],
-                  //                               );
-                  //                             }).toList(),
-                  //                           ),
-                  //                         ),
-                  //                       ),
-                  //                 // TextButton(
-                  //                 //     onPressed: () async {
-                  //                 //       await saveWordCountToLocalstorage(wordCount);
-                  //                 //       replaceWordsWithTranslation(wordCount.wordEntries);
-                  //                 //       Navigator.pop(context);
-                  //                 //     },
-                  //                 //     child: const Text16(
-                  //                 //       text: 'Сохранить',
-                  //                 //       textColor: MyColors.black,
-                  //                 //     ))
-                  //               ],
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-                  );
+                  ));
             }
           },
         );
       },
     );
   }
-
-  // Облачка
-  // Future<void> showTableDialog(BuildContext context, WordCount wordCount) async {
-  //   showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: false,
-  //     builder: (BuildContext context) {
-  //       return FutureBuilder(
-  //         future: wordCount.checkCallInfo(),
-  //         builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-  //           if (snapshot.connectionState == ConnectionState.waiting) {
-  //             return const Center(
-  //               child: CircularProgressIndicator(
-  //                 color: MyColors.purple,
-  //               ),
-  //             );
-  //           } else if (snapshot.hasError) {
-  //             return const AlertDialog(
-  //               content: Text('Произошла ошибка: нет доступа к интернету'),
-  //             );
-  //           } else {
-  //             if (wordCount.wordEntries.isEmpty) {
-  //               Navigator.pop(context);
-  //             }
-
-  //             return WillPopScope(
-  //               onWillPop: () async {
-  //                 // debugPrint("DONE");
-  //                 await saveWordCountToLocalstorage(wordCount);
-  //                 return true;
-  //               },
-  //               child: ConstrainedBox(
-  //                 constraints: BoxConstraints(
-  //                   maxHeight: MediaQuery.of(context).size.height * 0.8,
-  //                 ),
-  //                 child: Column(
-  //                   // shrinkWrap: true,
-  //                   // padding: const EdgeInsets.all(0),
-  //                   children: <Widget>[
-  //                     Container(
-  //                       width: MediaQuery.of(context).size.width,
-  //                       height: MediaQuery.of(context).size.height * 0.5,
-  //                       color: Colors.transparent,
-  //                       child: Card(
-  //                         child: Column(
-  //                           mainAxisAlignment: MainAxisAlignment.start,
-  //                           crossAxisAlignment: CrossAxisAlignment.stretch,
-  //                           children: <Widget>[
-  //                             IconButton(
-  //                               alignment: Alignment.centerRight,
-  //                               padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-  //                               icon: const Icon(Icons.close),
-  //                               onPressed: () async {
-  //                                 // debugPrint("DONE");
-  //                                 await saveWordCountToLocalstorage(wordCount);
-  //                                 replaceWordsWithTranslation(wordCount.wordEntries);
-  //                                 Navigator.pop(context);
-  //                               },
-  //                             ),
-  //                             const Padding(
-  //                               padding: EdgeInsets.only(bottom: 20),
-  //                               child: Center(
-  //                                 child: Text24(
-  //                                   text: 'Частые слова',
-  //                                   textColor: MyColors.black,
-  //                                 ),
-  //                               ),
-  //                             ),
-
-  //                             Expanded(
-  //                               child: ListView.builder(
-  //                                 itemCount: wordCount.wordEntries.length,
-  //                                 itemBuilder: (context, index) {
-  //                                   var entry = wordCount.wordEntries[index];
-  //                                   return Container(
-  //                                     height: 70,
-  //                                     width: MediaQuery.of(context).size.width * 0.5, // Adjust width as needed
-  //                                     margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Adjust vertical margin as needed
-  //                                     decoration: BoxDecoration(
-  //                                         color: Colors.transparent,
-  //                                         // borderRadius: BorderRadius.circular(12),
-  //                                         border: Border.all(color: MyColors.lightGray) // Adjust border radius for rounded corners
-  //                                         ),
-  //                                     child: Padding(
-  //                                       padding: const EdgeInsets.all(8), // Adjust inner padding as needed
-  //                                       child: Column(
-  //                                         mainAxisAlignment: MainAxisAlignment.center,
-  //                                         children: [
-  //                                           TextForTable(
-  //                                             text: '${entry.word} - ${entry.translation!.isNotEmpty ? entry.translation! : 'N/A'}',
-  //                                             textColor: MyColors.black,
-  //                                           ),
-  //                                           TextForTable(
-  //                                             text: '[ ${entry.ipa} ]',
-  //                                             textColor: MyColors.black,
-  //                                           ),
-  //                                         ],
-  //                                       ),
-  //                                     ),
-  //                                   );
-  //                                 },
-  //                               ),
-  //                             )
-  //                             // TextButton(
-  //                             //     onPressed: () {
-  //                             //       Navigator.pop(context);
-  //                             //     },
-  //                             //     child: const Text16(
-  //                             //       text: 'Закрыть',
-  //                             //       textColor: MyColors.black,
-  //                             //     ))
-  //                           ],
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             );
-  //           }
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
 
   String getWordForm(int number) {
     int lastDigit = number % 10;
@@ -1345,193 +1048,6 @@ class Reader extends State with WidgetsBindingObserver {
     }
   }
 
-  // showEmptyTable(BuildContext context, WordCount wordCount) async {
-  //   final prefs = await SharedPreferences.getInstance();
-  //   final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
-  //   DateTime? lastCallTimestamp;
-  //   Duration timeElapsed;
-  //   lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
-
-  //   final now = DateTime.now();
-  //   final oneDayMore = now.add(const Duration(days: 1));
-  //   if (lastCallTimestamp != null) {
-  //     timeElapsed = now.difference(lastCallTimestamp);
-  //   } else {
-  //     timeElapsed = now.difference(oneDayMore);
-  //   }
-  //   int getWords = prefs.getInt('words') ?? 10;
-  //   print('showEmptyTable getWords = $getWords');
-  //   // print('lastCallTimestampStr $lastCallTimestampStr');
-  //   // print('lastCallTimestamp $lastCallTimestamp');
-  //   // print('now $now');
-  //   // print('timeElapsed $timeElapsed');
-  //   if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-  //     // if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-  //     // print('Entered');
-  //     String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
-  //     var lastCallTimestamp = DateTime.now();
-  //     final prefs = await SharedPreferences.getInstance();
-  //     await prefs.setString('lastCallTimestamp', lastCallTimestamp.toIso8601String());
-
-  //     showDialog<void>(
-  //         context: context,
-  //         barrierDismissible: true,
-  //         builder: (BuildContext context) {
-  //           screenWord = getWordForm(getWords - wordCount.wordEntries.length);
-
-  //           return SingleChildScrollView(
-  //             child: ConstrainedBox(
-  //               constraints: BoxConstraints(
-  //                 maxHeight: MediaQuery.of(context).size.height * 0.8,
-  //               ),
-  //               child: ListView(
-  //                 shrinkWrap: true,
-  //                 padding: const EdgeInsets.all(0),
-  //                 children: <Widget>[
-  //                   Container(
-  //                     width: MediaQuery.of(context).size.width,
-  //                     color: Colors.transparent,
-  //                     child: Card(
-  //                       child: Column(
-  //                         mainAxisAlignment: MainAxisAlignment.start,
-  //                         crossAxisAlignment: CrossAxisAlignment.stretch,
-  //                         children: <Widget>[
-  //                           IconButton(
-  //                             alignment: Alignment.centerRight,
-  //                             padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-  //                             icon: const Icon(Icons.close),
-  //                             onPressed: () async {
-  //                               if (wordCount.wordEntries.length == getWords) {
-  //                                 await saveWordCountToLocalstorage(wordCount);
-  //                                 replaceWordsWithTranslation(wordCount.wordEntries);
-  //                                 Navigator.pop(context);
-  //                               } else {
-  //                                 Fluttertoast.showToast(msg: 'Вы не добавили все слова', toastLength: Toast.LENGTH_LONG);
-  //                               }
-  //                             },
-  //                           ),
-  //                           Padding(
-  //                             padding: const EdgeInsets.only(bottom: 20),
-  //                             child: Center(
-  //                               child: Text24(
-  //                                 text: wordCount.wordEntries.length < 10
-  //                                     ? 'Осталось добавить ${(getWords - wordCount.wordEntries.length)} $screenWord'
-  //                                     : 'Изучаемые слова',
-  //                                 textColor: MyColors.black,
-  //                               ),
-  //                             ),
-  //                           ),
-  //                           DataTable(
-  //                             columnSpacing: 38.0,
-  //                             showBottomBorder: false,
-  //                             dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-  //                             columns: const [
-  //                               DataColumn(
-  //                                 label: Expanded(
-  //                                   child: Text15(
-  //                                     text: 'Слово',
-  //                                     textColor: MyColors.black,
-  //                                   ),
-  //                                 ),
-  //                               ),
-  //                               DataColumn(
-  //                                 label: Expanded(
-  //                                   child: Text15(
-  //                                     text: 'Транскрипция',
-  //                                     textColor: MyColors.black,
-  //                                   ),
-  //                                 ),
-  //                               ),
-  //                               DataColumn(
-  //                                 label: Expanded(
-  //                                   child: Text15(
-  //                                     text: 'Перевод',
-  //                                     textColor: MyColors.black,
-  //                                   ),
-  //                                 ),
-  //                               ),
-  //                             ],
-  //                             rows: wordCount.wordEntries.map((entry) {
-  //                               return DataRow(
-  //                                 cells: [
-  //                                   DataCell(InkWell(
-  //                                     onTap: () async {
-  //                                       await _showWordInputDialog(entry.word, wordCount.wordEntries);
-  //                                       setState(() {
-  //                                         entry.word;
-  //                                         entry.count;
-  //                                         entry.ipa;
-  //                                       });
-  //                                     },
-  //                                     child: TextForTable(
-  //                                       text: entry.word,
-  //                                       textColor: MyColors.black,
-  //                                     ),
-  //                                   )),
-  //                                   DataCell(
-  //                                     ConstrainedBox(
-  //                                       constraints: BoxConstraints(
-  //                                         maxWidth: MediaQuery.of(context).size.width * 0.25,
-  //                                       ),
-  //                                       child: TextForTable(
-  //                                         text: '[ ${entry.ipa} ]',
-  //                                         textColor: MyColors.black,
-  //                                       ),
-  //                                     ),
-  //                                   ),
-  //                                   DataCell(
-  //                                     ConstrainedBox(
-  //                                       constraints: BoxConstraints(
-  //                                         maxWidth: MediaQuery.of(context).size.width * 0.25,
-  //                                       ),
-  //                                       child: TextForTable(
-  //                                         text: entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-  //                                         textColor: MyColors.black,
-  //                                       ),
-  //                                     ),
-  //                                   ),
-  //                                 ],
-  //                               );
-  //                             }).toList(),
-  //                           ),
-  //                           wordCount.wordEntries.length < 10
-  //                               ? TextButton(
-  //                                   onPressed: () async {
-  //                                     await addNewWord(wordCount.wordEntries, wordCount, wordCount.wordEntries.length);
-  //                                   },
-  //                                   child: const Text16(
-  //                                     text: 'Добавить',
-  //                                     textColor: MyColors.black,
-  //                                   ))
-  //                               : TextButton(
-  //                                   onPressed: () async {
-  //                                     await saveWordCountToLocalstorage(wordCount);
-  //                                     replaceWordsWithTranslation(wordCount.wordEntries);
-  //                                     Navigator.pop(context);
-  //                                   },
-  //                                   child: const Text16(
-  //                                     text: 'Сохранить',
-  //                                     textColor: MyColors.black,
-  //                                   ))
-  //                         ],
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //             ),
-  //           );
-  //         });
-  //   } else {
-  //     Fluttertoast.showToast(
-  //       msg: 'Можно только раз в 24 часа!',
-  //       toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-  //       gravity: ToastGravity.BOTTOM, // Расположение уведомления
-  //     );
-  //     return;
-  //   }
-  // }
-
   showEmptyTable(BuildContext context, WordCount wordCount) async {
     final prefs = await SharedPreferences.getInstance();
     final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
@@ -1547,14 +1063,8 @@ class Reader extends State with WidgetsBindingObserver {
       timeElapsed = now.difference(oneDayMore);
     }
     int getWords = prefs.getInt('words') ?? 10;
-    // print('showEmptyTable getWords = $getWords');
-    // print('lastCallTimestampStr $lastCallTimestampStr');
-    // print('lastCallTimestamp $lastCallTimestamp');
-    // print('now $now');
-    // print('timeElapsed $timeElapsed');
     // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
     if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
-      // print('Entered');
       String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
       var lastCallTimestamp = DateTime.now();
       final prefs = await SharedPreferences.getInstance();
@@ -1618,7 +1128,6 @@ class Reader extends State with WidgetsBindingObserver {
                                         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Adjust vertical margin as needed
                                         decoration: BoxDecoration(
                                             color: Colors.transparent,
-                                            // borderRadius: BorderRadius.circular(12),
                                             border: Border.all(color: MyColors.lightGray) // Adjust border radius for rounded corners
                                             ),
                                         child: Padding(
@@ -1875,11 +1384,6 @@ class Reader extends State with WidgetsBindingObserver {
                                         return DataRow(
                                           cells: [
                                             DataCell(
-                                              // Text(
-                                              //   entry.word,
-                                              //   style: TextStyle(
-                                              //       overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                              // ),
                                               forTable == false
                                                   ? SizedBox(
                                                       width: MediaQuery.of(context).size.width * 0.23,
@@ -1894,17 +1398,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                       style: TextStyle(
                                                           overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
-                                              // TextForTable(
-                                              //   text: entry.word,
-                                              //   textColor: MyColors.black,
-                                              // ),
                                             ),
                                             DataCell(
-                                              // Text(
-                                              //   '[ ${entry.ipa} ]',
-                                              //   style: TextStyle(
-                                              //       overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
-                                              // ),
                                               forTable == false
                                                   ? SizedBox(
                                                       width: MediaQuery.of(context).size.width * 0.275,
@@ -1922,19 +1417,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                             overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     ),
-                                              // TextForTable(
-                                              //   text: '[ ${entry.ipa} ]',
-                                              //   textColor: MyColors.black,
-                                              // ),
                                             ),
                                             DataCell(
-                                              // SizedBox(
-                                              //   width: MediaQuery.of(context).size.width * 0.275,
-                                              //   child: Text(
-                                              //     entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                              //     style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
-                                              //   ),
-                                              // ),
                                               forTable == false
                                                   ? Padding(
                                                       padding: const EdgeInsets.only(left: 10),
@@ -1981,138 +1465,6 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
-  // Облачка
-  // Future<void> showSavedWords(BuildContext context, String filePath) async {
-  //   showDialog<void>(
-  //     context: context,
-  //     barrierDismissible: true,
-  //     builder: (BuildContext context) {
-  //       return FutureBuilder<WordCount>(
-  //         future: loadWordCountFromLocalStorage(filePath),
-  //         builder: (BuildContext context, AsyncSnapshot<WordCount> snapshot) {
-  //           if (snapshot.connectionState == ConnectionState.waiting) {
-  //             return const Center(
-  //               child: CircularProgressIndicator(
-  //                 color: MyColors.purple,
-  //               ),
-  //             );
-  //           } else if (snapshot.hasError) {
-  //             return AlertDialog(
-  //               content: Text('Error: ${snapshot.error}'),
-  //             );
-  //           } else if (snapshot.connectionState == ConnectionState.done) {
-  //             if (snapshot.hasData) {
-  //               WordCount? wordCount = snapshot.data;
-  //               // debugPrint('Getted wordCount $wordCount');
-  //               if (wordCount == null || wordCount.wordEntries.isEmpty) {
-  //                 Fluttertoast.showToast(
-  //                   msg: 'Нет сохраненных слов',
-  //                   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-  //                   gravity: ToastGravity.BOTTOM,
-  //                 );
-  //                 Navigator.pop(context);
-  //                 return const SizedBox.shrink();
-  //               }
-  //               return ConstrainedBox(
-  //                 constraints: BoxConstraints(
-  //                   maxHeight: MediaQuery.of(context).size.height * 0.6,
-  //                 ),
-  //                 child: Column(
-  //                   // shrinkWrap: true,
-  //                   // padding: const EdgeInsets.all(0),
-  //                   children: <Widget>[
-  //                     Container(
-  //                       width: MediaQuery.of(context).size.width,
-  //                       height: MediaQuery.of(context).size.height * 0.5,
-  //                       color: Colors.transparent,
-  //                       child: Card(
-  //                         child: Column(
-  //                           mainAxisAlignment: MainAxisAlignment.start,
-  //                           crossAxisAlignment: CrossAxisAlignment.stretch,
-  //                           children: <Widget>[
-  //                             IconButton(
-  //                               alignment: Alignment.centerRight,
-  //                               padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-  //                               icon: const Icon(Icons.close),
-  //                               onPressed: () {
-  //                                 Navigator.of(context).pop();
-  //                               },
-  //                             ),
-  //                             const Padding(
-  //                               padding: EdgeInsets.only(bottom: 20),
-  //                               child: Center(
-  //                                 child: Text24(
-  //                                   text: 'Изучаемые слова',
-  //                                   textColor: MyColors.black,
-  //                                 ),
-  //                               ),
-  //                             ),
-
-  //                             Expanded(
-  //                               child: ListView.builder(
-  //                                 itemCount: wordCount.wordEntries.length,
-  //                                 itemBuilder: (context, index) {
-  //                                   var entry = wordCount.wordEntries[index];
-  //                                   return Container(
-  //                                     // height: MediaQuery.of(context).size.height * 0.1,
-  //                                     width: MediaQuery.of(context).size.width * 0.5, // Adjust width as needed
-  //                                     margin: const EdgeInsets.symmetric(vertical: 2.5, horizontal: 20), // Adjust vertical margin as needed
-  //                                     decoration: BoxDecoration(
-  //                                         color: Colors.transparent,
-  //                                         // borderRadius: BorderRadius.circular(12),
-  //                                         border: Border.all(color: MyColors.lightGray) // Adjust border radius for rounded corners
-  //                                         ),
-  //                                     child: Padding(
-  //                                       padding: const EdgeInsets.symmetric(vertical: 10), // Adjust inner padding as needed
-  //                                       child: Column(
-  //                                         mainAxisAlignment: MainAxisAlignment.center,
-  //                                         children: [
-  //                                           TextForTable(
-  //                                             text: '${entry.word} - ${entry.translation!.isNotEmpty ? entry.translation! : 'N/A'}',
-  //                                             textColor: MyColors.black,
-  //                                           ),
-  //                                           TextForTable(
-  //                                             text: '[ ${entry.ipa} ]',
-  //                                             textColor: MyColors.black,
-  //                                           ),
-  //                                         ],
-  //                                       ),
-  //                                     ),
-  //                                   );
-  //                                 },
-  //                               ),
-  //                             )
-  //                             // TextButton(
-  //                             //     onPressed: () {
-  //                             //       Navigator.pop(context);
-  //                             //     },
-  //                             //     child: const Text16(
-  //                             //       text: 'Закрыть',
-  //                             //       textColor: MyColors.black,
-  //                             //     ))
-  //                           ],
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ],
-  //                 ),
-  //               );
-  //             } else {
-  //               return const Center(
-  //                 child: Text('No data available.'),
-  //               );
-  //             }
-  //           } else {
-  //             return const Center(
-  //               child: Text('Unexpected state.'),
-  //             );
-  //           }
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
   void wordModeDialog(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     int getWords = prefs.getInt('words') ?? 10;
@@ -2139,72 +1491,6 @@ class Reader extends State with WidgetsBindingObserver {
       await showTableDialog(context, wordCount, false);
     }
   }
-
-  // Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries) async {
-  //   List<String> words = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
-  //   Set<String> uniqueSet = <String>{};
-  //   List<String> result = [];
-  //   for (String item in words.reversed) {
-  //     if (uniqueSet.add(item)) {
-  //       result.add(item);
-  //     }
-  //   }
-  //   result.reversed.toList();
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       String newWord = word;
-
-  //       return AlertDialog(
-  //         title: const Text('Изменить слово'),
-  //         content: Autocomplete<String>(
-  //           optionsBuilder: (TextEditingValue textEditingValue) {
-  //             if (textEditingValue.text == '') {
-  //               return const Iterable<String>.empty();
-  //             }
-  //             String pattern = textEditingValue.text.toLowerCase();
-  //             final Iterable<String> matchingStart = result.where((String option) {
-  //               return option.toLowerCase().startsWith(pattern);
-  //             });
-  //             final Iterable<String> matchingAll = result.where((String option) {
-  //               return option.toLowerCase().contains(pattern) && !option.toLowerCase().startsWith(pattern);
-  //             });
-  //             return matchingStart.followedBy(matchingAll);
-  //           },
-  //           onSelected: (String selection) {
-  //             // debugPrint('You just selected $selection');
-  //             newWord = selection;
-  //           },
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: const Text16(text: 'Отмена', textColor: MyColors.black),
-  //           ),
-  //           TextButton(
-  //             onPressed: () async {
-  //               // debugPrint('Введенное слово: $newWord');
-  //               // debugPrint('onPressed word: $word');
-  //               if (result.contains(newWord)) {
-  //                 await updateWordInTable(word, newWord, wordEntries);
-  //                 Navigator.of(context).pop();
-  //               } else {
-  //                 Fluttertoast.showToast(
-  //                   msg: 'Введенного слова нет в книге',
-  //                   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-  //                   gravity: ToastGravity.BOTTOM,
-  //                 );
-  //               }
-  //             },
-  //             child: const Text16(text: 'Сохранить', textColor: MyColors.black),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries, Map<String, int> wordsMap) async {
     String searchText = '';
@@ -2235,7 +1521,6 @@ class Reader extends State with WidgetsBindingObserver {
                                 padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                 icon: const Icon(Icons.close),
                                 onPressed: () async {
-                                  // debugPrint("DONE");
                                   Navigator.pop(context);
                                 },
                               ),
@@ -2400,8 +1685,6 @@ class Reader extends State with WidgetsBindingObserver {
     final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
     if (index != -1) {
       final count = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getWordCount(newWord);
-      // debugPrint('updateWordInTable entry ${wordEntries[index]}');
-      // debugPrint('updateWordInTable count ${wordEntries[index].count}');
       final translation = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).translateToEnglish(newWord);
       final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation);
 
@@ -2413,8 +1696,6 @@ class Reader extends State with WidgetsBindingObserver {
       );
 
       setState(() {});
-    } else {
-      // debugPrint('Word $oldWord not found in the list.');
     }
   }
 
@@ -2453,7 +1734,6 @@ class Reader extends State with WidgetsBindingObserver {
               return matchingStart.followedBy(matchingAll);
             },
             onSelected: (String selection) {
-              // debugPrint('You just selected $selection');
               newWord = selection;
             },
           ),
@@ -2589,28 +1869,23 @@ class Reader extends State with WidgetsBindingObserver {
                     controller: _scrollController,
                     itemCount: 1,
                     itemBuilder: (context, index) {
-                      if (textes.isNotEmpty) {
-                        return _scrollController.hasClients
-                            ? () {
-                                return Text(
-                                  getText,
-                                  // textAlign: TextAlign.justify,
-                                  // textAlign: TextAlign.center,
-                                  softWrap: true,
-                                  style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
-                                );
-                              }()
-                            : Center(
-                                child: Text(
-                                  'Нет текста для отображения',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: textColor,
-                                  ),
-                                ),
+                      return _scrollController.hasClients
+                          ? () {
+                              return Text(
+                                getText,
+                                softWrap: true,
+                                style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
                               );
-                      }
-                      return null;
+                            }()
+                          : Center(
+                              child: Text(
+                                'Нет текста для отображения',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  color: textColor,
+                                ),
+                              ),
+                            );
                     }),
                 GestureDetector(
                     behavior: HitTestBehavior.translucent,
@@ -2648,10 +1923,6 @@ class Reader extends State with WidgetsBindingObserver {
                                 visible = !visible;
                               });
                               if (visible) {
-                                // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-                                //   systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
-                                //   systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.light,
-                                // ));
                                 SystemChrome.setEnabledSystemUIMode(
                                   SystemUiMode.manual,
                                   overlays: [
@@ -2684,10 +1955,6 @@ class Reader extends State with WidgetsBindingObserver {
                                 visible = !visible;
                               });
                               if (visible) {
-                                // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-                                //   systemNavigationBarColor: Theme.of(context) == darkTheme() ? MyColors.blackGray : MyColors.white,
-                                //   systemNavigationBarIconBrightness: Theme.of(context) == darkTheme() ? Brightness.light : Brightness.dark,
-                                // ));
                                 SystemChrome.setEnabledSystemUIMode(
                                   SystemUiMode.manual,
                                   overlays: [
@@ -2696,7 +1963,6 @@ class Reader extends State with WidgetsBindingObserver {
                                   ],
                                 );
                               } else {
-                                // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
                                 SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
                               }
                             },
@@ -2728,7 +1994,6 @@ class Reader extends State with WidgetsBindingObserver {
               ]),
             )),
         bottomNavigationBar: BottomAppBar(
-          // color: Theme.of(context).colorScheme.primary,
           color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
           child: Stack(
             children: [
@@ -2752,7 +2017,6 @@ class Reader extends State with WidgetsBindingObserver {
                                     angle: 90 * 3.14159265 / 180,
                                     child: Icon(
                                       Icons.battery_full,
-                                      // color: Theme.of(context).iconTheme.color,
                                       color: isDarkTheme
                                           ? backgroundColor.value == 0xff1d1d21
                                               ? MyColors.white
@@ -2779,11 +2043,6 @@ class Reader extends State with WidgetsBindingObserver {
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
-
-                                  // Text7(
-                                  //   text: '${_batteryLevel.toString()}%',
-                                  //   textColor: MyColors.white,
-                                  // ),
                                 ],
                               ),
                             ),
@@ -2977,7 +2236,7 @@ class Reader extends State with WidgetsBindingObserver {
                                           }
                                           break;
                                         default:
-                                          await getDataFromLocalStorage('textKey');
+                                          //await getDataFromLocalStorage('textKey');
                                           isBorder = false;
                                           final prefs = await SharedPreferences.getInstance();
 
@@ -2985,7 +2244,6 @@ class Reader extends State with WidgetsBindingObserver {
                                           var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                           var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
                                           if (timeElapsed.inHours > 24) {
-                                            // if (timeElapsed.inMilliseconds > 1) {
                                             wordModeDialog(context);
                                           } else {
                                             Fluttertoast.showToast(
@@ -2995,8 +2253,6 @@ class Reader extends State with WidgetsBindingObserver {
                                               gravity: ToastGravity.BOTTOM,
                                             );
                                           }
-
-                                          // print('isTrans = $isTrans');
                                           break;
                                       }
                                     },
