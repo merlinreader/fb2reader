@@ -97,6 +97,7 @@ class Reader extends State with WidgetsBindingObserver {
   int pageCount = 0;
   double pagesForCount = 0;
   int lastPageCount = 0;
+  String translatedText = '';
 
   @override
   void initState() {
@@ -201,8 +202,7 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   Future<void> bookSaveProgress() async {
-    await book.updateProgressInFile(_scrollController.position.pixels /
-        _scrollController.position.maxScrollExtent);
+    await book.updateProgressInFile(_scrollController.position.pixels / _scrollController.position.maxScrollExtent);
   }
 
   Future<void> bookSaveReadingPosition(double position) async {
@@ -227,9 +227,7 @@ class Reader extends State with WidgetsBindingObserver {
     if (_scrollController.position.maxScrollExtent == 0) {
       return;
     }
-    double percentage = (_scrollController.position.pixels /
-            _scrollController.position.maxScrollExtent) *
-        100;
+    double percentage = (_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * 100;
     setState(() {
       _scrollPosition = percentage;
       position = _scrollController.position.pixels;
@@ -258,10 +256,8 @@ class Reader extends State with WidgetsBindingObserver {
   final ColorProvider _colorProvider = ColorProvider();
 
   Future<void> loadStylePreferences() async {
-    final backgroundColorFromStorage =
-        await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
-    final textColorFromStorage =
-        await _colorProvider.getColor(ColorKeys.readerTextColor);
+    final backgroundColorFromStorage = await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
+    final textColorFromStorage = await _colorProvider.getColor(ColorKeys.readerTextColor);
     final prefs = await SharedPreferences.getInstance();
 
     final fontSizeFromStorage = prefs.getDouble('fontSize');
@@ -289,14 +285,10 @@ class Reader extends State with WidgetsBindingObserver {
   bool forTable = false;
   void switchOrientation() async {
     if (savedPosition != null && savedMaxExtent != null) {
-      currentOrientationIndex =
-          (currentOrientationIndex + 1) % orientations.length;
-      SystemChrome.setPreferredOrientations(
-          [orientations[currentOrientationIndex]]);
-      if (orientations[currentOrientationIndex] ==
-              DeviceOrientation.landscapeLeft ||
-          orientations[currentOrientationIndex] ==
-              DeviceOrientation.landscapeRight) {
+      currentOrientationIndex = (currentOrientationIndex + 1) % orientations.length;
+      SystemChrome.setPreferredOrientations([orientations[currentOrientationIndex]]);
+      if (orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+          orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight) {
         forTable = true;
       } else {
         forTable = false;
@@ -328,25 +320,22 @@ class Reader extends State with WidgetsBindingObserver {
       final timeElapsed = now.difference(lastCallTranslateStamp);
       if (timeElapsed.inMilliseconds >= 1) {}
     }
-    String updatedText =
-        book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
+    translatedText = book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
 
     for (var entry in wordEntries) {
       var escapedWord = RegExp.escape(entry.word);
       var pattern = '(?<!\\p{L})$escapedWord(?!\\p{L})';
       var wordRegExp = RegExp(pattern, caseSensitive: false, unicode: true);
 
-      updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
+      translatedText = translatedText.replaceAllMapped(wordRegExp, (match) {
         final matchedWord = match.group(0)!;
         return matchCase(matchedWord, entry.translation ?? '');
       });
     }
 
-    await prefs.setString(
-        'lastCallTranslate', DateTime.now().toIso8601String());
+    await prefs.setString('lastCallTranslate', DateTime.now().toIso8601String());
     isTrans = prefs.getBool('${book.filePath}-isTrans');
     setState(() {
-      book.text = updatedText;
       isTrans;
     });
   }
@@ -417,10 +406,8 @@ class Reader extends State with WidgetsBindingObserver {
     }
   }
 
-  showTableDialog(
-      BuildContext context, WordCount wordCount, bool confirm) async {
-    var wordsMap = await WordCount(filePath: book.filePath, fileText: book.text)
-        .getAllWordCounts();
+  showTableDialog(BuildContext context, WordCount wordCount, bool confirm) async {
+    var wordsMap = await WordCount(filePath: book.filePath, fileText: book.text).getAllWordCounts();
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -461,109 +448,77 @@ class Reader extends State with WidgetsBindingObserver {
                         ? SingleChildScrollView(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxHeight: forTable == false
-                                    ? MediaQuery.of(context).size.height * 0.6
-                                    : MediaQuery.of(context).size.height * 0.8,
+                                maxHeight: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
                               ),
                               child: Container(
                                 width: MediaQuery.of(context).size.width,
-                                height: forTable == false
-                                    ? MediaQuery.of(context).size.height * 0.6
-                                    : MediaQuery.of(context).size.height * 0.8,
+                                height: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
                                 color: Colors.transparent,
                                 child: Card(
                                   child: SizedBox(
                                     width: MediaQuery.of(context).size.width,
-                                    height: forTable == false
-                                        ? MediaQuery.of(context).size.height *
-                                            0.5
-                                        : MediaQuery.of(context).size.height *
-                                            0.7,
+                                    height: forTable == false ? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.7,
                                     child: Column(
                                       // mainAxisAlignment: MainAxisAlignment.start,
                                       // crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: <Widget>[
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                          mainAxisAlignment: MainAxisAlignment.end,
                                           children: [
                                             IconButton(
                                               alignment: Alignment.centerRight,
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      0, 0, 20, 0),
+                                              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                               icon: const Icon(Icons.close),
                                               onPressed: () async {
-                                                await saveWordCountToLocalstorage(
-                                                    wordCount);
-                                                replaceWordsWithTranslation(
-                                                    wordCount.wordEntries);
+                                                await saveWordCountToLocalstorage(wordCount);
+                                                replaceWordsWithTranslation(wordCount.wordEntries);
                                                 Navigator.pop(context);
                                               },
                                             ),
                                           ],
                                         ),
                                         Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 0),
+                                          padding: const EdgeInsets.only(bottom: 0),
                                           child: Center(
                                             child: forTable == false
                                                 ? const Text24(
                                                     text: 'Изучаемые слова',
                                                     textColor: MyColors.black,
                                                   )
-                                                : const Text20(
-                                                    text: 'Изучаемые слова',
-                                                    textColor: MyColors.black),
+                                                : const Text20(text: 'Изучаемые слова', textColor: MyColors.black),
                                           ),
                                         ),
                                         Container(
-                                          width:
-                                              MediaQuery.of(context).size.width,
+                                          width: MediaQuery.of(context).size.width,
                                           child: DataTable(
-                                            columnSpacing:
-                                                forTable == false ? 15 : 0,
+                                            columnSpacing: forTable == false ? 15 : 0,
                                             showBottomBorder: false,
-                                            dataTextStyle: const TextStyle(
-                                                fontFamily: 'Roboto',
-                                                color: MyColors.black),
+                                            dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                             clipBehavior: Clip.hardEdge,
                                             horizontalMargin: 10,
                                             columns: [
                                               DataColumn(
                                                 label: forTable == false
                                                     ? SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.19,
+                                                        width: MediaQuery.of(context).size.width * 0.19,
                                                         child: const Text(
                                                           'Слово',
                                                           style: TextStyle(
-                                                            fontFamily:
-                                                                'Tektur',
+                                                            fontFamily: 'Tektur',
                                                             fontSize: 15,
                                                           ),
-                                                          textAlign:
-                                                              TextAlign.left,
+                                                          textAlign: TextAlign.left,
                                                         ),
                                                       )
                                                     : SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.285,
+                                                        width: MediaQuery.of(context).size.width * 0.285,
                                                         child: const Text(
                                                           'Слово',
                                                           style: TextStyle(
-                                                            fontFamily:
-                                                                'Tektur',
+                                                            fontFamily: 'Tektur',
                                                             fontSize: 15,
                                                           ),
-                                                          textAlign:
-                                                              TextAlign.left,
+                                                          textAlign: TextAlign.left,
                                                         ),
                                                       ),
                                               ),
@@ -574,23 +529,15 @@ class Reader extends State with WidgetsBindingObserver {
                                                           fontFamily: 'Tektur',
                                                           fontSize: 15,
                                                         ),
-                                                        textAlign:
-                                                            TextAlign.left)
+                                                        textAlign: TextAlign.left)
                                                     : SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.345,
-                                                        child: const Text(
-                                                            'Транскрипция',
+                                                        width: MediaQuery.of(context).size.width * 0.345,
+                                                        child: const Text('Транскрипция',
                                                             style: TextStyle(
-                                                              fontFamily:
-                                                                  'Tektur',
+                                                              fontFamily: 'Tektur',
                                                               fontSize: 15,
                                                             ),
-                                                            textAlign:
-                                                                TextAlign.left),
+                                                            textAlign: TextAlign.left),
                                                       ),
                                               ),
                                               DataColumn(
@@ -601,29 +548,17 @@ class Reader extends State with WidgetsBindingObserver {
                                                           fontFamily: 'Tektur',
                                                           fontSize: 15,
                                                         ),
-                                                        textAlign: forTable ==
-                                                                false
-                                                            ? TextAlign.right
-                                                            : TextAlign.left,
+                                                        textAlign: forTable == false ? TextAlign.right : TextAlign.left,
                                                       )
                                                     : SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.3,
+                                                        width: MediaQuery.of(context).size.width * 0.3,
                                                         child: Text(
                                                           'Перевод',
-                                                          style:
-                                                              const TextStyle(
-                                                            fontFamily:
-                                                                'Tektur',
+                                                          style: const TextStyle(
+                                                            fontFamily: 'Tektur',
                                                             fontSize: 15,
                                                           ),
-                                                          textAlign: forTable ==
-                                                                  false
-                                                              ? TextAlign.right
-                                                              : TextAlign.left,
+                                                          textAlign: forTable == false ? TextAlign.right : TextAlign.left,
                                                         ),
                                                       ),
                                               ),
@@ -632,29 +567,16 @@ class Reader extends State with WidgetsBindingObserver {
                                           ),
                                         ),
                                         Container(
-                                          width: forTable == true
-                                              ? MediaQuery.of(context)
-                                                  .size
-                                                  .width
-                                              : null,
+                                          width: forTable == true ? MediaQuery.of(context).size.width : null,
                                           height: forTable == false
-                                              ? MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.42
-                                              : MediaQuery.of(context)
-                                                      .size
-                                                      .height *
-                                                  0.43,
+                                              ? MediaQuery.of(context).size.height * 0.42
+                                              : MediaQuery.of(context).size.height * 0.43,
                                           child: SingleChildScrollView(
                                             scrollDirection: Axis.vertical,
                                             child: DataTable(
-                                              columnSpacing:
-                                                  forTable == false ? 33 : 0,
+                                              columnSpacing: forTable == false ? 33 : 0,
                                               showBottomBorder: false,
-                                              dataTextStyle: const TextStyle(
-                                                  fontFamily: 'Roboto',
-                                                  color: MyColors.black),
+                                              dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                               clipBehavior: Clip.hardEdge,
                                               headingRowHeight: 0,
                                               horizontalMargin: 10,
@@ -684,125 +606,63 @@ class Reader extends State with WidgetsBindingObserver {
                                                   ),
                                                 ),
                                               ],
-                                              rows: wordCount.wordEntries
-                                                  .map((entry) {
+                                              rows: wordCount.wordEntries.map((entry) {
                                                 return DataRow(
                                                   cells: [
                                                     DataCell(
                                                       forTable == false
                                                           ? SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  0.23,
+                                                              width: MediaQuery.of(context).size.width * 0.23,
                                                               child: Text(
                                                                 entry.word,
                                                                 style: TextStyle(
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    color: isDarkTheme
-                                                                        ? MyColors
-                                                                            .white
-                                                                        : MyColors
-                                                                            .black),
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             )
                                                           : Text(
                                                               entry.word,
                                                               style: TextStyle(
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                  color: isDarkTheme
-                                                                      ? MyColors
-                                                                          .white
-                                                                      : MyColors
-                                                                          .black),
+                                                                  overflow: TextOverflow.ellipsis,
+                                                                  color: isDarkTheme ? MyColors.white : MyColors.black),
                                                             ),
                                                     ),
                                                     DataCell(
                                                       forTable == false
                                                           ? SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  0.275,
+                                                              width: MediaQuery.of(context).size.width * 0.275,
                                                               child: Text(
                                                                 '[ ${entry.ipa} ]',
                                                                 style: TextStyle(
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    color: isDarkTheme
-                                                                        ? MyColors
-                                                                            .white
-                                                                        : MyColors
-                                                                            .black),
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             )
                                                           : SizedBox(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width *
-                                                                  0.14,
+                                                              width: MediaQuery.of(context).size.width * 0.14,
                                                               child: Text(
                                                                 '[ ${entry.ipa} ]',
                                                                 style: TextStyle(
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    color: isDarkTheme
-                                                                        ? MyColors
-                                                                            .white
-                                                                        : MyColors
-                                                                            .black),
+                                                                    overflow: TextOverflow.ellipsis,
+                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             ),
                                                     ),
                                                     DataCell(
                                                       forTable == false
                                                           ? Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      left: 10),
+                                                              padding: const EdgeInsets.only(left: 10),
                                                               child: SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.5,
+                                                                width: MediaQuery.of(context).size.width * 0.5,
                                                                 child: Text(
-                                                                  entry.translation!
-                                                                          .isNotEmpty
-                                                                      ? entry
-                                                                          .translation!
-                                                                      : 'N/A',
-                                                                  style: TextStyle(
-                                                                      color: isDarkTheme
-                                                                          ? MyColors
-                                                                              .white
-                                                                          : MyColors
-                                                                              .black),
+                                                                  entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                                  style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                                 ),
                                                               ),
                                                             )
                                                           : Text(
-                                                              entry.translation!
-                                                                      .isNotEmpty
-                                                                  ? entry
-                                                                      .translation!
-                                                                  : 'N/A',
-                                                              style: TextStyle(
-                                                                  color: isDarkTheme
-                                                                      ? MyColors
-                                                                          .white
-                                                                      : MyColors
-                                                                          .black),
+                                                              entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                              style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                             ),
                                                     ),
                                                   ],
@@ -821,107 +681,75 @@ class Reader extends State with WidgetsBindingObserver {
                         : SingleChildScrollView(
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
-                                maxHeight: forTable == false
-                                    ? MediaQuery.of(context).size.height * 0.6
-                                    : MediaQuery.of(context).size.height * 0.8,
+                                maxHeight: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
                               ),
                               child: Container(
                                 width: MediaQuery.of(context).size.width,
-                                height: forTable == false
-                                    ? MediaQuery.of(context).size.height * 0.6
-                                    : MediaQuery.of(context).size.height * 0.8,
+                                height: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
                                 color: Colors.transparent,
                                 child: Card(
                                   child: SizedBox(
                                     width: MediaQuery.of(context).size.width,
-                                    height: forTable == false
-                                        ? MediaQuery.of(context).size.height *
-                                            0.5
-                                        : MediaQuery.of(context).size.height *
-                                            0.7,
+                                    height: forTable == false ? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.7,
                                     child: Column(
                                       children: <Widget>[
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
+                                          mainAxisAlignment: MainAxisAlignment.end,
                                           children: [
                                             IconButton(
                                               alignment: Alignment.centerRight,
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      0, 0, 20, 0),
+                                              padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                               icon: const Icon(Icons.close),
                                               onPressed: () async {
-                                                await saveWordCountToLocalstorage(
-                                                    wordCount);
-                                                replaceWordsWithTranslation(
-                                                    wordCount.wordEntries);
+                                                await saveWordCountToLocalstorage(wordCount);
+                                                replaceWordsWithTranslation(wordCount.wordEntries);
                                                 Navigator.pop(context);
                                               },
                                             ),
                                           ],
                                         ),
                                         Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 20),
+                                          padding: const EdgeInsets.only(bottom: 20),
                                           child: Center(
                                             child: forTable == false
                                                 ? const Text24(
                                                     text: 'Изучаемые слова',
                                                     textColor: MyColors.black,
                                                   )
-                                                : const Text20(
-                                                    text: 'Изучаемые слова',
-                                                    textColor: MyColors.black),
+                                                : const Text20(text: 'Изучаемые слова', textColor: MyColors.black),
                                           ),
                                         ),
                                         Container(
-                                          width:
-                                              MediaQuery.of(context).size.width,
+                                          width: MediaQuery.of(context).size.width,
                                           child: DataTable(
-                                            columnSpacing:
-                                                forTable == false ? 0 : 30,
+                                            columnSpacing: forTable == false ? 0 : 30,
                                             showBottomBorder: false,
-                                            dataTextStyle: const TextStyle(
-                                                fontFamily: 'Roboto',
-                                                color: MyColors.black),
+                                            dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                             clipBehavior: Clip.hardEdge,
                                             horizontalMargin: 10,
                                             columns: [
                                               DataColumn(
                                                 label: forTable == false
                                                     ? SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.6,
+                                                        width: MediaQuery.of(context).size.width * 0.6,
                                                         child: const Text(
                                                           'Слово',
                                                           style: TextStyle(
-                                                            fontFamily:
-                                                                'Tektur',
+                                                            fontFamily: 'Tektur',
                                                             fontSize: 15,
                                                           ),
-                                                          textAlign:
-                                                              TextAlign.left,
+                                                          textAlign: TextAlign.left,
                                                         ),
                                                       )
                                                     : SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.3,
+                                                        width: MediaQuery.of(context).size.width * 0.3,
                                                         child: const Text(
                                                           'Слово',
                                                           style: TextStyle(
-                                                            fontFamily:
-                                                                'Tektur',
+                                                            fontFamily: 'Tektur',
                                                             fontSize: 15,
                                                           ),
-                                                          textAlign:
-                                                              TextAlign.left,
+                                                          textAlign: TextAlign.left,
                                                         ),
                                                       ),
                                               ),
@@ -933,10 +761,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                           fontFamily: 'Tektur',
                                                           fontSize: 15,
                                                         ),
-                                                        textAlign: forTable ==
-                                                                false
-                                                            ? TextAlign.right
-                                                            : TextAlign.left,
+                                                        textAlign: forTable == false ? TextAlign.right : TextAlign.left,
                                                       )
                                                     : Text(
                                                         'Количество',
@@ -944,10 +769,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                           fontFamily: 'Tektur',
                                                           fontSize: 15,
                                                         ),
-                                                        textAlign: forTable ==
-                                                                false
-                                                            ? TextAlign.right
-                                                            : TextAlign.left,
+                                                        textAlign: forTable == false ? TextAlign.right : TextAlign.left,
                                                       ),
                                               ),
                                             ],
@@ -955,26 +777,16 @@ class Reader extends State with WidgetsBindingObserver {
                                           ),
                                         ),
                                         Container(
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
+                                            width: MediaQuery.of(context).size.width,
                                             height: forTable == false
-                                                ? MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.41
-                                                : MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.35,
+                                                ? MediaQuery.of(context).size.height * 0.41
+                                                : MediaQuery.of(context).size.height * 0.35,
                                             child: SingleChildScrollView(
                                               scrollDirection: Axis.vertical,
                                               child: DataTable(
                                                 columnSpacing: 0,
                                                 showBottomBorder: false,
-                                                dataTextStyle: const TextStyle(
-                                                    fontFamily: 'Roboto',
-                                                    color: MyColors.black),
+                                                dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                                 clipBehavior: Clip.hardEdge,
                                                 headingRowHeight: 0,
                                                 horizontalMargin: 10,
@@ -983,8 +795,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                     label: Flexible(
                                                       child: Text15(
                                                         text: '',
-                                                        textColor:
-                                                            MyColors.black,
+                                                        textColor: MyColors.black,
                                                       ),
                                                     ),
                                                   ),
@@ -992,97 +803,55 @@ class Reader extends State with WidgetsBindingObserver {
                                                     label: Flexible(
                                                       child: Text15(
                                                         text: '',
-                                                        textColor:
-                                                            MyColors.black,
+                                                        textColor: MyColors.black,
                                                       ),
                                                     ),
                                                   ),
                                                 ],
-                                                rows: wordCount.wordEntries
-                                                    .map((entry) {
+                                                rows: wordCount.wordEntries.map((entry) {
                                                   return DataRow(
                                                     cells: [
                                                       DataCell(
                                                         forTable == false
                                                             ? SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.6,
+                                                                width: MediaQuery.of(context).size.width * 0.6,
                                                                 child: InkWell(
-                                                                  onTap:
-                                                                      () async {
-                                                                    await _showWordInputDialog(
-                                                                        entry
-                                                                            .word,
-                                                                        wordCount
-                                                                            .wordEntries,
-                                                                        wordsMap);
-                                                                    setState(
-                                                                        () {
-                                                                      entry
-                                                                          .word;
-                                                                      entry
-                                                                          .count;
+                                                                  onTap: () async {
+                                                                    await _showWordInputDialog(entry.word, wordCount.wordEntries, wordsMap);
+                                                                    setState(() {
+                                                                      entry.word;
+                                                                      entry.count;
                                                                     });
                                                                   },
-                                                                  child:
-                                                                      TextForTable(
-                                                                    text: entry
-                                                                        .word,
-                                                                    textColor:
-                                                                        MyColors
-                                                                            .black,
+                                                                  child: TextForTable(
+                                                                    text: entry.word,
+                                                                    textColor: MyColors.black,
                                                                   ),
                                                                 ),
                                                               )
                                                             : SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.43,
+                                                                width: MediaQuery.of(context).size.width * 0.43,
                                                                 child: InkWell(
-                                                                  onTap:
-                                                                      () async {
-                                                                    await _showWordInputDialog(
-                                                                        entry
-                                                                            .word,
-                                                                        wordCount
-                                                                            .wordEntries,
-                                                                        wordsMap);
-                                                                    setState(
-                                                                        () {
-                                                                      entry
-                                                                          .word;
-                                                                      entry
-                                                                          .count;
+                                                                  onTap: () async {
+                                                                    await _showWordInputDialog(entry.word, wordCount.wordEntries, wordsMap);
+                                                                    setState(() {
+                                                                      entry.word;
+                                                                      entry.count;
                                                                     });
                                                                   },
-                                                                  child:
-                                                                      TextForTable(
-                                                                    text: entry
-                                                                        .word,
-                                                                    textColor:
-                                                                        MyColors
-                                                                            .black,
+                                                                  child: TextForTable(
+                                                                    text: entry.word,
+                                                                    textColor: MyColors.black,
                                                                   ),
                                                                 ),
                                                               ),
                                                       ),
                                                       DataCell(
                                                         SizedBox(
-                                                          width: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width *
-                                                              0.2,
+                                                          width: MediaQuery.of(context).size.width * 0.2,
                                                           child: TextForTable(
-                                                            text:
-                                                                '${entry.count}',
-                                                            textColor:
-                                                                MyColors.black,
+                                                            text: '${entry.count}',
+                                                            textColor: MyColors.black,
                                                           ),
                                                         ),
                                                       ),
@@ -1106,8 +875,7 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries,
-      Map<String, int> wordsMap) async {
+  Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries, Map<String, int> wordsMap) async {
     String searchText = '';
     List<String> filteredWords = [];
 
@@ -1116,8 +884,7 @@ class Reader extends State with WidgetsBindingObserver {
       builder: (BuildContext context) {
         return SingleChildScrollView(
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8),
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 return Column(
@@ -1156,36 +923,24 @@ class Reader extends State with WidgetsBindingObserver {
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                   child: TextField(
                                     onChanged: (value) {
                                       setState(() {
                                         searchText = value.toLowerCase();
-                                        filteredWords = wordsMap.keys
-                                            .where((word) => word
-                                                .toLowerCase()
-                                                .startsWith(searchText))
-                                            .toList();
-                                        filteredWords
-                                            .sort((a, b) => a.compareTo(b));
-                                        filteredWords.sort((a, b) =>
-                                            wordsMap[b]!
-                                                .compareTo(wordsMap[a]!));
+                                        filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
+                                        filteredWords.sort((a, b) => a.compareTo(b));
+                                        filteredWords.sort((a, b) => wordsMap[b]!.compareTo(wordsMap[a]!));
                                       });
                                     },
                                     decoration: InputDecoration(
                                       labelText: 'Введите текст',
                                       border: const OutlineInputBorder(),
-                                      disabledBorder:
-                                          const OutlineInputBorder(),
+                                      disabledBorder: const OutlineInputBorder(),
                                       focusedBorder: const OutlineInputBorder(),
                                       focusColor: MyColors.purple,
-                                      floatingLabelStyle: isDarkTheme
-                                          ? const TextStyle(
-                                              color: MyColors.white)
-                                          : const TextStyle(
-                                              color: MyColors.black),
+                                      floatingLabelStyle:
+                                          isDarkTheme ? const TextStyle(color: MyColors.white) : const TextStyle(color: MyColors.black),
                                     ),
                                   ),
                                 ),
@@ -1195,15 +950,11 @@ class Reader extends State with WidgetsBindingObserver {
                                       columnSpacing: 45.0,
                                       showBottomBorder: false,
                                       horizontalMargin: 20,
-                                      dataTextStyle: const TextStyle(
-                                          fontFamily: 'Roboto',
-                                          color: MyColors.black),
+                                      dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                       columns: const [
                                         DataColumn(
                                           label: SizedBox(
-                                            child: Text15(
-                                                text: 'Слово',
-                                                textColor: MyColors.black),
+                                            child: Text15(text: 'Слово', textColor: MyColors.black),
                                           ),
                                         ),
                                         DataColumn(
@@ -1219,19 +970,13 @@ class Reader extends State with WidgetsBindingObserver {
                                 ),
                                 Container(
                                     width: MediaQuery.of(context).size.width,
-                                    height: forTable == false
-                                        ? MediaQuery.of(context).size.height *
-                                            0.42
-                                        : MediaQuery.of(context).size.height *
-                                            0.2,
+                                    height: forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.2,
                                     child: SingleChildScrollView(
                                       scrollDirection: Axis.vertical,
                                       child: DataTable(
                                         columnSpacing: 0.0,
                                         showBottomBorder: false,
-                                        dataTextStyle: const TextStyle(
-                                            fontFamily: 'Roboto',
-                                            color: MyColors.black),
+                                        dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                         clipBehavior: Clip.hardEdge,
                                         headingRowHeight: 0,
                                         horizontalMargin: 10,
@@ -1261,78 +1006,40 @@ class Reader extends State with WidgetsBindingObserver {
                                                   cells: [
                                                     DataCell(
                                                       SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.3,
+                                                        width: MediaQuery.of(context).size.width * 0.3,
                                                         child: TextButton(
-                                                          style: const ButtonStyle(
-                                                              alignment: Alignment
-                                                                  .centerLeft),
+                                                          style: const ButtonStyle(alignment: Alignment.centerLeft),
                                                           onPressed: () async {
-                                                            List<String> test =
-                                                                [
-                                                              filteredWords[
-                                                                  index]
-                                                            ];
+                                                            List<String> test = [filteredWords[index]];
                                                             // print(test);
-                                                            test = await WordCount()
-                                                                .getNounsByList(
-                                                                    test);
+                                                            test = await WordCount().getNounsByList(test);
                                                             // print('after $test');
-                                                            if (test.length !=
-                                                                1) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Данное слово не существительное');
+                                                            if (test.length != 1) {
+                                                              Fluttertoast.showToast(msg: 'Данное слово не существительное');
                                                               return;
                                                             } else {
-                                                              await updateWordInTable(
-                                                                  word,
-                                                                  filteredWords[
-                                                                      index],
-                                                                  wordEntries);
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
+                                                              await updateWordInTable(word, filteredWords[index], wordEntries);
+                                                              Navigator.of(context).pop();
                                                             }
                                                           },
                                                           child: Text(
-                                                            filteredWords[
-                                                                index],
+                                                            filteredWords[index],
                                                             style: TextStyle(
-                                                                fontFamily:
-                                                                    'Roboto',
+                                                                fontFamily: 'Roboto',
                                                                 fontSize: 15,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .normal,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                color: isDarkTheme
-                                                                    ? MyColors
-                                                                        .white
-                                                                    : MyColors
-                                                                        .black),
+                                                                fontWeight: FontWeight.normal,
+                                                                overflow: TextOverflow.ellipsis,
+                                                                color: isDarkTheme ? MyColors.white : MyColors.black),
                                                           ),
                                                         ),
                                                       ),
                                                     ),
                                                     DataCell(
                                                       SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.3,
+                                                        width: MediaQuery.of(context).size.width * 0.3,
                                                         child: TextForTable(
-                                                          text:
-                                                              '${wordsMap[filteredWords[index]] ?? 0}',
-                                                          textColor:
-                                                              MyColors.black,
+                                                          text: '${wordsMap[filteredWords[index]] ?? 0}',
+                                                          textColor: MyColors.black,
                                                         ),
                                                       ),
                                                     ),
@@ -1357,17 +1064,12 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
-  Future<void> updateWordInTable(
-      String oldWord, String newWord, List<WordEntry> wordEntries) async {
+  Future<void> updateWordInTable(String oldWord, String newWord, List<WordEntry> wordEntries) async {
     final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
     if (index != -1) {
-      final count = WordCount(filePath: book.filePath, fileText: book.text)
-          .getWordCount(newWord);
-      final translation =
-          await WordCount(filePath: book.filePath, fileText: book.text)
-              .translateToEnglish(newWord);
-      final ipa = await WordCount(filePath: book.filePath, fileText: book.text)
-          .getIPA(translation);
+      final count = WordCount(filePath: book.filePath, fileText: book.text).getWordCount(newWord);
+      final translation = await WordCount(filePath: book.filePath, fileText: book.text).translateToEnglish(newWord);
+      final ipa = await WordCount(filePath: book.filePath, fileText: book.text).getIPA(translation);
 
       wordEntries[index] = WordEntry(
         word: newWord,
@@ -1418,22 +1120,16 @@ class Reader extends State with WidgetsBindingObserver {
                   child: SingleChildScrollView(
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxHeight: forTable == false
-                            ? MediaQuery.of(context).size.height * 0.6
-                            : MediaQuery.of(context).size.height * 0.8,
+                        maxHeight: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
                       ),
                       child: Container(
                         width: MediaQuery.of(context).size.width,
-                        height: forTable == false
-                            ? MediaQuery.of(context).size.height * 0.6
-                            : MediaQuery.of(context).size.height * 0.8,
+                        height: forTable == false ? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
                         color: Colors.transparent,
                         child: Card(
                           child: SizedBox(
                             width: MediaQuery.of(context).size.width,
-                            height: forTable == false
-                                ? MediaQuery.of(context).size.height * 0.5
-                                : MediaQuery.of(context).size.height * 0.7,
+                            height: forTable == false ? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.7,
                             child: Column(
                               // mainAxisAlignment: MainAxisAlignment.start,
                               // crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1443,8 +1139,7 @@ class Reader extends State with WidgetsBindingObserver {
                                   children: [
                                     IconButton(
                                       alignment: Alignment.centerRight,
-                                      padding: const EdgeInsets.fromLTRB(
-                                          0, 0, 20, 0),
+                                      padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
                                       icon: const Icon(Icons.close),
                                       onPressed: () async {
                                         Navigator.pop(context);
@@ -1460,9 +1155,7 @@ class Reader extends State with WidgetsBindingObserver {
                                             text: 'Изучаемые слова',
                                             textColor: MyColors.black,
                                           )
-                                        : const Text20(
-                                            text: 'Изучаемые слова',
-                                            textColor: MyColors.black),
+                                        : const Text20(text: 'Изучаемые слова', textColor: MyColors.black),
                                   ),
                                 ),
                                 Container(
@@ -1470,19 +1163,14 @@ class Reader extends State with WidgetsBindingObserver {
                                   child: DataTable(
                                     columnSpacing: forTable == false ? 15 : 0,
                                     showBottomBorder: false,
-                                    dataTextStyle: const TextStyle(
-                                        fontFamily: 'Roboto',
-                                        color: MyColors.black),
+                                    dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                     clipBehavior: Clip.hardEdge,
                                     horizontalMargin: 10,
                                     columns: [
                                       DataColumn(
                                         label: forTable == false
                                             ? SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.19,
+                                                width: MediaQuery.of(context).size.width * 0.19,
                                                 child: const Text(
                                                   'Слово',
                                                   style: TextStyle(
@@ -1493,10 +1181,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                 ),
                                               )
                                             : SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.285,
+                                                width: MediaQuery.of(context).size.width * 0.285,
                                                 child: const Text(
                                                   'Слово',
                                                   style: TextStyle(
@@ -1516,12 +1201,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                 ),
                                                 textAlign: TextAlign.left)
                                             : SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.345,
-                                                child: const Text(
-                                                    'Транскрипция',
+                                                width: MediaQuery.of(context).size.width * 0.345,
+                                                child: const Text('Транскрипция',
                                                     style: TextStyle(
                                                       fontFamily: 'Tektur',
                                                       fontSize: 15,
@@ -1537,24 +1218,17 @@ class Reader extends State with WidgetsBindingObserver {
                                                   fontFamily: 'Tektur',
                                                   fontSize: 15,
                                                 ),
-                                                textAlign: forTable == false
-                                                    ? TextAlign.right
-                                                    : TextAlign.left,
+                                                textAlign: forTable == false ? TextAlign.right : TextAlign.left,
                                               )
                                             : SizedBox(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.3,
+                                                width: MediaQuery.of(context).size.width * 0.3,
                                                 child: Text(
                                                   'Перевод',
                                                   style: const TextStyle(
                                                     fontFamily: 'Tektur',
                                                     fontSize: 15,
                                                   ),
-                                                  textAlign: forTable == false
-                                                      ? TextAlign.right
-                                                      : TextAlign.left,
+                                                  textAlign: forTable == false ? TextAlign.right : TextAlign.left,
                                                 ),
                                               ),
                                       ),
@@ -1563,22 +1237,14 @@ class Reader extends State with WidgetsBindingObserver {
                                   ),
                                 ),
                                 Container(
-                                  width: forTable == true
-                                      ? MediaQuery.of(context).size.width
-                                      : null,
-                                  height: forTable == false
-                                      ? MediaQuery.of(context).size.height *
-                                          0.42
-                                      : MediaQuery.of(context).size.height *
-                                          0.43,
+                                  width: forTable == true ? MediaQuery.of(context).size.width : null,
+                                  height: forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.43,
                                   child: SingleChildScrollView(
                                     scrollDirection: Axis.vertical,
                                     child: DataTable(
                                       columnSpacing: forTable == false ? 33 : 0,
                                       showBottomBorder: false,
-                                      dataTextStyle: const TextStyle(
-                                          fontFamily: 'Roboto',
-                                          color: MyColors.black),
+                                      dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
                                       clipBehavior: Clip.hardEdge,
                                       headingRowHeight: 0,
                                       horizontalMargin: 10,
@@ -1614,108 +1280,53 @@ class Reader extends State with WidgetsBindingObserver {
                                             DataCell(
                                               forTable == false
                                                   ? SizedBox(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.23,
+                                                      width: MediaQuery.of(context).size.width * 0.23,
                                                       child: Text(
                                                         entry.word,
                                                         style: TextStyle(
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            color: isDarkTheme
-                                                                ? MyColors.white
-                                                                : MyColors
-                                                                    .black),
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     )
                                                   : Text(
                                                       entry.word,
                                                       style: TextStyle(
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          color: isDarkTheme
-                                                              ? MyColors.white
-                                                              : MyColors.black),
+                                                          overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
                                             ),
                                             DataCell(
                                               forTable == false
                                                   ? SizedBox(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.275,
+                                                      width: MediaQuery.of(context).size.width * 0.275,
                                                       child: Text(
                                                         '[ ${entry.ipa} ]',
                                                         style: TextStyle(
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            color: isDarkTheme
-                                                                ? MyColors.white
-                                                                : MyColors
-                                                                    .black),
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     )
                                                   : SizedBox(
-                                                      width:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .width *
-                                                              0.14,
+                                                      width: MediaQuery.of(context).size.width * 0.14,
                                                       child: Text(
                                                         '[ ${entry.ipa} ]',
                                                         style: TextStyle(
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                            color: isDarkTheme
-                                                                ? MyColors.white
-                                                                : MyColors
-                                                                    .black),
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     ),
                                             ),
                                             DataCell(
                                               forTable == false
                                                   ? Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              left: 10),
+                                                      padding: const EdgeInsets.only(left: 10),
                                                       child: SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.5,
+                                                        width: MediaQuery.of(context).size.width * 0.5,
                                                         child: Text(
-                                                          entry.translation!
-                                                                  .isNotEmpty
-                                                              ? entry
-                                                                  .translation!
-                                                              : 'N/A',
-                                                          style: TextStyle(
-                                                              color: isDarkTheme
-                                                                  ? MyColors
-                                                                      .white
-                                                                  : MyColors
-                                                                      .black),
+                                                          entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                          style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                         ),
                                                       ),
                                                     )
                                                   : Text(
-                                                      entry.translation!
-                                                              .isNotEmpty
-                                                          ? entry.translation!
-                                                          : 'N/A',
-                                                      style: TextStyle(
-                                                          color: isDarkTheme
-                                                              ? MyColors.white
-                                                              : MyColors.black),
+                                                      entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
+                                                      style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
                                             ),
                                           ],
@@ -1758,8 +1369,7 @@ class Reader extends State with WidgetsBindingObserver {
             ? Scaffold(
                 appBar: visible
                     ? PreferredSize(
-                        preferredSize:
-                            Size(MediaQuery.of(context).size.width, 50),
+                        preferredSize: Size(MediaQuery.of(context).size.width, 50),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 250),
                           child: AppBar(
@@ -1776,51 +1386,37 @@ class Reader extends State with WidgetsBindingObserver {
                                       child: Icon(
                                         CustomIcons.chevronLeft,
                                         size: 30,
-                                        color:
-                                            Theme.of(context).iconTheme.color,
+                                        color: Theme.of(context).iconTheme.color,
                                       ))),
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
+                              backgroundColor: Theme.of(context).colorScheme.primary,
                               shadowColor: Colors.transparent,
                               title: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
                                       clipBehavior: Clip.antiAlias,
                                       child: Text(
-                                        book.author.isNotEmpty &&
-                                                book.title.isNotEmpty
+                                        book.author.isNotEmpty && book.title.isNotEmpty
                                             ? '${book.author.toString()}. ${book.title.toString()}'
                                             : 'Нет автора',
                                         softWrap: false,
                                         overflow: TextOverflow.fade,
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontFamily: 'Tektur',
-                                            color: isDarkTheme
-                                                ? MyColors.white
-                                                : MyColors.black),
+                                        style: TextStyle(fontSize: 16, fontFamily: 'Tektur', color: isDarkTheme ? MyColors.white : MyColors.black),
                                       ),
                                     ),
                                   ),
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(35, 0, 0, 0),
+                                    padding: const EdgeInsets.fromLTRB(35, 0, 0, 0),
                                     child: GestureDetector(
                                       onTap: () {
-                                        Navigator.pushNamed(context,
-                                                RouteNames.readerSettings)
-                                            .then((value) =>
-                                                loadStylePreferences());
+                                        Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
                                       },
                                       child: Icon(
                                         CustomIcons.sliders,
                                         size: 28,
-                                        color:
-                                            Theme.of(context).iconTheme.color,
+                                        color: Theme.of(context).iconTheme.color,
                                       ),
                                     ),
                                   ),
@@ -1833,21 +1429,16 @@ class Reader extends State with WidgetsBindingObserver {
                     decoration: BoxDecoration(
                         color: backgroundColor,
                         border: isBorder == true
-                            ? Border.all(
-                                color: const Color.fromRGBO(0, 255, 163, 1),
-                                width: 2)
+                            ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 2)
                             : Border.all(width: 0, color: Colors.transparent)),
                     child: SafeArea(
                       top: true,
                       minimum: visible
                           ? const EdgeInsets.only(top: 0, left: 8, right: 8)
-                          : orientations[currentOrientationIndex] ==
-                                      DeviceOrientation.landscapeLeft ||
-                                  orientations[currentOrientationIndex] ==
-                                      DeviceOrientation.landscapeRight
+                          : orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                                  orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
                               ? const EdgeInsets.only(top: 0, left: 8, right: 8)
-                              : const EdgeInsets.only(
-                                  top: 40, left: 8, right: 8),
+                              : const EdgeInsets.only(top: 40, left: 8, right: 8),
                       child: Stack(children: [
                         ListView.builder(
                             controller: _scrollController,
@@ -1856,15 +1447,9 @@ class Reader extends State with WidgetsBindingObserver {
                               return _scrollController.hasClients
                                   ? () {
                                       return Text(
-                                        book.text
-                                            .replaceAll(RegExp(r'\['), '')
-                                            .replaceAll(RegExp(r'\]'), ''),
+                                        isBorder ? translatedText : book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), ''),
                                         softWrap: true,
-                                        style: TextStyle(
-                                            fontSize: fontSize,
-                                            color: textColor,
-                                            height: 1.41,
-                                            locale: const Locale('ru', 'RU')),
+                                        style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
                                       );
                                     }()
                                   : Center(
@@ -1881,11 +1466,8 @@ class Reader extends State with WidgetsBindingObserver {
                             behavior: HitTestBehavior.translucent,
                             onTap: () {
                               // Скролл вниз / следующая страница
-                              _scrollController.animateTo(
-                                  _scrollController.position.pixels +
-                                      MediaQuery.of(context).size.height * 0.92,
-                                  duration: const Duration(milliseconds: 250),
-                                  curve: Curves.ease);
+                              _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.92,
+                                  duration: const Duration(milliseconds: 250), curve: Curves.ease);
                             },
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
@@ -1899,12 +1481,8 @@ class Reader extends State with WidgetsBindingObserver {
                             )),
                         isBorder
                             ? Positioned(
-                                left: isBorder
-                                    ? MediaQuery.of(context).size.width / 4.5
-                                    : MediaQuery.of(context).size.width / 6,
-                                top: isBorder
-                                    ? MediaQuery.of(context).size.height / 4.5
-                                    : MediaQuery.of(context).size.height / 5,
+                                left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                                top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
                                 child: GestureDetector(
                                     behavior: HitTestBehavior.translucent,
                                     onDoubleTap: () async {
@@ -1928,42 +1506,20 @@ class Reader extends State with WidgetsBindingObserver {
                                           ],
                                         );
                                       } else {
-                                        SystemChrome.setEnabledSystemUIMode(
-                                            SystemUiMode.immersive);
+                                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
                                       }
                                     },
                                     child: IgnorePointer(
                                       child: Container(
-                                        width: isBorder
-                                            ? MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                2
-                                            : MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                1.5,
-                                        height: isBorder
-                                            ? MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                2.5
-                                            : MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                2,
-                                        color: const Color.fromRGBO(
-                                            250, 100, 100, 0),
+                                        width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                                        height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                                        color: const Color.fromRGBO(250, 100, 100, 0),
                                       ),
                                     )),
                               )
                             : Positioned(
-                                left: isBorder
-                                    ? MediaQuery.of(context).size.width / 4.5
-                                    : MediaQuery.of(context).size.width / 6,
-                                top: isBorder
-                                    ? MediaQuery.of(context).size.height / 4.5
-                                    : MediaQuery.of(context).size.height / 5,
+                                left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                                top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
                                 child: GestureDetector(
                                     behavior: HitTestBehavior.translucent,
                                     onDoubleTap: () async {
@@ -1982,33 +1538,14 @@ class Reader extends State with WidgetsBindingObserver {
                                           ],
                                         );
                                       } else {
-                                        SystemChrome.setEnabledSystemUIMode(
-                                            SystemUiMode.manual,
-                                            overlays: []);
+                                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
                                       }
                                     },
                                     child: IgnorePointer(
                                       child: Container(
-                                        width: isBorder
-                                            ? MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                2
-                                            : MediaQuery.of(context)
-                                                    .size
-                                                    .width /
-                                                1.5,
-                                        height: isBorder
-                                            ? MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                2.5
-                                            : MediaQuery.of(context)
-                                                    .size
-                                                    .height /
-                                                2,
-                                        color: const Color.fromRGBO(
-                                            250, 100, 100, 0),
+                                        width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                                        height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                                        color: const Color.fromRGBO(250, 100, 100, 0),
                                       ),
                                     )),
                               ),
@@ -2018,19 +1555,13 @@ class Reader extends State with WidgetsBindingObserver {
                               behavior: HitTestBehavior.translucent,
                               onTap: () {
                                 // Сролл вверх / предыдущая страница
-                                _scrollController.animateTo(
-                                    _scrollController.position.pixels -
-                                        MediaQuery.of(context).size.height *
-                                            0.92,
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.ease);
+                                _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.92,
+                                    duration: const Duration(milliseconds: 250), curve: Curves.ease);
                               },
                               child: IgnorePointer(
                                 child: Container(
-                                  width:
-                                      MediaQuery.of(context).size.width / 1.5,
-                                  height:
-                                      MediaQuery.of(context).size.height / 5,
+                                  width: MediaQuery.of(context).size.width / 1.5,
+                                  height: MediaQuery.of(context).size.height / 5,
                                   color: const Color.fromRGBO(100, 150, 200, 0),
                                 ),
                               )),
@@ -2038,9 +1569,7 @@ class Reader extends State with WidgetsBindingObserver {
                       ]),
                     )),
                 bottomNavigationBar: BottomAppBar(
-                  color: visible
-                      ? Theme.of(context).colorScheme.primary
-                      : backgroundColor,
+                  color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
                   child: Stack(
                     children: [
                       AnimatedContainer(
@@ -2052,11 +1581,9 @@ class Reader extends State with WidgetsBindingObserver {
                           children: !visible
                               ? [
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                    padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                                     child: Container(
-                                      width:
-                                          MediaQuery.of(context).size.width / 8,
+                                      width: MediaQuery.of(context).size.width / 8,
                                       alignment: Alignment.topLeft,
                                       child: Stack(
                                         alignment: Alignment.centerLeft,
@@ -2066,29 +1593,23 @@ class Reader extends State with WidgetsBindingObserver {
                                             child: Icon(
                                               Icons.battery_full,
                                               color: isDarkTheme
-                                                  ? backgroundColor.value ==
-                                                          0xff1d1d21
+                                                  ? backgroundColor.value == 0xff1d1d21
                                                       ? MyColors.white
                                                       : MyColors.black
-                                                  : backgroundColor.value !=
-                                                          0xff1d1d21
+                                                  : backgroundColor.value != 0xff1d1d21
                                                       ? MyColors.black
                                                       : MyColors.white,
                                               size: 28,
                                             ),
                                           ),
                                           Text(
-                                            _batteryLevel.toInt() >= 100
-                                                ? '${_batteryLevel.toString()}%'
-                                                : ' ${_batteryLevel.toString()}%',
+                                            _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
                                             style: TextStyle(
                                               color: isDarkTheme
-                                                  ? backgroundColor.value ==
-                                                          0xff1d1d21
+                                                  ? backgroundColor.value == 0xff1d1d21
                                                       ? MyColors.black
                                                       : MyColors.white
-                                                  : backgroundColor.value !=
-                                                          0xff1d1d21
+                                                  : backgroundColor.value != 0xff1d1d21
                                                       ? MyColors.white
                                                       : MyColors.black,
                                               fontSize: 7,
@@ -2103,34 +1624,23 @@ class Reader extends State with WidgetsBindingObserver {
                                   ),
                                   Expanded(
                                     child: Padding(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                                      padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
                                       child: Align(
                                         alignment: Alignment.topCenter,
                                         child: Text(
-                                          book.title.isNotEmpty &&
-                                                  book.author.isNotEmpty
-                                              ? (book.title.toString().length +
-                                                          book.author
-                                                              .toString()
-                                                              .length >
-                                                      30
-                                                  ? book.author
-                                                              .toString()
-                                                              .length >
-                                                          19
+                                          book.title.isNotEmpty && book.author.isNotEmpty
+                                              ? (book.title.toString().length + book.author.toString().length > 30
+                                                  ? book.author.toString().length > 19
                                                       ? '${book.author.toString()}. ${book.title.toString().substring(0, book.title.toString().length ~/ 4.5)}...'
                                                       : '${book.author.toString()}. ${book.title.toString().substring(0, book.title.toString().length ~/ 1.5)}...'
                                                   : '${book.author.toString()}. ${book.title.toString()}')
                                               : 'Нет названия',
                                           style: TextStyle(
                                               color: isDarkTheme
-                                                  ? backgroundColor.value ==
-                                                          0xff1d1d21
+                                                  ? backgroundColor.value == 0xff1d1d21
                                                       ? MyColors.white
                                                       : MyColors.black
-                                                  : backgroundColor.value !=
-                                                          0xff1d1d21
+                                                  : backgroundColor.value != 0xff1d1d21
                                                       ? MyColors.black
                                                       : MyColors.white,
                                               fontFamily: 'Tektur',
@@ -2142,22 +1652,18 @@ class Reader extends State with WidgetsBindingObserver {
                                     ),
                                   ),
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(0, 3, 10, 0),
+                                    padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
                                     child: Container(
-                                      width:
-                                          MediaQuery.of(context).size.width / 8,
+                                      width: MediaQuery.of(context).size.width / 8,
                                       alignment: Alignment.topRight,
                                       child: Text(
                                         '${_scrollPosition.toStringAsFixed(1)}%',
                                         style: TextStyle(
                                             color: isDarkTheme
-                                                ? backgroundColor.value ==
-                                                        0xff1d1d21
+                                                ? backgroundColor.value == 0xff1d1d21
                                                     ? MyColors.white
                                                     : MyColors.black
-                                                : backgroundColor.value !=
-                                                        0xff1d1d21
+                                                : backgroundColor.value != 0xff1d1d21
                                                     ? MyColors.black
                                                     : MyColors.white,
                                             fontFamily: 'Tektur',
@@ -2185,68 +1691,32 @@ class Reader extends State with WidgetsBindingObserver {
                                     children: [
                                       _scrollController.hasClients
                                           ? SliderTheme(
-                                              data: const SliderThemeData(
-                                                  showValueIndicator:
-                                                      ShowValueIndicator
-                                                          .always),
+                                              data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
                                               child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceEvenly,
+                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                 children: [
                                                   SliderTheme(
                                                     data: const SliderThemeData(
                                                         trackHeight: 3,
-                                                        thumbShape:
-                                                            RoundSliderThumbShape(
-                                                                enabledThumbRadius:
-                                                                    9),
-                                                        trackShape:
-                                                            RectangularSliderTrackShape()),
+                                                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                        trackShape: RectangularSliderTrackShape()),
                                                     child: Container(
-                                                      width: orientations[
-                                                                      currentOrientationIndex] ==
-                                                                  DeviceOrientation
-                                                                      .landscapeLeft ||
-                                                              orientations[
-                                                                      currentOrientationIndex] ==
-                                                                  DeviceOrientation
-                                                                      .landscapeRight
-                                                          ? MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width /
-                                                              1.19
-                                                          : MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .width /
-                                                              1.12,
+                                                      width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                                                              orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                                                          ? MediaQuery.of(context).size.width / 1.19
+                                                          : MediaQuery.of(context).size.width / 1.12,
                                                       child: Slider(
                                                         value: position != 0
-                                                            ? position >
-                                                                    _scrollController
-                                                                        .position
-                                                                        .maxScrollExtent
-                                                                ? _scrollController
-                                                                    .position
-                                                                    .maxScrollExtent
+                                                            ? position > _scrollController.position.maxScrollExtent
+                                                                ? _scrollController.position.maxScrollExtent
                                                                 : position
-                                                            : _scrollController
-                                                                .position
-                                                                .pixels,
+                                                            : _scrollController.position.pixels,
                                                         min: 0,
-                                                        max: _scrollController
-                                                            .position
-                                                            .maxScrollExtent,
+                                                        max: _scrollController.position.maxScrollExtent,
                                                         label: visible
-                                                            ? (position / _scrollController.position.maxScrollExtent) *
-                                                                        100 ==
-                                                                    100
+                                                            ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
                                                                 ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                : (position / _scrollController.position.maxScrollExtent) *
-                                                                            100 >
-                                                                        0
+                                                                : (position / _scrollController.position.maxScrollExtent) * 100 > 0
                                                                     ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
                                                                     : "0.0%"
                                                             : "",
@@ -2254,101 +1724,55 @@ class Reader extends State with WidgetsBindingObserver {
                                                           setState(() {
                                                             position = value;
                                                           });
-                                                          if (_actionTimer
-                                                                  ?.isActive ??
-                                                              false) {
-                                                            _actionTimer
-                                                                ?.cancel();
+                                                          if (_actionTimer?.isActive ?? false) {
+                                                            _actionTimer?.cancel();
                                                           }
-                                                          _actionTimer = Timer(
-                                                              const Duration(
-                                                                  milliseconds:
-                                                                      250), () {
-                                                            _scrollController
-                                                                .jumpTo(value);
+                                                          _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                            _scrollController.jumpTo(value);
                                                           });
                                                         },
                                                         onChangeEnd: (value) {
-                                                          _actionTimer
-                                                              ?.cancel();
-                                                          if (value !=
-                                                              _scrollController
-                                                                  .position
-                                                                  .pixels) {
-                                                            _scrollController
-                                                                .jumpTo(value);
+                                                          _actionTimer?.cancel();
+                                                          if (value != _scrollController.position.pixels) {
+                                                            _scrollController.jumpTo(value);
                                                           }
                                                         },
-                                                        activeColor: isDarkTheme
-                                                            ? MyColors.white
-                                                            : const Color
-                                                                .fromRGBO(
-                                                                29, 29, 33, 1),
+                                                        activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
                                                         inactiveColor:
-                                                            isDarkTheme
-                                                                ? const Color
-                                                                    .fromRGBO(
-                                                                    96,
-                                                                    96,
-                                                                    96,
-                                                                    1)
-                                                                : const Color
-                                                                    .fromRGBO(
-                                                                    96,
-                                                                    96,
-                                                                    96,
-                                                                    1),
-                                                        thumbColor: isDarkTheme
-                                                            ? MyColors.white
-                                                            : const Color
-                                                                .fromRGBO(
-                                                                29, 29, 33, 1),
+                                                            isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
+                                                        thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
                                                       ),
                                                     ),
                                                   ),
                                                   Container(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                                .size
-                                                                .width /
-                                                            11,
+                                                    width: MediaQuery.of(context).size.width / 11,
                                                     alignment: Alignment.center,
                                                     child: Text11(
                                                         text: visible
-                                                            ? (position / _scrollController.position.maxScrollExtent) *
-                                                                        100 ==
-                                                                    100
+                                                            ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
                                                                 ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                : (position / _scrollController.position.maxScrollExtent) *
-                                                                            100 >
-                                                                        0
+                                                                : (position / _scrollController.position.maxScrollExtent) * 100 > 0
                                                                     ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
                                                                     : "0.0%"
                                                             : "",
-                                                        textColor:
-                                                            MyColors.darkGray),
+                                                        textColor: MyColors.darkGray),
                                                   )
                                                 ],
                                               ),
                                             )
                                           : const Text("Загрузка..."),
                                       Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            0, 0, 0, 8),
+                                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
                                         child: SizedBox(
-                                          width:
-                                              MediaQuery.of(context).size.width,
+                                          width: MediaQuery.of(context).size.width,
                                           height: 2,
                                           child: Container(
-                                            color: isDarkTheme
-                                                ? MyColors.darkGray
-                                                : MyColors.black,
+                                            color: isDarkTheme ? MyColors.darkGray : MyColors.black,
                                           ),
                                         ),
                                       ),
                                       Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
                                           GestureDetector(
                                             onTap: () async {
@@ -2357,46 +1781,32 @@ class Reader extends State with WidgetsBindingObserver {
                                             },
                                             child: Icon(
                                               CustomIcons.turn,
-                                              color: Theme.of(context)
-                                                  .iconTheme
-                                                  .color,
+                                              color: Theme.of(context).iconTheme.color,
                                               size: 27,
                                             ),
                                           ),
-                                          const Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 30)),
+                                          const Padding(padding: EdgeInsets.only(right: 30)),
                                           InkWell(
                                             onTap: () {
-                                              final themeProvider =
-                                                  Provider.of<ThemeProvider>(
-                                                      context,
-                                                      listen: false);
-                                              themeProvider.isDarkTheme =
-                                                  !themeProvider.isDarkTheme;
-                                              saveSettings(
-                                                  themeProvider.isDarkTheme);
+                                              final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+                                              themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
+                                              saveSettings(themeProvider.isDarkTheme);
                                             },
                                             child: Icon(
                                               CustomIcons.theme,
-                                              color: Theme.of(context)
-                                                  .iconTheme
-                                                  .color,
+                                              color: Theme.of(context).iconTheme.color,
                                               size: 27,
                                             ),
                                           ),
-                                          const Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 30)),
+                                          const Padding(padding: EdgeInsets.only(right: 30)),
                                           GestureDetector(
                                             onTap: () async {
                                               switch (isBorder) {
                                                 case false:
-                                                  var temp =
-                                                      await loadWordCountFromLocalStorage();
+                                                  print('false');
+                                                  var temp = await loadWordCountFromLocalStorage();
                                                   if (temp.filePath != '') {
-                                                    replaceWordsWithTranslation(
-                                                        temp.wordEntries);
+                                                    replaceWordsWithTranslation(temp.wordEntries);
                                                   } else {
                                                     wordModeDialog(context);
                                                   }
@@ -2404,33 +1814,22 @@ class Reader extends State with WidgetsBindingObserver {
                                                 default:
                                                   //await getDataFromLocalStorage('textKey');
                                                   isBorder = false;
-                                                  final prefs =
-                                                      await SharedPreferences
-                                                          .getInstance();
+                                                  print('default');
+                                                  setState(() {});
+                                                  final prefs = await SharedPreferences.getInstance();
 
-                                                  final lastCallTimestampStr =
-                                                      prefs.getString(
-                                                          'lastCallTimestamp');
-                                                  var lastCallTimestamp =
-                                                      lastCallTimestampStr !=
-                                                              null
-                                                          ? DateTime.parse(
-                                                              lastCallTimestampStr)
-                                                          : null;
-                                                  var timeElapsed =
-                                                      DateTime.now().difference(
-                                                          lastCallTimestamp!);
-                                                  if (timeElapsed.inHours >
-                                                      24) {
+                                                  final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
+                                                  var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
+                                                  var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
+                                                  prefs.setBool('${book.filePath}-isTrans', false);
+                                                  if (timeElapsed.inHours > 24) {
                                                     wordModeDialog(context);
                                                   } else {
                                                     Fluttertoast.showToast(
                                                       msg:
                                                           'Новый перевод завтра в ${(lastCallTimestamp.add(const Duration(days: 1)).hour)}:${(lastCallTimestamp.add(const Duration(days: 1)).minute)}',
-                                                      toastLength:
-                                                          Toast.LENGTH_LONG,
-                                                      gravity:
-                                                          ToastGravity.BOTTOM,
+                                                      toastLength: Toast.LENGTH_LONG,
+                                                      gravity: ToastGravity.BOTTOM,
                                                     );
                                                   }
                                                   break;
@@ -2438,9 +1837,7 @@ class Reader extends State with WidgetsBindingObserver {
                                             },
                                             child: Icon(
                                               CustomIcons.wm,
-                                              color: Theme.of(context)
-                                                  .iconTheme
-                                                  .color,
+                                              color: Theme.of(context).iconTheme.color,
                                               size: 27,
                                             ),
                                           )

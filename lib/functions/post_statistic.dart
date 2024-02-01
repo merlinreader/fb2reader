@@ -139,7 +139,7 @@ getPageCount(String inputFilePath, bool isWM) async {
       print('WM entry.key = ${entry.key}');
       print('speed WM = $speed sym/sec');
       pageCountWordMode = 0;
-      if (33.3 > speed) {
+      if (100000 > speed) {
         pageCountWordMode = pageCountWordMode + entry.key;
       }
     }
@@ -148,7 +148,7 @@ getPageCount(String inputFilePath, bool isWM) async {
       print('SM entry.key = ${entry.key}');
       print('speed SM = $speed sym/sec');
       pageCountSimpleMode = 0;
-      if (33.3 > speed) {
+      if (100000 > speed) {
         pageCountSimpleMode = pageCountSimpleMode + entry.key;
       }
     }
