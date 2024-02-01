@@ -14,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xml/xml.dart';
 import 'package:path_provider/path_provider.dart';
 
-// для получаения картинки из файла книги
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/pages/reader/reader.dart';
@@ -30,7 +29,7 @@ class ImageInfo {
   String title;
   String author;
   String fileName;
-  double progress; // маяк ImageInfo
+  double progress;
 
   ImageInfo({this.imageBytes, required this.title, required this.author, required this.fileName, required this.progress});
 
@@ -79,8 +78,6 @@ class RecentPageState extends State<RecentPage> {
 
     _initData();
     super.initState();
-
-    // getDataFromLocalStorage('booksKey');
   }
 
   @override
@@ -139,82 +136,11 @@ class RecentPageState extends State<RecentPage> {
     }
   }
 
-  Future<void> getDataFromLocalStorage(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    String? imageDataJson = prefs.getString(key);
-    if (imageDataJson != null) {
-      images = (jsonDecode(imageDataJson) as List).map((item) => ImageInfo.fromJson(item)).toList();
-      setState(() {});
-    }
-    setState(() {});
-  }
-
-  Future<void> delDataFromLocalStorage(String key, String path) async {
-    final prefs = await SharedPreferences.getInstance();
-    String? imageDataToAdd = prefs.getString(key);
-    List<ImageInfo> imageDatas = [];
-    if (imageDataToAdd != null) {
-      imageDatas = (jsonDecode(imageDataToAdd) as List).map((item) => ImageInfo.fromJson(item)).toList();
-      imageDatas.removeWhere((element) => element.fileName == path);
-      String imageDatasString = jsonEncode(imageDatas);
-      await prefs.setString(key, imageDatasString);
-      setState(() {});
-    }
-  }
-
-  Future<void> delTextFromLocalStorage(String key, String path) async {
-    final prefs = await SharedPreferences.getInstance();
-    String? imageDataToAdd = prefs.getString(key);
-    List<BookInfo> imageDatas = [];
-
-    if (imageDataToAdd != null) {
-      imageDatas = (jsonDecode(imageDataToAdd) as List).map((item) => BookInfo.fromJson(item)).toList();
-
-      // Сначала устанавливаем позицию 0 для книги, которую удаляем
-      for (var bookInfo in imageDatas) {
-        if (bookInfo.filePath == path) {
-          bookInfo.setPosZero();
-          break;
-        }
-      }
-
-      imageDatas.removeWhere((element) => element.filePath == path);
-      String imageDatasString = jsonEncode(imageDatas);
-      await prefs.setString(key, imageDatasString);
-
-      // Обновляем информацию о позиции в кеше
-      // await Reader().resetPositionForBook(path);
-
-      setState(() {});
-    }
-  }
-
   bool isSended = false;
-
-  Future<void> sendDataFromLocalStorage(String key, int index) async {
-    List text = [];
-    List<BookInfo> bookDatas = [];
-    String fileContent = await File(images[index].fileName).readAsString();
-    XmlDocument document = XmlDocument.parse(fileContent);
-    final Iterable<XmlElement> textInfo = document.findAllElements('body');
-    for (var element in textInfo) {
-      text.add(element.innerText.replaceAll(RegExp(r'\[.*?\]'), ''));
-    }
-    BookInfo bookData = BookInfo(
-        filePath: images[index].fileName, fileText: text.toString(), title: images[index].title, author: images[index].author, lastPosition: 0);
-    bookDatas.add(bookData);
-    String textDataString = jsonEncode(bookDatas);
-
-    final prefs = await SharedPreferences.getInstance();
-    bool success = await prefs.setString(key, textDataString); // маяк текста
-    if (success == true) {
-      isSended = true;
-    }
-  }
 
   Future<void> sendFileTitle(String title) async {
     final prefs = await SharedPreferences.getInstance();
-    bool success = await prefs.setString('fileTitle', title); // маяк текста
+    bool success = await prefs.setString('fileTitle', title);
     if (success == true) {
       isSended = true;
     }
@@ -270,8 +196,8 @@ class RecentPageState extends State<RecentPage> {
                   if (updatedValue.isEmpty) {
                     Fluttertoast.showToast(
                       msg: 'Введите значение перед сохранением',
-                      toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-                      gravity: ToastGravity.BOTTOM, // Расположение уведомления
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
                     );
                   } else {
                     if (yourVariable == 'authorInput') {
@@ -298,103 +224,6 @@ class RecentPageState extends State<RecentPage> {
     );
   }
 
-  void onTapLongPressOne(BuildContext context, int index) {
-    // Создание окна с кнопками и текстом
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: AlertDialog(
-            title: const Text(
-              "Действия",
-            ),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    showInputDialog(context, 'authorInput', index);
-                  },
-                  child: const TextForTable(
-                    text: "Изменить автора",
-                    textColor: MyColors.black,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    showInputDialog(context, 'bookNameInput', index);
-                  },
-                  child: const TextForTable(
-                    text: "Изменить название",
-                    textColor: MyColors.black,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                          child: AlertDialog(
-                            title: Text(images[index].title),
-                            content: const Text("Вы уверены, что хотите удалить книгу?"),
-                            actions: <Widget>[
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop(); // Закрыть диалоговое окно
-                                },
-                                child: const TextForTable(
-                                  text: "Отмена",
-                                  textColor: MyColors.black,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  // Выполните удаление элемента
-                                  delDataFromLocalStorage('booksKey', images[index].fileName);
-                                  delTextFromLocalStorage('textKey', images[index].fileName);
-                                  images.removeAt(index);
-                                  setState(() {});
-                                  Navigator.of(context).pop(); // Закрыть диалоговое окно
-                                },
-                                child: const Text(
-                                  "Удалить",
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: const Text(
-                    "Удалить",
-                    style: TextStyle(color: Colors.red),
-                  ),
-                )
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  bool checkImages() {
-    if (images.isEmpty) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
   Offset _tapPosition = Offset.zero;
 
   void _getTapPosition(TapDownDetails tapPosition) {
@@ -402,6 +231,14 @@ class RecentPageState extends State<RecentPage> {
     setState(() {
       _tapPosition = renderBox.globalToLocal(tapPosition.globalPosition);
     });
+  }
+
+  bool checkBooks() {
+    if (books.isEmpty) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   void _showBlurMenu(context, int index) async {
@@ -464,12 +301,12 @@ class RecentPageState extends State<RecentPage> {
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
               child: AlertDialog(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                title: Text(images[index].title),
+                title: Text(books[index].title),
                 content: const Text("Вы уверены, что хотите удалить книгу?"),
                 actions: <Widget>[
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pop(); // Закрыть диалоговое окно
+                      Navigator.of(context).pop();
                     },
                     child: const TextForTable(
                       text: "Отмена",
@@ -478,12 +315,10 @@ class RecentPageState extends State<RecentPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      // Выполните удаление элемента
-                      delDataFromLocalStorage('booksKey', images[index].fileName);
-                      delTextFromLocalStorage('textKey', images[index].fileName);
-                      images.removeAt(index);
+                      books[index].deleteFileByTitle(books[index].title);
+                      books.removeAt(index);
                       setState(() {});
-                      Navigator.of(context).pop(); // Закрыть диалоговое окно
+                      Navigator.of(context).pop();
                     },
                     child: const Text(
                       "Удалить",
@@ -515,7 +350,6 @@ class RecentPageState extends State<RecentPage> {
               child: Text24(
                 text: "Последнее",
                 textColor: MyColors.black,
-                //fontWeight: FontWeight.w600,
               ),
             ),
             Center(
@@ -539,7 +373,6 @@ class RecentPageState extends State<RecentPage> {
                         if (!_isOperationInProgress) {
                           _isOperationInProgress = true;
                           try {
-                            // await sendDataFromLocalStorage('textKey', index);
                             await sendFileTitle(books[index].title);
                             if (isSended) {
                               isSended = false;
@@ -549,7 +382,6 @@ class RecentPageState extends State<RecentPage> {
                             // Обработка ошибок, если необходимо
                           } finally {
                             _isOperationInProgress = false;
-                            getDataFromLocalStorage('booksKey');
                             if (mounted) setState(() {});
                           }
                         }

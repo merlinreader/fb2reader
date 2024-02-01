@@ -283,18 +283,7 @@ class Reader extends State with WidgetsBindingObserver {
     await prefs.setBool('isDarkTheme', isDarkTheme);
   }
 
-  Future<WordCount> loadWordCountFromLocalStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    String key = 'WMWORDS';
-    String? storedData = prefs.getString(key);
-    if (storedData != null) {
-      Map<String, dynamic> decodedData = jsonDecode(storedData);
-      WordCount wordCount = WordCount.fromJson(decodedData);
-      return wordCount;
-    } else {
-      return WordCount();
-    }
-  }
+
 
   void replaceWordsWithTranslation(List<WordEntry> wordEntries) async {
     final prefs = await SharedPreferences.getInstance();
@@ -345,6 +334,19 @@ class Reader extends State with WidgetsBindingObserver {
     // Иначе возвращаем перевод в нижнем регистре
     // print('Иначе возвращаем перевод в нижнем регистре');
     return pattern.toLowerCase();
+  }
+
+  Future<WordCount> loadWordCountFromLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    String key = 'WMWORDS';
+    String? storedData = prefs.getString(key);
+    if (storedData != null) {
+      Map<String, dynamic> decodedData = jsonDecode(storedData);
+      WordCount wordCount = WordCount.fromJson(decodedData);
+      return wordCount;
+    } else {
+      return WordCount();
+    }
   }
 
   Future<void> saveWordCountToLocalstorage(WordCount wordCount) async {

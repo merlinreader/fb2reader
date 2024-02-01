@@ -49,7 +49,7 @@ class Page extends State<AppPage> {
     });
     if (index == 0) {
       await ImageLoader().loadImage();
-
+      await Navigator.pushNamed(context, RouteNames.reader);
       setState(() {
         profile = false;
         _selectedPage = 1;
@@ -136,7 +136,7 @@ class Page extends State<AppPage> {
           ? FloatingActionButton(
               onPressed: () {
                 try {
-                  if (RecentPageState().checkImages() == true) {
+                  if (RecentPageState().checkBooks() == true) {
                     Fluttertoast.showToast(
                       msg: 'Нет последней книги',
                       toastLength: Toast.LENGTH_SHORT, // Длительность отображения

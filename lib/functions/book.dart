@@ -81,6 +81,24 @@ class Book {
     }
   }
 
+  Future<void> deleteFileByTitle(String title) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/$title.json';
+
+      final file = File(filePath);
+
+      if (await file.exists()) {
+        await file.delete();
+        print('Файл $title успешно удален');
+      } else {
+        print('Файл $title не найден');
+      }
+    } catch (e) {
+      print('Ошибка при удалении файла: $e');
+    }
+  }
+
   Future<void> updateTextInFile(String newText) async {
     try {
       final appDir = await getExternalStorageDirectory();

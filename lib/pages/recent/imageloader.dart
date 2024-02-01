@@ -133,6 +133,8 @@ class ImageLoader {
 
       if (targetFile == null) {
         await book.saveJsonToFile(jsonData, title);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('fileTitle', title);
       } else {
         Fluttertoast.showToast(
           msg: 'Данная книга уже есть в приложении',
@@ -141,9 +143,6 @@ class ImageLoader {
         );
         return;
       }
-
-      // String textDataString = jsonEncode(bookDatas);
-      // await prefs.setString('textKey', textDataString);
     } else {
       Fluttertoast.showToast(
         msg: 'Вы не дали доступ к хранилищу',
