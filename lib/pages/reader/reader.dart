@@ -283,8 +283,6 @@ class Reader extends State with WidgetsBindingObserver {
     await prefs.setBool('isDarkTheme', isDarkTheme);
   }
 
-
-
   void replaceWordsWithTranslation(List<WordEntry> wordEntries) async {
     final prefs = await SharedPreferences.getInstance();
 

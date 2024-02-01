@@ -76,24 +76,27 @@ class RecentPageState extends State<RecentPage> {
       ],
     );
 
-    _initData();
     super.initState();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-  }
-
-  @override
-  void didUpdateWidget(RecentPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
+    updateProgress();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void updateProgress() {
+    print('Updating...');
+    if (books.isNotEmpty) {
+      books.clear();
+    }
+    _initData();
   }
 
   Future<void> _initData() async {
@@ -234,7 +237,7 @@ class RecentPageState extends State<RecentPage> {
   }
 
   bool checkBooks() {
-    if (books.isEmpty) {
+    if (books.isNotEmpty) {
       return false;
     } else {
       return true;

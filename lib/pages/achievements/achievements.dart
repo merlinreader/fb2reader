@@ -70,26 +70,24 @@ class _AchievementsPageState extends State<AchievementsPage> {
             //fontWeight: FontWeight.w600,
           ),
         ),
-        Padding(
-            padding: const EdgeInsets.only(top: 72),
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: MyColors.purple),
+        _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: MyColors.purple),
+              )
+            : errorCode != 200
+                ? Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [TextTektur(text: "Авторизуйтесь, чтобы открыть достижения", fontsize: 16, textColor: MyColors.grey)],
+                    ),
                   )
-                : errorCode != 200
-                    ? Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [TextTektur(text: "Авторизуйтесь, чтобы открыть достижения", fontsize: 16, textColor: MyColors.grey)],
-                        ),
-                      )
-                    : ListView.separated(
-                        itemCount: _achievements.length,
-                        itemBuilder: ((context, index) => AchievementCard(achievement: _achievements[index])),
-                        separatorBuilder: (context, index) => const SizedBox(
-                          height: 8,
-                        ),
-                      ))
+                : ListView.separated(
+                    itemCount: _achievements.length,
+                    itemBuilder: ((context, index) => AchievementCard(achievement: _achievements[index])),
+                    separatorBuilder: (context, index) => const SizedBox(
+                      height: 8,
+                    ),
+                  )
       ],
     );
   }
