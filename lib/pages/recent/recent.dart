@@ -86,13 +86,11 @@ class RecentPageState extends State<RecentPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    getDataFromLocalStorage('booksKey');
   }
 
   @override
   void didUpdateWidget(RecentPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    getDataFromLocalStorage('booksKey');
   }
 
   @override
@@ -185,7 +183,7 @@ class RecentPageState extends State<RecentPage> {
       await prefs.setString(key, imageDatasString);
 
       // Обновляем информацию о позиции в кеше
-      await Reader().resetPositionForBook(path);
+      // await Reader().resetPositionForBook(path);
 
       setState(() {});
     }

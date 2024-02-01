@@ -40,9 +40,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
       url,
       headers: {'Authorization': 'Bearer $token'},
     );
-    setState(() {
-      errorCode = response.statusCode;
-    });
+    errorCode = response.statusCode;
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       final ach = GetAchievementsResponse.fromJson(jsonResponse);
@@ -54,10 +52,9 @@ class _AchievementsPageState extends State<AchievementsPage> {
         _isLoading = false;
       });
     } else {
-      setState(() {
-        _isLoading = false;
-      });
+      _isLoading = false;
     }
+    setState(() {});
   }
 
   @override

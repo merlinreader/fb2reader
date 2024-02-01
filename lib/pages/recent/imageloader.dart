@@ -71,23 +71,6 @@ class ImageLoader {
         fileContent = await File(path).readAsString();
       }
 
-      final prefs = await SharedPreferences.getInstance();
-      String? imageDataToAdd = prefs.getString('booksKey');
-      List<ImageInfo> imageDatas = [];
-      // List<BookInfo> bookDatas = [];
-
-      if (imageDataToAdd != null) {
-        imageDatas = (jsonDecode(imageDataToAdd) as List).map((item) => ImageInfo.fromJson(item)).toList();
-      }
-      if (imageDatas.any((imageData) => imageData.fileName == path)) {
-        Fluttertoast.showToast(
-          msg: 'Данная книга уже есть в приложении',
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-        );
-        return;
-      }
-      // print('start');
       XmlDocument document = XmlDocument.parse(fileContent);
       try {
         final XmlElement binaryInfo = document.findAllElements('binary').first;
@@ -132,18 +115,32 @@ class ImageLoader {
       }
 
       ImageInfo imageData = ImageInfo(imageBytes: decodedBytes, title: title, author: name, fileName: path, progress: 0.0);
-      imageDatas.add(imageData); // маяк извлеченных данных
-
-      String imageDatasString = jsonEncode(imageDatas);
-      await prefs.setString('booksKey', imageDatasString);
 
       BookInfo bookData = BookInfo(filePath: path, fileText: text.toString(), title: title, author: name, lastPosition: 0);
       Book book = Book.combine(bookData, imageData);
-      print('Это наш новый бук: \n$book');
       Map<String, dynamic> jsonData = book.toJson();
-      await book.saveJsonToFile(jsonData, title);
-      Future<String?> bookname = BookProvider().getTitle(title);
-      print('Это название книги: \n$bookname');
+      String pathWithJsons = '/storage/emulated/0/Android/data/com.example.merlin/files/';
+      List<FileSystemEntity> files = Directory(pathWithJsons).listSync();
+      String targetFileName = '$title.json';
+      FileSystemEntity? targetFile;
+      try {
+        targetFile = files.firstWhere(
+          (file) => file is File && file.uri.pathSegments.last == targetFileName,
+        );
+      } catch (e) {
+        targetFile = null;
+      }
+
+      if (targetFile == null) {
+        await book.saveJsonToFile(jsonData, title);
+      } else {
+        Fluttertoast.showToast(
+          msg: 'Данная книга уже есть в приложении',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        return;
+      }
 
       // String textDataString = jsonEncode(bookDatas);
       // await prefs.setString('textKey', textDataString);

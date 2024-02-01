@@ -49,98 +49,13 @@ class Page extends State<AppPage> {
     });
     if (index == 0) {
       await ImageLoader().loadImage();
-      var temp = await getIndex();
-      // print(temp);
-      await getDataFromLocalStorage('booksKey');
-      if (temp != 0) {
-        await sendData('textKey', temp - 1);
-      } else {
-        await sendData('textKey', temp);
-      }
 
-      await Navigator.pushNamed(context, RouteNames.reader).then((_) {
-        getDataFromLocalStorage('booksKey');
-      });
-      // print('tempPro $tempPro');
       setState(() {
         profile = false;
         _selectedPage = 1;
         _widgetOptions[1];
       });
     }
-  }
-
-  List<recent.ImageInfo> tempImages = [];
-
-  Future<void> saveImages(key) async {}
-
-  Future<void> getDataFromLocalStorage(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    String? imageDataJson = prefs.getString(key);
-    if (imageDataJson != null) {
-      tempImages = (jsonDecode(imageDataJson) as List).map((item) => recent.ImageInfo.fromJson(item)).toList();
-    }
-    // for (var e in tempImages) {
-    //   print(e.title);
-    //   print(e.progress);
-    // }
-    await prefs.setString('booksKey', jsonEncode(tempImages));
-  }
-
-  Future<void> sendData(String key, int index) async {
-    List text = [];
-    List<BookInfo> bookDatas = [];
-    String fileContent = await File(tempImages[index].fileName).readAsString();
-    XmlDocument document = XmlDocument.parse(fileContent);
-    final Iterable<XmlElement> textInfo = document.findAllElements('body');
-    for (var element in textInfo) {
-      text.add(element.innerText.replaceAll(RegExp(r'\[.*?\]'), ''));
-    }
-    BookInfo bookData = BookInfo(
-        filePath: tempImages[index].fileName,
-        fileText: text.toString(),
-        title: tempImages[index].title,
-        author: tempImages[index].author,
-        lastPosition: 0);
-    bookDatas.add(bookData);
-    String textDataString = jsonEncode(bookDatas);
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, textDataString);
-  }
-
-  Future<int> getIndex() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? imageDataJson = prefs.getString('booksKey');
-
-    // Проверяем, существует ли JSON строка
-    if (imageDataJson != null) {
-      // Парсим JSON строку в динамическую структуру данных
-      dynamic data = json.decode(imageDataJson);
-      // Подсчитываем количество объектов
-      int count = countObjects(data);
-      return count;
-    } else {
-      // Если JSON не найден, возвращаем 0 или выбрасываем исключение
-      return 0;
-    }
-  }
-
-  int countObjects(dynamic element) {
-    int count = 0;
-    void recurse(dynamic element) {
-      if (element is Map) {
-        count++;
-        element.forEach((key, value) {
-          recurse(value);
-        });
-      } else if (element is List) {
-        element.forEach(recurse);
-      }
-    }
-
-    recurse(element);
-    return count;
   }
 
   bool profile = false;

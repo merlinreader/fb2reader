@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:merlin/pages/reader/reader.dart';
-import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -40,30 +39,30 @@ class Book {
 
   @override
   String toString() {
-    return 'Book {filePath: $filePath, title: $title, author: $author, lastPosition: $lastPosition, progress: $progress, text: $text}';
+    return 'Book {filePath: $filePath, title: $title, author: $author, lastPosition: $lastPosition, progress: $progress, text: ${text.substring(0, (text.length * 0.1).toInt())}}';
   }
 
   Map<String, dynamic> toJson() {
     return {
       'filePath': filePath,
-      'text': text,
       'title': title,
       'author': author,
-      'lastPosition': lastPosition,
-      'imageBytes': imageBytes?.toList(),
       'progress': progress,
+      'lastPosition': lastPosition,
+      'text': text,
+      'imageBytes': imageBytes?.toList(),
     };
   }
 
   factory Book.fromJson(Map<String, dynamic> json) {
     return Book(
       filePath: json['filePath'],
-      text: json['text'],
       title: json['title'],
       author: json['author'],
-      lastPosition: json['lastPosition'],
-      imageBytes: json['imageBytes'] != null ? Uint8List.fromList(json['imageBytes'].cast<int>()) : null,
       progress: json['progress'],
+      lastPosition: json['lastPosition'],
+      text: json['text'],
+      imageBytes: json['imageBytes'] != null ? Uint8List.fromList(json['imageBytes'].cast<int>()) : null,
     );
   }
 
@@ -85,16 +84,14 @@ class Book {
   Future<void> updateTextInFile(String newText) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/${this.filePath}.json';
+      final filePath = '${appDir?.path}/$title.json';
 
       final file = File(filePath);
       String content = await file.readAsString();
       Map<String, dynamic> jsonMap = jsonDecode(content);
 
-      // Изменяем значение текста внутри JSON
       jsonMap['text'] = newText;
 
-      // Записываем обновленные данные обратно в файл
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
       print('Ошибка при обновлении текста в файле: $e');
@@ -104,16 +101,14 @@ class Book {
   Future<void> updateTitleInFile(String newTitle) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/${this.filePath}.json';
+      final filePath = '${appDir?.path}/$title.json';
 
       final file = File(filePath);
       String content = await file.readAsString();
       Map<String, dynamic> jsonMap = jsonDecode(content);
 
-      // Изменяем значение заголовка внутри JSON
       jsonMap['title'] = newTitle;
 
-      // Записываем обновленные данные обратно в файл
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
       print('Ошибка при обновлении заголовка в файле: $e');
@@ -123,16 +118,14 @@ class Book {
   Future<void> updateAuthorInFile(String newAuthor) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/${this.filePath}.json';
+      final filePath = '${appDir?.path}/$title.json';
 
       final file = File(filePath);
       String content = await file.readAsString();
       Map<String, dynamic> jsonMap = jsonDecode(content);
 
-      // Изменяем значение автора внутри JSON
       jsonMap['author'] = newAuthor;
 
-      // Записываем обновленные данные обратно в файл
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
       print('Ошибка при обновлении автора в файле: $e');
@@ -142,16 +135,14 @@ class Book {
   Future<void> updateLastPositionInFile(double newLastPosition) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/${this.filePath}.json';
+      final filePath = '${appDir?.path}/$title.json';
 
       final file = File(filePath);
       String content = await file.readAsString();
       Map<String, dynamic> jsonMap = jsonDecode(content);
 
-      // Изменяем значение последней позиции внутри JSON
       jsonMap['lastPosition'] = newLastPosition;
 
-      // Записываем обновленные данные обратно в файл
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
       print('Ошибка при обновлении последней позиции в файле: $e');
@@ -168,13 +159,30 @@ class Book {
       String content = await file.readAsString();
       Map<String, dynamic> jsonMap = jsonDecode(content);
 
-      // Изменяем значение прогресса внутри JSON
       jsonMap['progress'] = newProgress;
 
-      // Записываем обновленные данные обратно в файл
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
       print('Ошибка при обновлении прогресса в файле: $e');
+    }
+  }
+
+  Future<void> updateStageInFile(double newProgress, double newLastPosition) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/$title.json';
+      print(filePath);
+
+      final file = File(filePath);
+      String content = await file.readAsString();
+      Map<String, dynamic> jsonMap = jsonDecode(content);
+
+      jsonMap['progress'] = newProgress;
+      jsonMap['lastPosition'] = newLastPosition;
+
+      await file.writeAsString(jsonEncode(jsonMap));
+    } catch (e) {
+      print('Ошибка при обновлении прогресса и позиции в файле: $e');
     }
   }
 }

@@ -26,6 +26,7 @@ Future<double?> getPageSize() async {
 }
 
 // метод который составляет список прочитанных страниц
+// TODO create new logic for taking filePaths
 getPageCount(String inputFilePath, bool isWM) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
   String token = prefs.getString('token') ?? '';
