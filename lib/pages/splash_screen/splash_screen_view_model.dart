@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/domain/data_providers/avatar_provider.dart';
 import 'package:merlin/domain/data_providers/token_provider.dart';
+import 'package:merlin/functions/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:uni_links/uni_links.dart';
@@ -24,8 +25,8 @@ class SplashSreenViewModel {
     await AvatarProvider.initAsync();
     await TokenProvider().initAsync();
     await getFirstName();
-    // await Future.delayed(const Duration(seconds: 2));
     Navigator.pushReplacementNamed(context, RouteNames.main);
+    await getLocation();
   }
 
   // ignore: unused_field

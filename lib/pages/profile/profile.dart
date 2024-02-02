@@ -272,7 +272,7 @@ class _ProfilePage extends State<ProfilePage> {
                           children: [
                             SizedBox(width: size),
                             SizedBox(
-                              width: width > 600 ? 400 : MediaQuery.of(context).size.width * 0.7,
+                              //width: width > 650 ? 400 : MediaQuery.of(context).size.width * 0.7,
                               child: SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Text16(text: locationData, textColor: MyColors.black),

@@ -48,18 +48,24 @@ class _StatTableState extends State<StatTable> {
       final fetchedId = data['_id'];
       // debugPrint(fetchedId.toString());
       if (response.statusCode == 200) {
-        setState(() {
-          id = fetchedId.toString();
-        });
+        if (mounted) {
+          setState(() {
+            id = fetchedId.toString();
+          });
+        }
       } else {
+        if (mounted) {
+          setState(() {
+            id = prefs.getString('deviceId');
+          });
+        }
+      }
+    } catch (_) {
+      if (mounted) {
         setState(() {
           id = prefs.getString('deviceId');
         });
       }
-    } catch (_) {
-      setState(() {
-        id = prefs.getString('deviceId');
-      });
     }
   }
 

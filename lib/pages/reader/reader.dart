@@ -145,7 +145,7 @@ class Reader extends State with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
-      _disposePage();
+      await _savePageCountToLocalStorage();
     }
   }
 

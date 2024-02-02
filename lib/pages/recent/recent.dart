@@ -77,12 +77,22 @@ class RecentPageState extends State<RecentPage> {
     );
 
     super.initState();
+    _initData();
   }
 
   @override
   void didChangeDependencies() {
+    print("Start didChangeDependencies...");
     super.didChangeDependencies();
-    updateProgress();
+    // updateFromJSON();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (books.isNotEmpty) {
+        print('ОЧИСТКА');
+        books.clear();
+        await updateFromJSON();
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -91,21 +101,55 @@ class RecentPageState extends State<RecentPage> {
     super.dispose();
   }
 
-  void updateProgress() {
-    print('Updating...');
-    if (books.isNotEmpty) {
-      books.clear();
+  Future<void> updateFromJSON() async {
+    print('Start updateFromJSON...');
+
+    await _initData();
+  }
+
+  Future<void> _fetchFromJSON() async {
+    String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
+    List<FileSystemEntity> files = Directory(path).listSync();
+    int length = books.length;
+    int index = 0;
+    for (FileSystemEntity file in files) {
+      if (file is File) {
+        print('length = $length \nindex = $index');
+        if (index > length) {
+          return;
+        } else {
+          String content = await file.readAsString();
+          Map<String, dynamic> jsonMap = jsonDecode(content);
+
+          if (jsonMap['title'] != books[index].title) {
+            books[index].title = jsonMap['title'];
+            print('Updating title...');
+          }
+          if (jsonMap['author'] != books[index].author) {
+            books[index].author = jsonMap['author'];
+            print('Updating author...');
+          }
+          if (jsonMap['progress'] != books[index].progress) {
+            books[index].progress = jsonMap['progress'];
+            print('Updating progress...');
+          }
+        }
+        index = index + 1;
+      }
     }
-    _initData();
+    setState(() {
+      books;
+    });
   }
 
   Future<void> _initData() async {
+    print('Start _initData => processFiles');
     await processFiles();
     setState(() {});
   }
 
   Future<void> processFiles() async {
-    print('Start');
+    print('Start processFiles...');
     String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
 
     List<FileSystemEntity> files = Directory(path).listSync();
@@ -124,7 +168,7 @@ class RecentPageState extends State<RecentPage> {
 
     books.addAll(loadedBooks);
 
-    print('Длина списка с книжками ${books.length}');
+    print('Длина books ${books.length}');
   }
 
   Future<Book> _readBookFromFile(File file) async {
@@ -195,7 +239,7 @@ class RecentPageState extends State<RecentPage> {
               ),
               TextButton(
                 child: const Text('Сохранить', style: TextStyle(color: Colors.blue)),
-                onPressed: () {
+                onPressed: () async {
                   if (updatedValue.isEmpty) {
                     Fluttertoast.showToast(
                       msg: 'Введите значение перед сохранением',
@@ -204,11 +248,11 @@ class RecentPageState extends State<RecentPage> {
                     );
                   } else {
                     if (yourVariable == 'authorInput') {
-                      books[index].updateAuthorInFile(updatedValue);
-                      updateProgress();
+                      await books[index].updateAuthorInFile(updatedValue);
+                      await _fetchFromJSON();
                     } else if (yourVariable == 'bookNameInput') {
-                      books[index].updateTitleInFile(updatedValue);
-                      updateProgress();
+                      await books[index].updateTitleInFile(updatedValue);
+                      await _fetchFromJSON();
                     }
                     Navigator.of(context).pop();
                   }
@@ -379,7 +423,7 @@ class RecentPageState extends State<RecentPage> {
                             // Обработка ошибок, если необходимо
                           } finally {
                             _isOperationInProgress = false;
-                            if (mounted) setState(() {});
+                            // if (mounted) setState(() {});
                           }
                         }
                       },
