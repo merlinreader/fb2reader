@@ -32,6 +32,7 @@ class AppPage extends StatefulWidget {
 
 class Page extends State<AppPage> {
   int _selectedPage = 1;
+  String bookName = '';
 
   static const List<Widget> _widgetOptions = <Widget>[
     LoadingScreen(),
@@ -39,6 +40,25 @@ class Page extends State<AppPage> {
     AchievementsPage(),
     StatisticPage(),
   ];
+
+  @override
+  void initState() {
+    getBookName();
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    getBookName();
+  }
+
+  Future<dynamic> getBookName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      bookName = prefs.getString('fileTitle') ?? '';
+    });
+  }
 
   void onSelectTab(int index) async {
     //if (index == _selectedPage) return;
@@ -136,12 +156,19 @@ class Page extends State<AppPage> {
           ? FloatingActionButton(
               onPressed: () {
                 try {
-                  if (RecentPageState().checkBooks() == true) {
+                  // if (RecentPageState().checkBooks() == true) {
+                  //   Fluttertoast.showToast(
+                  //     msg: 'Нет последней книги',
+                  //     toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                  //     gravity: ToastGravity.BOTTOM,
+                  //   ); // Расположение уведомления
+                  // } else {
+                  if (bookName == '') {
                     Fluttertoast.showToast(
                       msg: 'Нет последней книги',
                       toastLength: Toast.LENGTH_SHORT, // Длительность отображения
                       gravity: ToastGravity.BOTTOM,
-                    ); // Расположение уведомления
+                    );
                   } else {
                     Navigator.pushNamed(context, RouteNames.reader);
                   }
