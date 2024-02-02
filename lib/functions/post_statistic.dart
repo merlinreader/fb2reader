@@ -47,7 +47,7 @@ Future<void> processFiles() async {
 
   books.addAll(loadedBooks);
 
-  print('Длина списка с книжками ${books.length}');
+  // print('Длина списка с книжками ${books.length}');
 }
 
 Future<Book> _readBookFromFile(File file) async {
@@ -58,7 +58,7 @@ Future<Book> _readBookFromFile(File file) async {
     return book;
   } catch (e) {
     print('Error reading file: $e');
-    return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0);
+    return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0, customTitle: '');
   }
 }
 
@@ -183,13 +183,13 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pa
     },
     body: jsonEncode(data),
   );
-  print(response.body);
+  // print(response.body);
   if (response.statusCode == 200) {
-    print('Данные статистики ЮЗЕРА отправлены успешно!');
-    print("$pageCountSimpleMode, $pageCountWordMode");
+    print('Данные статистики ЮЗЕРА отправлены успешно! 200');
+    // print("$pageCountSimpleMode, $pageCountWordMode");
   }
   if (response.statusCode == 201) {
-    print('Данные статистики ЮЗЕРА отправлены успешно!');
+    print('Данные статистики ЮЗЕРА отправлены успешно! 201');
   } else {
     print('Ошибка при отправке данных статистики ЮЗЕРА: ${response.reasonPhrase} (${response.statusCode})');
   }
@@ -217,14 +217,14 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
     },
     body: jsonEncode(data),
   );
-  print(response.body);
+  // print(response.body);
   if (response.statusCode == 200) {
-    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
-    print("принт $pageCountSimpleMode, $pageCountWordMode");
+    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно! 200');
+    // print("принт $pageCountSimpleMode, $pageCountWordMode");
   }
   if (response.statusCode == 201) {
-    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
-    print("принт201 $pageCountSimpleMode, $pageCountWordMode");
+    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно! 201');
+    // print("принт201 $pageCountSimpleMode, $pageCountWordMode");
   } else {
     print('Ошибка при отправке данных статистики и местоположения МЕРЛИНА: ${response.reasonPhrase} (${response.statusCode})');
   }

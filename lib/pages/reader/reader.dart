@@ -110,24 +110,30 @@ class Reader extends State with WidgetsBindingObserver {
     _initPage();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Future.delayed(const Duration(milliseconds: 400), () async {
+      Future.delayed(const Duration(milliseconds: 300), () async {
         final prefs = await SharedPreferences.getInstance();
-        lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-        print('READER lastpagecount $lastPageCount');
-        prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
-        pageSize = MediaQuery.of(context).size.height;
-        await saveDateTime(pageSize);
-        if (!loading) {
-          isTrans = prefs.getBool('${book.filePath}-isTrans');
-          if (isTrans != null && isTrans == true && isBorder == true) {
-            var temp = await loadWordCountFromLocalStorage();
-            replaceWordsWithTranslation(temp.wordEntries);
+        while (!loading) {
+          lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+          print('READER lastpagecount $lastPageCount');
+          prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+          pageSize = MediaQuery.of(context).size.height;
+          await saveDateTime(pageSize);
+          if (!loading) {
+            isTrans = prefs.getBool('${book.filePath}-isTrans');
+            if (isTrans != null && isTrans == true && isBorder == true) {
+              var temp = await loadWordCountFromLocalStorage();
+              replaceWordsWithTranslation(temp.wordEntries);
+            }
+          }
+          if (_scrollController.hasClients) {
+            _scrollController.jumpTo(book.lastPosition);
+          }
+          _loadPageCountFromLocalStorage();
+          if (book.text.isNotEmpty) {
+            print('break dance');
+            break;
           }
         }
-        if (_scrollController.hasClients) {
-          _scrollController.jumpTo(book.lastPosition);
-        }
-        _loadPageCountFromLocalStorage();
       });
     });
   }
@@ -142,12 +148,13 @@ class Reader extends State with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) async {
-    if (state == AppLifecycleState.paused) {
-      await _savePageCountToLocalStorage();
-    }
-  }
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) async {
+  //   if (state == AppLifecycleState.paused) {
+  //     await _savePageCountToLocalStorage();
+  //     await book.updateStageInFile(_scrollPosition / 100, position);
+  //   }
+  // }
 
   Future<void> _disposePage() async {
     await _savePageCountToLocalStorage();
@@ -199,14 +206,6 @@ class Reader extends State with WidgetsBindingObserver {
         );
       }
     }
-  }
-
-  Future<void> bookSaveProgress() async {
-    await book.updateProgressInFile(_scrollController.position.pixels / _scrollController.position.maxScrollExtent);
-  }
-
-  Future<void> bookSaveReadingPosition(double position) async {
-    await book.updateLastPositionInFile(position);
   }
 
   void _getBatteryLevel() async {
@@ -341,20 +340,20 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   String matchCase(String source, String pattern) {
-    // print('source $source');
-    // print('pattern $pattern');
+    print('source $source');
+    print('pattern $pattern');
     // Сохраняем регистр первой буквы исходного слова
     if (source[0] == source[0].toUpperCase()) {
-      // print('большая буква');
+      print('большая буква');
       return pattern[0].toUpperCase() + pattern.substring(1).toLowerCase();
     }
     // Если весь текст в верхнем регистре - перевод тоже
     if (source.toUpperCase() == source) {
-      // print('Если весь текст в верхнем регистре - перевод тоже');
+      print('Если весь текст в верхнем регистре - перевод тоже');
       return pattern.toUpperCase();
     }
     // Иначе возвращаем перевод в нижнем регистре
-    // print('Иначе возвращаем перевод в нижнем регистре');
+    print('Иначе возвращаем перевод в нижнем регистре');
     return pattern.toLowerCase();
   }
 
@@ -1362,6 +1361,7 @@ class Reader extends State with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () async {
+          await book.updateStageInFile(_scrollPosition / 100, position);
           Navigator.pop(context, true);
           return true;
         },
@@ -1375,10 +1375,7 @@ class Reader extends State with WidgetsBindingObserver {
                           child: AppBar(
                               leading: GestureDetector(
                                   onTap: () async {
-                                    // TODO create new funcs
-                                    // await bookSaveProgress();
-                                    // await bookSaveReadingPosition(_scrollController.position.pixels);
-                                    // await _savePageCountToLocalStorage();
+                                    await book.updateStageInFile(_scrollPosition / 100, position);
                                     Navigator.pop(context, true);
                                   },
                                   child: Theme(
@@ -1398,8 +1395,8 @@ class Reader extends State with WidgetsBindingObserver {
                                       scrollDirection: Axis.horizontal,
                                       clipBehavior: Clip.antiAlias,
                                       child: Text(
-                                        book.author.isNotEmpty && book.title.isNotEmpty
-                                            ? '${book.author.toString()}. ${book.title.toString()}'
+                                        book.author.isNotEmpty && book.customTitle.isNotEmpty
+                                            ? '${book.author.toString()}. ${book.customTitle.toString()}'
                                             : 'Нет автора',
                                         softWrap: false,
                                         overflow: TextOverflow.fade,
@@ -1628,12 +1625,12 @@ class Reader extends State with WidgetsBindingObserver {
                                       child: Align(
                                         alignment: Alignment.topCenter,
                                         child: Text(
-                                          book.title.isNotEmpty && book.author.isNotEmpty
-                                              ? (book.title.toString().length + book.author.toString().length > 30
+                                          book.customTitle.isNotEmpty && book.author.isNotEmpty
+                                              ? (book.customTitle.toString().length + book.author.toString().length > 30
                                                   ? book.author.toString().length > 19
-                                                      ? '${book.author.toString()}. ${book.title.toString().substring(0, book.title.toString().length ~/ 4.5)}...'
-                                                      : '${book.author.toString()}. ${book.title.toString().substring(0, book.title.toString().length ~/ 1.5)}...'
-                                                  : '${book.author.toString()}. ${book.title.toString()}')
+                                                      ? '${book.author.toString()}. ${book.customTitle.toString().substring(0, book.customTitle.toString().length ~/ 4.5)}...'
+                                                      : '${book.author.toString()}. ${book.customTitle.toString().substring(0, book.customTitle.toString().length ~/ 1.5)}...'
+                                                  : '${book.author.toString()}. ${book.customTitle.toString()}')
                                               : 'Нет названия',
                                           style: TextStyle(
                                               color: isDarkTheme
@@ -1803,7 +1800,6 @@ class Reader extends State with WidgetsBindingObserver {
                                             onTap: () async {
                                               switch (isBorder) {
                                                 case false:
-                                                  print('false');
                                                   var temp = await loadWordCountFromLocalStorage();
                                                   if (temp.filePath != '') {
                                                     replaceWordsWithTranslation(temp.wordEntries);
@@ -1814,7 +1810,6 @@ class Reader extends State with WidgetsBindingObserver {
                                                 default:
                                                   //await getDataFromLocalStorage('textKey');
                                                   isBorder = false;
-                                                  print('default');
                                                   setState(() {});
                                                   final prefs = await SharedPreferences.getInstance();
 

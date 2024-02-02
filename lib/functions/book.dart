@@ -10,6 +10,7 @@ class Book {
   String filePath;
   String text;
   String title;
+  String customTitle;
   String author;
   double lastPosition = 0;
   Uint8List? imageBytes;
@@ -19,6 +20,7 @@ class Book {
     required this.filePath,
     required this.text,
     required this.title,
+    required this.customTitle,
     required this.author,
     required this.lastPosition,
     required this.imageBytes,
@@ -30,6 +32,7 @@ class Book {
       filePath: bookInfo.filePath,
       text: bookInfo.fileText,
       title: bookInfo.title,
+      customTitle: bookInfo.title,
       author: bookInfo.author,
       lastPosition: bookInfo.lastPosition,
       imageBytes: imageInfo.imageBytes,
@@ -46,6 +49,7 @@ class Book {
     return {
       'filePath': filePath,
       'title': title,
+      'customTitle': title,
       'author': author,
       'progress': progress,
       'lastPosition': lastPosition,
@@ -58,6 +62,7 @@ class Book {
     return Book(
       filePath: json['filePath'],
       title: json['title'],
+      customTitle: json['customTitle'],
       author: json['author'],
       progress: json['progress'],
       lastPosition: json['lastPosition'],
@@ -68,8 +73,9 @@ class Book {
 
   Future<void> saveJsonToFile(Map<String, dynamic> jsonData, String fileName) async {
     try {
+      print('Saving inside book class file...');
       final appDir = await getExternalStorageDirectory();
-      print(appDir?.path);
+      // print(appDir?.path);
       final filePath = '${appDir?.path}/$fileName.json';
 
       final file = File(filePath);
@@ -119,21 +125,17 @@ class Book {
   Future<void> updateTitleInFile(String newTitle) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final oldFilePath = '${appDir?.path}/$title.json';
+      final filePath = '${appDir?.path}/$title.json';
 
-      final file = File(oldFilePath);
+      final file = File(filePath);
       String content = await file.readAsString();
       Map<String, dynamic> jsonMap = jsonDecode(content);
 
-      jsonMap['title'] = newTitle;
+      jsonMap['customTitle'] = newTitle;
 
       await file.writeAsString(jsonEncode(jsonMap));
-
-      // Переименование файла
-      final newFilePath = '${appDir?.path}/$newTitle.json';
-      await file.rename(newFilePath);
     } catch (e) {
-      print('Ошибка при обновлении заголовка и переименовании файла: $e');
+      print('Ошибка при обновлении заголовка в файле: $e');
     }
   }
 
@@ -173,9 +175,11 @@ class Book {
 
   Future<void> updateProgressInFile(double newProgress) async {
     try {
+      print('Updating PROGRESS inside book class file...');
+
       final appDir = await getExternalStorageDirectory();
       final filePath = '${appDir?.path}/$title.json';
-      print(filePath);
+      // print(filePath);
 
       final file = File(filePath);
       String content = await file.readAsString();
@@ -191,9 +195,11 @@ class Book {
 
   Future<void> updateStageInFile(double newProgress, double newLastPosition) async {
     try {
+      print('Updating STAGE inside book class file...');
+
       final appDir = await getExternalStorageDirectory();
       final filePath = '${appDir?.path}/$title.json';
-      print(filePath);
+      // print(filePath);
 
       final file = File(filePath);
       String content = await file.readAsString();
