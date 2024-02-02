@@ -14,7 +14,6 @@ import 'package:merlin/domain/data_providers/color_provider.dart';
 import 'package:merlin/functions/book.dart';
 import 'package:merlin/functions/post_statistic.dart';
 import 'package:merlin/main.dart';
-import 'package:merlin/pages/loading/loading.dart';
 import 'package:merlin/pages/wordmode/models/word_entry.dart';
 import 'package:merlin/pages/wordmode/wordmode.dart';
 import 'package:merlin/style/colors.dart';
@@ -22,7 +21,6 @@ import 'package:merlin/style/text.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
-import 'package:merlin/pages/recent/recent.dart' as recent;
 
 class BookInfo {
   String filePath;
@@ -230,7 +228,9 @@ class Reader extends State with WidgetsBindingObserver {
     }
     _scrollPosition = (_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * 100;
     pagesForCount = _scrollController.position.maxScrollExtent / pageSize;
-    if (_scrollController.position.pixels - position >= pageSize / 1.25 || position - _scrollController.position.pixels >= pageSize / 1.25) {
+    if (_scrollController.position.pixels - position >= pageSize / 1.25 ||
+        position - _scrollController.position.pixels >= pageSize / 1.25 ||
+        _scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
       setState(() {
         position = _scrollController.position.pixels;
       });
@@ -311,13 +311,6 @@ class Reader extends State with WidgetsBindingObserver {
 
     prefs.setBool('${book.filePath}-isTrans', true);
     isBorder = true;
-    var lastCallTranslateStr = prefs.getString('lastCallTranslate');
-    if (lastCallTranslateStr != null) {
-      final now = DateTime.now();
-      DateTime? lastCallTranslateStamp = DateTime.parse(lastCallTranslateStr);
-      final timeElapsed = now.difference(lastCallTranslateStamp);
-      if (timeElapsed.inMilliseconds >= 1) {}
-    }
     translatedText = book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
 
     for (var entry in wordEntries) {
@@ -339,20 +332,20 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   String matchCase(String source, String pattern) {
-    print('source $source');
-    print('pattern $pattern');
+    // print('source $source');
+    // print('pattern $pattern');
     // Сохраняем регистр первой буквы исходного слова
     if (source[0] == source[0].toUpperCase()) {
-      print('большая буква');
+      // print('большая буква');
       return pattern[0].toUpperCase() + pattern.substring(1).toLowerCase();
     }
     // Если весь текст в верхнем регистре - перевод тоже
     if (source.toUpperCase() == source) {
-      print('Если весь текст в верхнем регистре - перевод тоже');
+      // print('Если весь текст в верхнем регистре - перевод тоже');
       return pattern.toUpperCase();
     }
     // Иначе возвращаем перевод в нижнем регистре
-    print('Иначе возвращаем перевод в нижнем регистре');
+    // print('Иначе возвращаем перевод в нижнем регистре');
     return pattern.toLowerCase();
   }
 
@@ -381,6 +374,7 @@ class Reader extends State with WidgetsBindingObserver {
   void wordModeDialog(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     int getWords = prefs.getInt('words') ?? 10;
+    print('wordModeDialog $getWords');
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AgreementDialog(
@@ -605,6 +599,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                 ),
                                               ],
                                               rows: wordCount.wordEntries.map((entry) {
+                                                final themeProvider = Provider.of<ThemeProvider>(context);
+
                                                 return DataRow(
                                                   cells: [
                                                     DataCell(
@@ -615,14 +611,14 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 entry.word,
                                                                 style: TextStyle(
                                                                     overflow: TextOverflow.ellipsis,
-                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                                    color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             )
                                                           : Text(
                                                               entry.word,
                                                               style: TextStyle(
                                                                   overflow: TextOverflow.ellipsis,
-                                                                  color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                                  color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                             ),
                                                     ),
                                                     DataCell(
@@ -633,7 +629,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 '[ ${entry.ipa} ]',
                                                                 style: TextStyle(
                                                                     overflow: TextOverflow.ellipsis,
-                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                                    color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             )
                                                           : SizedBox(
@@ -642,7 +638,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 '[ ${entry.ipa} ]',
                                                                 style: TextStyle(
                                                                     overflow: TextOverflow.ellipsis,
-                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                                    color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             ),
                                                     ),
@@ -654,13 +650,14 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 width: MediaQuery.of(context).size.width * 0.5,
                                                                 child: Text(
                                                                   entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                                  style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                                  style:
+                                                                      TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                                 ),
                                                               ),
                                                             )
                                                           : Text(
                                                               entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                              style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                              style: TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                             ),
                                                     ),
                                                   ],
@@ -885,6 +882,8 @@ class Reader extends State with WidgetsBindingObserver {
             constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
+                final themeProvider = Provider.of<ThemeProvider>(context);
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
@@ -938,7 +937,7 @@ class Reader extends State with WidgetsBindingObserver {
                                       focusedBorder: const OutlineInputBorder(),
                                       focusColor: MyColors.purple,
                                       floatingLabelStyle:
-                                          isDarkTheme ? const TextStyle(color: MyColors.white) : const TextStyle(color: MyColors.black),
+                                          themeProvider.isDarkTheme ? const TextStyle(color: MyColors.white) : const TextStyle(color: MyColors.black),
                                     ),
                                   ),
                                 ),
@@ -1027,7 +1026,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 fontSize: 15,
                                                                 fontWeight: FontWeight.normal,
                                                                 overflow: TextOverflow.ellipsis,
-                                                                color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                                color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                           ),
                                                         ),
                                                       ),
@@ -1273,6 +1272,8 @@ class Reader extends State with WidgetsBindingObserver {
                                         ),
                                       ],
                                       rows: wordCount.wordEntries.map((entry) {
+                                        final themeProvider = Provider.of<ThemeProvider>(context);
+
                                         return DataRow(
                                           cells: [
                                             DataCell(
@@ -1282,13 +1283,15 @@ class Reader extends State with WidgetsBindingObserver {
                                                       child: Text(
                                                         entry.word,
                                                         style: TextStyle(
-                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                            overflow: TextOverflow.ellipsis,
+                                                            color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     )
                                                   : Text(
                                                       entry.word,
                                                       style: TextStyle(
-                                                          overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                          overflow: TextOverflow.ellipsis,
+                                                          color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
                                             ),
                                             DataCell(
@@ -1298,7 +1301,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                       child: Text(
                                                         '[ ${entry.ipa} ]',
                                                         style: TextStyle(
-                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                            overflow: TextOverflow.ellipsis,
+                                                            color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     )
                                                   : SizedBox(
@@ -1306,7 +1310,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                       child: Text(
                                                         '[ ${entry.ipa} ]',
                                                         style: TextStyle(
-                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                            overflow: TextOverflow.ellipsis,
+                                                            color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     ),
                                             ),
@@ -1318,13 +1323,13 @@ class Reader extends State with WidgetsBindingObserver {
                                                         width: MediaQuery.of(context).size.width * 0.5,
                                                         child: Text(
                                                           entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                          style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                          style: TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                         ),
                                                       ),
                                                     )
                                                   : Text(
                                                       entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                      style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                      style: TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
                                             ),
                                           ],
@@ -1821,7 +1826,8 @@ class Reader extends State with WidgetsBindingObserver {
                                                   var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                                   var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
                                                   prefs.setBool('${book.filePath}-isTrans', false);
-                                                  if (timeElapsed.inHours > 24) {
+                                                  // if (timeElapsed.inHours > 24) {
+                                                  if (timeElapsed.inMicroseconds >= 1) {
                                                     wordModeDialog(context);
                                                   } else {
                                                     Fluttertoast.showToast(

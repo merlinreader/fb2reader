@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,7 +6,6 @@ import 'package:merlin/UI/router.dart';
 import 'package:merlin/pages/loading/loading.dart';
 import 'package:merlin/pages/profile/profile.dart';
 import 'package:merlin/pages/profile/profile_view_model.dart';
-import 'package:merlin/pages/reader/reader.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/pages/achievements/achievements.dart';
 import 'package:merlin/style/text.dart';
@@ -17,11 +13,8 @@ import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:merlin/pages/statistic/statistic.dart';
-import 'package:merlin/functions/location.dart';
 import 'package:provider/provider.dart';
-import 'package:merlin/pages/recent/recent.dart' as recent;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:xml/xml.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({Key? key}) : super(key: key);
@@ -67,7 +60,11 @@ class Page extends State<AppPage> {
     });
     if (index == 0) {
       await ImageLoader().loadImage();
-      await Navigator.pushNamed(context, RouteNames.reader);
+      final prefs = await SharedPreferences.getInstance();
+      bool check = prefs.getBool('success') ?? false;
+      if (check) {
+        await Navigator.pushNamed(context, RouteNames.reader);
+      }
       setState(() {
         profile = false;
         _selectedPage = 1;

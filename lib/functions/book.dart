@@ -73,7 +73,7 @@ class Book {
 
   Future<void> saveJsonToFile(Map<String, dynamic> jsonData, String fileName) async {
     try {
-      print('Saving inside book class file...');
+      // print('Saving inside book class file...');
       final appDir = await getExternalStorageDirectory();
       // print(appDir?.path);
       final filePath = '${appDir?.path}/$fileName.json';
@@ -81,9 +81,9 @@ class Book {
       final file = File(filePath);
       await file.writeAsString(jsonEncode(jsonData));
 
-      print('Файл успешно сохранен по пути: $filePath');
+      // print('Файл успешно сохранен по пути: $filePath');
     } catch (e) {
-      print('Ошибка при сохранении файла: $e');
+      // print('Ошибка при сохранении файла: $e');
     }
   }
 
@@ -96,12 +96,12 @@ class Book {
 
       if (await file.exists()) {
         await file.delete();
-        print('Файл $title успешно удален');
+        // print('Файл $title успешно удален');
       } else {
-        print('Файл $title не найден');
+        // print('Файл $title не найден');
       }
     } catch (e) {
-      print('Ошибка при удалении файла: $e');
+      // print('Ошибка при удалении файла: $e');
     }
   }
 
@@ -118,7 +118,7 @@ class Book {
 
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
-      print('Ошибка при обновлении текста в файле: $e');
+      // print('Ошибка при обновлении текста в файле: $e');
     }
   }
 
@@ -135,7 +135,7 @@ class Book {
 
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
-      print('Ошибка при обновлении заголовка в файле: $e');
+      // print('Ошибка при обновлении заголовка в файле: $e');
     }
   }
 
@@ -152,7 +152,7 @@ class Book {
 
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
-      print('Ошибка при обновлении автора в файле: $e');
+      // print('Ошибка при обновлении автора в файле: $e');
     }
   }
 
@@ -169,13 +169,13 @@ class Book {
 
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
-      print('Ошибка при обновлении последней позиции в файле: $e');
+      // print('Ошибка при обновлении последней позиции в файле: $e');
     }
   }
 
   Future<void> updateProgressInFile(double newProgress) async {
     try {
-      print('Updating PROGRESS inside book class file...');
+      // print('Updating PROGRESS inside book class file...');
 
       final appDir = await getExternalStorageDirectory();
       final filePath = '${appDir?.path}/$title.json';
@@ -189,13 +189,13 @@ class Book {
 
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
-      print('Ошибка при обновлении прогресса в файле: $e');
+      // print('Ошибка при обновлении прогресса в файле: $e');
     }
   }
 
   Future<void> updateStageInFile(double newProgress, double newLastPosition) async {
     try {
-      print('Updating STAGE inside book class file...');
+      // print('Updating STAGE inside book class file...');
 
       final appDir = await getExternalStorageDirectory();
       final filePath = '${appDir?.path}/$title.json';
@@ -210,7 +210,7 @@ class Book {
 
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {
-      print('Ошибка при обновлении прогресса и позиции в файле: $e');
+      // print('Ошибка при обновлении прогресса и позиции в файле: $e');
     }
   }
 }

@@ -3,8 +3,6 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:merlin/functions/book.dart';
-import 'package:merlin/pages/recent/recent.dart';
-import 'package:merlin/pages/wordmode/wordmode.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:merlin/functions/location.dart';

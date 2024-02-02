@@ -107,8 +107,8 @@ class WordCount {
       final timeElapsed = now.difference(_lastCallTimestamp!);
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
-      if (timeElapsed.inHours >= 24) {
-        // if (timeElapsed.inMicroseconds >= 1) {
+      // if (timeElapsed.inHours >= 24) {
+      if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset();
 
         await updateCallInfo();
@@ -308,6 +308,7 @@ class WordCount {
 
     final prefs = await SharedPreferences.getInstance();
     int getWords = prefs.getInt('words') ?? 10;
+    // print('countWordsWithOffset $getWords');
     int start = prefs.getInt('$filePath-end') ?? 0;
     int end = start + getWords;
     end = min(end, sortedWordCounts.length);
@@ -365,7 +366,7 @@ class WordCount {
     final wordEntries = await Future.wait(wordEntriesFutures);
 
     prefs.setInt('$filePath-end', min(end, sortedWordCounts.length));
-    prefs.setInt('words', getWords);
+    prefs.setInt('words', 10);
     this.wordEntries = wordEntries; // Присваиваем wordEntries к текущим wordEntries
 
     // Сохранение обновленной истории слов
@@ -415,7 +416,7 @@ class WordCount {
     }
     // prefs.setInt('$filePath-start', start);
     prefs.setInt('$filePath-end', end);
-    prefs.setInt('words', 10);
+    // prefs.setInt('words', 10);
     // Присваиваем wordEntries к текущим wordEntries
     this.wordEntries = wordEntries;
   }

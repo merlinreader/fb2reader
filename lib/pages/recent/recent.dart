@@ -11,12 +11,9 @@ import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:xml/xml.dart';
-import 'package:path_provider/path_provider.dart';
 
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:merlin/pages/reader/reader.dart';
 
 class RecentPage extends StatefulWidget {
   const RecentPage({super.key});
@@ -97,13 +94,13 @@ class RecentPageState extends State<RecentPage> {
   }
 
   Future<void> updateFromJSON() async {
-    print('Start updateFromJSON...');
+    // print('Start updateFromJSON...');
 
     await _initData();
   }
 
   Future<void> _fetchFromJSON() async {
-    print('_fetchFromJSON...');
+    // print('_fetchFromJSON...');
     String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
     List<FileSystemEntity> files = Directory(path).listSync();
     int length = books.length;
@@ -118,16 +115,16 @@ class RecentPageState extends State<RecentPage> {
 
           if (jsonMap['customTitle'] != books[index].customTitle) {
             books[index].customTitle = jsonMap['customTitle'];
-            print('Updating customTitle...');
+            // print('Updating customTitle...');
           }
           if (jsonMap['author'] != books[index].author) {
             books[index].author = jsonMap['author'];
-            print('Updating author...');
+            // print('Updating author...');
           }
           if (jsonMap['progress'] != books[index].progress) {
-            print('Updating progress...');
-            print('Inside Book ${books[index].progress}');
-            print('Inside JSON ${jsonMap['progress']}');
+            // print('Updating progress...');
+            // print('Inside Book ${books[index].progress}');
+            // print('Inside JSON ${jsonMap['progress']}');
             setState(() {
               books[index].progress = jsonMap['progress'];
             });
@@ -136,22 +133,22 @@ class RecentPageState extends State<RecentPage> {
         index = index + 1;
       }
     }
-    for (var item in books) {
-      print('Book ${item.customTitle} = ${item.progress}');
-    }
+    // for (var item in books) {
+    //   print('Book ${item.customTitle} = ${item.progress}');
+    // }
     setState(() {
       books;
     });
   }
 
   Future<void> _initData() async {
-    print('Start _initData => processFiles');
+    // print('Start _initData => processFiles');
     await processFiles();
     setState(() {});
   }
 
   Future<void> processFiles() async {
-    print('Start processFiles...');
+    // print('Start processFiles...');
     String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
 
     List<FileSystemEntity> files = Directory(path).listSync();
@@ -168,7 +165,7 @@ class RecentPageState extends State<RecentPage> {
 
     books.addAll(loadedBooks);
 
-    print('Длина books ${books.length}');
+    // print('Длина books ${books.length}');
   }
 
   Future<Book> _readBookFromFile(File file) async {
@@ -178,7 +175,7 @@ class RecentPageState extends State<RecentPage> {
       Book book = Book.fromJson(jsonMap);
       return book;
     } catch (e) {
-      print('Error reading file: $e');
+      // print('Error reading file: $e');
       return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0, customTitle: '');
     }
   }

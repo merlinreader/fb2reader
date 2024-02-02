@@ -6,7 +6,6 @@ import 'dart:typed_data';
 import 'dart:async';
 
 // для получаения картинки из файла книги
-import 'package:merlin/domain/data_providers/book_provider.dart';
 import 'package:merlin/functions/book.dart';
 import 'package:merlin/pages/reader/reader.dart';
 import 'package:merlin/pages/recent/recent.dart';
@@ -30,6 +29,8 @@ class ImageLoader {
   late Uint8List decodedBytes;
 
   Future<void> loadImage() async {
+    final prefs = await SharedPreferences.getInstance();
+
     var check = await requestStoragePermission();
     if (check == true) {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -43,6 +44,7 @@ class ImageLoader {
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
         );
+        await prefs.setBool('success', false);
         return;
       }
 
@@ -52,6 +54,7 @@ class ImageLoader {
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
         );
+        await prefs.setBool('success', false);
         return;
       }
 
@@ -133,14 +136,16 @@ class ImageLoader {
 
       if (targetFile == null) {
         await book.saveJsonToFile(jsonData, title);
-        final prefs = await SharedPreferences.getInstance();
         await prefs.setString('fileTitle', title);
+        await prefs.setBool('success', true);
       } else {
         Fluttertoast.showToast(
           msg: 'Данная книга уже есть в приложении',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
         );
+        await prefs.setString('fileTitle', title);
+        await prefs.setBool('success', true);
         return;
       }
     } else {
@@ -149,6 +154,7 @@ class ImageLoader {
         toastLength: Toast.LENGTH_SHORT, // Длительность отображения
         gravity: ToastGravity.BOTTOM, // Расположение уведомления
       );
+      await prefs.setBool('success', false);
       return;
     }
   }
