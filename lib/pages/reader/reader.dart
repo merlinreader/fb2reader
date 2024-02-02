@@ -177,11 +177,12 @@ class Reader extends State with WidgetsBindingObserver {
     if (fileTitle != null) {
       List<FileSystemEntity> files = Directory(path).listSync();
       String targetFileName = '$fileTitle.json';
-
-      FileSystemEntity? targetFile = files.firstWhere(
-        (file) => file is File && file.uri.pathSegments.last == targetFileName,
-      );
-      if (targetFile == null) {
+      FileSystemEntity? targetFile;
+      try {
+        targetFile = files.firstWhere(
+          (file) => file is File && file.uri.pathSegments.last == targetFileName,
+        );
+      } catch (e) {
         Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Файл не найден',
@@ -190,6 +191,7 @@ class Reader extends State with WidgetsBindingObserver {
         );
         return;
       }
+
       try {
         String content = await (targetFile as File).readAsString();
         Map<String, dynamic> jsonMap = jsonDecode(content);
@@ -198,7 +200,7 @@ class Reader extends State with WidgetsBindingObserver {
         setState(() {});
       } catch (e) {
         print('Error reading file: $e');
-        Navigator.pop(context);
+        // Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Ошибка чтения файла',
           toastLength: Toast.LENGTH_SHORT,
