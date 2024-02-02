@@ -1358,6 +1358,8 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return WillPopScope(
         onWillPop: () async {
           await book.updateStageInFile(_scrollPosition / 100, position);
@@ -1399,7 +1401,8 @@ class Reader extends State with WidgetsBindingObserver {
                                             : 'Нет автора',
                                         softWrap: false,
                                         overflow: TextOverflow.fade,
-                                        style: TextStyle(fontSize: 16, fontFamily: 'Tektur', color: isDarkTheme ? MyColors.white : MyColors.black),
+                                        style: TextStyle(
+                                            fontSize: 16, fontFamily: 'Tektur', color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                       ),
                                     ),
                                   ),
@@ -1589,7 +1592,7 @@ class Reader extends State with WidgetsBindingObserver {
                                             angle: 90 * 3.14159265 / 180,
                                             child: Icon(
                                               Icons.battery_full,
-                                              color: isDarkTheme
+                                              color: themeProvider.isDarkTheme
                                                   ? backgroundColor.value == 0xff1d1d21
                                                       ? MyColors.white
                                                       : MyColors.black
@@ -1602,7 +1605,7 @@ class Reader extends State with WidgetsBindingObserver {
                                           Text(
                                             _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
                                             style: TextStyle(
-                                              color: isDarkTheme
+                                              color: themeProvider.isDarkTheme
                                                   ? backgroundColor.value == 0xff1d1d21
                                                       ? MyColors.black
                                                       : MyColors.white
@@ -1633,7 +1636,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                   : '${book.author.toString()}. ${book.customTitle.toString()}')
                                               : 'Нет названия',
                                           style: TextStyle(
-                                              color: isDarkTheme
+                                              color: themeProvider.isDarkTheme
                                                   ? backgroundColor.value == 0xff1d1d21
                                                       ? MyColors.white
                                                       : MyColors.black
@@ -1656,7 +1659,7 @@ class Reader extends State with WidgetsBindingObserver {
                                       child: Text(
                                         '${_scrollPosition.toStringAsFixed(1)}%',
                                         style: TextStyle(
-                                            color: isDarkTheme
+                                            color: themeProvider.isDarkTheme
                                                 ? backgroundColor.value == 0xff1d1d21
                                                     ? MyColors.white
                                                     : MyColors.black
@@ -1734,10 +1737,11 @@ class Reader extends State with WidgetsBindingObserver {
                                                             _scrollController.jumpTo(value);
                                                           }
                                                         },
-                                                        activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                        inactiveColor:
-                                                            isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
-                                                        thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                        activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                        inactiveColor: themeProvider.isDarkTheme
+                                                            ? const Color.fromRGBO(96, 96, 96, 1)
+                                                            : const Color.fromRGBO(96, 96, 96, 1),
+                                                        thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
                                                       ),
                                                     ),
                                                   ),
@@ -1764,7 +1768,7 @@ class Reader extends State with WidgetsBindingObserver {
                                           width: MediaQuery.of(context).size.width,
                                           height: 2,
                                           child: Container(
-                                            color: isDarkTheme ? MyColors.darkGray : MyColors.black,
+                                            color: themeProvider.isDarkTheme ? MyColors.darkGray : MyColors.black,
                                           ),
                                         ),
                                       ),
@@ -1784,10 +1788,10 @@ class Reader extends State with WidgetsBindingObserver {
                                           ),
                                           const Padding(padding: EdgeInsets.only(right: 30)),
                                           InkWell(
-                                            onTap: () {
+                                            onTap: () async {
                                               final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
                                               themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
-                                              saveSettings(themeProvider.isDarkTheme);
+                                              await saveSettings(themeProvider.isDarkTheme);
                                             },
                                             child: Icon(
                                               CustomIcons.theme,
