@@ -228,21 +228,18 @@ class Reader extends State with WidgetsBindingObserver {
     if (_scrollController.position.maxScrollExtent == 0) {
       return;
     }
-    double percentage = (_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * 100;
-    setState(() {
-      _scrollPosition = percentage;
-      position = _scrollController.position.pixels;
-      pagesForCount = _scrollController.position.maxScrollExtent / pageSize;
-      // TODO убрать отсюда и сделать сохранение количества страних в dispose
-      // _savePageCountToLocalStorage();
-    });
+    _scrollPosition = (_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * 100;
+    pagesForCount = _scrollController.position.maxScrollExtent / pageSize;
+    if (_scrollController.position.pixels - position >= pageSize / 1.25 || position - _scrollController.position.pixels >= pageSize / 1.25) {
+      setState(() {
+        position = _scrollController.position.pixels;
+      });
+    }
   }
 
   Future<void> _loadPageCountFromLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      pageCount = (prefs.getInt('pageCount-${book.filePath}') ?? 0);
-    });
+    pageCount = (prefs.getInt('pageCount-${book.filePath}') ?? 0);
   }
 
   Future<void> _savePageCountToLocalStorage() async {
@@ -1446,7 +1443,8 @@ class Reader extends State with WidgetsBindingObserver {
                               return _scrollController.hasClients
                                   ? () {
                                       return Text(
-                                        isBorder ? translatedText : book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), ''),
+                                        // isBorder ? translatedText : book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), ''),
+                                        book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), ''),
                                         softWrap: true,
                                         style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
                                       );

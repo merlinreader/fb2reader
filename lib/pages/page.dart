@@ -55,9 +55,7 @@ class Page extends State<AppPage> {
 
   Future<dynamic> getBookName() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      bookName = prefs.getString('fileTitle') ?? '';
-    });
+    bookName = prefs.getString('fileTitle') ?? '';
   }
 
   void onSelectTab(int index) async {

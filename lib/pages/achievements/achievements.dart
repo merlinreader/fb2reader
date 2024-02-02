@@ -71,7 +71,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
           ),
         ),
         Padding(
-            padding: const EdgeInsets.only(top: 0),
+            padding: errorCode != 200 ? const EdgeInsets.only(top: 0) : const EdgeInsets.only(top: 72),
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(color: MyColors.purple),
