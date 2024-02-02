@@ -119,17 +119,21 @@ class Book {
   Future<void> updateTitleInFile(String newTitle) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/$title.json';
+      final oldFilePath = '${appDir?.path}/$title.json';
 
-      final file = File(filePath);
+      final file = File(oldFilePath);
       String content = await file.readAsString();
       Map<String, dynamic> jsonMap = jsonDecode(content);
 
       jsonMap['title'] = newTitle;
 
       await file.writeAsString(jsonEncode(jsonMap));
+
+      // Переименование файла
+      final newFilePath = '${appDir?.path}/$newTitle.json';
+      await file.rename(newFilePath);
     } catch (e) {
-      print('Ошибка при обновлении заголовка в файле: $e');
+      print('Ошибка при обновлении заголовка и переименовании файла: $e');
     }
   }
 

@@ -60,14 +60,7 @@ Future<Book> _readBookFromFile(File file) async {
     return book;
   } catch (e) {
     print('Error reading file: $e');
-    return Book(
-        filePath: '',
-        text: '',
-        title: '',
-        author: '',
-        lastPosition: 0,
-        imageBytes: null,
-        progress: 0);
+    return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0);
   }
 }
 
@@ -78,29 +71,18 @@ getPageCount(String inputFilePath, bool isWM) async {
   String token = prefs.getString('token') ?? '';
   await processFiles();
 
-  List<WordCount> wordCounts = [];
-  for (final entry in books) {
-    String? storedData = prefs.getString('${entry.title}-words');
-    if (storedData != null) {
-      List<dynamic> decodedData = jsonDecode(storedData);
-      WordCount wordCount = WordCount.fromJson(decodedData[0]);
-      wordCounts.add(wordCount);
-    }
-  }
-
   Map<int, bool> dataToSend = {};
   // int index = 0;
   for (final entry in books) {
-    int countFromStorage = prefs.getInt('pageCount-${entry.title}') ?? 0;
+    int countFromStorage = prefs.getInt('pageCount-${entry.filePath}') ?? 0;
     //prefs.remove('pageCount-${entry.title}');
-    int lastCountFromStorage =
-        prefs.getInt('lastPageCount-${entry.title}') ?? 0;
+    int lastCountFromStorage = prefs.getInt('lastPageCount-${entry.filePath}') ?? 0;
     print("countfromst $countFromStorage");
     print("lastfromst $lastCountFromStorage");
     int diff = countFromStorage - lastCountFromStorage;
     diff = diff < 0 ? 0 : diff;
 
-    print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.title}');
+    print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.filePath}');
     if (isWM == true && entry.title == inputFilePath) {
       if (countFromStorage > 0) {
         if (countFromStorage > lastCountFromStorage) {
@@ -131,8 +113,7 @@ getPageCount(String inputFilePath, bool isWM) async {
   print('differenceInSeconds = $differenceInSeconds');
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
-  String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00")
-      .format(DateTime.now().toUtc());
+  String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
       double speed = pageSize / differenceInSeconds;
@@ -171,11 +152,9 @@ getPageCount(String inputFilePath, bool isWM) async {
     if (prefs.getString("deviceId") == null) {
       saveDeviceIdToLocalStorage();
     }
-    await postAnonymStatisticData(
-        pageCountSimpleMode, pageCountWordMode, nowDataUTC);
+    await postAnonymStatisticData(pageCountSimpleMode, pageCountWordMode, nowDataUTC);
   } else {
-    await postUserStatisticData(
-        token, pageCountSimpleMode, pageCountWordMode, nowDataUTC);
+    await postUserStatisticData(token, pageCountSimpleMode, pageCountWordMode, nowDataUTC);
   }
 }
 
@@ -186,8 +165,7 @@ void saveDeviceIdToLocalStorage() async {
   await prefs.setString('deviceId', deviceId);
 }
 
-Future<void> postUserStatisticData(String token, int pageCountSimpleMode,
-    int pageCountWordMode, String nowDataUTC) async {
+Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
   final Map<String, dynamic> data = {
     "pageCountSimpleMode": pageCountSimpleMode,
     "pageCountWordMode": pageCountWordMode,
@@ -213,13 +191,11 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode,
   if (response.statusCode == 201) {
     print('Данные статистики ЮЗЕРА отправлены успешно!');
   } else {
-    print(
-        'Ошибка при отправке данных статистики ЮЗЕРА: ${response.reasonPhrase} (${response.statusCode})');
+    print('Ошибка при отправке данных статистики ЮЗЕРА: ${response.reasonPhrase} (${response.statusCode})');
   }
 }
 
-Future<void> postAnonymStatisticData(
-    int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
+Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
   final prefs = await SharedPreferences.getInstance();
   getLocation();
   final Map<String, dynamic> data = {
@@ -250,7 +226,6 @@ Future<void> postAnonymStatisticData(
     print('Данные статистики и местоположения МЕРЛИНА отправлены успешно!');
     print("принт201 $pageCountSimpleMode, $pageCountWordMode");
   } else {
-    print(
-        'Ошибка при отправке данных статистики и местоположения МЕРЛИНА: ${response.reasonPhrase} (${response.statusCode})');
+    print('Ошибка при отправке данных статистики и местоположения МЕРЛИНА: ${response.reasonPhrase} (${response.statusCode})');
   }
 }

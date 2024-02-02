@@ -204,17 +204,11 @@ class RecentPageState extends State<RecentPage> {
                     );
                   } else {
                     if (yourVariable == 'authorInput') {
-                      changeDataFromLocalStorage('booksKey', images[index].fileName, 'author', updatedValue);
-                      images[index].author = updatedValue;
-                      setState(() {
-                        images[index].author = updatedValue;
-                      });
+                      books[index].updateAuthorInFile(updatedValue);
+                      updateProgress();
                     } else if (yourVariable == 'bookNameInput') {
-                      changeDataFromLocalStorage('booksKey', images[index].fileName, 'title', updatedValue);
-                      images[index].title = updatedValue;
-                      setState(() {
-                        images[index].title = updatedValue;
-                      });
+                      books[index].updateTitleInFile(updatedValue);
+                      updateProgress();
                     }
                     Navigator.of(context).pop();
                   }

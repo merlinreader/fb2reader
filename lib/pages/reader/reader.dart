@@ -112,9 +112,9 @@ class Reader extends State with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Future.delayed(const Duration(milliseconds: 400), () async {
         final prefs = await SharedPreferences.getInstance();
-        lastPageCount = prefs.getInt('pageCount-${book.title}') ?? 0;
+        lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
         print('READER lastpagecount $lastPageCount');
-        prefs.setInt('lastPageCount-${book.title}', lastPageCount);
+        prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
         pageSize = MediaQuery.of(context).size.height;
         await saveDateTime(pageSize);
         if (!loading) {
@@ -240,7 +240,7 @@ class Reader extends State with WidgetsBindingObserver {
   Future<void> _loadPageCountFromLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      pageCount = (prefs.getInt('pageCount-${book.title}') ?? 0);
+      pageCount = (prefs.getInt('pageCount-${book.filePath}') ?? 0);
     });
   }
 
@@ -248,7 +248,7 @@ class Reader extends State with WidgetsBindingObserver {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     pageCount = ((_scrollPosition / 100) * pagesForCount).toInt();
     print("Сохраняем pageCount $pageCount");
-    prefs.setInt('pageCount-${book.title}', pageCount);
+    prefs.setInt('pageCount-${book.filePath}', pageCount);
   }
 
   Color textColor = MyColors.black;
