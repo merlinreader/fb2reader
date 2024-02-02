@@ -77,12 +77,17 @@ class RecentPageState extends State<RecentPage> {
     );
 
     super.initState();
+    _initData();
   }
 
   @override
   void didChangeDependencies() {
+    // print("Start didChangeDependencies...");
     super.didChangeDependencies();
-    updateProgress();
+    // // updateFromJSON();
+    // print('ОЧИСТКА');
+    // updateFromJSON();
+    setState(() {});
   }
 
   @override
@@ -91,21 +96,62 @@ class RecentPageState extends State<RecentPage> {
     super.dispose();
   }
 
-  void updateProgress() {
-    print('Updating...');
-    if (books.isNotEmpty) {
-      books.clear();
+  Future<void> updateFromJSON() async {
+    print('Start updateFromJSON...');
+
+    await _initData();
+  }
+
+  Future<void> _fetchFromJSON() async {
+    print('_fetchFromJSON...');
+    String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
+    List<FileSystemEntity> files = Directory(path).listSync();
+    int length = books.length;
+    int index = 0;
+    for (FileSystemEntity file in files) {
+      if (file is File) {
+        if (index > length) {
+          return;
+        } else {
+          String content = await file.readAsString();
+          Map<String, dynamic> jsonMap = jsonDecode(content);
+
+          if (jsonMap['customTitle'] != books[index].customTitle) {
+            books[index].customTitle = jsonMap['customTitle'];
+            print('Updating customTitle...');
+          }
+          if (jsonMap['author'] != books[index].author) {
+            books[index].author = jsonMap['author'];
+            print('Updating author...');
+          }
+          if (jsonMap['progress'] != books[index].progress) {
+            print('Updating progress...');
+            print('Inside Book ${books[index].progress}');
+            print('Inside JSON ${jsonMap['progress']}');
+            setState(() {
+              books[index].progress = jsonMap['progress'];
+            });
+          }
+        }
+        index = index + 1;
+      }
     }
-    _initData();
+    for (var item in books) {
+      print('Book ${item.customTitle} = ${item.progress}');
+    }
+    setState(() {
+      books;
+    });
   }
 
   Future<void> _initData() async {
+    print('Start _initData => processFiles');
     await processFiles();
     setState(() {});
   }
 
   Future<void> processFiles() async {
-    print('Start');
+    print('Start processFiles...');
     String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
 
     List<FileSystemEntity> files = Directory(path).listSync();
@@ -113,8 +159,6 @@ class RecentPageState extends State<RecentPage> {
 
     for (FileSystemEntity file in files) {
       if (file is File) {
-        print(file);
-
         Future<Book> futureBook = _readBookFromFile(file);
         futures.add(futureBook);
       }
@@ -124,7 +168,7 @@ class RecentPageState extends State<RecentPage> {
 
     books.addAll(loadedBooks);
 
-    print('Длина списка с книжками ${books.length}');
+    print('Длина books ${books.length}');
   }
 
   Future<Book> _readBookFromFile(File file) async {
@@ -135,7 +179,7 @@ class RecentPageState extends State<RecentPage> {
       return book;
     } catch (e) {
       print('Error reading file: $e');
-      return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0);
+      return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0, customTitle: '');
     }
   }
 
@@ -146,25 +190,6 @@ class RecentPageState extends State<RecentPage> {
     bool success = await prefs.setString('fileTitle', title);
     if (success == true) {
       isSended = true;
-    }
-  }
-
-  Future<void> changeDataFromLocalStorage(String key, String path, String changeField, String updatedValue) async {
-    final prefs = await SharedPreferences.getInstance();
-    String? imageDataToAdd = prefs.getString('booksKey');
-    List<ImageInfo> imageDatas = [];
-    if (imageDataToAdd != null) {
-      imageDatas = (jsonDecode(imageDataToAdd) as List).map((item) => ImageInfo.fromJson(item)).toList();
-      var index = imageDatas.indexWhere((element) => element.fileName.startsWith(path));
-      if (changeField == 'author') {
-        imageDatas[index].author = updatedValue;
-      } else if (changeField == 'title') {
-        imageDatas[index].title = updatedValue;
-      }
-
-      String imageDatasString = jsonEncode(imageDatas);
-      await prefs.setString('booksKey', imageDatasString);
-      setState(() {});
     }
   }
 
@@ -195,7 +220,7 @@ class RecentPageState extends State<RecentPage> {
               ),
               TextButton(
                 child: const Text('Сохранить', style: TextStyle(color: Colors.blue)),
-                onPressed: () {
+                onPressed: () async {
                   if (updatedValue.isEmpty) {
                     Fluttertoast.showToast(
                       msg: 'Введите значение перед сохранением',
@@ -204,11 +229,11 @@ class RecentPageState extends State<RecentPage> {
                     );
                   } else {
                     if (yourVariable == 'authorInput') {
-                      books[index].updateAuthorInFile(updatedValue);
-                      updateProgress();
+                      await books[index].updateAuthorInFile(updatedValue);
+                      await _fetchFromJSON();
                     } else if (yourVariable == 'bookNameInput') {
-                      books[index].updateTitleInFile(updatedValue);
-                      updateProgress();
+                      await books[index].updateTitleInFile(updatedValue);
+                      await _fetchFromJSON();
                     }
                     Navigator.of(context).pop();
                   }
@@ -298,7 +323,7 @@ class RecentPageState extends State<RecentPage> {
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
               child: AlertDialog(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-                title: Text(books[index].title),
+                title: Text(books[index].customTitle),
                 content: const Text("Вы уверены, что хотите удалить книгу?"),
                 actions: <Widget>[
                   TextButton(
@@ -373,13 +398,14 @@ class RecentPageState extends State<RecentPage> {
                             await sendFileTitle(books[index].title);
                             if (isSended) {
                               isSended = false;
-                              await Navigator.pushNamed(context, RouteNames.reader);
+                              // await Navigator.pushNamed(context, RouteNames.reader);
+                              Navigator.of(context).pushNamed(RouteNames.reader).then((value) async => await _fetchFromJSON());
                             }
                           } catch (e) {
                             // Обработка ошибок, если необходимо
                           } finally {
                             _isOperationInProgress = false;
-                            if (mounted) setState(() {});
+                            // if (mounted) setState(() {});
                           }
                         }
                       },
@@ -444,11 +470,11 @@ class RecentPageState extends State<RecentPage> {
                               ? '${books[index].author.substring(0, books[index].author.length ~/ 1.5)}...'
                               : books[index].author),
                           Text(
-                            books[index].title.length > 20
-                                ? books[index].title.length > 15
-                                    ? '${books[index].title.substring(0, books[index].title.length ~/ 2.5)}...'
-                                    : '${books[index].title.substring(0, books[index].title.length ~/ 2)}...'
-                                : books[index].title,
+                            books[index].customTitle.length > 20
+                                ? books[index].customTitle.length > 15
+                                    ? '${books[index].customTitle.substring(0, books[index].customTitle.length ~/ 2.5)}...'
+                                    : '${books[index].customTitle.substring(0, books[index].customTitle.length ~/ 2)}...'
+                                : books[index].customTitle,
                             maxLines: 1,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,

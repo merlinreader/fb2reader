@@ -83,7 +83,6 @@ class Page extends State<AppPage> {
 
   @override
   Widget build(BuildContext context) {
-    getLocation();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
