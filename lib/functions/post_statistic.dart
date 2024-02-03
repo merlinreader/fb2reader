@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:merlin/functions/book.dart';
@@ -63,13 +64,17 @@ Future<Book> _readBookFromFile(File file) async {
 // метод который составляет список прочитанных страниц
 // TODO create new logic for taking filePaths
 getPageCount(String inputFilePath, bool isWM) async {
+  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  String token = _secureStorage.read(key: 'token') as String ?? '';
   final SharedPreferences prefs = await SharedPreferences.getInstance();
+
   String token = prefs.getString('token') ?? '';
   await processFiles();
 
   Map<int, bool> dataToSend = {};
   // int index = 0;
   // print('TEXT AFASHFHASGFHJKASHK ${books.length}');
+
   for (final entry in books) {
     int countFromStorage = prefs.getInt('pageCount-${entry.filePath}') ?? 0;
     //prefs.remove('pageCount-${entry.title}');
@@ -79,8 +84,10 @@ getPageCount(String inputFilePath, bool isWM) async {
     int diff = countFromStorage - lastCountFromStorage;
     diff = diff < 0 ? 0 : diff;
 
+
     // print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.filePath}');
     if (isWM == true && entry.title == inputFilePath) {
+
       if (countFromStorage > 0) {
         if (countFromStorage > lastCountFromStorage) {
           final dataToAdd = <int, bool>{diff: true};
@@ -106,9 +113,9 @@ getPageCount(String inputFilePath, bool isWM) async {
   DateTime nowDateTime = DateTime.now();
   Duration difference = nowDateTime.difference(savedDateTime);
   int differenceInSeconds = difference.inSeconds;
-  // print('pageSize = $pageSize');
-  // print('savedDateTime = $savedDateTime');
-  // print('differenceInSeconds = $differenceInSeconds');
+  print('pageSize = $pageSize');
+  print('savedDateTime = $savedDateTime');
+  print('differenceInSeconds = $differenceInSeconds');
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
   String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
@@ -118,7 +125,7 @@ getPageCount(String inputFilePath, bool isWM) async {
       // print('WM entry.key = ${entry.key}');
       // print('speed WM = $speed sym/sec');
       pageCountWordMode = 0;
-      if (100000 > speed) {
+      if (33.3 > speed) {
         pageCountWordMode = pageCountWordMode + entry.key;
       }
     }
@@ -127,11 +134,12 @@ getPageCount(String inputFilePath, bool isWM) async {
       // print('SM entry.key = ${entry.key}');
       // print('speed SM = $speed sym/sec');
       pageCountSimpleMode = 0;
-      if (100000 > speed) {
+      if (33.3 > speed) {
         pageCountSimpleMode = pageCountSimpleMode + entry.key;
       }
     }
   }
+
   // print('pageCountWordMode $pageCountWordMode');
   // print('pageCountSimpleMode $pageCountSimpleMode');
   // print('nowDataUTC $nowDataUTC');

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/achievement_card.dart';
 import 'dart:convert';
@@ -33,8 +34,10 @@ class _AchievementsPageState extends State<AchievementsPage> {
   }
 
   Future<void> fetchJson() async {
-    final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+    //final prefs = await SharedPreferences.getInstance();
+    //String token = prefs.getString('token') ?? '';
+    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+    String token = await _secureStorage.read(key: 'token') as String ?? '';
     final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(
       url,

@@ -1422,7 +1422,235 @@ class Reader extends State with WidgetsBindingObserver {
                                         size: 28,
                                         color: Theme.of(context).iconTheme.color,
                                       ),
-                                    ),
+
+                                    ))
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> updateWordInTable(String oldWord, String newWord, List<WordEntry> wordEntries) async {
+    final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
+    if (index != -1) {
+      final count = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getWordCount(newWord);
+      // debugPrint('updateWordInTable entry ${wordEntries[index]}');
+      // debugPrint('updateWordInTable count ${wordEntries[index].count}');
+      final translation = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).translateToEnglish(newWord);
+      final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation);
+
+      wordEntries[index] = WordEntry(
+        word: newWord,
+        count: count,
+        translation: translation,
+        ipa: ipa,
+      );
+
+      setState(() {});
+    } else {
+      // debugPrint('Word $oldWord not found in the list.');
+    }
+  }
+
+  Future<void> addNewWord(List<WordEntry> wordEntries, WordCount wordCount, int length) async {
+    final prefs = await SharedPreferences.getInstance();
+
+    List<String> words = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWords();
+    Set<String> uniqueSet = <String>{};
+    List<String> result = [];
+    for (String item in words.reversed) {
+      if (uniqueSet.add(item)) {
+        result.add(item);
+      }
+    }
+    String newWord = '';
+    result.reversed.toList();
+    int getWords = prefs.getInt('words') ?? 10;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Добавить слово'),
+          content: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text == '') {
+                return const Iterable<String>.empty();
+              }
+              String pattern = textEditingValue.text.toLowerCase();
+              final Iterable<String> matchingStart = result.where((String option) {
+                return option.toLowerCase().startsWith(pattern);
+              });
+              final Iterable<String> matchingAll = result.where((String option) {
+                return option.toLowerCase().contains(pattern) && !option.toLowerCase().startsWith(pattern);
+              });
+              return matchingStart.followedBy(matchingAll);
+            },
+            onSelected: (String selection) {
+              // debugPrint('You just selected $selection');
+              newWord = selection;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text16(text: 'Отмена', textColor: MyColors.black),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (length < getWords) {
+                  if (result.contains(newWord)) {
+                    WordCount wordProcessor = WordCount();
+
+                    List<WordEntry> updatedWordEntries = await wordProcessor.processSingleWord(newWord, wordCount.wordEntries);
+
+                    setState(() {
+                      wordCount.wordEntries = updatedWordEntries;
+                    });
+                    Navigator.of(context).pop();
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: 'Введенного слова нет в книге!',
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                    );
+                  }
+                } else {
+                  Fluttertoast.showToast(
+                    msg: 'Достигнут лимит слов!',
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
+                  );
+                }
+              },
+              child: const Text16(text: 'Сохранить', textColor: MyColors.black),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> saveSettings(bool isDarkTheme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkTheme', isDarkTheme);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        await saveProgress();
+        await _savePageCountToLocalStorage();
+        await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
+        Navigator.pop(context, true);
+        return true;
+      },
+      child: Scaffold(
+        appBar: visible
+            ? PreferredSize(
+                preferredSize: Size(MediaQuery.of(context).size.width, 50),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  child: AppBar(
+                      leading: GestureDetector(
+                          onTap: () async {
+                            await saveProgress();
+                            await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
+                            await _savePageCountToLocalStorage();
+                            //тут нужно сделать очистку оперативы
+                            Navigator.pop(context, true);
+                          },
+                          child: Theme(
+                              data: lightTheme(),
+                              child: Icon(
+                                CustomIcons.chevronLeft,
+                                size: 30,
+                                color: Theme.of(context).iconTheme.color,
+                              ))),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      shadowColor: Colors.transparent,
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              clipBehavior: Clip.antiAlias,
+                              child: Text(
+                                textes.isNotEmpty ? '${textes[0].author.toString()}. ${textes[0].title.toString()}' : 'Нет автора',
+                                softWrap: false,
+                                overflow: TextOverflow.fade,
+                                style: TextStyle(fontSize: 16, fontFamily: 'Tektur', color: isDarkTheme ? MyColors.white : MyColors.black),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(35, 0, 0, 0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
+                              },
+                              child: Icon(
+                                CustomIcons.sliders,
+                                size: 28,
+                                color: Theme.of(context).iconTheme.color,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )),
+                ),
+              )
+            : null,
+        body: Container(
+            decoration: BoxDecoration(
+                color: backgroundColor,
+                border: isBorder == true
+                    ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 2)
+                    : Border.all(width: 0, color: Colors.transparent)),
+            child: SafeArea(
+              top: true,
+              minimum: visible
+                  ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                  : orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                          orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                      ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                      : const EdgeInsets.only(top: 40, left: 8, right: 8),
+              child: Stack(children: [
+                ListView.builder(
+                    controller: _scrollController,
+                    itemCount: 1,
+                    itemBuilder: (context, index) {
+                      if (textes.isNotEmpty) {
+                        return _scrollController.hasClients
+                            ? () {
+                                return Text(
+                                  getText,
+                                  // textAlign: TextAlign.justify,
+                                  // textAlign: TextAlign.center,
+                                  softWrap: true,
+                                  style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
+                                );
+                              }()
+                            : Center(
+                                child: Text(
+                                  'Нет текста для отображения',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    color: textColor,
                                   ),
                                 ],
                               )),

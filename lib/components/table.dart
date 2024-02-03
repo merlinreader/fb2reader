@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
@@ -36,8 +37,10 @@ class _StatTableState extends State<StatTable> {
   }
 
   Future<void> getId() async {
+    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+    String token = await _secureStorage.read(key: 'token') as String ?? '';
     final prefs = await SharedPreferences.getInstance();
-    String token = prefs.getString('token') ?? '';
+    // String token = prefs.getString('token') ?? '';
     const url = 'https://fb2.cloud.leam.pro/api/account/';
     try {
       final response = await http.get(
