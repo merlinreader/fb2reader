@@ -43,9 +43,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
       url,
       headers: {'Authorization': 'Bearer $token'},
     );
-    setState(() {
-      errorCode = response.statusCode;
-    });
+    errorCode = response.statusCode;
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       final ach = GetAchievementsResponse.fromJson(jsonResponse);
@@ -57,10 +55,9 @@ class _AchievementsPageState extends State<AchievementsPage> {
         _isLoading = false;
       });
     } else {
-      setState(() {
-        _isLoading = false;
-      });
+      _isLoading = false;
     }
+    setState(() {});
   }
 
   @override
@@ -77,7 +74,7 @@ class _AchievementsPageState extends State<AchievementsPage> {
           ),
         ),
         Padding(
-            padding: const EdgeInsets.only(top: 72),
+            padding: errorCode != 200 ? const EdgeInsets.only(top: 0) : const EdgeInsets.only(top: 72),
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(color: MyColors.purple),

@@ -21,6 +21,7 @@ import 'package:merlin/style/text.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
+import 'package:merlin/pages/recent/recent.dart' as recent;
 
 class BookInfo {
   String filePath;
@@ -70,98 +71,124 @@ class ReaderPage extends StatefulWidget {
 }
 
 class Reader extends State with WidgetsBindingObserver {
+  final Battery _battery = Battery();
+  int _batteryLevel = 0;
   final ScrollController _scrollController = ScrollController();
+  double lastPosition = 0;
+  double position = 0;
+  bool isLast = false;
+  List<recent.ImageInfo> images = [];
+  int pageCount = 0;
+  int lastPageCount = 0;
+  double pageSize = 0;
+  Timer? _actionTimer;
+  bool? isTrans = false;
+  bool isBorder = false;
+
+  double _scrollPosition = 0.0;
+
+  bool visible = false;
+
+  double fontSize = 18;
+
   String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
   late Book book;
-  bool loading = true;
-  double fontSize = 18;
-  bool isDarkTheme = false;
-  bool visible = false;
-  int _batteryLevel = 0;
-  double _scrollPosition = 0.0;
-  List<DeviceOrientation> orientations = [
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.portraitDown,
-    DeviceOrientation.landscapeRight,
-  ];
-  int currentOrientationIndex = 0;
-  double position = 0;
-  Timer? _actionTimer;
-  bool isBorder = false;
-  bool? isTrans = false;
-  final Battery _battery = Battery();
-  double pageSize = 0;
-  int pageCount = 0;
-  double pagesForCount = 0;
-  int lastPageCount = 0;
-  String translatedText = '';
+
+  void _getBatteryLevel() async {
+    final batteryLevel = await _battery.batteryLevel;
+    setState(() {
+      _batteryLevel = batteryLevel;
+    });
+  }
+
+  void saveDateTime(double pageSize) async {
+    final prefs = await SharedPreferences.getInstance();
+    DateTime currentTime = DateTime.now();
+    prefs.setString('savedDateTime', currentTime.toIso8601String());
+    prefs.setDouble('pageSize', pageSize);
+  }
 
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    //getDataFromLocalStorage('textKey');
+    getImagesFromLocalStorage('booksKey');
+
     _getBatteryLevel();
     _scrollController.addListener(_updateScrollPercentage);
     WidgetsBinding.instance.addObserver(this);
-
     super.initState();
     _initPage();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      Future.delayed(const Duration(milliseconds: 300), () async {
-        final prefs = await SharedPreferences.getInstance();
-        while (!loading) {
-          lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-          print('READER lastpagecount $lastPageCount');
-          prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
-          pageSize = MediaQuery.of(context).size.height;
-          await saveDateTime(pageSize);
-          if (!loading) {
-            isTrans = prefs.getBool('${book.filePath}-isTrans');
-            if (isTrans != null && isTrans == true && isBorder == true) {
-              var temp = await loadWordCountFromLocalStorage();
-              replaceWordsWithTranslation(temp.wordEntries);
-            }
-          }
-          if (_scrollController.hasClients) {
-            _scrollController.jumpTo(book.lastPosition);
-          }
-          _loadPageCountFromLocalStorage();
-          if (book.text.isNotEmpty) {
-            print('break dance');
-            break;
-          }
-        }
-      });
+      // final prefs = await SharedPreferences.getInstance();
+      // lastPageCount = prefs.getInt('pageCount-${textes.first.filePath}') ?? 0;
+      // prefs.setInt('lastPageCount-${textes.first.filePath}', lastPageCount);
+      // // print('initState lastPageCount $lastPageCount');
+      // final filePath = textes.first.filePath;
+      // pageSize = MediaQuery.of(context).size.height;
+      // // print('pageSize = $pageSize');
+      // saveDateTime(pageSize);
+      // final readingPositionsJson = prefs.getString('readingPositions');
+      // isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
+      // setState(() {
+      //   isTrans;
+      // });
+      // if (isTrans != null && isTrans == true && isBorder == true) {
+      //   var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
+      //   replaceWordsWithTranslation(temp.wordEntries);
+      // }
+      // if (readingPositionsJson != null) {
+      //   final readingPositions = jsonDecode(readingPositionsJson);
+      //   if (readingPositions.containsKey(filePath)) {
+      //     lastPosition = readingPositions[filePath];
+      //     Future.delayed(const Duration(milliseconds: 200), () {
+      //       if (_scrollController.hasClients) {
+      //         // _scrollController.animateTo(
+      //         //   lastPosition,
+      //         //   duration: const Duration(milliseconds: 100),
+      //         //   curve: Curves.linear,
+      //         // );
+      //         _scrollController.jumpTo(lastPosition);
+      //       }
+      //     });
+      //     setState(() {
+      //       isLast = true;
+      //       pageSize = MediaQuery.of(context).size.height / 5.35;
+      //       position = _scrollController.position.pixels;
+      //     });
+      //   }
+      // }
+      // _loadPageCountFromLocalStorage();
     });
   }
 
+  // TODO
   @override
-  void dispose() {
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
+      await bookSaveProgress();
+      // await _savePageCountToLocalStorage();
+      await bookSaveReadingPosition(_scrollController.position.pixels);
+      // await getPageCount(textes.first.filePath, isBorder);
+    }
+  }
+
+  @override
+  void dispose() async {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    WidgetsBinding.instance.removeObserver(this);
     SystemChrome.setPreferredOrientations([orientations[0]]);
-    _disposePage();
-    getPageCount(book.title, isBorder);
+    getPageCount(textes.first.filePath, isBorder);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) async {
-  //   if (state == AppLifecycleState.paused) {
-  //     await _savePageCountToLocalStorage();
-  //     await book.updateStageInFile(_scrollPosition / 100, position);
-  //   }
-  // }
-
-  Future<void> _disposePage() async {
-    await _savePageCountToLocalStorage();
-    await disposeBook();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  Future<void> disposeBook() async {
-    book.updateStageInFile(_scrollPosition / 100, position);
+  @override
+  Future<void> didChangeDependencies() async {
+    final prefs = await SharedPreferences.getInstance();
+    isDarkTheme = prefs.getBool('isDarkTheme') ?? false;
+    loadStylePreferences();
+    super.didChangeDependencies();
   }
 
   Future<void> _initPage() async {
@@ -175,12 +202,11 @@ class Reader extends State with WidgetsBindingObserver {
     if (fileTitle != null) {
       List<FileSystemEntity> files = Directory(path).listSync();
       String targetFileName = '$fileTitle.json';
-      FileSystemEntity? targetFile;
-      try {
-        targetFile = files.firstWhere(
-          (file) => file is File && file.uri.pathSegments.last == targetFileName,
-        );
-      } catch (e) {
+
+      FileSystemEntity? targetFile = files.firstWhere(
+        (file) => file is File && file.uri.pathSegments.last == targetFileName,
+      );
+      if (targetFile == null) {
         Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Файл не найден',
@@ -189,16 +215,16 @@ class Reader extends State with WidgetsBindingObserver {
         );
         return;
       }
-
       try {
         String content = await (targetFile as File).readAsString();
         Map<String, dynamic> jsonMap = jsonDecode(content);
-        book = Book.fromJson(jsonMap);
-        loading = false;
-        setState(() {});
+        Book book = Book.fromJson(jsonMap);
+        setState(() {
+          book = book;
+        });
       } catch (e) {
         print('Error reading file: $e');
-        // Navigator.pop(context);
+        Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Ошибка чтения файла',
           toastLength: Toast.LENGTH_SHORT,
@@ -208,45 +234,124 @@ class Reader extends State with WidgetsBindingObserver {
     }
   }
 
-  void _getBatteryLevel() async {
-    final batteryLevel = await _battery.batteryLevel;
+  Future<void> isWM() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isWM-${textes.first.filePath}', isBorder);
+  }
+
+  // TODO create new logic for taking filePaths
+  Future<void> _loadPageCountFromLocalStorage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _batteryLevel = batteryLevel;
+      pageCount = (prefs.getInt('pageCount-${textes.first.filePath}') ?? 0);
+      // print('pageCount-${textes.first.filePath}');
     });
   }
 
-  Future<void> saveDateTime(double pageSize) async {
+  Future<void> _savePageCountToLocalStorage() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    pageCount = ((_scrollController.position.pixels / _scrollController.position.maxScrollExtent) *
+            (_scrollController.position.maxScrollExtent / MediaQuery.of(context).size.height))
+        .toInt();
+    // print(pageCount);
+    prefs.setInt('pageCount-${book.filePath}', pageCount);
+  }
+
+  bool isDarkTheme = false;
+
+  void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
+    SystemChrome.setSystemUIOverlayStyle(style);
+  }
+
+  Future<void> resetPositionForBook(String filePath) async {
     final prefs = await SharedPreferences.getInstance();
-    DateTime currentTime = DateTime.now();
-    prefs.setString('savedDateTime', currentTime.toIso8601String());
-    prefs.setDouble('pageSize', pageSize);
+    final readingPositionsJson = prefs.getString('readingPositions');
+    Map<String, double> readingPositions = {};
+
+    if (readingPositionsJson != null) {
+      final readingPositionsMap = jsonDecode(readingPositionsJson);
+      if (readingPositionsMap is Map<String, dynamic>) {
+        readingPositions = readingPositionsMap.cast<String, double>();
+      }
+    }
+
+    readingPositions[filePath] = 0;
+    await prefs.setString('readingPositions', jsonEncode(readingPositions));
+  }
+
+  Future<void> getImagesFromLocalStorage(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    String? imageDataJson = prefs.getString(key);
+    if (imageDataJson != null) {
+      images = (jsonDecode(imageDataJson) as List).map((item) => recent.ImageInfo.fromJson(item)).toList();
+      setState(() {});
+    }
+  }
+
+  Future<void> saveProgress() async {
+    images.firstWhere((element) => element.fileName == textes.first.filePath).progress =
+        _scrollController.position.pixels / _scrollController.position.maxScrollExtent;
+    // setState(() {});
+    // print("SAVING PROGRESS ${_scrollController.position.pixels / _scrollController.position.maxScrollExtent}");
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('booksKey', jsonEncode(images));
+    // print('SUCCESS PROGRESS');
+  }
+
+  Future<void> bookSaveProgress() async {
+    await book.updateProgressInFile(_scrollController.position.pixels / _scrollController.position.maxScrollExtent);
+  }
+
+  double getProgress() {
+    return _scrollController.position.pixels / _scrollController.position.maxScrollExtent;
+  }
+
+  Future<void> saveReadingPosition(double position, String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    final readingPositionsJson = prefs.getString('readingPositions');
+    Map<String, double> readingPositions = {};
+
+    if (readingPositionsJson != null) {
+      final readingPositionsMap = jsonDecode(readingPositionsJson);
+      if (readingPositionsMap is Map<String, dynamic>) {
+        readingPositions = readingPositionsMap.cast<String, double>();
+      }
+    }
+    readingPositions[filePath] = position;
+    await prefs.setString('readingPositions', jsonEncode(readingPositions));
+  }
+
+  Future<void> bookSaveReadingPosition(double position) async {
+    await book.updateLastPositionInFile(position);
+  }
+
+  Future<void> getReadingPosition(String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    final readingPositionsJson = prefs.getString('readingPositions');
+    if (readingPositionsJson != null) {
+      final readingPositions = Map<String, dynamic>.from(jsonDecode(readingPositionsJson));
+      if (readingPositions.containsKey(filePath)) {
+        setState(() {
+          position = readingPositions[filePath];
+          // print('getReadingPosition position $position');
+          lastPosition = position;
+          isLast = true;
+          _scrollPosition = position;
+        });
+      }
+    }
   }
 
   void _updateScrollPercentage() {
     if (_scrollController.position.maxScrollExtent == 0) {
       return;
     }
-    _scrollPosition = (_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * 100;
-    pagesForCount = _scrollController.position.maxScrollExtent / pageSize;
-    if (_scrollController.position.pixels - position >= pageSize / 1.25 ||
-        position - _scrollController.position.pixels >= pageSize / 1.25 ||
-        _scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-      setState(() {
-        position = _scrollController.position.pixels;
-      });
-    }
-  }
-
-  Future<void> _loadPageCountFromLocalStorage() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pageCount = (prefs.getInt('pageCount-${book.filePath}') ?? 0);
-  }
-
-  Future<void> _savePageCountToLocalStorage() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pageCount = ((_scrollPosition / 100) * pagesForCount).toInt();
-    print("Сохраняем pageCount $pageCount");
-    prefs.setInt('pageCount-${book.filePath}', pageCount);
+    double percentage = (_scrollController.position.pixels / _scrollController.position.maxScrollExtent) * 100;
+    setState(() {
+      _scrollPosition = percentage;
+      position = _scrollController.position.pixels;
+      _savePageCountToLocalStorage();
+    });
   }
 
   Color textColor = MyColors.black;
@@ -272,8 +377,81 @@ class Reader extends State with WidgetsBindingObserver {
     });
   }
 
-  double? savedPosition;
-  double? savedMaxExtent;
+  String getText = "";
+  List<BookInfo> textes = [];
+
+  // Future<void> getDataFromLocalStorage(String key) async {
+  //   getText = "";
+  //   final prefs = await SharedPreferences.getInstance();
+  //   String? textDataJson = prefs.getString(key);
+  //   if (textDataJson != null) {
+  //     textes = (jsonDecode(textDataJson) as List).map((item) => BookInfo.fromJson(item)).toList();
+  //     setState(() {});
+  //   }
+  //   if (textes.isEmpty) {
+  //     Navigator.pop(context);
+  //     Fluttertoast.showToast(
+  //       msg: 'Нет последней книги',
+  //       toastLength: Toast.LENGTH_SHORT,
+  //       gravity: ToastGravity.BOTTOM,
+  //     );
+  //   }
+
+  //   setState(() {
+  //     getText = textes[0].fileText.toString().replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
+  //   });
+  // }
+  Future<void> getFileTitle() async {
+    final prefs = await SharedPreferences.getInstance();
+    getText = "";
+    String? fileTitle = prefs.getString('fileTitle');
+    print(fileTitle);
+    if (fileTitle != null) {
+      List<FileSystemEntity> files = Directory(path).listSync();
+      String targetFileName = '$fileTitle.json';
+
+      FileSystemEntity? targetFile = files.firstWhere(
+        (file) => file is File && file.uri.pathSegments.last == targetFileName,
+      );
+      if (targetFile == null) {
+        Navigator.pop(context);
+        Fluttertoast.showToast(
+          msg: 'Файл не найден',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+        return;
+      }
+      try {
+        String content = await (targetFile as File).readAsString();
+        Map<String, dynamic> jsonMap = jsonDecode(content);
+        Book book = Book.fromJson(jsonMap);
+        setState(() {
+          getText = book.text;
+        });
+      } catch (e) {
+        print('Error reading file: $e');
+        Navigator.pop(context);
+        Fluttertoast.showToast(
+          msg: 'Ошибка чтения файла',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+        );
+      }
+    }
+  }
+
+  List<DeviceOrientation> orientations = [
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.landscapeRight,
+  ];
+
+  int currentOrientationIndex = 0;
+
+  double? savedPosition; // Переменная для хранения позиции скролла
+  double? savedMaxExtent; // Переменная для хранения максимальной прокрутки
 
   Future<void> savePositionAndExtent() async {
     savedPosition = _scrollController.position.pixels;
@@ -292,41 +470,121 @@ class Reader extends State with WidgetsBindingObserver {
         forTable = false;
       }
 
+      // Дождитесь завершения изменения ориентации
       await Future.delayed(const Duration(milliseconds: 200));
+
       double newMaxExtent = _scrollController.position.maxScrollExtent;
       double newPositionRatio = savedPosition! / savedMaxExtent!;
       double newPosition = newPositionRatio * newMaxExtent;
+
+      // Убедитесь, что новая позиция не выходит за пределы
       newPosition = min(newPosition, newMaxExtent);
+
+      // Используйте animateTo для плавного перехода
+      // _scrollController.animateTo(
+      //   newPosition,
+      //   duration: Duration(milliseconds: 250),
+      //   curve: Curves.easeOut,
+      // );
       _scrollController.jumpTo(newPosition);
     }
   }
 
-  Future<void> saveSettings(bool isDarkTheme) async {
+  // Метод для объединения прошлых и новых слов
+  // Future<void> saveWordCountToLocalstorage(WordCount newWordCount) async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   String key = '${newWordCount.filePath}-words';
+
+  //   // Загрузка и декодирование существующих данных, если они есть.
+  //   String? storedData = prefs.getString(key);
+  //   List<WordCount> wordDatas = storedData != null
+  //       ? (jsonDecode(storedData) as List)
+  //           .map((item) => WordCount.fromJson(item))
+  //           .toList()
+  //       : [];
+
+  //   // Поиск существующего WordCount.
+  //   int index = wordDatas
+  //       .indexWhere((element) => element.filePath == newWordCount.filePath);
+  //   if (index != -1) {
+  //     // Объединение новых слов с существующими.
+  //     wordDatas[index].wordEntries = [
+  //       ...wordDatas[index].wordEntries,
+  //       ...newWordCount.wordEntries
+  //     ];
+  //   } else {
+  //     // Добавление нового WordCount, если он не найден.
+  //     wordDatas.add(newWordCount);
+  //   }
+
+  //   // Сериализация обновлённого списка в JSON и сохранение.
+  //   String wordDatasString = jsonEncode(wordDatas);
+  //   await prefs.setString(key, wordDatasString);
+  // }
+
+  Future<void> saveWordCountToLocalstorage(WordCount wordCount) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDarkTheme', isDarkTheme);
+    String key = 'WMWORDS';
+
+    // Сериализация WordCount в JSON и сохранение.
+    String wordCountString = jsonEncode(wordCount.toJson());
+    await prefs.setString(key, wordCountString);
+  }
+
+  Future<WordCount> loadWordCountFromLocalStorage(String filePath) async {
+    final prefs = await SharedPreferences.getInstance();
+    String key = 'WMWORDS';
+    String? storedData = prefs.getString(key);
+    // print('reader loadwCounts $storedData');
+    if (storedData != null) {
+      Map<String, dynamic> decodedData = jsonDecode(storedData);
+      WordCount wordCount = WordCount.fromJson(decodedData);
+      return wordCount;
+    } else {
+      return WordCount();
+    }
   }
 
   void replaceWordsWithTranslation(List<WordEntry> wordEntries) async {
     final prefs = await SharedPreferences.getInstance();
 
-    prefs.setBool('${book.filePath}-isTrans', true);
+    prefs.setBool('${textes.first.filePath}-isTrans', true);
     isBorder = true;
-    translatedText = book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
+    var lastCallTranslateStr = prefs.getString('lastCallTranslate');
+    if (lastCallTranslateStr != null) {
+      final now = DateTime.now();
+      DateTime? lastCallTranslateStamp = DateTime.parse(lastCallTranslateStr);
+      final timeElapsed = now.difference(lastCallTranslateStamp);
+      if (timeElapsed.inMilliseconds >= 1) {
+        //await getDataFromLocalStorage('textKey');
+      }
+    }
+    String updatedText = getText;
 
     for (var entry in wordEntries) {
+      // print('Ищем слово: ${entry.word}');
+
       var escapedWord = RegExp.escape(entry.word);
       var pattern = '(?<!\\p{L})$escapedWord(?!\\p{L})';
       var wordRegExp = RegExp(pattern, caseSensitive: false, unicode: true);
 
-      translatedText = translatedText.replaceAllMapped(wordRegExp, (match) {
+      updatedText = updatedText.replaceAllMapped(wordRegExp, (match) {
         final matchedWord = match.group(0)!;
+        // print('Найдено совпадение: $matchedWord');
         return matchCase(matchedWord, entry.translation ?? '');
       });
+      // updatedText = updatedText.replaceAllMapped(entry.word[0].toUpperCase() + entry.word.substring(1).toLowerCase(), (match) {
+      //   final matchedWord = match.group(0)!;
+      //   print('Найдено совпадение: ${matchedWord.characters}');
+      //   return matchCase(matchedWord, entry.translation ?? '');
+      // });
     }
 
     await prefs.setString('lastCallTranslate', DateTime.now().toIso8601String());
-    isTrans = prefs.getBool('${book.filePath}-isTrans');
+    isTrans = prefs.getBool('${textes.first.filePath}-isTrans');
+    // print(isTrans);
     setState(() {
+      getText = updatedText;
       isTrans;
     });
   }
@@ -349,57 +607,8 @@ class Reader extends State with WidgetsBindingObserver {
     return pattern.toLowerCase();
   }
 
-  Future<WordCount> loadWordCountFromLocalStorage() async {
-    final prefs = await SharedPreferences.getInstance();
-    String key = 'WMWORDS';
-    String? storedData = prefs.getString(key);
-    if (storedData != null) {
-      Map<String, dynamic> decodedData = jsonDecode(storedData);
-      WordCount wordCount = WordCount.fromJson(decodedData);
-      return wordCount;
-    } else {
-      return WordCount();
-    }
-  }
-
-  Future<void> saveWordCountToLocalstorage(WordCount wordCount) async {
-    final prefs = await SharedPreferences.getInstance();
-    String key = 'WMWORDS';
-
-    // Сериализация WordCount в JSON и сохранение.
-    String wordCountString = jsonEncode(wordCount.toJson());
-    await prefs.setString(key, wordCountString);
-  }
-
-  void wordModeDialog(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    int getWords = prefs.getInt('words') ?? 10;
-    print('wordModeDialog $getWords');
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AgreementDialog(
-        getWords: getWords,
-      ),
-    );
-
-    if (result == true) {
-      // Действие, выполняемое после нажатия "Да"
-      final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
-      // await wordCount.resetCallCount();
-      // await showEmptyTable(context, wordCount);
-      await showTableDialog(context, wordCount, true);
-    } else if (result == false) {
-      // Действие, выполняемое после нажатия "Нет"
-      final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
-      // Если нужно сбросить счётчик времени
-      // await wordCount.resetCallCount();
-      // await wordCount.checkCallInfo();
-      await showTableDialog(context, wordCount, false);
-    }
-  }
-
   showTableDialog(BuildContext context, WordCount wordCount, bool confirm) async {
-    var wordsMap = await WordCount(filePath: book.filePath, fileText: book.text).getAllWordCounts();
+    var wordsMap = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getAllWordCounts();
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -599,8 +808,6 @@ class Reader extends State with WidgetsBindingObserver {
                                                 ),
                                               ],
                                               rows: wordCount.wordEntries.map((entry) {
-                                                final themeProvider = Provider.of<ThemeProvider>(context);
-
                                                 return DataRow(
                                                   cells: [
                                                     DataCell(
@@ -611,14 +818,14 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 entry.word,
                                                                 style: TextStyle(
                                                                     overflow: TextOverflow.ellipsis,
-                                                                    color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             )
                                                           : Text(
                                                               entry.word,
                                                               style: TextStyle(
                                                                   overflow: TextOverflow.ellipsis,
-                                                                  color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                                  color: isDarkTheme ? MyColors.white : MyColors.black),
                                                             ),
                                                     ),
                                                     DataCell(
@@ -629,7 +836,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 '[ ${entry.ipa} ]',
                                                                 style: TextStyle(
                                                                     overflow: TextOverflow.ellipsis,
-                                                                    color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             )
                                                           : SizedBox(
@@ -638,7 +845,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 '[ ${entry.ipa} ]',
                                                                 style: TextStyle(
                                                                     overflow: TextOverflow.ellipsis,
-                                                                    color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                                    color: isDarkTheme ? MyColors.white : MyColors.black),
                                                               ),
                                                             ),
                                                     ),
@@ -650,14 +857,13 @@ class Reader extends State with WidgetsBindingObserver {
                                                                 width: MediaQuery.of(context).size.width * 0.5,
                                                                 child: Text(
                                                                   entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                                  style:
-                                                                      TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                                  style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                                 ),
                                                               ),
                                                             )
                                                           : Text(
                                                               entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                              style: TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                              style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                             ),
                                                     ),
                                                   ],
@@ -870,212 +1076,160 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
-  Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries, Map<String, int> wordsMap) async {
-    String searchText = '';
-    List<String> filteredWords = [];
+  String getWordForm(int number) {
+    int lastDigit = number % 10;
+    int lastTwoDigits = number % 100;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                final themeProvider = Provider.of<ThemeProvider>(context);
+    if (lastTwoDigits > 10 && lastTwoDigits < 15) {
+      return 'слов';
+    } else if (lastDigit == 1) {
+      return 'слово';
+    } else if (lastDigit > 1 && lastDigit < 5) {
+      return 'слова';
+    } else if (number > 1 && number < 5) {
+      return 'слова';
+    } else {
+      return 'слов';
+    }
+  }
 
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Card(
+  showEmptyTable(BuildContext context, WordCount wordCount) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
+    DateTime? lastCallTimestamp;
+    Duration timeElapsed;
+    lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
+
+    final now = DateTime.now();
+    final oneDayMore = now.add(const Duration(days: 1));
+    if (lastCallTimestamp != null) {
+      timeElapsed = now.difference(lastCallTimestamp);
+    } else {
+      timeElapsed = now.difference(oneDayMore);
+    }
+    int getWords = prefs.getInt('words') ?? 10;
+    // if (timeElapsed.inMilliseconds >= 1 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+    if (timeElapsed.inHours >= 24 && wordCount.wordEntries.length <= getWords || lastCallTimestampStr == null) {
+      String screenWord = getWordForm(getWords - wordCount.wordEntries.length);
+      var lastCallTimestamp = DateTime.now();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('lastCallTimestamp', lastCallTimestamp.toIso8601String());
+
+      showDialog<void>(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext context) {
+            screenWord = getWordForm(getWords - wordCount.wordEntries.length);
+
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.8,
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: wordCount.wordEntries.isNotEmpty ? MediaQuery.of(context).size.height * 0.5 : MediaQuery.of(context).size.height * 0.3,
+                    color: Colors.transparent,
+                    child: Card(
                       child: Column(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: wordCount.wordEntries.isNotEmpty ? MainAxisAlignment.start : MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                icon: const Icon(Icons.close),
-                                onPressed: () async {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ],
+                          IconButton(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                            icon: const Icon(Icons.close),
+                            onPressed: () async {
+                              if (wordCount.wordEntries.length == getWords) {
+                                await saveWordCountToLocalstorage(wordCount);
+                                replaceWordsWithTranslation(wordCount.wordEntries);
+                                Navigator.pop(context);
+                              } else {
+                                Fluttertoast.showToast(msg: 'Вы не добавили все слова', toastLength: Toast.LENGTH_LONG);
+                              }
+                            },
                           ),
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 0),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 20),
                             child: Center(
                               child: Text24(
-                                text: 'Выберите слова',
+                                text: wordCount.wordEntries.length < 10
+                                    ? 'Осталось добавить ${(getWords - wordCount.wordEntries.length)} $screenWord'
+                                    : 'Изучаемые слова',
                                 textColor: MyColors.black,
                               ),
                             ),
                           ),
-                          Flexible(
-                            flex: 1,
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                  child: TextField(
-                                    onChanged: (value) {
-                                      setState(() {
-                                        searchText = value.toLowerCase();
-                                        filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
-                                        filteredWords.sort((a, b) => a.compareTo(b));
-                                        filteredWords.sort((a, b) => wordsMap[b]!.compareTo(wordsMap[a]!));
-                                      });
+                          wordCount.wordEntries.isNotEmpty
+                              ? Expanded(
+                                  child: ListView.builder(
+                                    itemCount: wordCount.wordEntries.length,
+                                    itemBuilder: (context, index) {
+                                      var entry = wordCount.wordEntries[index];
+                                      return Container(
+                                        height: 70,
+                                        width: MediaQuery.of(context).size.width * 0.5, // Adjust width as needed
+                                        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Adjust vertical margin as needed
+                                        decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            border: Border.all(color: MyColors.lightGray) // Adjust border radius for rounded corners
+                                            ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8), // Adjust inner padding as needed
+                                          child: Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              TextForTable(
+                                                text: '${entry.word} - ${entry.translation!.isNotEmpty ? entry.translation! : 'N/A'}',
+                                                textColor: MyColors.black,
+                                              ),
+                                              TextForTable(
+                                                text: '[ ${entry.ipa} ]',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
                                     },
-                                    decoration: InputDecoration(
-                                      labelText: 'Введите текст',
-                                      border: const OutlineInputBorder(),
-                                      disabledBorder: const OutlineInputBorder(),
-                                      focusedBorder: const OutlineInputBorder(),
-                                      focusColor: MyColors.purple,
-                                      floatingLabelStyle:
-                                          themeProvider.isDarkTheme ? const TextStyle(color: MyColors.white) : const TextStyle(color: MyColors.black),
+                                  ),
+                                )
+                              : Container(
+                                  height: 70,
+                                  width: MediaQuery.of(context).size.width * 0.5, // Adjust width as needed
+                                  margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Adjust vertical margin as needed
+                                  decoration: const BoxDecoration(
+                                    color: Colors.transparent,
+                                  ),
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(8), // Adjust inner padding as needed
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        TextForTable(
+                                          text: 'Добавьте первое слово',
+                                          textColor: MyColors.black,
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                                Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  child: DataTable(
-                                      columnSpacing: 45.0,
-                                      showBottomBorder: false,
-                                      horizontalMargin: 20,
-                                      dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                                      columns: const [
-                                        DataColumn(
-                                          label: SizedBox(
-                                            child: Text15(text: 'Слово', textColor: MyColors.black),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                          label: SizedBox(
-                                            child: Text15(
-                                              text: 'Количество',
-                                              textColor: MyColors.black,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                      rows: const []),
-                                ),
-                                Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.2,
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.vertical,
-                                      child: DataTable(
-                                        columnSpacing: 0.0,
-                                        showBottomBorder: false,
-                                        dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
-                                        clipBehavior: Clip.hardEdge,
-                                        headingRowHeight: 0,
-                                        horizontalMargin: 10,
-                                        columns: const [
-                                          DataColumn(
-                                            label: Flexible(
-                                              child: Text15(
-                                                text: '',
-                                                textColor: MyColors.black,
-                                              ),
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: Flexible(
-                                              child: Text15(
-                                                text: '',
-                                                textColor: MyColors.black,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                        rows: searchText.isEmpty
-                                            ? const <DataRow>[]
-                                            : List<DataRow>.generate(
-                                                filteredWords.length,
-                                                (index) => DataRow(
-                                                  cells: [
-                                                    DataCell(
-                                                      SizedBox(
-                                                        width: MediaQuery.of(context).size.width * 0.3,
-                                                        child: TextButton(
-                                                          style: const ButtonStyle(alignment: Alignment.centerLeft),
-                                                          onPressed: () async {
-                                                            List<String> test = [filteredWords[index]];
-                                                            // print(test);
-                                                            test = await WordCount().getNounsByList(test);
-                                                            // print('after $test');
-                                                            if (test.length != 1) {
-                                                              Fluttertoast.showToast(msg: 'Данное слово не существительное');
-                                                              return;
-                                                            } else {
-                                                              await updateWordInTable(word, filteredWords[index], wordEntries);
-                                                              Navigator.of(context).pop();
-                                                            }
-                                                          },
-                                                          child: Text(
-                                                            filteredWords[index],
-                                                            style: TextStyle(
-                                                                fontFamily: 'Roboto',
-                                                                fontSize: 15,
-                                                                fontWeight: FontWeight.normal,
-                                                                overflow: TextOverflow.ellipsis,
-                                                                color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    DataCell(
-                                                      SizedBox(
-                                                        width: MediaQuery.of(context).size.width * 0.3,
-                                                        child: TextForTable(
-                                                          text: '${wordsMap[filteredWords[index]] ?? 0}',
-                                                          textColor: MyColors.black,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                      ),
-                                    ))
-                              ],
-                            ),
-                          ),
                         ],
                       ),
                     ),
-                  ],
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> updateWordInTable(String oldWord, String newWord, List<WordEntry> wordEntries) async {
-    final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
-    if (index != -1) {
-      final count = WordCount(filePath: book.filePath, fileText: book.text).getWordCount(newWord);
-      final translation = await WordCount(filePath: book.filePath, fileText: book.text).translateToEnglish(newWord);
-      final ipa = await WordCount(filePath: book.filePath, fileText: book.text).getIPA(translation);
-
-      wordEntries[index] = WordEntry(
-        word: newWord,
-        count: count,
-        translation: translation,
-        ipa: ipa,
+                  ),
+                ],
+              ),
+            );
+          });
+    } else {
+      Fluttertoast.showToast(
+        msg: 'Можно только раз в 24 часа!',
+        toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+        gravity: ToastGravity.BOTTOM, // Расположение уведомления
       );
-
-      setState(() {});
+      return;
     }
   }
 
@@ -1085,7 +1239,7 @@ class Reader extends State with WidgetsBindingObserver {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return FutureBuilder<WordCount>(
-          future: loadWordCountFromLocalStorage(),
+          future: loadWordCountFromLocalStorage(filePath),
           builder: (BuildContext context, AsyncSnapshot<WordCount> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
@@ -1272,8 +1426,6 @@ class Reader extends State with WidgetsBindingObserver {
                                         ),
                                       ],
                                       rows: wordCount.wordEntries.map((entry) {
-                                        final themeProvider = Provider.of<ThemeProvider>(context);
-
                                         return DataRow(
                                           cells: [
                                             DataCell(
@@ -1283,15 +1435,13 @@ class Reader extends State with WidgetsBindingObserver {
                                                       child: Text(
                                                         entry.word,
                                                         style: TextStyle(
-                                                            overflow: TextOverflow.ellipsis,
-                                                            color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     )
                                                   : Text(
                                                       entry.word,
                                                       style: TextStyle(
-                                                          overflow: TextOverflow.ellipsis,
-                                                          color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                          overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
                                             ),
                                             DataCell(
@@ -1301,8 +1451,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                       child: Text(
                                                         '[ ${entry.ipa} ]',
                                                         style: TextStyle(
-                                                            overflow: TextOverflow.ellipsis,
-                                                            color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     )
                                                   : SizedBox(
@@ -1310,8 +1459,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                       child: Text(
                                                         '[ ${entry.ipa} ]',
                                                         style: TextStyle(
-                                                            overflow: TextOverflow.ellipsis,
-                                                            color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                            overflow: TextOverflow.ellipsis, color: isDarkTheme ? MyColors.white : MyColors.black),
                                                       ),
                                                     ),
                                             ),
@@ -1323,13 +1471,13 @@ class Reader extends State with WidgetsBindingObserver {
                                                         width: MediaQuery.of(context).size.width * 0.5,
                                                         child: Text(
                                                           entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                          style: TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                          style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                         ),
                                                       ),
                                                     )
                                                   : Text(
                                                       entry.translation!.isNotEmpty ? entry.translation! : 'N/A',
-                                                      style: TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
+                                                      style: TextStyle(color: isDarkTheme ? MyColors.white : MyColors.black),
                                                     ),
                                             ),
                                           ],
@@ -1362,67 +1510,205 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+  void wordModeDialog(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    int getWords = prefs.getInt('words') ?? 10;
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AgreementDialog(
+        getWords: getWords,
+      ),
+    );
 
-    return WillPopScope(
-        onWillPop: () async {
-          await book.updateStageInFile(_scrollPosition / 100, position);
-          Navigator.pop(context, true);
-          return true;
-        },
-        child: !loading
-            ? Scaffold(
-                appBar: visible
-                    ? PreferredSize(
-                        preferredSize: Size(MediaQuery.of(context).size.width, 50),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          child: AppBar(
-                              leading: GestureDetector(
-                                  onTap: () async {
-                                    await book.updateStageInFile(_scrollPosition / 100, position);
-                                    Navigator.pop(context, true);
-                                  },
-                                  child: Theme(
-                                      data: lightTheme(),
-                                      child: Icon(
-                                        CustomIcons.chevronLeft,
-                                        size: 30,
-                                        color: Theme.of(context).iconTheme.color,
-                                      ))),
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              shadowColor: Colors.transparent,
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      clipBehavior: Clip.antiAlias,
-                                      child: Text(
-                                        book.author.isNotEmpty && book.customTitle.isNotEmpty
-                                            ? '${book.author.toString()}. ${book.customTitle.toString()}'
-                                            : 'Нет автора',
-                                        softWrap: false,
-                                        overflow: TextOverflow.fade,
-                                        style: TextStyle(
-                                            fontSize: 16, fontFamily: 'Tektur', color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
-                                      ),
+    if (result == true) {
+      // Действие, выполняемое после нажатия "Да"
+
+      final wordCount = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText);
+      // await wordCount.resetCallCount();
+      // await showEmptyTable(context, wordCount);
+      await showTableDialog(context, wordCount, true);
+    } else if (result == false) {
+      // Действие, выполняемое после нажатия "Нет"
+      final wordCount = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText);
+      // Если нужно сбросить счётчик времени
+      // await wordCount.resetCallCount();
+      // await wordCount.checkCallInfo();
+      await showTableDialog(context, wordCount, false);
+    }
+  }
+
+  Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries, Map<String, int> wordsMap) async {
+    String searchText = '';
+    List<String> filteredWords = [];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
+            child: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Card(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                icon: const Icon(Icons.close),
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ],
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 0),
+                            child: Center(
+                              child: Text24(
+                                text: 'Выберите слова',
+                                textColor: MyColors.black,
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            flex: 1,
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                  child: TextField(
+                                    onChanged: (value) {
+                                      setState(() {
+                                        searchText = value.toLowerCase();
+                                        filteredWords = wordsMap.keys.where((word) => word.toLowerCase().startsWith(searchText)).toList();
+                                        filteredWords.sort((a, b) => a.compareTo(b));
+                                        filteredWords.sort((a, b) => wordsMap[b]!.compareTo(wordsMap[a]!));
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                      labelText: 'Введите текст',
+                                      border: const OutlineInputBorder(),
+                                      disabledBorder: const OutlineInputBorder(),
+                                      focusedBorder: const OutlineInputBorder(),
+                                      focusColor: MyColors.purple,
+                                      floatingLabelStyle:
+                                          isDarkTheme ? const TextStyle(color: MyColors.white) : const TextStyle(color: MyColors.black),
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(35, 0, 0, 0),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
-                                      },
-                                      child: Icon(
-                                        CustomIcons.sliders,
-                                        size: 28,
-                                        color: Theme.of(context).iconTheme.color,
+                                ),
+                                Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  child: DataTable(
+                                      columnSpacing: 45.0,
+                                      showBottomBorder: false,
+                                      horizontalMargin: 20,
+                                      dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                      columns: const [
+                                        DataColumn(
+                                          label: SizedBox(
+                                            child: Text15(text: 'Слово', textColor: MyColors.black),
+                                          ),
+                                        ),
+                                        DataColumn(
+                                          label: SizedBox(
+                                            child: Text15(
+                                              text: 'Количество',
+                                              textColor: MyColors.black,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                      rows: const []),
+                                ),
+                                Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: forTable == false ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.2,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
+                                      child: DataTable(
+                                        columnSpacing: 0.0,
+                                        showBottomBorder: false,
+                                        dataTextStyle: const TextStyle(fontFamily: 'Roboto', color: MyColors.black),
+                                        clipBehavior: Clip.hardEdge,
+                                        headingRowHeight: 0,
+                                        horizontalMargin: 10,
+                                        columns: const [
+                                          DataColumn(
+                                            label: Flexible(
+                                              child: Text15(
+                                                text: '',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          DataColumn(
+                                            label: Flexible(
+                                              child: Text15(
+                                                text: '',
+                                                textColor: MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                        rows: searchText.isEmpty
+                                            ? const <DataRow>[]
+                                            : List<DataRow>.generate(
+                                                filteredWords.length,
+                                                (index) => DataRow(
+                                                  cells: [
+                                                    DataCell(
+                                                      SizedBox(
+                                                        width: MediaQuery.of(context).size.width * 0.3,
+                                                        child: TextButton(
+                                                          style: const ButtonStyle(alignment: Alignment.centerLeft),
+                                                          onPressed: () async {
+                                                            List<String> test = [filteredWords[index]];
+                                                            // print(test);
+                                                            test = await WordCount().getNounsByList(test);
+                                                            // print('after $test');
+                                                            if (test.length != 1) {
+                                                              Fluttertoast.showToast(msg: 'Данное слово не существительное');
+                                                              return;
+                                                            } else {
+                                                              await updateWordInTable(word, filteredWords[index], wordEntries);
+                                                              Navigator.of(context).pop();
+                                                            }
+                                                          },
+                                                          child: Text(
+                                                            filteredWords[index],
+                                                            style: TextStyle(
+                                                                fontFamily: 'Roboto',
+                                                                fontSize: 15,
+                                                                fontWeight: FontWeight.normal,
+                                                                overflow: TextOverflow.ellipsis,
+                                                                color: isDarkTheme ? MyColors.white : MyColors.black),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    DataCell(
+                                                      SizedBox(
+                                                        width: MediaQuery.of(context).size.width * 0.3,
+                                                        child: TextForTable(
+                                                          text: '${wordsMap[filteredWords[index]] ?? 0}',
+                                                          textColor: MyColors.black,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
                                       ),
-
                                     ))
                               ],
                             ),
@@ -1444,8 +1730,6 @@ class Reader extends State with WidgetsBindingObserver {
     final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
     if (index != -1) {
       final count = WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getWordCount(newWord);
-      // debugPrint('updateWordInTable entry ${wordEntries[index]}');
-      // debugPrint('updateWordInTable count ${wordEntries[index].count}');
       final translation = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).translateToEnglish(newWord);
       final ipa = await WordCount(filePath: textes.first.filePath, fileText: textes.first.fileText).getIPA(translation);
 
@@ -1457,8 +1741,6 @@ class Reader extends State with WidgetsBindingObserver {
       );
 
       setState(() {});
-    } else {
-      // debugPrint('Word $oldWord not found in the list.');
     }
   }
 
@@ -1497,7 +1779,6 @@ class Reader extends State with WidgetsBindingObserver {
               return matchingStart.followedBy(matchingAll);
             },
             onSelected: (String selection) {
-              // debugPrint('You just selected $selection');
               newWord = selection;
             },
           ),
@@ -1552,9 +1833,9 @@ class Reader extends State with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        await saveProgress();
-        await _savePageCountToLocalStorage();
-        await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
+        await bookSaveProgress();
+        await bookSaveReadingPosition(_scrollController.position.pixels);
+        // await _savePageCountToLocalStorage();
         Navigator.pop(context, true);
         return true;
       },
@@ -1567,10 +1848,9 @@ class Reader extends State with WidgetsBindingObserver {
                   child: AppBar(
                       leading: GestureDetector(
                           onTap: () async {
-                            await saveProgress();
-                            await saveReadingPosition(_scrollController.position.pixels, textes.first.filePath);
+                            await bookSaveProgress();
+                            await bookSaveReadingPosition(_scrollController.position.pixels);
                             await _savePageCountToLocalStorage();
-                            //тут нужно сделать очистку оперативы
                             Navigator.pop(context, true);
                           },
                           child: Theme(
@@ -1590,7 +1870,9 @@ class Reader extends State with WidgetsBindingObserver {
                               scrollDirection: Axis.horizontal,
                               clipBehavior: Clip.antiAlias,
                               child: Text(
-                                textes.isNotEmpty ? '${textes[0].author.toString()}. ${textes[0].title.toString()}' : 'Нет автора',
+                                book.author.isNotEmpty && book.title.isNotEmpty
+                                    ? '${book.author.toString()}. ${book.title.toString()}'
+                                    : 'Нет автора',
                                 softWrap: false,
                                 overflow: TextOverflow.fade,
                                 style: TextStyle(fontSize: 16, fontFamily: 'Tektur', color: isDarkTheme ? MyColors.white : MyColors.black),
@@ -1634,460 +1916,409 @@ class Reader extends State with WidgetsBindingObserver {
                     controller: _scrollController,
                     itemCount: 1,
                     itemBuilder: (context, index) {
-                      if (textes.isNotEmpty) {
-                        return _scrollController.hasClients
-                            ? () {
-                                return Text(
-                                  getText,
-                                  // textAlign: TextAlign.justify,
-                                  // textAlign: TextAlign.center,
-                                  softWrap: true,
-                                  style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
-                                );
-                              }()
-                            : Center(
-                                child: Text(
-                                  'Нет текста для отображения',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: textColor,
-                                  ),
-                                ],
-                              )),
-                        ),
-                      )
-                    : null,
-                body: Container(
-                    decoration: BoxDecoration(
-                        color: backgroundColor,
-                        border: isBorder == true
-                            ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 2)
-                            : Border.all(width: 0, color: Colors.transparent)),
-                    child: SafeArea(
-                      top: true,
-                      minimum: visible
-                          ? const EdgeInsets.only(top: 0, left: 8, right: 8)
-                          : orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
-                                  orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
-                              ? const EdgeInsets.only(top: 0, left: 8, right: 8)
-                              : const EdgeInsets.only(top: 40, left: 8, right: 8),
-                      child: Stack(children: [
-                        ListView.builder(
-                            controller: _scrollController,
-                            itemCount: 1,
-                            itemBuilder: (context, index) {
-                              return _scrollController.hasClients
-                                  ? () {
-                                      return Text(
-                                        // isBorder ? translatedText : book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), ''),
-                                        book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), ''),
-                                        softWrap: true,
-                                        style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
-                                      );
-                                    }()
-                                  : Center(
-                                      child: Text(
-                                        'Нет текста для отображения',
-                                        style: TextStyle(
-                                          fontSize: 18.0,
-                                          color: textColor,
-                                        ),
-                                      ),
-                                    );
-                            }),
-                        GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onTap: () {
-                              // Скролл вниз / следующая страница
-                              _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.92,
-                                  duration: const Duration(milliseconds: 250), curve: Curves.ease);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              child: IgnorePointer(
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  height: MediaQuery.of(context).size.height,
-                                  color: const Color.fromRGBO(100, 150, 100, 0),
+                      return _scrollController.hasClients
+                          ? () {
+                              return Text(
+                                book.text,
+                                softWrap: true,
+                                style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
+                              );
+                            }()
+                          : Center(
+                              child: Text(
+                                'Нет текста для отображения',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  color: textColor,
                                 ),
                               ),
-                            )),
-                        isBorder
-                            ? Positioned(
-                                left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
-                                top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
-                                child: GestureDetector(
-                                    behavior: HitTestBehavior.translucent,
-                                    onDoubleTap: () async {
-                                      showSavedWords(context, book.filePath);
-                                    },
-                                    onVerticalDragEnd: (dragEndDetails) async {
-                                      if (dragEndDetails.primaryVelocity! > 0) {
-                                        showSavedWords(context, book.filePath);
-                                      }
-                                    },
-                                    onTap: () {
-                                      setState(() {
-                                        visible = !visible;
-                                      });
-                                      if (visible) {
-                                        SystemChrome.setEnabledSystemUIMode(
-                                          SystemUiMode.manual,
-                                          overlays: [
-                                            SystemUiOverlay.top,
-                                            SystemUiOverlay.bottom,
-                                          ],
-                                        );
-                                      } else {
-                                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-                                      }
-                                    },
-                                    child: IgnorePointer(
-                                      child: Container(
-                                        width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
-                                        height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
-                                        color: const Color.fromRGBO(250, 100, 100, 0),
-                                      ),
-                                    )),
-                              )
-                            : Positioned(
-                                left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
-                                top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
-                                child: GestureDetector(
-                                    behavior: HitTestBehavior.translucent,
-                                    onDoubleTap: () async {
-                                      showSavedWords(context, book.filePath);
-                                    },
-                                    onTap: () {
-                                      setState(() {
-                                        visible = !visible;
-                                      });
-                                      if (visible) {
-                                        SystemChrome.setEnabledSystemUIMode(
-                                          SystemUiMode.manual,
-                                          overlays: [
-                                            SystemUiOverlay.top,
-                                            SystemUiOverlay.bottom,
-                                          ],
-                                        );
-                                      } else {
-                                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-                                      }
-                                    },
-                                    child: IgnorePointer(
-                                      child: Container(
-                                        width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
-                                        height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
-                                        color: const Color.fromRGBO(250, 100, 100, 0),
-                                      ),
-                                    )),
-                              ),
-                        Positioned(
-                          left: MediaQuery.of(context).size.width / 6,
-                          child: GestureDetector(
-                              behavior: HitTestBehavior.translucent,
-                              onTap: () {
-                                // Сролл вверх / предыдущая страница
-                                _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.92,
-                                    duration: const Duration(milliseconds: 250), curve: Curves.ease);
-                              },
-                              child: IgnorePointer(
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width / 1.5,
-                                  height: MediaQuery.of(context).size.height / 5,
-                                  color: const Color.fromRGBO(100, 150, 200, 0),
-                                ),
-                              )),
-                        ),
-                      ]),
-                    )),
-                bottomNavigationBar: BottomAppBar(
-                  color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
-                  child: Stack(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        height: visible ? 85 : 20,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: !visible
-                              ? [
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width / 8,
-                                      alignment: Alignment.topLeft,
-                                      child: Stack(
-                                        alignment: Alignment.centerLeft,
-                                        children: [
-                                          Transform.rotate(
-                                            angle: 90 * 3.14159265 / 180,
-                                            child: Icon(
-                                              Icons.battery_full,
-                                              color: themeProvider.isDarkTheme
-                                                  ? backgroundColor.value == 0xff1d1d21
-                                                      ? MyColors.white
-                                                      : MyColors.black
-                                                  : backgroundColor.value != 0xff1d1d21
-                                                      ? MyColors.black
-                                                      : MyColors.white,
-                                              size: 28,
-                                            ),
-                                          ),
-                                          Text(
-                                            _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
-                                            style: TextStyle(
-                                              color: themeProvider.isDarkTheme
-                                                  ? backgroundColor.value == 0xff1d1d21
-                                                      ? MyColors.black
-                                                      : MyColors.white
-                                                  : backgroundColor.value != 0xff1d1d21
-                                                      ? MyColors.white
-                                                      : MyColors.black,
-                                              fontSize: 7,
-                                              fontFamily: 'Tektur',
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-                                      child: Align(
-                                        alignment: Alignment.topCenter,
-                                        child: Text(
-                                          book.customTitle.isNotEmpty && book.author.isNotEmpty
-                                              ? (book.customTitle.toString().length + book.author.toString().length > 30
-                                                  ? book.author.toString().length > 19
-                                                      ? '${book.author.toString()}. ${book.customTitle.toString().substring(0, book.customTitle.toString().length ~/ 4.5)}...'
-                                                      : '${book.author.toString()}. ${book.customTitle.toString().substring(0, book.customTitle.toString().length ~/ 1.5)}...'
-                                                  : '${book.author.toString()}. ${book.customTitle.toString()}')
-                                              : 'Нет названия',
-                                          style: TextStyle(
-                                              color: themeProvider.isDarkTheme
-                                                  ? backgroundColor.value == 0xff1d1d21
-                                                      ? MyColors.white
-                                                      : MyColors.black
-                                                  : backgroundColor.value != 0xff1d1d21
-                                                      ? MyColors.black
-                                                      : MyColors.white,
-                                              fontFamily: 'Tektur',
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width / 8,
-                                      alignment: Alignment.topRight,
-                                      child: Text(
-                                        '${_scrollPosition.toStringAsFixed(1)}%',
-                                        style: TextStyle(
-                                            color: themeProvider.isDarkTheme
-                                                ? backgroundColor.value == 0xff1d1d21
-                                                    ? MyColors.white
-                                                    : MyColors.black
-                                                : backgroundColor.value != 0xff1d1d21
-                                                    ? MyColors.black
-                                                    : MyColors.white,
-                                            fontFamily: 'Tektur',
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                ]
-                              : [],
+                            );
+                    }),
+                GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      // Скролл вниз / следующая страница
+                      _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.92,
+                          duration: const Duration(milliseconds: 250), curve: Curves.ease);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                      child: IgnorePointer(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          color: const Color.fromRGBO(100, 150, 100, 0),
                         ),
                       ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            height: visible ? 85 : 0,
-                            child: SingleChildScrollView(
+                    )),
+                isBorder
+                    ? Positioned(
+                        left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                        top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                        child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onDoubleTap: () async {
+                              showSavedWords(context, textes.first.filePath);
+                            },
+                            onVerticalDragEnd: (dragEndDetails) async {
+                              if (dragEndDetails.primaryVelocity! > 0) {
+                                showSavedWords(context, textes.first.filePath);
+                              }
+                            },
+                            onTap: () {
+                              setState(() {
+                                visible = !visible;
+                              });
+                              if (visible) {
+                                SystemChrome.setEnabledSystemUIMode(
+                                  SystemUiMode.manual,
+                                  overlays: [
+                                    SystemUiOverlay.top,
+                                    SystemUiOverlay.bottom,
+                                  ],
+                                );
+                              } else {
+                                SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+                              }
+                            },
+                            child: IgnorePointer(
                               child: Container(
-                                  alignment: AlignmentDirectional.topEnd,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  child: Column(
-                                    children: [
-                                      _scrollController.hasClients
-                                          ? SliderTheme(
-                                              data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                children: [
-                                                  SliderTheme(
-                                                    data: const SliderThemeData(
-                                                        trackHeight: 3,
-                                                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
-                                                        trackShape: RectangularSliderTrackShape()),
-                                                    child: Container(
-                                                      width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
-                                                              orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
-                                                          ? MediaQuery.of(context).size.width / 1.19
-                                                          : MediaQuery.of(context).size.width / 1.12,
-                                                      child: Slider(
-                                                        value: position != 0
-                                                            ? position > _scrollController.position.maxScrollExtent
-                                                                ? _scrollController.position.maxScrollExtent
-                                                                : position
-                                                            : _scrollController.position.pixels,
-                                                        min: 0,
-                                                        max: _scrollController.position.maxScrollExtent,
-                                                        label: visible
-                                                            ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                                ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                                    ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                    : "0.0%"
-                                                            : "",
-                                                        onChanged: (value) {
-                                                          setState(() {
-                                                            position = value;
-                                                          });
-                                                          if (_actionTimer?.isActive ?? false) {
-                                                            _actionTimer?.cancel();
-                                                          }
-                                                          _actionTimer = Timer(const Duration(milliseconds: 250), () {
-                                                            _scrollController.jumpTo(value);
-                                                          });
-                                                        },
-                                                        onChangeEnd: (value) {
-                                                          _actionTimer?.cancel();
-                                                          if (value != _scrollController.position.pixels) {
-                                                            _scrollController.jumpTo(value);
-                                                          }
-                                                        },
-                                                        activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                        inactiveColor: themeProvider.isDarkTheme
-                                                            ? const Color.fromRGBO(96, 96, 96, 1)
-                                                            : const Color.fromRGBO(96, 96, 96, 1),
-                                                        thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Container(
-                                                    width: MediaQuery.of(context).size.width / 11,
-                                                    alignment: Alignment.center,
-                                                    child: Text11(
-                                                        text: visible
-                                                            ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                                ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                                    ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                    : "0.0%"
-                                                            : "",
-                                                        textColor: MyColors.darkGray),
-                                                  )
-                                                ],
-                                              ),
-                                            )
-                                          : const Text("Загрузка..."),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                                        child: SizedBox(
-                                          width: MediaQuery.of(context).size.width,
-                                          height: 2,
-                                          child: Container(
-                                            color: themeProvider.isDarkTheme ? MyColors.darkGray : MyColors.black,
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () async {
-                                              await savePositionAndExtent();
-                                              switchOrientation();
-                                            },
-                                            child: Icon(
-                                              CustomIcons.turn,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
-                                          ),
-                                          const Padding(padding: EdgeInsets.only(right: 30)),
-                                          InkWell(
-                                            onTap: () async {
-                                              final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-                                              themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
-                                              await saveSettings(themeProvider.isDarkTheme);
-                                            },
-                                            child: Icon(
-                                              CustomIcons.theme,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
-                                          ),
-                                          const Padding(padding: EdgeInsets.only(right: 30)),
-                                          GestureDetector(
-                                            onTap: () async {
-                                              switch (isBorder) {
-                                                case false:
-                                                  var temp = await loadWordCountFromLocalStorage();
-                                                  if (temp.filePath != '') {
-                                                    replaceWordsWithTranslation(temp.wordEntries);
-                                                  } else {
-                                                    wordModeDialog(context);
-                                                  }
-                                                  break;
-                                                default:
-                                                  //await getDataFromLocalStorage('textKey');
-                                                  isBorder = false;
-                                                  setState(() {});
-                                                  final prefs = await SharedPreferences.getInstance();
-
-                                                  final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
-                                                  var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
-                                                  var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                                  prefs.setBool('${book.filePath}-isTrans', false);
-                                                  // if (timeElapsed.inHours > 24) {
-                                                  if (timeElapsed.inMicroseconds >= 1) {
-                                                    wordModeDialog(context);
-                                                  } else {
-                                                    Fluttertoast.showToast(
-                                                      msg:
-                                                          'Новый перевод завтра в ${(lastCallTimestamp.add(const Duration(days: 1)).hour)}:${(lastCallTimestamp.add(const Duration(days: 1)).minute)}',
-                                                      toastLength: Toast.LENGTH_LONG,
-                                                      gravity: ToastGravity.BOTTOM,
-                                                    );
-                                                  }
-                                                  break;
-                                              }
-                                            },
-                                            child: Icon(
-                                              CustomIcons.wm,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    ],
-                                  )),
+                                width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                                height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                                color: const Color.fromRGBO(250, 100, 100, 0),
+                              ),
                             )),
                       )
-                    ],
-                  ),
+                    : Positioned(
+                        left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                        top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                        child: GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onDoubleTap: () async {
+                              showSavedWords(context, textes.first.filePath);
+                            },
+                            onTap: () {
+                              setState(() {
+                                visible = !visible;
+                              });
+                              if (visible) {
+                                SystemChrome.setEnabledSystemUIMode(
+                                  SystemUiMode.manual,
+                                  overlays: [
+                                    SystemUiOverlay.top,
+                                    SystemUiOverlay.bottom,
+                                  ],
+                                );
+                              } else {
+                                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+                              }
+                            },
+                            child: IgnorePointer(
+                              child: Container(
+                                width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                                height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                                color: const Color.fromRGBO(250, 100, 100, 0),
+                              ),
+                            )),
+                      ),
+                Positioned(
+                  left: MediaQuery.of(context).size.width / 6,
+                  child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        // Сролл вверх / предыдущая страница
+                        _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.92,
+                            duration: const Duration(milliseconds: 250), curve: Curves.ease);
+                      },
+                      child: IgnorePointer(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width / 1.5,
+                          height: MediaQuery.of(context).size.height / 5,
+                          color: const Color.fromRGBO(100, 150, 200, 0),
+                        ),
+                      )),
                 ),
+              ]),
+            )),
+        bottomNavigationBar: BottomAppBar(
+          color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
+          child: Stack(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                height: visible ? 85 : 20,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: !visible
+                      ? [
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width / 8,
+                              alignment: Alignment.topLeft,
+                              child: Stack(
+                                alignment: Alignment.centerLeft,
+                                children: [
+                                  Transform.rotate(
+                                    angle: 90 * 3.14159265 / 180,
+                                    child: Icon(
+                                      Icons.battery_full,
+                                      color: isDarkTheme
+                                          ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black
+                                          : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white,
+                                      size: 28,
+                                    ),
+                                  ),
+                                  Text(
+                                    _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
+                                    style: TextStyle(
+                                      color: isDarkTheme
+                                          ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white
+                                          : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black,
+                                      fontSize: 7,
+                                      fontFamily: 'Tektur',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                              child: Align(
+                                alignment: Alignment.topCenter,
+                                child: Text(
+                                  book.title.isNotEmpty && book.author.isNotEmpty
+                                      ? (book.title.toString().length + book.author.toString().length > 30
+                                          ? book.author.toString().length > 19
+                                              ? '${book.author.toString()}. ${book.title.toString().substring(0, book.title.toString().length ~/ 4.5)}...'
+                                              : '${book.author.toString()}. ${book.title.toString().substring(0, book.title.toString().length ~/ 1.5)}...'
+                                          : '${book.author.toString()}. ${book.title.toString()}')
+                                      : 'Нет названия',
+                                  style: TextStyle(
+                                      color: isDarkTheme
+                                          ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black
+                                          : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white,
+                                      fontFamily: 'Tektur',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width / 8,
+                              alignment: Alignment.topRight,
+                              child: Text(
+                                '${_scrollPosition.toStringAsFixed(1)}%',
+                                style: TextStyle(
+                                    color: isDarkTheme
+                                        ? backgroundColor.value == 0xff1d1d21
+                                            ? MyColors.white
+                                            : MyColors.black
+                                        : backgroundColor.value != 0xff1d1d21
+                                            ? MyColors.black
+                                            : MyColors.white,
+                                    fontFamily: 'Tektur',
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ]
+                      : [],
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    height: visible ? 85 : 0,
+                    child: SingleChildScrollView(
+                      child: Container(
+                          alignment: AlignmentDirectional.topEnd,
+                          color: Theme.of(context).colorScheme.primary,
+                          child: Column(
+                            children: [
+                              _scrollController.hasClients
+                                  ? SliderTheme(
+                                      data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          SliderTheme(
+                                            data: const SliderThemeData(
+                                                trackHeight: 3,
+                                                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                trackShape: RectangularSliderTrackShape()),
+                                            child: Container(
+                                              width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                                                      orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                                                  ? MediaQuery.of(context).size.width / 1.19
+                                                  : MediaQuery.of(context).size.width / 1.12,
+                                              child: Slider(
+                                                value: position != 0
+                                                    ? position > _scrollController.position.maxScrollExtent
+                                                        ? _scrollController.position.maxScrollExtent
+                                                        : position
+                                                    : _scrollController.position.pixels,
+                                                min: 0,
+                                                max: _scrollController.position.maxScrollExtent,
+                                                label: visible
+                                                    ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                        : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : "0.0%"
+                                                    : "",
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    position = value;
+                                                  });
+                                                  if (_actionTimer?.isActive ?? false) {
+                                                    _actionTimer?.cancel();
+                                                  }
+                                                  _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                    _scrollController.jumpTo(value);
+                                                  });
+                                                },
+                                                onChangeEnd: (value) {
+                                                  _actionTimer?.cancel();
+                                                  if (value != _scrollController.position.pixels) {
+                                                    _scrollController.jumpTo(value);
+                                                  }
+                                                },
+                                                activeColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                inactiveColor:
+                                                    isDarkTheme ? const Color.fromRGBO(96, 96, 96, 1) : const Color.fromRGBO(96, 96, 96, 1),
+                                                thumbColor: isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            width: MediaQuery.of(context).size.width / 11,
+                                            alignment: Alignment.center,
+                                            child: Text11(
+                                                text: visible
+                                                    ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                        ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                        : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : "0.0%"
+                                                    : "",
+                                                textColor: MyColors.darkGray),
+                                          )
+                                        ],
+                                      ),
+                                    )
+                                  : const Text("Загрузка..."),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 2,
+                                  child: Container(
+                                    color: isDarkTheme ? MyColors.darkGray : MyColors.black,
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () async {
+                                      await savePositionAndExtent();
+                                      switchOrientation();
+                                    },
+                                    child: Icon(
+                                      CustomIcons.turn,
+                                      color: Theme.of(context).iconTheme.color,
+                                      size: 27,
+                                    ),
+                                  ),
+                                  const Padding(padding: EdgeInsets.only(right: 30)),
+                                  InkWell(
+                                    onTap: () {
+                                      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+                                      themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
+                                      saveSettings(themeProvider.isDarkTheme);
+                                    },
+                                    child: Icon(
+                                      CustomIcons.theme,
+                                      color: Theme.of(context).iconTheme.color,
+                                      size: 27,
+                                    ),
+                                  ),
+                                  const Padding(padding: EdgeInsets.only(right: 30)),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      switch (isBorder) {
+                                        case false:
+                                          var temp = await loadWordCountFromLocalStorage(textes.first.filePath);
+                                          if (temp.filePath != '') {
+                                            replaceWordsWithTranslation(temp.wordEntries);
+                                          } else {
+                                            wordModeDialog(context);
+                                          }
+                                          break;
+                                        default:
+                                          //await getDataFromLocalStorage('textKey');
+                                          isBorder = false;
+                                          final prefs = await SharedPreferences.getInstance();
+
+                                          final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
+                                          var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
+                                          var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
+                                          if (timeElapsed.inHours > 24) {
+                                            wordModeDialog(context);
+                                          } else {
+                                            Fluttertoast.showToast(
+                                              msg:
+                                                  'Новый перевод завтра в ${(lastCallTimestamp.add(const Duration(days: 1)).hour)}:${(lastCallTimestamp.add(const Duration(days: 1)).minute)}',
+                                              toastLength: Toast.LENGTH_LONG,
+                                              gravity: ToastGravity.BOTTOM,
+                                            );
+                                          }
+                                          break;
+                                      }
+                                    },
+                                    child: Icon(
+                                      CustomIcons.wm,
+                                      color: Theme.of(context).iconTheme.color,
+                                      size: 27,
+                                    ),
+                                  )
+                                ],
+                              )
+                            ],
+                          )),
+                    )),
               )
-            : Scaffold(
-                body: Container(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ));
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

@@ -83,15 +83,19 @@ class _ProfilePage extends State<ProfilePage> {
     _initAds();
   }
 
-  void saveWordsToLocalStorage(int words) async {
+  Future<void> saveWordsToLocalStorage(int wordsInput) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('words', words);
+    await prefs.setInt('words', wordsInput);
+
+    setState(() {
+      words = wordsInput;
+    });
   }
 
   Future<void> getWordsFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
+    getWords = prefs.getInt('words') ?? 10;
     setState(() {
-      getWords = prefs.getInt('words') ?? 10;
       words = getWords;
     });
   }
@@ -146,7 +150,8 @@ class _ProfilePage extends State<ProfilePage> {
         // onAdImpression: (data) =>
         //     debugPrint("callback: rewarded ad impression: ${data.getRawData()}"),
         onRewarded: (Reward reward) async {
-      saveWordsToLocalStorage(words + 5);
+      await saveWordsToLocalStorage(words + 5);
+      Fluttertoast.showToast(msg: 'Вам доступно ${words.toString()} слов');
     }));
   }
 
@@ -207,7 +212,6 @@ class _ProfilePage extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     // print('ШИРИНА');
     // print(width);
     // double height = MediaQuery.of(context).size.height;
@@ -282,7 +286,7 @@ class _ProfilePage extends State<ProfilePage> {
                           children: [
                             SizedBox(width: size),
                             SizedBox(
-                              width: width > 600 ? 400 : MediaQuery.of(context).size.width * 0.7,
+                              //width: width > 650 ? 400 : MediaQuery.of(context).size.width * 0.7,
                               child: SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Text16(text: locationData, textColor: MyColors.black),
