@@ -61,19 +61,19 @@ Future<Book> _readBookFromFile(File file) async {
   }
 }
 
-// метод который составляет список прочитанных страниц
-// TODO create new logic for taking filePaths
 getPageCount(String inputFilePath, bool isWM) async {
-  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-  String token = _secureStorage.read(key: 'token') as String ?? '';
+  const FlutterSecureStorage storage = FlutterSecureStorage();
+  String? tokenFromStorage = await storage.read(key: 'token');
+  String token = '';
+  if (tokenFromStorage != null) {
+    token = tokenFromStorage;
+  }
+  print(token);
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  String token = prefs.getString('token') ?? '';
   await processFiles();
 
   Map<int, bool> dataToSend = {};
-  // int index = 0;
-  // print('TEXT AFASHFHASGFHJKASHK ${books.length}');
 
   for (final entry in books) {
     int countFromStorage = prefs.getInt('pageCount-${entry.filePath}') ?? 0;
@@ -84,10 +84,8 @@ getPageCount(String inputFilePath, bool isWM) async {
     int diff = countFromStorage - lastCountFromStorage;
     diff = diff < 0 ? 0 : diff;
 
-
     // print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.filePath}');
     if (isWM == true && entry.title == inputFilePath) {
-
       if (countFromStorage > 0) {
         if (countFromStorage > lastCountFromStorage) {
           final dataToAdd = <int, bool>{diff: true};

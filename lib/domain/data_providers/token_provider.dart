@@ -5,7 +5,7 @@ class TokenProvider {
   static final TokenProvider _instance = TokenProvider._();
   factory TokenProvider() => _instance;
 
-  final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  final FlutterSecureStorage storage = FlutterSecureStorage();
 
   String? _token = '';
   final StreamController<String?> _tokenController = StreamController<String?>.broadcast();
@@ -14,7 +14,7 @@ class TokenProvider {
   TokenProvider._();
 
   Future<void> initAsync() async {
-    _token = await _secureStorage.read(key: 'token');
+    _token = await storage.read(key: 'token');
   }
 
   Future<String?> getToken() async {
@@ -22,7 +22,7 @@ class TokenProvider {
   }
 
   Future<void> setToken(String token) async {
-    await _secureStorage.write(key: 'token', value: token);
+    await storage.write(key: 'token', value: token);
     _token = token;
     _tokenController.add(token);
   }

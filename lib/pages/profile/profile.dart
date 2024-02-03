@@ -119,12 +119,11 @@ class _ProfilePage extends State<ProfilePage> {
     final FlutterSecureStorage secureStorage = FlutterSecureStorage();
     //final prefs = await SharedPreferences.getInstance();
 
-    String? token = await secureStorage.read(key: 'token');
+    String? tokenSecure = await secureStorage.read(key: 'token');
     //token = prefs.getString('token') ?? token;
-
-    print('ТОКЕН ИЗ ЛОКЛКИ: $token');
+    print('ТОКЕН ИЗ ЛОКЛКИ: $tokenSecure');
     setState(() {
-      this.token = token!;
+      token = tokenSecure!;
     });
   }
 
@@ -166,12 +165,12 @@ class _ProfilePage extends State<ProfilePage> {
       'area': area,
       'city': locality,
     };
-    await sendLocationDataToServer(locationData, _secureStorage.read(key: 'token') as String ?? '');
+    await sendLocationDataToServer(locationData, _secureStorage.read(key: 'token').toString());
   }
 
   Future<List<Achievement>> fetchJson() async {
     const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-    String token = await secureStorage.read(key: 'token') as String;
+    String token = await secureStorage.read(key: 'token').toString();
     print('ТОКЕН ${token}');
     // final prefs = await SharedPreferences.getInstance();
     // String token = prefs.getString('token') ?? '';
