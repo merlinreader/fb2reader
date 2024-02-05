@@ -30,8 +30,11 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
   Future<void> getAvatars() async {
     isLoading = true;
     notifyListeners();
-    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-    String token = _secureStorage.read(key: 'token') as String ?? '';
+    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    String? tokenSecure = await secureStorage.read(key: 'token');
+    String token = '';
+    token = tokenSecure!;
+
     // final prefs = await SharedPreferences.getInstance();
     // String token = prefs.getString('token') ?? '';
     final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
