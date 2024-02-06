@@ -6,14 +6,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/style/colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:merlin/style/text.dart';
-
-// пока не забыл
-// Создаем список с name полученных ачивок
-// Пихаем это в попап в профиле на карандшик
-// Выводим из нашего кода только те, что в списке
-// Чтобы список обновился, надо заходить в Достижения. Но это каждый человек будет делать, чтобы убедиться, чо ачивка есть.
 
 class AchievementsPage extends StatefulWidget {
   const AchievementsPage({super.key});
@@ -34,15 +27,12 @@ class _AchievementsPageState extends State<AchievementsPage> {
   }
 
   Future<void> fetchJson() async {
-    //final prefs = await SharedPreferences.getInstance();
-    //String token = prefs.getString('token') ?? '';
-    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
     String? tokenSecure = await secureStorage.read(key: 'token');
     String token = '';
     if (tokenSecure != null) {
       token = tokenSecure;
     }
-    print(token);
 
     final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(

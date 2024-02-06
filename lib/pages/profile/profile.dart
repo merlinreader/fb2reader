@@ -116,15 +116,14 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   Future<void> getTokenFromLocalStorage() async {
-    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
     //final prefs = await SharedPreferences.getInstance();
 
     String? tokenSecure = await secureStorage.read(key: 'token');
-    //token = prefs.getString('token') ?? token;
-    print('ТОКЕН ИЗ ЛОКЛКИ: $tokenSecure');
-    setState(() {
-      token = tokenSecure!;
-    });
+    token = '';
+    if (tokenSecure != null) {
+      token = tokenSecure;
+    }
   }
 
   Future<void> _showRewardedAd() async {
@@ -155,7 +154,7 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   void saveGeo(String country, String area, String locality) async {
-    const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
     final prefs = await SharedPreferences.getInstance();
     prefs.setString("country", country);
     prefs.setString("adminArea", area);
@@ -165,15 +164,16 @@ class _ProfilePage extends State<ProfilePage> {
       'area': area,
       'city': locality,
     };
-    await sendLocationDataToServer(locationData, _secureStorage.read(key: 'token').toString());
+    await sendLocationDataToServer(locationData, secureStorage.read(key: 'token').toString());
   }
 
   Future<List<Achievement>> fetchJson() async {
     const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-    String token = await secureStorage.read(key: 'token').toString();
-    print('ТОКЕН ${token}');
-    // final prefs = await SharedPreferences.getInstance();
-    // String token = prefs.getString('token') ?? '';
+    String? tokenSecure = await secureStorage.read(key: 'token');
+    String token = '';
+    if (tokenSecure != null) {
+      token = tokenSecure;
+    }
     final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
     final response = await http.get(
       url,

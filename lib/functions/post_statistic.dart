@@ -29,7 +29,6 @@ Future<double?> getPageSize() async {
 List<Book> books = [];
 
 Future<void> processFiles() async {
-  print('Start from POST STATS');
   String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
 
   List<FileSystemEntity> files = Directory(path).listSync();
@@ -56,7 +55,7 @@ Future<Book> _readBookFromFile(File file) async {
     Book book = Book.fromJson(jsonMap);
     return book;
   } catch (e) {
-    print('Error reading file: $e');
+    // print('Error reading file: $e');
     return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0, customTitle: '');
   }
 }
@@ -68,7 +67,7 @@ getPageCount(String inputFilePath, bool isWM) async {
   if (tokenFromStorage != null) {
     token = tokenFromStorage;
   }
-  print(token);
+  // print(token);
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   await processFiles();
@@ -111,9 +110,9 @@ getPageCount(String inputFilePath, bool isWM) async {
   DateTime nowDateTime = DateTime.now();
   Duration difference = nowDateTime.difference(savedDateTime);
   int differenceInSeconds = difference.inSeconds;
-  print('pageSize = $pageSize');
-  print('savedDateTime = $savedDateTime');
-  print('differenceInSeconds = $differenceInSeconds');
+  // print('pageSize = $pageSize');
+  // print('savedDateTime = $savedDateTime');
+  // print('differenceInSeconds = $differenceInSeconds');
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
   String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
@@ -189,13 +188,13 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pa
   );
   // print(response.body);
   if (response.statusCode == 200) {
-    print('Данные статистики ЮЗЕРА отправлены успешно! 200');
+    // print('Данные статистики ЮЗЕРА отправлены успешно! 200');
     // print("$pageCountSimpleMode, $pageCountWordMode");
   }
   if (response.statusCode == 201) {
-    print('Данные статистики ЮЗЕРА отправлены успешно! 201');
+    // print('Данные статистики ЮЗЕРА отправлены успешно! 201');
   } else {
-    print('Ошибка при отправке данных статистики ЮЗЕРА: ${response.reasonPhrase} (${response.statusCode})');
+    // print('Ошибка при отправке данных статистики ЮЗЕРА: ${response.reasonPhrase} (${response.statusCode})');
   }
 }
 
@@ -223,13 +222,13 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
   );
   // print(response.body);
   if (response.statusCode == 200) {
-    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно! 200');
+    // print('Данные статистики и местоположения МЕРЛИНА отправлены успешно! 200');
     // print("принт $pageCountSimpleMode, $pageCountWordMode");
   }
   if (response.statusCode == 201) {
-    print('Данные статистики и местоположения МЕРЛИНА отправлены успешно! 201');
+    // print('Данные статистики и местоположения МЕРЛИНА отправлены успешно! 201');
     // print("принт201 $pageCountSimpleMode, $pageCountWordMode");
   } else {
-    print('Ошибка при отправке данных статистики и местоположения МЕРЛИНА: ${response.reasonPhrase} (${response.statusCode})');
+    // print('Ошибка при отправке данных статистики и местоположения МЕРЛИНА: ${response.reasonPhrase} (${response.statusCode})');
   }
 }

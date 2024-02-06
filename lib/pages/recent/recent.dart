@@ -232,6 +232,7 @@ class RecentPageState extends State<RecentPage> {
                       await books[index].updateTitleInFile(updatedValue);
                       await _fetchFromJSON();
                     }
+                    // ignore: use_build_context_synchronously
                     Navigator.of(context).pop();
                   }
                 },
@@ -395,7 +396,7 @@ class RecentPageState extends State<RecentPage> {
                             await sendFileTitle(books[index].title);
                             if (isSended) {
                               isSended = false;
-                              // await Navigator.pushNamed(context, RouteNames.reader);
+                              // ignore: use_build_context_synchronously
                               Navigator.of(context).pushNamed(RouteNames.reader).then((value) async => await _fetchFromJSON());
                             }
                           } catch (e) {

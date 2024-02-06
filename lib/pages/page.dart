@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -46,7 +48,7 @@ class Page extends State<AppPage> {
     getBookName();
   }
 
-  Future<dynamic> getBookName() async {
+  Future<void> getBookName() async {
     final prefs = await SharedPreferences.getInstance();
     bookName = prefs.getString('fileTitle') ?? '';
   }
@@ -148,7 +150,8 @@ class Page extends State<AppPage> {
           : _widgetOptions[_selectedPage],
       floatingActionButton: profile == false
           ? FloatingActionButton(
-              onPressed: () {
+              onPressed: () async {
+                await getBookName();
                 try {
                   // if (RecentPageState().checkBooks() == true) {
                   //   Fluttertoast.showToast(
@@ -160,7 +163,7 @@ class Page extends State<AppPage> {
                   if (bookName == '') {
                     Fluttertoast.showToast(
                       msg: 'Нет последней книги',
-                      toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                      toastLength: Toast.LENGTH_SHORT,
                       gravity: ToastGravity.BOTTOM,
                     );
                   } else {
@@ -170,8 +173,8 @@ class Page extends State<AppPage> {
                 } catch (e) {
                   Fluttertoast.showToast(
                     msg: 'Нет последней книги',
-                    toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-                    gravity: ToastGravity.BOTTOM, // Расположение уведомления
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM,
                   );
                 }
               },

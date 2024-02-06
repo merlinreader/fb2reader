@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, sized_box_for_whitespace
 
 import 'dart:async';
 import 'dart:convert';
@@ -7,6 +7,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
@@ -113,7 +114,7 @@ class Reader extends State with WidgetsBindingObserver {
         final prefs = await SharedPreferences.getInstance();
         while (!loading) {
           lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-          print('READER lastpagecount $lastPageCount');
+          // print('READER lastpagecount $lastPageCount');
           prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
           pageSize = MediaQuery.of(context).size.height;
           await saveDateTime(pageSize);
@@ -129,7 +130,6 @@ class Reader extends State with WidgetsBindingObserver {
           }
           _loadPageCountFromLocalStorage();
           if (book.text.isNotEmpty) {
-            print('break dance');
             break;
           }
         }
@@ -198,7 +198,7 @@ class Reader extends State with WidgetsBindingObserver {
         loading = false;
         setState(() {});
       } catch (e) {
-        print('Error reading file: $e');
+        // print('Error reading file: $e');
         // Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Ошибка чтения файла',
@@ -250,7 +250,7 @@ class Reader extends State with WidgetsBindingObserver {
   Future<void> _savePageCountToLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     pageCount = ((_scrollPosition / 100) * pagesForCount).toInt();
-    print("Сохраняем pageCount $pageCount");
+    // print("Сохраняем pageCount $pageCount");
     prefs.setInt('pageCount-${book.filePath}', pageCount);
   }
 
@@ -379,7 +379,7 @@ class Reader extends State with WidgetsBindingObserver {
   void wordModeDialog(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     int getWords = prefs.getInt('words') ?? 10;
-    print('wordModeDialog $getWords');
+    // print('wordModeDialog $getWords');
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AgreementDialog(
@@ -1367,6 +1367,7 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
+  @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
@@ -1830,13 +1831,14 @@ class Reader extends State with WidgetsBindingObserver {
                                                   var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                                   var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
                                                   prefs.setBool('${book.filePath}-isTrans', false);
-                                                  // if (timeElapsed.inHours > 24) {
-                                                  if (timeElapsed.inMicroseconds >= 1) {
+
+                                                  if (timeElapsed.inHours > 24) {
                                                     wordModeDialog(context);
                                                   } else {
+                                                    final formattedTime = DateFormat('HH:mm').format(lastCallTimestamp.add(const Duration(days: 1)));
+
                                                     Fluttertoast.showToast(
-                                                      msg:
-                                                          'Новый перевод завтра в ${(lastCallTimestamp.add(const Duration(days: 1)).hour)}:${(lastCallTimestamp.add(const Duration(days: 1)).minute)}',
+                                                      msg: 'Новый перевод завтра в $formattedTime',
                                                       toastLength: Toast.LENGTH_LONG,
                                                       gravity: ToastGravity.BOTTOM,
                                                     );

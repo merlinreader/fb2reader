@@ -10,6 +10,7 @@ class StatisticPage extends StatefulWidget {
   const StatisticPage({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _StatisticPageState createState() => _StatisticPageState();
 }
 
@@ -91,7 +92,7 @@ class _StatisticPageState extends State<StatisticPage> {
         Expanded(
           child: IndexedStack(
             index: _currentPageIndex,
-            children: [
+            children: const [
               Country(), // Страница "Страна"
               Region(), // Страница "Регион"
               City(), // Страница "Город"
@@ -104,6 +105,8 @@ class _StatisticPageState extends State<StatisticPage> {
 }
 
 class Country extends StatelessWidget {
+  const Country({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -160,6 +163,8 @@ class Country extends StatelessWidget {
 }
 
 class Region extends StatelessWidget {
+  const Region({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -217,6 +222,8 @@ class Region extends StatelessWidget {
 }
 
 class City extends StatelessWidget {
+  const City({super.key});
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
@@ -293,6 +300,7 @@ class Swipe extends StatefulWidget {
   @override
   // ignore: no_logic_in_create_state
   SwipeState createState() =>
+      // ignore: no_logic_in_create_state
       SwipeState(statDay: statDay, statWeek: statWeek, statMonth: statMonth, statSemiAnnual: statSemiAnnual, statAnnual: statAnnual);
 }
 

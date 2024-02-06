@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -6,7 +8,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/domain/data_providers/avatar_provider.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
 class ChooseAvatarDialogViewModel extends ChangeNotifier {
@@ -30,7 +31,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
   Future<void> getAvatars() async {
     isLoading = true;
     notifyListeners();
-    final FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
     String? tokenSecure = await secureStorage.read(key: 'token');
     String token = '';
     token = tokenSecure!;
@@ -81,10 +82,12 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
   }
 
   Future<void> sendAvatar(avatarName) async {
-    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-    String token = _secureStorage.read(key: 'token') as String ?? '';
-    // final prefs = await SharedPreferences.getInstance();
-    // String token = prefs.getString('token') ?? '';
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    String? tokenSecure = await secureStorage.read(key: 'token');
+    String token = '';
+    if (tokenSecure != null) {
+      token = tokenSecure;
+    }
     String url = 'https://fb2.cloud.leam.pro/api/account/avatar';
     // ignore: unused_local_variable
     var res = await http.patch(Uri.parse(url),

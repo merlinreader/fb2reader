@@ -5,7 +5,7 @@ class TokenProvider {
   static final TokenProvider _instance = TokenProvider._();
   factory TokenProvider() => _instance;
 
-  final FlutterSecureStorage storage = FlutterSecureStorage();
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
 
   String? _token = '';
   final StreamController<String?> _tokenController = StreamController<String?>.broadcast();

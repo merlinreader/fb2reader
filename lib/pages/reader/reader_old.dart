@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unused_element, sized_box_for_whitespace
 
 import 'dart:async';
 import 'dart:convert';
@@ -163,14 +163,11 @@ class Reader extends State with WidgetsBindingObserver {
     });
   }
 
-  // TODO
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       await bookSaveProgress();
-      // await _savePageCountToLocalStorage();
       await bookSaveReadingPosition(_scrollController.position.pixels);
-      // await getPageCount(textes.first.filePath, isBorder);
     }
   }
 
@@ -206,6 +203,7 @@ class Reader extends State with WidgetsBindingObserver {
       FileSystemEntity? targetFile = files.firstWhere(
         (file) => file is File && file.uri.pathSegments.last == targetFileName,
       );
+      // ignore: unnecessary_null_comparison
       if (targetFile == null) {
         Navigator.pop(context);
         Fluttertoast.showToast(
@@ -223,7 +221,7 @@ class Reader extends State with WidgetsBindingObserver {
           book = book;
         });
       } catch (e) {
-        print('Error reading file: $e');
+        // print('Error reading file: $e');
         Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Ошибка чтения файла',
@@ -239,7 +237,6 @@ class Reader extends State with WidgetsBindingObserver {
     prefs.setBool('isWM-${textes.first.filePath}', isBorder);
   }
 
-  // TODO create new logic for taking filePaths
   Future<void> _loadPageCountFromLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -405,7 +402,7 @@ class Reader extends State with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     getText = "";
     String? fileTitle = prefs.getString('fileTitle');
-    print(fileTitle);
+    // print(fileTitle);
     if (fileTitle != null) {
       List<FileSystemEntity> files = Directory(path).listSync();
       String targetFileName = '$fileTitle.json';
@@ -413,6 +410,7 @@ class Reader extends State with WidgetsBindingObserver {
       FileSystemEntity? targetFile = files.firstWhere(
         (file) => file is File && file.uri.pathSegments.last == targetFileName,
       );
+      // ignore: unnecessary_null_comparison
       if (targetFile == null) {
         Navigator.pop(context);
         Fluttertoast.showToast(
@@ -430,7 +428,7 @@ class Reader extends State with WidgetsBindingObserver {
           getText = book.text;
         });
       } catch (e) {
-        print('Error reading file: $e');
+        // print('Error reading file: $e');
         Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Ошибка чтения файла',
@@ -489,6 +487,14 @@ class Reader extends State with WidgetsBindingObserver {
       _scrollController.jumpTo(newPosition);
     }
   }
+  // Послание будущим разработчикам:
+  // Мы Вам не советуем работать с данным кодом
+  // Во избежание психологических проблем
+  // Не дополняйте, не редактируйте,
+  // Не используйте, не читайте
+  // Наш код.
+  // Используйте только в ознакомительных целях,
+  // желательно в церкви.
 
   // Метод для объединения прошлых и новых слов
   // Future<void> saveWordCountToLocalstorage(WordCount newWordCount) async {

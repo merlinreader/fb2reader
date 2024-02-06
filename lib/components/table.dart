@@ -24,6 +24,7 @@ class StatTable extends StatefulWidget {
   }) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _StatTableState createState() => _StatTableState();
 }
 
@@ -37,8 +38,12 @@ class _StatTableState extends State<StatTable> {
   }
 
   Future<void> getId() async {
-    final FlutterSecureStorage _secureStorage = FlutterSecureStorage();
-    String token = await _secureStorage.read(key: 'token') as String ?? '';
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    String? tokenSecure = await secureStorage.read(key: 'token');
+    String token = '';
+    if (tokenSecure != null) {
+      token = tokenSecure;
+    }
     final prefs = await SharedPreferences.getInstance();
     // String token = prefs.getString('token') ?? '';
     const url = 'https://fb2.cloud.leam.pro/api/account/';
