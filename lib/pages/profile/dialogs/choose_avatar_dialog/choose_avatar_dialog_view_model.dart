@@ -38,7 +38,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
 
     // final prefs = await SharedPreferences.getInstance();
     // String token = prefs.getString('token') ?? '';
-    final url = Uri.parse('https://fb2.cloud.leam.pro/api/account/achievements');
+    final url = Uri.parse('https://merlin.su/account/achievements');
     try {
       final response = await http.get(
         url,
@@ -88,7 +88,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
     if (tokenSecure != null) {
       token = tokenSecure;
     }
-    String url = 'https://fb2.cloud.leam.pro/api/account/avatar';
+    String url = 'https://merlin.su/account/avatar';
     // ignore: unused_local_variable
     var res = await http.patch(Uri.parse(url),
         headers: {

@@ -176,7 +176,7 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pa
   };
   // print(token);
   // print(data);
-  final url = Uri.parse('https://fb2.cloud.leam.pro/api/statistic/user');
+  final url = Uri.parse('https://merlin.su/statistic/user');
   // ignore: unused_local_variable
   final response = await http.post(
     url,
@@ -211,7 +211,7 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
     "date": nowDataUTC,
   };
   // print(data);
-  final url = Uri.parse('https://fb2.cloud.leam.pro/api/statistic/anonym');
+  final url = Uri.parse('https://merlin.su/statistic/anonym');
   // ignore: unused_local_variable
   final response = await http.post(
     url,

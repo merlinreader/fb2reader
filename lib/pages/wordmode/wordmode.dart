@@ -238,7 +238,7 @@ class WordCount {
 
   Future<List<String>> getNounsByList(List<String> inputWords) async {
     // debugPrint('getNounsByList inputWords $inputWords');
-    String url = 'https://fb2.cloud.leam.pro/api/account/words/nouns';
+    String url = 'https://merlin.su/account/words/nouns';
     var response = await http.post(
       Uri.parse(url),
       headers: {
@@ -261,7 +261,7 @@ class WordCount {
     final words = await getAllWords();
     // debugPrint('words = $words');
     // debugPrint('words.length = ${words.length}');
-    String url = 'https://fb2.cloud.leam.pro/api/account/words/nouns';
+    String url = 'https://merlin.su/account/words/nouns';
 
     var response = await http.post(
       Uri.parse(url),

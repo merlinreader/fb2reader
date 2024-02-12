@@ -10,8 +10,11 @@ Future<Map<String, String>> getLocation() async {
   if (!status.isGranted) {
     await Permission.locationWhenInUse.request();
   }
-  Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude, localeIdentifier: 'en-US');
+  Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high);
+  List<Placemark> placemarks = await placemarkFromCoordinates(
+      position.latitude, position.longitude,
+      localeIdentifier: 'en-US');
   Placemark placemark = placemarks[0];
   String? country = placemark.country;
   String? area = placemark.administrativeArea;
@@ -32,8 +35,9 @@ Future<Map<String, String>> getLocation() async {
   return locationData;
 }
 
-Future<void> sendLocationDataToServer(Map<String, String> locationData, String? token) async {
-  const url = 'https://fb2.cloud.leam.pro/api/account/geo';
+Future<void> sendLocationDataToServer(
+    Map<String, String> locationData, String? token) async {
+  const url = 'https://merlin.su/account/geo';
   try {
     // ignore: unused_local_variable
     final response = await http.patch(

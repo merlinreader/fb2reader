@@ -80,7 +80,7 @@ class SplashSreenViewModel {
     // );
     // debugPrint('вот токен::::::::::::::::::::::::::::::::::::::::::::::::::::::::=$token');
     if (token != null) {
-      String url = 'https://fb2.cloud.leam.pro/api/account/';
+      String url = 'https://merlin.su/account/';
       final data = json.decode((await http.get(Uri.parse(url), headers: {
         'Authorization': 'Bearer $token',
       }))
