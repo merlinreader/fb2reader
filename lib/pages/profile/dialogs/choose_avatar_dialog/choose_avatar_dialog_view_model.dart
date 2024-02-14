@@ -36,8 +36,6 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
     String token = '';
     token = tokenSecure!;
 
-    // final prefs = await SharedPreferences.getInstance();
-    // String token = prefs.getString('token') ?? '';
     final url = Uri.parse('https://merlin.su/account/achievements');
     try {
       final response = await http.get(

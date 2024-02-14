@@ -100,6 +100,8 @@ class SplashSreenViewModel {
         await AvatarProvider.setAvatarBytes(response.bodyBytes);
         saveAvatar = response.bodyBytes;
       } catch (_) {}
+    } else {
+      return;
     }
   }
 }

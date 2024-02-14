@@ -1,3 +1,5 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,11 +12,8 @@ Future<Map<String, String>> getLocation() async {
   if (!status.isGranted) {
     await Permission.locationWhenInUse.request();
   }
-  Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high);
-  List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude, position.longitude,
-      localeIdentifier: 'en-US');
+  Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude, localeIdentifier: 'en-US');
   Placemark placemark = placemarks[0];
   String? country = placemark.country;
   String? area = placemark.administrativeArea;
@@ -29,14 +28,17 @@ Future<Map<String, String>> getLocation() async {
     'area': area ?? '',
     'city': locality ?? '',
   };
-  // Отправляем данные на сервер
-  await sendLocationDataToServer(locationData, prefs.getString('token') ?? '');
 
+  const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+  String? tokenSecure = await secureStorage.read(key: 'token');
+
+  if (tokenSecure != null) {
+    await sendLocationDataToServer(locationData, tokenSecure.toString());
+  }
   return locationData;
 }
 
-Future<void> sendLocationDataToServer(
-    Map<String, String> locationData, String? token) async {
+Future<void> sendLocationDataToServer(Map<String, String> locationData, String? token) async {
   const url = 'https://merlin.su/account/geo';
   try {
     // ignore: unused_local_variable

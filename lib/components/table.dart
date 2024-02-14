@@ -45,7 +45,6 @@ class _StatTableState extends State<StatTable> {
       token = tokenSecure;
     }
     final prefs = await SharedPreferences.getInstance();
-    // String token = prefs.getString('token') ?? '';
     const url = 'https://merlin.su/account/';
     try {
       final response = await http.get(
