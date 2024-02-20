@@ -109,6 +109,8 @@ class Reader extends State with WidgetsBindingObserver {
     loadStylePreferences();
     _initPage();
 
+    // TODO УБРАТЬ ПРОВЕРКУ ЕСТЬ ЛИ РАМКА ИЛИ ПЕРЕВОД
+    // КНИГА ВСЕГДА ДОЛЖНА ОТКРЫВАТЬСЯ В ОРИГИНАЛЕ
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Future.delayed(const Duration(milliseconds: 300), () async {
         final prefs = await SharedPreferences.getInstance();
@@ -354,6 +356,7 @@ class Reader extends State with WidgetsBindingObserver {
     return pattern.toLowerCase();
   }
 
+  // TODO ИЗМЕНИТЬ НА SECURE STORAGE
   Future<WordCount> loadWordCountFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     String key = 'WMWORDS';
@@ -1827,6 +1830,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                   setState(() {});
                                                   final prefs = await SharedPreferences.getInstance();
 
+                                                  // TODO ИЗМЕНИТЬ НА SECURE STORAGE
                                                   final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
                                                   var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
                                                   var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
