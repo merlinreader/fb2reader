@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
@@ -109,8 +110,6 @@ class Reader extends State with WidgetsBindingObserver {
     loadStylePreferences();
     _initPage();
 
-    // TODO УБРАТЬ ПРОВЕРКУ ЕСТЬ ЛИ РАМКА ИЛИ ПЕРЕВОД
-    // КНИГА ВСЕГДА ДОЛЖНА ОТКРЫВАТЬСЯ В ОРИГИНАЛЕ
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Future.delayed(const Duration(milliseconds: 300), () async {
         final prefs = await SharedPreferences.getInstance();
@@ -120,13 +119,7 @@ class Reader extends State with WidgetsBindingObserver {
           prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
           pageSize = MediaQuery.of(context).size.height;
           await saveDateTime(pageSize);
-          if (!loading) {
-            isTrans = prefs.getBool('${book.filePath}-isTrans');
-            if (isTrans != null && isTrans == true && isBorder == true) {
-              var temp = await loadWordCountFromLocalStorage();
-              replaceWordsWithTranslation(temp.wordEntries);
-            }
-          }
+
           if (_scrollController.hasClients) {
             _scrollController.jumpTo(book.lastPosition);
           }
@@ -356,7 +349,7 @@ class Reader extends State with WidgetsBindingObserver {
     return pattern.toLowerCase();
   }
 
-  // TODO ИЗМЕНИТЬ НА SECURE STORAGE
+  // ИЗМЕНИТЬ НА SECURE STORAGE
   Future<WordCount> loadWordCountFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
     String key = 'WMWORDS';
@@ -390,11 +383,17 @@ class Reader extends State with WidgetsBindingObserver {
       ),
     );
 
+    const FlutterSecureStorage storage = FlutterSecureStorage();
+
     if (result == true) {
       // Действие, выполняемое после нажатия "Да"
       final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
       // await wordCount.resetCallCount();
       // await showEmptyTable(context, wordCount);
+      var timeNow = DateTime.now();
+      String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(timeNow);
+      await storage.write(key: 'TimeDialog', value: formattedDateTime);
+
       await showTableDialog(context, wordCount, true);
     } else if (result == false) {
       // Действие, выполняемое после нажатия "Нет"
@@ -402,6 +401,9 @@ class Reader extends State with WidgetsBindingObserver {
       // Если нужно сбросить счётчик времени
       // await wordCount.resetCallCount();
       // await wordCount.checkCallInfo();
+      var timeNow = DateTime.now();
+      String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(timeNow);
+      await storage.write(key: 'TimeDialog', value: formattedDateTime);
       await showTableDialog(context, wordCount, false);
     }
   }
@@ -1817,32 +1819,34 @@ class Reader extends State with WidgetsBindingObserver {
                                             onTap: () async {
                                               switch (isBorder) {
                                                 case false:
-                                                  var temp = await loadWordCountFromLocalStorage();
-                                                  if (temp.filePath != '') {
-                                                    replaceWordsWithTranslation(temp.wordEntries);
+                                                  const FlutterSecureStorage storage = FlutterSecureStorage();
+                                                  var timeNow = DateTime.now();
+                                                  var timeLast = await storage.read(key: 'TimeDialog');
+                                                  if (timeLast != null) {
+                                                    var elapsedTime = timeNow.difference(DateTime.parse(timeLast));
+                                                    if (elapsedTime.inHours >= 24) {
+                                                      wordModeDialog(context);
+                                                    } else {
+                                                      var tempWE = await loadWordCountFromLocalStorage();
+                                                      if (tempWE.filePath != '') {
+                                                        replaceWordsWithTranslation(tempWE.wordEntries);
+                                                      }
+                                                    }
                                                   } else {
                                                     wordModeDialog(context);
                                                   }
                                                   break;
                                                 default:
-                                                  //await getDataFromLocalStorage('textKey');
                                                   isBorder = false;
                                                   setState(() {});
-                                                  final prefs = await SharedPreferences.getInstance();
-
-                                                  // TODO ИЗМЕНИТЬ НА SECURE STORAGE
-                                                  final lastCallTimestampStr = prefs.getString('lastCallTimestamp');
-                                                  var lastCallTimestamp = lastCallTimestampStr != null ? DateTime.parse(lastCallTimestampStr) : null;
-                                                  var timeElapsed = DateTime.now().difference(lastCallTimestamp!);
-                                                  prefs.setBool('${book.filePath}-isTrans', false);
-
-                                                  if (timeElapsed.inHours > 24) {
-                                                    wordModeDialog(context);
-                                                  } else {
-                                                    final formattedTime = DateFormat('HH:mm').format(lastCallTimestamp.add(const Duration(days: 1)));
+                                                  const FlutterSecureStorage storage = FlutterSecureStorage();
+                                                  var timeLast = await storage.read(key: 'TimeDialog');
+                                                  if (timeLast != null) {
+                                                    final formattedTime =
+                                                        DateFormat('MM.dd HH:mm').format(DateTime.parse(timeLast).add(const Duration(days: 1)));
 
                                                     Fluttertoast.showToast(
-                                                      msg: 'Новый перевод завтра в $formattedTime',
+                                                      msg: 'Новый перевод будет доступен $formattedTime',
                                                       toastLength: Toast.LENGTH_LONG,
                                                       gravity: ToastGravity.BOTTOM,
                                                     );
