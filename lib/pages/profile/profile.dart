@@ -77,7 +77,6 @@ class _ProfilePage extends State<ProfilePage> {
     //initUniLinks();
     getTokenFromLocalStorage();
     getFirstNameFromLocalStorage();
-
     getWordsFromLocalStorage();
     MobileAds.initialize();
     _initAds();
@@ -119,7 +118,12 @@ class _ProfilePage extends State<ProfilePage> {
     const FlutterSecureStorage secureStorage = FlutterSecureStorage();
     //final prefs = await SharedPreferences.getInstance();
 
-    String? tokenSecure = await secureStorage.read(key: 'token');
+    String? tokenSecure;
+    try {
+      tokenSecure = await secureStorage.read(key: 'token');
+    } catch (e) {
+      tokenSecure == null;
+    }
     token = '';
     if (tokenSecure != null) {
       token = tokenSecure;

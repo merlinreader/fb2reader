@@ -22,7 +22,6 @@ class SplashSreenViewModel {
 
   Future<void> _initAsync() async {
     await initUniLinks();
-    await AvatarProvider.initAsync();
     await TokenProvider().initAsync();
     await getFirstName();
     Navigator.pushReplacementNamed(context, RouteNames.main);
@@ -78,23 +77,26 @@ class SplashSreenViewModel {
     //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
     //   gravity: ToastGravity.BOTTOM,
     // );
-    // debugPrint('вот токен::::::::::::::::::::::::::::::::::::::::::::::::::::::::=$token');
-    if (token != null) {
+    // debugPrint('вот токен $token');
+    if (token != null && token != '') {
       String url = 'https://merlin.su/account/';
       final data = json.decode((await http.get(Uri.parse(url), headers: {
         'Authorization': 'Bearer $token',
       }))
           .body);
       firstName = data['firstName'].toString();
-      // debugPrint('имя из запроса $firstName');
+      debugPrint('имя из запроса $firstName');
       // Fluttertoast.showToast(
       //   msg: 'имя из запроса $firstName',
       //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
       //   gravity: ToastGravity.BOTTOM,
       // );
       avatarFromServer = data['avatar']['picture'];
-      prefs.setString('firstName', firstName);
+      await prefs.setString('firstName', firstName);
+      print('From splash firstname $firstName');
       try {
+        await AvatarProvider.initAsync();
+
         await AvatarProvider.setAvatarUrl(avatarFromServer);
         final response = await http.get(Uri.parse(avatarFromServer));
         await AvatarProvider.setAvatarBytes(response.bodyBytes);

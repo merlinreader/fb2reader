@@ -14,7 +14,13 @@ class TokenProvider {
   TokenProvider._();
 
   Future<void> initAsync() async {
-    _token = await storage.read(key: 'token');
+    try {
+      _token = await storage.read(key: 'token');
+      // print("Токен в провайдере $_token");
+    } catch (e) {
+      _token = '';
+      return;
+    }
   }
 
   Future<String?> getToken() async {

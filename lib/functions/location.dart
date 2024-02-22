@@ -1,5 +1,4 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -30,7 +29,12 @@ Future<Map<String, String>> getLocation() async {
   };
 
   const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-  String? tokenSecure = await secureStorage.read(key: 'token');
+  String? tokenSecure;
+  try {
+    tokenSecure = await secureStorage.read(key: 'token');
+  } catch (e) {
+    tokenSecure = null;
+  }
 
   if (tokenSecure != null) {
     await sendLocationDataToServer(locationData, tokenSecure.toString());

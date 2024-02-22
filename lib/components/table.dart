@@ -39,7 +39,12 @@ class _StatTableState extends State<StatTable> {
 
   Future<void> getId() async {
     const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-    String? tokenSecure = await secureStorage.read(key: 'token');
+    String? tokenSecure;
+    try {
+      tokenSecure = await secureStorage.read(key: 'token');
+    } catch (e) {
+      tokenSecure = null;
+    }
     String token = '';
     if (tokenSecure != null) {
       token = tokenSecure;

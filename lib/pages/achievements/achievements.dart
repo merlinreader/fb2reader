@@ -28,7 +28,12 @@ class _AchievementsPageState extends State<AchievementsPage> {
 
   Future<void> fetchJson() async {
     const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-    String? tokenSecure = await secureStorage.read(key: 'token');
+    String? tokenSecure;
+    try {
+      tokenSecure = await secureStorage.read(key: 'token');
+    } catch (e) {
+      tokenSecure = null;
+    }
     String token = '';
     if (tokenSecure != null) {
       token = tokenSecure;
