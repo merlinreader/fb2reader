@@ -80,32 +80,34 @@ getPageCount(String inputFilePath, bool isWM) async {
   Map<int, bool> dataToSend = {};
 
   for (final entry in books) {
-    int countFromStorage = prefs.getInt('pageCount-${entry.filePath}') ?? 0;
-    prefs.remove('pageCount-${entry.title}');
-    int lastCountFromStorage = prefs.getInt('lastPageCount-${entry.filePath}') ?? 0;
-    // print("countfromst $countFromStorage");
-    // print("lastfromst $lastCountFromStorage");
-    int diff = countFromStorage - lastCountFromStorage;
-    diff = diff < 0 ? 0 : diff;
+    if (entry.title == inputFilePath) {
+      int countFromStorage = prefs.getInt('pageCount-${entry.filePath}') ?? 0;
+      prefs.remove('pageCount-${entry.title}');
+      int lastCountFromStorage = prefs.getInt('lastPageCount-${entry.filePath}') ?? 0;
+      // print("countfromst $countFromStorage");
+      // print("lastfromst $lastCountFromStorage");
+      int diff = countFromStorage - lastCountFromStorage;
+      diff = diff < 0 ? 0 : diff;
 
-    // print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.filePath}');
-    if (isWM == true && entry.title == inputFilePath) {
-      if (countFromStorage > 0) {
+      // print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.filePath}');
+      if (isWM == true) {
+        if (countFromStorage > 0) {
+          if (countFromStorage > lastCountFromStorage) {
+            final dataToAdd = <int, bool>{diff: true};
+            dataToSend.addEntries(dataToAdd.entries);
+          } else {
+            final dataToAdd = <int, bool>{0: true};
+            dataToSend.addEntries(dataToAdd.entries);
+          }
+        }
+      } else {
         if (countFromStorage > lastCountFromStorage) {
-          final dataToAdd = <int, bool>{diff: true};
+          final dataToAdd = <int, bool>{diff: false};
           dataToSend.addEntries(dataToAdd.entries);
         } else {
-          final dataToAdd = <int, bool>{0: true};
+          final dataToAdd = <int, bool>{0: false};
           dataToSend.addEntries(dataToAdd.entries);
         }
-      }
-    } else {
-      if (countFromStorage > lastCountFromStorage) {
-        final dataToAdd = <int, bool>{diff: false};
-        dataToSend.addEntries(dataToAdd.entries);
-      } else {
-        final dataToAdd = <int, bool>{0: false};
-        dataToSend.addEntries(dataToAdd.entries);
       }
     }
   }
@@ -133,7 +135,7 @@ getPageCount(String inputFilePath, bool isWM) async {
         pageCountWordMode = pageCountWordMode + entry.key;
         int number = entry.key;
         bool value = entry.value;
-        pageCountSimpleMode += number;
+        // pageCountSimpleMode += number;
         if (value) {
           pageCountWordMode += number;
         }
@@ -147,7 +149,7 @@ getPageCount(String inputFilePath, bool isWM) async {
         pageCountSimpleMode = pageCountSimpleMode + entry.key;
         int number = entry.key;
         bool value = entry.value;
-        pageCountSimpleMode += number;
+        // pageCountSimpleMode += number;
         if (value) {
           pageCountWordMode += number;
         }
