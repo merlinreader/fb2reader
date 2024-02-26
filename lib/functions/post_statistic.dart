@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+// import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:merlin/functions/book.dart';
@@ -133,12 +134,6 @@ getPageCount(String inputFilePath, bool isWM) async {
       // print('speed WM = $speed sym/sec');
       if (33.3 > speed) {
         pageCountWordMode = pageCountWordMode + entry.key;
-        int number = entry.key;
-        bool value = entry.value;
-        // pageCountSimpleMode += number;
-        if (value) {
-          pageCountWordMode += number;
-        }
       }
     }
     if (entry.value == false) {
@@ -147,12 +142,6 @@ getPageCount(String inputFilePath, bool isWM) async {
       // print('speed SM = $speed sym/sec');
       if (33.3 > speed) {
         pageCountSimpleMode = pageCountSimpleMode + entry.key;
-        int number = entry.key;
-        bool value = entry.value;
-        // pageCountSimpleMode += number;
-        if (value) {
-          pageCountWordMode += number;
-        }
       }
     }
   }
@@ -171,6 +160,8 @@ getPageCount(String inputFilePath, bool isWM) async {
   // }
 
 // Присвоение значений переменным data
+  // Fluttertoast.showToast(msg: 'pageSM: $pageCountSimpleMode | pageWM: $pageCountWordMode', toastLength: Toast.LENGTH_LONG);
+  // print('pageSM: $pageCountSimpleMode | pageWM: $pageCountWordMode');
   if (token == '') {
     if (prefs.getString("deviceId") == null) {
       saveDeviceIdToLocalStorage();

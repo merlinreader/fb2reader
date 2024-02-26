@@ -96,6 +96,9 @@ class Reader extends State with WidgetsBindingObserver {
   double pageSize = 0;
   int pageCount = 0;
   double pagesForCount = 0;
+  double nowPage = 0;
+  double pageFormula = 0;
+  double pageResult = 0;
   int lastPageCount = 0;
   String translatedText = '';
 
@@ -133,12 +136,10 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     WidgetsBinding.instance.removeObserver(this);
     SystemChrome.setPreferredOrientations([orientations[0]]);
-    _disposePage();
-    getPageCount(book.title, isBorder);
     super.dispose();
   }
 
@@ -151,13 +152,12 @@ class Reader extends State with WidgetsBindingObserver {
   // }
 
   Future<void> _disposePage() async {
-    await _savePageCountToLocalStorage();
     await disposeBook();
     WidgetsBinding.instance.addObserver(this);
   }
 
   Future<void> disposeBook() async {
-    book.updateStageInFile(_scrollPosition / 100, position);
+    await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
   }
 
   Future<void> _initPage() async {
@@ -201,6 +201,7 @@ class Reader extends State with WidgetsBindingObserver {
           gravity: ToastGravity.BOTTOM,
         );
       }
+      // print('Длина текста книги = ${book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '').length}');
     }
   }
 
@@ -235,6 +236,11 @@ class Reader extends State with WidgetsBindingObserver {
         position = _scrollController.position.pixels;
       });
     }
+    setState(() {
+      nowPage = _scrollController.position.pixels / pageSize;
+      pageFormula = pagesForCount / (book.text.length.toDouble() / 900);
+      pageResult = nowPage / pageFormula;
+    });
   }
 
   Future<void> _loadPageCountFromLocalStorage() async {
@@ -246,7 +252,8 @@ class Reader extends State with WidgetsBindingObserver {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     pageCount = ((_scrollPosition / 100) * pagesForCount).toInt();
     // print("Сохраняем pageCount $pageCount");
-    prefs.setInt('pageCount-${book.filePath}', pageCount);
+    prefs.setInt('pageCount-${book.filePath}', pageResult.round());
+    // print("Сохраняем pageCount ${pageResult.round()}");
   }
 
   Color textColor = MyColors.black;
@@ -1378,7 +1385,10 @@ class Reader extends State with WidgetsBindingObserver {
 
     return WillPopScope(
         onWillPop: () async {
-          await book.updateStageInFile(_scrollPosition / 100, position);
+          await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+
+          await _savePageCountToLocalStorage();
+          await getPageCount(book.title, isBorder);
           Navigator.pop(context, true);
           return true;
         },

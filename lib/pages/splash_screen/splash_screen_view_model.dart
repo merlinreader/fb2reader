@@ -93,7 +93,7 @@ class SplashSreenViewModel {
       // );
       avatarFromServer = data['avatar']['picture'];
       await prefs.setString('firstName', firstName);
-      print('From splash firstname $firstName');
+      // print('From splash firstname $firstName');
       try {
         await AvatarProvider.initAsync();
 
