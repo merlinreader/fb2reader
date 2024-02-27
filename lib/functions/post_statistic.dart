@@ -221,8 +221,8 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
       "country": prefs.getString("country"),
       "area": prefs.getString("adminArea"),
       "city": prefs.getString("locality"),
-      "pageCountSimpleMode": pageCountWordMode,
-      "pageCountWordMode": pageCountSimpleMode,
+      "pageCountSimpleMode": pageCountSimpleMode,
+      "pageCountWordMode": pageCountWordMode,
       "date": nowDataUTC,
     };
     // print(data);

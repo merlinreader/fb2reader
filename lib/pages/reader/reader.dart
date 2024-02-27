@@ -143,17 +143,16 @@ class Reader extends State with WidgetsBindingObserver {
     super.dispose();
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) async {
-  //   if (state == AppLifecycleState.paused) {
-  //     await _savePageCountToLocalStorage();
-  //     await book.updateStageInFile(_scrollPosition / 100, position);
-  //   }
-  // }
-
-  Future<void> _disposePage() async {
-    await disposeBook();
-    WidgetsBinding.instance.addObserver(this);
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused) {
+      await _savePageCountToLocalStorage();
+      await getPageCount(book.title, isBorder);
+      final prefs = await SharedPreferences.getInstance();
+      await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+      lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+      prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+    }
   }
 
   Future<void> disposeBook() async {
@@ -162,7 +161,6 @@ class Reader extends State with WidgetsBindingObserver {
 
   Future<void> _initPage() async {
     await initBook();
-    WidgetsBinding.instance.addObserver(this);
   }
 
   Future<void> initBook() async {
