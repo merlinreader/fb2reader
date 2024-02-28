@@ -313,6 +313,11 @@ class Reader extends State with WidgetsBindingObserver {
 
   void replaceWordsWithTranslation(List<WordEntry> wordEntries) async {
     final prefs = await SharedPreferences.getInstance();
+    await _savePageCountToLocalStorage();
+    await getPageCount(book.title, isBorder);
+    await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+    lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+    prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
 
     prefs.setBool('${book.filePath}-isTrans', true);
     isBorder = true;
@@ -391,6 +396,12 @@ class Reader extends State with WidgetsBindingObserver {
     const FlutterSecureStorage storage = FlutterSecureStorage();
 
     if (result == true) {
+      await _savePageCountToLocalStorage();
+      await getPageCount(book.title, isBorder);
+      final prefs = await SharedPreferences.getInstance();
+      await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+      lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+      prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
       // Действие, выполняемое после нажатия "Да"
       final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
       // await wordCount.resetCallCount();
@@ -401,6 +412,12 @@ class Reader extends State with WidgetsBindingObserver {
 
       await showTableDialog(context, wordCount, true);
     } else if (result == false) {
+      await _savePageCountToLocalStorage();
+      await getPageCount(book.title, isBorder);
+      final prefs = await SharedPreferences.getInstance();
+      await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+      lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+      prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
       // Действие, выполняемое после нажатия "Нет"
       final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
       // Если нужно сбросить счётчик времени
@@ -1845,6 +1862,12 @@ class Reader extends State with WidgetsBindingObserver {
                                                   }
                                                   break;
                                                 default:
+                                                  await _savePageCountToLocalStorage();
+                                                  await getPageCount(book.title, isBorder);
+                                                  final prefs = await SharedPreferences.getInstance();
+                                                  await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+                                                  lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+                                                  prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
                                                   isBorder = false;
                                                   setState(() {});
                                                   const FlutterSecureStorage storage = FlutterSecureStorage();
