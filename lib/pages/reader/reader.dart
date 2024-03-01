@@ -382,6 +382,24 @@ class Reader extends State with WidgetsBindingObserver {
     await prefs.setString(key, wordCountString);
   }
 
+  String detectLanguage({required String string}) {
+    String languageCode = '';
+    final RegExp english = RegExp(r'^[a-zA-Z]+');
+    final RegExp ukrainian = RegExp(r'^[ҐЄІЇґєії]+', caseSensitive: false);
+    final RegExp kazakh = RegExp(r'^[ҰүҮәӘіІһҺңҢқҚөӨөғҒұҰ]+', caseSensitive: false);
+    final RegExp belarusian = RegExp(r'^[ЎўІі]+', caseSensitive: false);
+    // final RegExp russian = RegExp(r'^[\u0400-\u04FF]+');
+    final RegExp russian = RegExp(r'^[а-яА-Я]+');
+
+    if (english.hasMatch(string)) languageCode = 'en';
+    if (ukrainian.hasMatch(string)) languageCode = 'uk';
+    if (kazakh.hasMatch(string)) languageCode = 'kz';
+    if (belarusian.hasMatch(string)) languageCode = 'br';
+    if (russian.hasMatch(string)) languageCode = 'ru';
+
+    return languageCode;
+  }
+
   void wordModeDialog(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     int getWords = prefs.getInt('words') ?? 10;
@@ -394,39 +412,46 @@ class Reader extends State with WidgetsBindingObserver {
     );
 
     const FlutterSecureStorage storage = FlutterSecureStorage();
+    var code = detectLanguage(string: book.title);
+    // print(code);
 
-    if (result == true) {
-      await _savePageCountToLocalStorage();
-      await getPageCount(book.title, isBorder);
-      final prefs = await SharedPreferences.getInstance();
-      await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
-      lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-      prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
-      // Действие, выполняемое после нажатия "Да"
-      final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
-      // await wordCount.resetCallCount();
-      // await showEmptyTable(context, wordCount);
-      var timeNow = DateTime.now();
-      String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(timeNow);
-      await storage.write(key: 'TimeDialog', value: formattedDateTime);
+    if (code == 'ru') {
+      if (result == true) {
+        await _savePageCountToLocalStorage();
+        await getPageCount(book.title, isBorder);
+        final prefs = await SharedPreferences.getInstance();
+        await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+        lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+        prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+        // Действие, выполняемое после нажатия "Да"
+        final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
+        // await wordCount.resetCallCount();
+        // await showEmptyTable(context, wordCount);
+        var timeNow = DateTime.now();
+        String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(timeNow);
+        await storage.write(key: 'TimeDialog', value: formattedDateTime);
 
-      await showTableDialog(context, wordCount, true);
-    } else if (result == false) {
-      await _savePageCountToLocalStorage();
-      await getPageCount(book.title, isBorder);
-      final prefs = await SharedPreferences.getInstance();
-      await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
-      lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-      prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
-      // Действие, выполняемое после нажатия "Нет"
-      final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
-      // Если нужно сбросить счётчик времени
-      // await wordCount.resetCallCount();
-      // await wordCount.checkCallInfo();
-      var timeNow = DateTime.now();
-      String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(timeNow);
-      await storage.write(key: 'TimeDialog', value: formattedDateTime);
-      await showTableDialog(context, wordCount, false);
+        await showTableDialog(context, wordCount, true);
+      } else if (result == false) {
+        await _savePageCountToLocalStorage();
+        await getPageCount(book.title, isBorder);
+        final prefs = await SharedPreferences.getInstance();
+        await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+        lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+        prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+        // Действие, выполняемое после нажатия "Нет"
+        final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
+        // Если нужно сбросить счётчик времени
+        // await wordCount.resetCallCount();
+        // await wordCount.checkCallInfo();
+        var timeNow = DateTime.now();
+        String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(timeNow);
+        await storage.write(key: 'TimeDialog', value: formattedDateTime);
+        await showTableDialog(context, wordCount, false);
+      }
+    } else {
+      Fluttertoast.showToast(msg: 'Книга не на русском языке!');
+      return;
     }
   }
 
