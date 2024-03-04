@@ -10,6 +10,7 @@ import 'package:merlin/functions/book.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/pages/recent/imageloader.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
@@ -101,7 +102,8 @@ class RecentPageState extends State<RecentPage> {
 
   Future<void> _fetchFromJSON() async {
     // print('_fetchFromJSON...');
-    String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
+    final Directory? externalDir = await getExternalStorageDirectory();
+    final String path = '${externalDir?.path}/books';
     List<FileSystemEntity> files = Directory(path).listSync();
     int length = books.length;
     int index = 0;
@@ -148,12 +150,19 @@ class RecentPageState extends State<RecentPage> {
   }
 
   Future<void> processFiles() async {
-    // print('Start processFiles...');
-    String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
+    final Directory? externalDir = await getExternalStorageDirectory();
+    final String path = '${externalDir?.path}/books';
+    final Directory booksDir = Directory(path);
+
+    // Проверяем, существует ли уже директория, если нет - создаем
+    if (!await booksDir.exists()) {
+      await booksDir.create(recursive: true);
+    }
 
     List<FileSystemEntity> files = Directory(path).listSync();
     List<Future<Book>> futures = [];
 
+    print(files);
     for (FileSystemEntity file in files) {
       if (file is File) {
         Future<Book> futureBook = _readBookFromFile(file);
@@ -164,8 +173,6 @@ class RecentPageState extends State<RecentPage> {
     List<Book> loadedBooks = await Future.wait(futures);
 
     books.addAll(loadedBooks);
-
-    // print('Длина books ${books.length}');
   }
 
   Future<Book> _readBookFromFile(File file) async {

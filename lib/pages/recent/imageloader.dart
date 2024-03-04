@@ -122,19 +122,20 @@ class ImageLoader {
       BookInfo bookData = BookInfo(filePath: path, fileText: text.toString(), title: title, author: name, lastPosition: 0);
       Book book = Book.combine(bookData, imageData);
       Map<String, dynamic> jsonData = book.toJson();
-      String pathWithJsons = '/storage/emulated/0/Android/data/com.example.merlin/files/';
-      List<FileSystemEntity> files = Directory(pathWithJsons).listSync();
+      final Directory? externalDir = await getExternalStorageDirectory();
+      final String pathWithJsons = '${externalDir?.path}/books';
       String targetFileName = '$title.json';
-      FileSystemEntity? targetFile;
-      try {
-        targetFile = files.firstWhere(
-          (file) => file is File && file.uri.pathSegments.last == targetFileName,
-        );
-      } catch (e) {
-        targetFile = null;
+      final Directory directory = Directory(pathWithJsons);
+      if (!await directory.exists()) {
+        await directory.create(recursive: true);
       }
 
-      if (targetFile == null) {
+      final File targetFile = File('${directory.path}/$targetFileName');
+      if (!await targetFile.exists()) {
+        await targetFile.create();
+      }
+      var temp = await targetFile.exists();
+      if (temp == true) {
         await book.saveJsonToFile(jsonData, title);
         await prefs.setString('fileTitle', title);
         await prefs.setBool('success', true);

@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:merlin/functions/book.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:merlin/functions/location.dart';
@@ -30,8 +31,8 @@ Future<double?> getPageSize() async {
 List<Book> books = [];
 
 Future<void> processFiles() async {
-  String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
-
+  final Directory? externalDir = await getExternalStorageDirectory();
+  final String path = '${externalDir?.path}/books';
   List<FileSystemEntity> files = Directory(path).listSync();
   List<Future<Book>> futures = [];
 

@@ -76,7 +76,7 @@ class Book {
       // print('Saving inside book class file...');
       final appDir = await getExternalStorageDirectory();
       // print(appDir?.path);
-      final filePath = '${appDir?.path}/$fileName.json';
+      final filePath = '${appDir?.path}/books/$fileName.json';
 
       final file = File(filePath);
       await file.writeAsString(jsonEncode(jsonData));
@@ -90,7 +90,7 @@ class Book {
   Future<void> deleteFileByTitle(String title) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/$title.json';
+      final filePath = '${appDir?.path}/books/$title.json';
 
       final file = File(filePath);
 
@@ -108,7 +108,7 @@ class Book {
   Future<void> updateTextInFile(String newText) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/$title.json';
+      final filePath = '${appDir?.path}/books/$title.json';
 
       final file = File(filePath);
       String content = await file.readAsString();
@@ -125,7 +125,7 @@ class Book {
   Future<void> updateTitleInFile(String newTitle) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/$title.json';
+      final filePath = '${appDir?.path}/books/$title.json';
 
       final file = File(filePath);
       String content = await file.readAsString();
@@ -142,7 +142,7 @@ class Book {
   Future<void> updateAuthorInFile(String newAuthor) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/$title.json';
+      final filePath = '${appDir?.path}/books/$title.json';
 
       final file = File(filePath);
       String content = await file.readAsString();
@@ -159,7 +159,7 @@ class Book {
   Future<void> updateLastPositionInFile(double newLastPosition) async {
     try {
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/$title.json';
+      final filePath = '${appDir?.path}/books/$title.json';
 
       final file = File(filePath);
       String content = await file.readAsString();
@@ -178,7 +178,7 @@ class Book {
       // print('Updating PROGRESS inside book class file...');
 
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/$title.json';
+      final filePath = '${appDir?.path}/books/$title.json';
       // print(filePath);
 
       final file = File(filePath);
@@ -198,7 +198,7 @@ class Book {
       // print('Updating STAGE inside book class file...');
 
       final appDir = await getExternalStorageDirectory();
-      final filePath = '${appDir?.path}/$title.json';
+      final filePath = '${appDir?.path}/books/$title.json';
       // print(filePath);
 
       final file = File(filePath);

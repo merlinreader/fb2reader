@@ -91,7 +91,7 @@ class Reader extends State with WidgetsBindingObserver {
 
   double fontSize = 18;
 
-  String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
+  String path = '/storage/emulated/0/Android/data/com.example.merlin/files/books/';
   late Book book;
 
   void _getBatteryLevel() async {

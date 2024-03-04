@@ -20,6 +20,7 @@ import 'package:merlin/pages/wordmode/models/word_entry.dart';
 import 'package:merlin/pages/wordmode/wordmode.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
@@ -73,7 +74,6 @@ class ReaderPage extends StatefulWidget {
 
 class Reader extends State with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
-  String path = '/storage/emulated/0/Android/data/com.example.merlin/files/';
   late Book book;
   bool loading = true;
   double fontSize = 18;
@@ -166,10 +166,14 @@ class Reader extends State with WidgetsBindingObserver {
   Future<void> initBook() async {
     final prefs = await SharedPreferences.getInstance();
     String? fileTitle = prefs.getString('fileTitle');
+    final Directory? externalDir = await getExternalStorageDirectory();
+    final String path = '${externalDir?.path}/books/';
     if (fileTitle != null) {
       List<FileSystemEntity> files = Directory(path).listSync();
+      print(path);
       String targetFileName = '$fileTitle.json';
       FileSystemEntity? targetFile;
+
       try {
         targetFile = files.firstWhere(
           (file) => file is File && file.uri.pathSegments.last == targetFileName,
