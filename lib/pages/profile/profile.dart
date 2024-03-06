@@ -206,11 +206,19 @@ class _ProfilePage extends State<ProfilePage> {
 
   Future<void> getFirstNameFromLocalStorage() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      var getFirstName = prefs.getString('firstName') ?? firstName;
-      firstName = getFirstName;
-      // debugPrint('имя из локалки $firstName');
-    });
+    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
+    String? tokenSecure = await secureStorage.read(key: 'token');
+    String token = '';
+    if (tokenSecure != null) {
+      token = tokenSecure;
+    }
+    if (token != '') {
+      setState(() {
+        var getFirstName = prefs.getString('firstName') ?? firstName;
+        firstName = getFirstName;
+        // debugPrint('имя из локалки $firstName');
+      });
+    }
   }
 
   @override
