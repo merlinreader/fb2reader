@@ -162,7 +162,7 @@ class RecentPageState extends State<RecentPage> {
     List<FileSystemEntity> files = Directory(path).listSync();
     List<Future<Book>> futures = [];
 
-    print(files);
+    // print(files);
     for (FileSystemEntity file in files) {
       if (file is File) {
         Future<Book> futureBook = _readBookFromFile(file);

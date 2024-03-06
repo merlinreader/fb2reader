@@ -170,7 +170,7 @@ class Reader extends State with WidgetsBindingObserver {
     final String path = '${externalDir?.path}/books/';
     if (fileTitle != null) {
       List<FileSystemEntity> files = Directory(path).listSync();
-      print(path);
+      // print(path);
       String targetFileName = '$fileTitle.json';
       FileSystemEntity? targetFile;
 
@@ -240,7 +240,7 @@ class Reader extends State with WidgetsBindingObserver {
     }
     setState(() {
       nowPage = _scrollController.position.pixels / pageSize;
-      pageFormula = pagesForCount / (book.text.length.toDouble() / 900);
+      pageFormula = pagesForCount / (book.text.length.toDouble() / 1860);
       pageResult = nowPage / pageFormula;
     });
   }
