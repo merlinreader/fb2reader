@@ -415,7 +415,6 @@ class Reader extends State with WidgetsBindingObserver {
       ),
     );
 
-    const FlutterSecureStorage storage = FlutterSecureStorage();
     var code = detectLanguage(string: book.title);
     // print(code);
 
@@ -431,9 +430,7 @@ class Reader extends State with WidgetsBindingObserver {
         final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
         // await wordCount.resetCallCount();
         // await showEmptyTable(context, wordCount);
-        var timeNow = DateTime.now();
-        String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(timeNow);
-        await storage.write(key: 'TimeDialog', value: formattedDateTime);
+        await saveCurrentTime('timeStep');
 
         await showTableDialog(context, wordCount, true);
       } else if (result == false) {
@@ -448,9 +445,8 @@ class Reader extends State with WidgetsBindingObserver {
         // Если нужно сбросить счётчик времени
         // await wordCount.resetCallCount();
         // await wordCount.checkCallInfo();
-        var timeNow = DateTime.now();
-        String formattedDateTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(timeNow);
-        await storage.write(key: 'TimeDialog', value: formattedDateTime);
+        await saveCurrentTime('timeStep');
+
         await showTableDialog(context, wordCount, false);
       }
     } else {
@@ -1423,6 +1419,89 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
+  Future<void> saveJsonToFile(Map<String, dynamic> jsonData, String filePath) async {
+    try {
+      final file = File(filePath);
+      final directory = Directory(file.parent.path);
+
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+
+      await file.writeAsString(jsonEncode(jsonData));
+    } catch (e) {
+      print('Ошибка при сохранении файла: $e');
+    }
+  }
+
+  Future<DateTime?> readTimeFromJsonFile(String fileName) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/Timer/$fileName.json';
+      final file = File(filePath);
+      if (await file.exists()) {
+        final fileContent = await file.readAsString();
+        final jsonData = jsonDecode(fileContent);
+        if (jsonData.containsKey('TimeDialog')) {
+          return DateTime.parse(jsonData['TimeDialog']);
+        }
+      }
+    } catch (e) {
+      print('Ошибка при чтении файла: $e');
+    }
+    return null;
+  }
+
+  Future<void> saveCurrentTime(String fileName) async {
+    final appDir = await getExternalStorageDirectory();
+    final filePath = '${appDir?.path}/Timer/$fileName.json';
+    var timeNow = DateTime.now();
+    await saveJsonToFile({'TimeDialog': timeNow.toIso8601String()}, filePath);
+  }
+
+  void toggleWordMode() async {
+    const String fileName = 'timeStep';
+    switch (isBorder) {
+      case false:
+        var timeNow = DateTime.now();
+        var timeLast = await readTimeFromJsonFile(fileName);
+        if (timeLast != null) {
+          var elapsedTime = timeNow.difference(timeLast);
+          if (elapsedTime.inHours >= 24) {
+            wordModeDialog(context);
+          } else {
+            var tempWE = await loadWordCountFromLocalStorage();
+            if (tempWE.filePath != '') {
+              replaceWordsWithTranslation(tempWE.wordEntries);
+            }
+          }
+        } else {
+          wordModeDialog(context);
+        }
+        break;
+      default:
+        await _savePageCountToLocalStorage();
+        await getPageCount(book.title, isBorder);
+        final prefs = await SharedPreferences.getInstance();
+        await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
+        lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+        prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+        isBorder = false;
+        setState(() {});
+        var timeLast = await readTimeFromJsonFile(fileName);
+        if (timeLast != null) {
+          final formattedTime = DateFormat('MM.dd HH:mm').format(timeLast.add(const Duration(days: 1)));
+
+          Fluttertoast.showToast(
+            msg: 'Новый перевод будет доступен $formattedTime',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+          );
+        }
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -1871,48 +1950,7 @@ class Reader extends State with WidgetsBindingObserver {
                                           const Padding(padding: EdgeInsets.only(right: 30)),
                                           GestureDetector(
                                             onTap: () async {
-                                              switch (isBorder) {
-                                                case false:
-                                                  const FlutterSecureStorage storage = FlutterSecureStorage();
-                                                  var timeNow = DateTime.now();
-                                                  var timeLast = await storage.read(key: 'TimeDialog');
-                                                  if (timeLast != null) {
-                                                    var elapsedTime = timeNow.difference(DateTime.parse(timeLast));
-                                                    if (elapsedTime.inHours >= 24) {
-                                                      wordModeDialog(context);
-                                                    } else {
-                                                      var tempWE = await loadWordCountFromLocalStorage();
-                                                      if (tempWE.filePath != '') {
-                                                        replaceWordsWithTranslation(tempWE.wordEntries);
-                                                      }
-                                                    }
-                                                  } else {
-                                                    wordModeDialog(context);
-                                                  }
-                                                  break;
-                                                default:
-                                                  await _savePageCountToLocalStorage();
-                                                  await getPageCount(book.title, isBorder);
-                                                  final prefs = await SharedPreferences.getInstance();
-                                                  await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
-                                                  lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-                                                  prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
-                                                  isBorder = false;
-                                                  setState(() {});
-                                                  const FlutterSecureStorage storage = FlutterSecureStorage();
-                                                  var timeLast = await storage.read(key: 'TimeDialog');
-                                                  if (timeLast != null) {
-                                                    final formattedTime =
-                                                        DateFormat('MM.dd HH:mm').format(DateTime.parse(timeLast).add(const Duration(days: 1)));
-
-                                                    Fluttertoast.showToast(
-                                                      msg: 'Новый перевод будет доступен $formattedTime',
-                                                      toastLength: Toast.LENGTH_LONG,
-                                                      gravity: ToastGravity.BOTTOM,
-                                                    );
-                                                  }
-                                                  break;
-                                              }
+                                              toggleWordMode();
                                             },
                                             child: Icon(
                                               CustomIcons.wm,
