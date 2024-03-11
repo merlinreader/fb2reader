@@ -184,6 +184,7 @@ class Reader extends State with WidgetsBindingObserver {
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
         );
+        Navigator.of(context).pop();
         return;
       }
 
@@ -195,12 +196,13 @@ class Reader extends State with WidgetsBindingObserver {
         setState(() {});
       } catch (e) {
         // print('Error reading file: $e');
-        // Navigator.pop(context);
+        Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Ошибка чтения файла',
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM,
         );
+        targetFile.delete();
       }
       // print('Длина текста книги = ${book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '').length}');
     }

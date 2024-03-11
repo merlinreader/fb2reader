@@ -129,13 +129,14 @@ class ImageLoader {
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }
-
       final File targetFile = File('${directory.path}/$targetFileName');
+      var temp = await targetFile.exists();
+
       if (!await targetFile.exists()) {
         await targetFile.create();
       }
-      var temp = await targetFile.exists();
-      if (temp == true) {
+      print('ImageLoader temp $temp');
+      if (temp == false) {
         await book.saveJsonToFile(jsonData, title);
         await prefs.setString('fileTitle', title);
         await prefs.setBool('success', true);
