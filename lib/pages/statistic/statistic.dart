@@ -7,7 +7,7 @@ import 'package:merlin/components/table.dart';
 import 'package:merlin/functions/location.dart';
 
 class StatisticPage extends StatefulWidget {
-  const StatisticPage({Key? key}) : super(key: key);
+  const StatisticPage({super.key});
 
   @override
   // ignore: library_private_types_in_public_api

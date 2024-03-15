@@ -480,7 +480,7 @@ class WordCount {
 class AgreementDialog extends StatelessWidget {
   final int getWords;
 
-  const AgreementDialog({Key? key, required this.getWords}) : super(key: key);
+  const AgreementDialog({super.key, required this.getWords});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(

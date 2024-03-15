@@ -19,7 +19,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppPage extends StatefulWidget {
-  const AppPage({Key? key}) : super(key: key);
+  const AppPage({super.key});
 
   @override
   Page createState() => Page();

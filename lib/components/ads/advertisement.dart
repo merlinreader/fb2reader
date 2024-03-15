@@ -17,7 +17,7 @@ import 'log_tile.dart';
 import 'text_logger.dart';
 
 class RewardedAdPage extends StatefulWidget {
-  const RewardedAdPage({Key? key}) : super(key: key);
+  const RewardedAdPage({super.key});
 
   @override
   State<RewardedAdPage> createState() => _RewardedAdPageState();

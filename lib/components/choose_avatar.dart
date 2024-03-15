@@ -9,8 +9,8 @@ class AvatarList extends StatelessWidget {
 
   const AvatarList({
     required this.achievement,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

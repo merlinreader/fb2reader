@@ -11,8 +11,9 @@ Future<Map<String, String>> getLocation() async {
   if (!status.isGranted) {
     await Permission.locationWhenInUse.request();
   }
+  setLocaleIdentifier('en_US');
   Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude, localeIdentifier: 'en-US');
+  List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
   Placemark placemark = placemarks[0];
   String? country = placemark.country;
   String? area = placemark.administrativeArea;

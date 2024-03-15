@@ -20,8 +20,8 @@ class StatTable extends StatefulWidget {
     required this.country,
     required this.area,
     required this.city,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   // ignore: library_private_types_in_public_api

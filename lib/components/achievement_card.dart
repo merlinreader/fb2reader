@@ -7,8 +7,8 @@ class AchievementCard extends StatelessWidget {
 
   const AchievementCard({
     required this.achievement,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

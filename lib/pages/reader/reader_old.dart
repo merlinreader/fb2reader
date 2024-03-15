@@ -64,7 +64,7 @@ class BookInfo {
 }
 
 class ReaderPage extends StatefulWidget {
-  const ReaderPage({Key? key, String? fileTitle}) : super(key: key);
+  const ReaderPage({super.key, String? fileTitle});
 
   @override
   Reader createState() => Reader();
