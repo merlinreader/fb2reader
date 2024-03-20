@@ -1,6 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -11,22 +10,10 @@ Future<Map<String, String>> getLocation() async {
   if (!status.isGranted) {
     await Permission.locationWhenInUse.request();
   }
-  setLocaleIdentifier('en_US');
   Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-  List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-  Placemark placemark = placemarks[0];
-  String? country = placemark.country;
-  String? area = placemark.administrativeArea;
-  String? locality = placemark.locality;
-
-  final prefs = await SharedPreferences.getInstance();
-  prefs.setString("country", country ?? '');
-  prefs.setString("adminArea", area ?? '');
-  prefs.setString("locality", locality ?? '');
   Map<String, String> locationData = {
-    'country': country ?? '',
-    'area': area ?? '',
-    'city': locality ?? '',
+    'latitude': position.latitude.toString(),
+    'longitude': position.longitude.toString(),
   };
 
   const FlutterSecureStorage secureStorage = FlutterSecureStorage();
@@ -39,12 +26,14 @@ Future<Map<String, String>> getLocation() async {
 
   if (tokenSecure != null) {
     await sendLocationDataToServer(locationData, tokenSecure.toString());
+  } else {
+    convertCoordsToAdress(locationData);
   }
   return locationData;
 }
 
 Future<void> sendLocationDataToServer(Map<String, String> locationData, String? token) async {
-  const url = 'https://merlin.su/account/geo';
+  const url = 'https://merlin.su/account/geo-by-coords';
   try {
     // ignore: unused_local_variable
     final response = await http.patch(
@@ -56,21 +45,56 @@ Future<void> sendLocationDataToServer(Map<String, String> locationData, String? 
       body: jsonEncode(locationData),
     );
 
-    // if (response.statusCode == 200) {
-    //   debugPrint('Данные успешно отправлены на сервер');
-    // } else {
-    //   debugPrint('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
-    // }
+    if (response.statusCode == 200) {
+      // print('Данные успешно отправлены на сервер');
+      final jsonResponse = json.decode(response.body);
+      setLocation(jsonResponse);
+    } else {
+      // print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
+    }
   } catch (_) {}
+}
+
+Future<void> convertCoordsToAdress(Map<String, String> locationData) async {
+  final String url = 'https://merlin.su/account/geo-by-coords?latitude=${locationData['latitude']}&longitude=${locationData['longitude']}';
+
+  try {
+    final Uri uri = Uri.parse(url);
+    final response = await http.get(
+      uri,
+    );
+
+    if (response.statusCode == 200) {
+      // print('Данные успешно отправлены на сервер');
+      final jsonResponse = json.decode(response.body);
+      setLocation(jsonResponse);
+      print(jsonResponse);
+    } else {
+      // print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
+    }
+  } catch (_) {}
+}
+
+Future<void> setLocation(Map<String, dynamic> jsonResponse) async {
+  final prefs = await SharedPreferences.getInstance();
+  final country = jsonResponse['country'] ?? 'Russia';
+  final area = jsonResponse['area'] ?? '';
+  final locality = jsonResponse['city'] ?? '';
+
+  if (country.isNotEmpty && area.isNotEmpty && locality.isNotEmpty) {
+    final locationString = '$country, $area, $locality';
+    await prefs.setString('location', locationString);
+    // print('Локация сохранена: $locationString');
+  } else {
+    // print('Невозможно сохранить локацию: отсутствуют данные');
+  }
 }
 
 Future<String> getSavedLocation() async {
   final prefs = await SharedPreferences.getInstance();
-  final country = prefs.getString('country') ?? 'Russia';
-  final area = prefs.getString('adminArea') ?? '';
-  final locality = prefs.getString('locality') ?? '';
-  if (country.isNotEmpty && area.isNotEmpty && locality.isNotEmpty) {
-    return '$country, $area, $locality';
+  final locationString = prefs.getString('location');
+  if (locationString != null && locationString.isNotEmpty) {
+    return locationString;
   } else {
     return 'Нет данных о местоположении';
   }

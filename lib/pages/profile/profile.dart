@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/theme/theme.dart';
@@ -18,7 +19,6 @@ import 'package:merlin/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:csc_picker/csc_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
@@ -157,20 +157,6 @@ class _ProfilePage extends State<ProfilePage> {
     }));
   }
 
-  void saveGeo(String country, String area, String locality) async {
-    const FlutterSecureStorage secureStorage = FlutterSecureStorage();
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setString("country", country);
-    prefs.setString("adminArea", area);
-    prefs.setString("locality", locality);
-    Map<String, String> locationData = {
-      'country': country,
-      'area': area,
-      'city': locality,
-    };
-    await sendLocationDataToServer(locationData, secureStorage.read(key: 'token').toString());
-  }
-
   Future<List<Achievement>> fetchJson() async {
     const FlutterSecureStorage secureStorage = FlutterSecureStorage();
     String? tokenSecure = await secureStorage.read(key: 'token');
@@ -225,8 +211,8 @@ class _ProfilePage extends State<ProfilePage> {
   Widget build(BuildContext context) {
     // print('ШИРИНА');
     // print(width);
-    // double height = MediaQuery.of(context).size.height;
     // double aspectRatio = height/width;
+    double width = MediaQuery.of(context).size.width;
     double size = 20;
     final themeProvider = Provider.of<ThemeProvider>(context);
     final avatar = context.watch<ProfileViewModel>().storedAvatar;
@@ -291,39 +277,28 @@ class _ProfilePage extends State<ProfilePage> {
                 future: getSavedLocation(),
                 builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
                   final locationData = snapshot.data ?? 'Нет данных о местоположении';
-                  return selectedCountry != '' && selectedState != '' && selectedCity != ''
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(width: size),
-                            SizedBox(
-                              //width: width > 650 ? 400 : MediaQuery.of(context).size.width * 0.7,
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Text16(text: locationData, textColor: MyColors.black),
-                              ),
-                            ),
-                            IconButton(
-                                onPressed: geo,
-                                icon: Icon(
-                                  CustomIcons.pen,
-                                  size: size,
-                                )),
-                          ],
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(width: size),
-                            Text14(text: "$selectedCountry, $selectedState, $selectedCity", textColor: MyColors.black),
-                            IconButton(
-                                onPressed: geo,
-                                icon: Icon(
-                                  CustomIcons.pen,
-                                  size: size,
-                                )),
-                          ],
-                        );
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(width: 2 * size),
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: width > 650 ? 400 : MediaQuery.of(context).size.width * 0.75),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Text16(text: locationData, textColor: MyColors.black),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => _openLocationPicker(context),
+                        icon: Icon(
+                          CustomIcons.pen,
+                          size: size,
+                        ),
+                      ),
+                    ],
+                  );
                 })
           ])),
           const SizedBox(height: 81),
@@ -500,78 +475,42 @@ class _ProfilePage extends State<ProfilePage> {
             ));
   }
 
-  void geo() {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    showDialog(
+  Future<GeoPoint?> _openLocationPicker(BuildContext context) async {
+    var pickedLocation = await showSimplePickerLocation(
       context: context,
-      builder: (context) => Theme(
-        data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
-        child: AlertDialog(
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10.0))),
-          title: const Center(
-            child: Text20(text: 'Геолокация', textColor: MyColors.black),
-          ),
-          alignment: Alignment.center,
-          actions: [
-            CSCPicker(
-              stateDropdownLabel: 'Область',
-              countryDropdownLabel: 'Страна',
-              cityDropdownLabel: 'Город',
-              layout: Layout.vertical,
-              selectedItemStyle: TextStyle(color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
-              dropdownDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  borderRadius: const BorderRadius.all(Radius.circular(5)),
-                  border: Border.all(color: MyColors.lightGray)),
-              disabledDropdownDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.background,
-                  borderRadius: const BorderRadius.all(Radius.circular(5)),
-                  border: Border.all(color: MyColors.lightGray)),
-              onCountryChanged: (value) {
-                setState(() {
-                  selectedCountry = value;
-                });
-              },
-              onStateChanged: (value) {
-                setState(() {
-                  selectedState = value;
-                });
-              },
-              onCityChanged: (value) {
-                setState(() {
-                  selectedCity = value;
-                });
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 20, 0, 10),
-              child: Center(
-                child: SizedBox(
-                  width: 400, // Увеличиваем ширину кнопки
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: MyColors.purple, // Цвет кнопки
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10), // Скругление углов
-                      ),
-                    ),
-                    onPressed: () {
-                      saveGeo(selectedCountry!, selectedState!, selectedCity!);
-                      Navigator.of(context).pop();
-                    },
-                    child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                        child: Text(
-                          'Сохранить',
-                          style: TextStyle(color: MyColors.white, fontFamily: 'Tektur', fontSize: 16),
-                        )),
-                  ),
-                ),
-              ),
-            )
-          ],
-        ),
+      isDismissible: true,
+      title: "Выберите локацию",
+      textConfirmPicker: "Выбрать",
+      contentPadding: const EdgeInsets.only(bottom: 10),
+      zoomOption: const ZoomOption(
+        initZoom: 1,
       ),
+      initPosition: GeoPoint(
+        latitude: 61,
+        longitude: 69,
+      ),
+      radius: 8.0,
     );
+    if (pickedLocation != null) {
+      Map<String, String> location = convertGeoPointToMap(pickedLocation);
+      print("Picked Location: $location");
+      if (token == '' || token.isEmpty) {
+        print(token);
+        convertCoordsToAdress(location);
+      } else {
+        await sendLocationDataToServer(location, token);
+      }
+    }
+    return pickedLocation;
+  }
+
+  Map<String, String> convertGeoPointToMap(GeoPoint? geoPoint) {
+    if (geoPoint == null) {
+      return {};
+    }
+    return {
+      'latitude': geoPoint.latitude.toString(),
+      'longitude': geoPoint.longitude.toString(),
+    };
   }
 }
