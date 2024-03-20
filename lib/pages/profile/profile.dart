@@ -493,9 +493,8 @@ class _ProfilePage extends State<ProfilePage> {
     );
     if (pickedLocation != null) {
       Map<String, String> location = convertGeoPointToMap(pickedLocation);
-      print("Picked Location: $location");
+      // print("Picked Location: $location");
       if (token == '' || token.isEmpty) {
-        print(token);
         convertCoordsToAdress(location);
       } else {
         await sendLocationDataToServer(location, token);

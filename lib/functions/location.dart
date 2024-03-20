@@ -68,7 +68,7 @@ Future<void> convertCoordsToAdress(Map<String, String> locationData) async {
       // print('Данные успешно отправлены на сервер');
       final jsonResponse = json.decode(response.body);
       setLocation(jsonResponse);
-      print(jsonResponse);
+      // print(jsonResponse);
     } else {
       // print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
     }
@@ -79,10 +79,10 @@ Future<void> setLocation(Map<String, dynamic> jsonResponse) async {
   final prefs = await SharedPreferences.getInstance();
   final country = jsonResponse['country'] ?? 'Russia';
   final area = jsonResponse['area'] ?? '';
-  final locality = jsonResponse['city'] ?? '';
+  final city = jsonResponse['city'] ?? '';
 
-  if (country.isNotEmpty && area.isNotEmpty && locality.isNotEmpty) {
-    final locationString = '$country, $area, $locality';
+  if (country.isNotEmpty && area.isNotEmpty && city.isNotEmpty) {
+    final locationString = '$country, $area, $city';
     await prefs.setString('location', locationString);
     // print('Локация сохранена: $locationString');
   } else {

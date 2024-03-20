@@ -217,11 +217,23 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
   if (pageCountSimpleMode > 0 || pageCountWordMode > 0) {
     final prefs = await SharedPreferences.getInstance();
     getLocation();
+    String? location = prefs.getString('location');
+    String? country, area, city;
+
+    if (location != null) {
+      List<String> locationParts = location.split(',');
+      if (locationParts.length >= 3) {
+        country = locationParts[0].trim();
+        area = locationParts[1].trim();
+        city = locationParts[2].trim();
+      }
+    }
+
     final Map<String, dynamic> data = {
       "deviceId": prefs.getString("deviceId"),
-      "country": prefs.getString("country"),
-      "area": prefs.getString("adminArea"),
-      "city": prefs.getString("locality"),
+      "country": country,
+      "area": area,
+      "city": city,
       "pageCountSimpleMode": pageCountSimpleMode,
       "pageCountWordMode": pageCountWordMode,
       "date": nowDataUTC,
