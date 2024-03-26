@@ -163,13 +163,14 @@ getPageCount(String inputFilePath, bool isWM) async {
 // Присвоение значений переменным data
   // Fluttertoast.showToast(msg: 'pageSM: $pageCountSimpleMode | pageWM: $pageCountWordMode', toastLength: Toast.LENGTH_LONG);
   // print('pageSM: $pageCountSimpleMode | pageWM: $pageCountWordMode');
+  String savedDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(savedDateTime.toUtc());
   if (token == '') {
     if (prefs.getString("deviceId") == null) {
       saveDeviceIdToLocalStorage();
     }
-    await postAnonymStatisticData(pageCountSimpleMode, pageCountWordMode, nowDataUTC);
+    await postAnonymStatisticData(pageCountSimpleMode, pageCountWordMode, nowDataUTC, savedDataUTC);
   } else {
-    await postUserStatisticData(token, pageCountSimpleMode, pageCountWordMode, nowDataUTC);
+    await postUserStatisticData(token, pageCountSimpleMode, pageCountWordMode, nowDataUTC, savedDataUTC);
   }
 }
 
@@ -180,12 +181,13 @@ void saveDeviceIdToLocalStorage() async {
   await prefs.setString('deviceId', deviceId);
 }
 
-Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
+Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC, String savedDateUTC) async {
   if (pageCountSimpleMode > 0 || pageCountWordMode > 0) {
     final Map<String, dynamic> data = {
       "pageCountSimpleMode": pageCountSimpleMode,
       "pageCountWordMode": pageCountWordMode,
       "date": nowDataUTC,
+      "startReading": savedDateUTC
     };
     // print(token);
     // print(data);
@@ -212,7 +214,7 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pa
   }
 }
 
-Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC) async {
+Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC, String savedDateUTC) async {
   // print('Anonym func pagesSM $pageCountSimpleMode pagesWM $pageCountWordMode');
   if (pageCountSimpleMode > 0 || pageCountWordMode > 0) {
     final prefs = await SharedPreferences.getInstance();
@@ -237,6 +239,7 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
       "pageCountSimpleMode": pageCountSimpleMode,
       "pageCountWordMode": pageCountWordMode,
       "date": nowDataUTC,
+      "startReading": savedDateUTC
     };
     // print(data);
     final url = Uri.parse('https://merlin.su/statistic/anonym');
