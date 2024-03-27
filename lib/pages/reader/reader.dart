@@ -1634,9 +1634,6 @@ class Reader extends State with WidgetsBindingObserver {
                                 top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
                                 child: GestureDetector(
                                     behavior: HitTestBehavior.translucent,
-                                    onDoubleTap: () async {
-                                      showSavedWords(context, book.filePath);
-                                    },
                                     onVerticalDragEnd: (dragEndDetails) async {
                                       if (dragEndDetails.primaryVelocity! > 0) {
                                         showSavedWords(context, book.filePath);
@@ -1671,9 +1668,6 @@ class Reader extends State with WidgetsBindingObserver {
                                 top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
                                 child: GestureDetector(
                                     behavior: HitTestBehavior.translucent,
-                                    onDoubleTap: () async {
-                                      showSavedWords(context, book.filePath);
-                                    },
                                     onTap: () {
                                       setState(() {
                                         visible = !visible;
