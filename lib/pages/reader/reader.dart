@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -1770,26 +1771,26 @@ class Reader extends State with WidgetsBindingObserver {
                                       padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
                                       child: Align(
                                         alignment: Alignment.topCenter,
-                                        child: Text(
-                                          book.customTitle.isNotEmpty && book.author.isNotEmpty
-                                              ? (book.customTitle.toString().length + book.author.toString().length > 30
-                                                  ? book.author.toString().length > 19
-                                                      ? '${book.author.toString()}. ${book.customTitle.toString().substring(0, book.customTitle.toString().length ~/ 4.5)}...'
-                                                      : '${book.author.toString()}. ${book.customTitle.toString().substring(0, book.customTitle.toString().length ~/ 1.5)}...'
-                                                  : '${book.author.toString()}. ${book.customTitle.toString()}')
-                                              : 'Нет названия',
-                                          style: TextStyle(
-                                              color: themeProvider.isDarkTheme
-                                                  ? backgroundColor.value == 0xff1d1d21
-                                                      ? MyColors.white
-                                                      : MyColors.black
-                                                  : backgroundColor.value != 0xff1d1d21
-                                                      ? MyColors.black
-                                                      : MyColors.white,
-                                              fontFamily: 'Tektur',
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold),
-                                          textAlign: TextAlign.center,
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Text(
+                                            book.customTitle.isNotEmpty && book.author.isNotEmpty
+                                                ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                                : 'Нет названия',
+                                            style: TextStyle(
+                                                color: themeProvider.isDarkTheme
+                                                    ? backgroundColor.value == 0xff1d1d21
+                                                        ? MyColors.white
+                                                        : MyColors.black
+                                                    : backgroundColor.value != 0xff1d1d21
+                                                        ? MyColors.black
+                                                        : MyColors.white,
+                                                fontFamily: 'Tektur',
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.bold),
+                                            textAlign: TextAlign.center,
+                                            overflow: TextOverflow.visible,
+                                          ),
                                         ),
                                       ),
                                     ),
