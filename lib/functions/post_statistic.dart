@@ -74,54 +74,47 @@ getPageCount(String inputFilePath, bool isWM) async {
   if (tokenFromStorage != null) {
     token = tokenFromStorage;
   }
-  // print(token);
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
   await processFiles();
 
-  Map<int, bool> dataToSend = {};
+  Map<double, bool> dataToSend = {};
 
   for (final entry in books) {
     if (entry.title == inputFilePath) {
-      int countFromStorage = prefs.getInt('pageCount-${entry.filePath}') ?? 0;
+      double countFromStorage = prefs.getDouble('pageCount-${entry.filePath}') ?? 0;
       prefs.remove('pageCount-${entry.title}');
-      int lastCountFromStorage = prefs.getInt('lastPageCount-${entry.filePath}') ?? 0;
-      // print("countfromst $countFromStorage");
-      // print("lastfromst $lastCountFromStorage");
-      int diff = countFromStorage - lastCountFromStorage;
+      double lastCountFromStorage = prefs.getDouble('lastPageCount-${entry.filePath}') ?? 0;
+      double diff = countFromStorage - lastCountFromStorage;
       diff = diff < 0 ? 0 : diff;
 
-      // print('isWM $inputFilePath = $isWM and entry.fileName = ${entry.filePath}');
       if (isWM == true) {
         if (countFromStorage > 0) {
           if (countFromStorage > lastCountFromStorage) {
-            final dataToAdd = <int, bool>{diff: true};
+            final dataToAdd = <double, bool>{diff: true};
             dataToSend.addEntries(dataToAdd.entries);
           } else {
-            final dataToAdd = <int, bool>{0: true};
+            final dataToAdd = <double, bool>{0: true};
             dataToSend.addEntries(dataToAdd.entries);
           }
         }
       } else {
         if (countFromStorage > lastCountFromStorage) {
-          final dataToAdd = <int, bool>{diff: false};
+          final dataToAdd = <double, bool>{diff: false};
           dataToSend.addEntries(dataToAdd.entries);
         } else {
-          final dataToAdd = <int, bool>{0: false};
+          final dataToAdd = <double, bool>{0: false};
           dataToSend.addEntries(dataToAdd.entries);
         }
       }
     }
   }
   books.clear();
-  double pageSize = await getPageSize() ?? 0;
   DateTime savedDateTime = await getSavedDateTime() ?? DateTime.now();
   DateTime nowDateTime = DateTime.now();
   Duration difference = nowDateTime.difference(savedDateTime);
   int differenceInSeconds = difference.inSeconds;
-  // print('pageSize = $pageSize');
-  // print('savedDateTime = $savedDateTime');
-  // print('differenceInSeconds = $differenceInSeconds');
+
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
   String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
@@ -130,37 +123,19 @@ getPageCount(String inputFilePath, bool isWM) async {
 
   for (final entry in dataToSend.entries) {
     if (entry.value == true) {
-      double speed = pageSize / differenceInSeconds;
-      // print('WM entry.key = ${entry.key}');
-      // print('speed WM = $speed sym/sec');
+      double speed = (entry.key * 1860) / differenceInSeconds;
       if (33.3 > speed) {
-        pageCountWordMode = pageCountWordMode + entry.key;
+        pageCountWordMode = pageCountWordMode + entry.key.toInt();
       }
     }
     if (entry.value == false) {
-      double speed = pageSize / differenceInSeconds;
-      // print('SM entry.key = ${entry.key}');
-      // print('speed SM = $speed sym/sec');
+      double speed = (entry.key * 1860) / differenceInSeconds;
       if (33.3 > speed) {
-        pageCountSimpleMode = pageCountSimpleMode + entry.key;
+        pageCountSimpleMode = pageCountSimpleMode + entry.key.toInt();
       }
     }
   }
 
-  // print('pageCountWordMode $pageCountWordMode');
-  // print('pageCountSimpleMode $pageCountSimpleMode');
-  // print('nowDataUTC $nowDataUTC');
-  // print(dataToSend);
-  // for (final entry in dataToSend.entries) {
-  //   int number = entry.key;
-  //   bool value = entry.value;
-  //   pageCountSimpleMode += number;
-  //   if (value) {
-  //     pageCountWordMode += number;
-  //   }
-  // }
-
-// Присвоение значений переменным data
   // Fluttertoast.showToast(msg: 'pageSM: $pageCountSimpleMode | pageWM: $pageCountWordMode', toastLength: Toast.LENGTH_LONG);
   // print('pageSM: $pageCountSimpleMode | pageWM: $pageCountWordMode');
   String savedDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(savedDateTime.toUtc());

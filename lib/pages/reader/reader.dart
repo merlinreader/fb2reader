@@ -93,12 +93,12 @@ class Reader extends State with WidgetsBindingObserver {
   bool? isTrans = false;
   final Battery _battery = Battery();
   double pageSize = 0;
-  int pageCount = 0;
+  double pageCount = 0;
   double pagesForCount = 0;
   double nowPage = 0;
   double pageFormula = 0;
   double pageResult = 0;
-  int lastPageCount = 0;
+  double lastPageCount = 0;
   String translatedText = '';
 
   @override
@@ -116,9 +116,9 @@ class Reader extends State with WidgetsBindingObserver {
       Future.delayed(const Duration(milliseconds: 300), () async {
         final prefs = await SharedPreferences.getInstance();
         while (!loading) {
-          lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
+          lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
           // print('READER lastpagecount $lastPageCount');
-          prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+          prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
           pageSize = MediaQuery.of(context).size.height;
           await saveDateTime(pageSize);
 
@@ -149,8 +149,8 @@ class Reader extends State with WidgetsBindingObserver {
       await getPageCount(book.title, isBorder);
       final prefs = await SharedPreferences.getInstance();
       await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
-      lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-      prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+      lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
+      prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
     }
   }
 
@@ -248,14 +248,14 @@ class Reader extends State with WidgetsBindingObserver {
 
   Future<void> _loadPageCountFromLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pageCount = (prefs.getInt('pageCount-${book.filePath}') ?? 0);
+    pageCount = (prefs.getDouble('pageCount-${book.filePath}') ?? 0.0);
   }
 
   Future<void> _savePageCountToLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pageCount = ((_scrollPosition / 100) * pagesForCount).toInt();
+    pageCount = ((_scrollPosition / 100) * pagesForCount);
     // print("Сохраняем pageCount $pageCount");
-    prefs.setInt('pageCount-${book.filePath}', pageResult.round());
+    prefs.setDouble('pageCount-${book.filePath}', pageResult);
     // print("Сохраняем pageCount ${pageResult.round()}");
   }
 
@@ -321,8 +321,8 @@ class Reader extends State with WidgetsBindingObserver {
     await _savePageCountToLocalStorage();
     await getPageCount(book.title, isBorder);
     await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
-    lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-    prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+    lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
+    prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
 
     prefs.setBool('${book.filePath}-isTrans', true);
     isBorder = true;
@@ -425,8 +425,8 @@ class Reader extends State with WidgetsBindingObserver {
         await getPageCount(book.title, isBorder);
         final prefs = await SharedPreferences.getInstance();
         await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
-        lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-        prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+        lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
+        prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         // Действие, выполняемое после нажатия "Да"
         final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
         // await wordCount.resetCallCount();
@@ -439,8 +439,8 @@ class Reader extends State with WidgetsBindingObserver {
         await getPageCount(book.title, isBorder);
         final prefs = await SharedPreferences.getInstance();
         await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
-        lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-        prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+        lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
+        prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         // Действие, выполняемое после нажатия "Нет"
         final wordCount = WordCount(filePath: book.filePath, fileText: book.text);
         // Если нужно сбросить счётчик времени
@@ -1485,8 +1485,8 @@ class Reader extends State with WidgetsBindingObserver {
         await getPageCount(book.title, isBorder);
         final prefs = await SharedPreferences.getInstance();
         await book.updateStageInFile(_scrollPosition / 100, _scrollController.position.pixels);
-        lastPageCount = prefs.getInt('pageCount-${book.filePath}') ?? 0;
-        prefs.setInt('lastPageCount-${book.filePath}', lastPageCount);
+        lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
+        prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         isBorder = false;
         setState(() {});
         var timeLast = await readTimeFromJsonFile(fileName);
