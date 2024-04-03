@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
@@ -18,6 +21,7 @@ import 'package:merlin/components/ads/advertisement.dart';
 import 'package:merlin/main.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -207,6 +211,73 @@ class _ProfilePage extends State<ProfilePage> {
     }
   }
 
+  Future<void> saveJsonToFile(Map<String, dynamic> jsonData, String filePath) async {
+    try {
+      final file = File(filePath);
+      final directory = Directory(file.parent.path);
+
+      if (!directory.existsSync()) {
+        directory.createSync(recursive: true);
+      }
+
+      await file.writeAsString(jsonEncode(jsonData));
+    } catch (e) {
+      print('Ошибка при сохранении файла: $e');
+    }
+  }
+
+  Future<void> saveCurrentTime(String fileName) async {
+    final appDir = await getExternalStorageDirectory();
+    final filePath = '${appDir?.path}/Timer/$fileName.json';
+    var timeNow = DateTime.now();
+    await saveJsonToFile({'TimeDialog': timeNow.toIso8601String()}, filePath);
+  }
+
+  Future<DateTime?> readTimeFromJsonFile(String fileName) async {
+    try {
+      final appDir = await getExternalStorageDirectory();
+      final filePath = '${appDir?.path}/Timer/$fileName.json';
+      final file = File(filePath);
+      if (await file.exists()) {
+        final fileContent = await file.readAsString();
+        final jsonData = jsonDecode(fileContent);
+        if (jsonData.containsKey('TimeDialog')) {
+          return DateTime.parse(jsonData['TimeDialog']);
+        }
+      }
+    } catch (e) {
+      print('Ошибка при чтении файла: $e');
+    }
+    return null;
+  }
+
+  void loadAD() async {
+    const String fileName = 'timeStepAD';
+    var timeNow = DateTime.now();
+    var timeLast = await readTimeFromJsonFile(fileName);
+    if (timeLast != null) {
+      var elapsedTime = timeNow.difference(timeLast);
+      if (elapsedTime.inHours >= 24) {
+        _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
+        await saveCurrentTime('timeStepAD');
+      } else {
+        var timeLast = await readTimeFromJsonFile(fileName);
+        if (timeLast != null) {
+          final formattedTime = DateFormat('MM.dd HH:mm').format(timeLast.add(const Duration(days: 1)));
+
+          Fluttertoast.showToast(
+            msg: 'Новые слова будут доступны $formattedTime',
+            toastLength: Toast.LENGTH_LONG,
+            gravity: ToastGravity.BOTTOM,
+          );
+        }
+      }
+    } else {
+      _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
+      await saveCurrentTime('timeStepAD');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // print('ШИРИНА');
@@ -364,8 +435,8 @@ class _ProfilePage extends State<ProfilePage> {
                           verticalPadding: 12,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          onPressed: () {
-                            _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
+                          onPressed: () async {
+                            loadAD();
                             // Fluttertoast.showToast(msg: 'Вам доступно $words слов', toastLength: Toast.LENGTH_LONG);
                           },
                           fontWeight: FontWeight.bold,
