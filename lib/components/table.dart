@@ -50,7 +50,7 @@ class _StatTableState extends State<StatTable> {
       token = tokenSecure;
     }
     final prefs = await SharedPreferences.getInstance();
-    const url = 'https://merlin.su/account/';
+    const url = 'https://app.merlin.su/account/';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -83,7 +83,7 @@ class _StatTableState extends State<StatTable> {
 
   Future<List<dynamic>> fetchJson() async {
     final url = Uri.parse(
-        'https://merlin.su/statistic/${widget.path}?sortBy=totalPageCountWordMode&country=${widget.country}&area=${widget.area}&city=${widget.city}&userId=$id');
+        'https://app.merlin.su/statistic/${widget.path}?sortBy=totalPageCountWordMode&country=${widget.country}&area=${widget.area}&city=${widget.city}&userId=$id');
     final response = await http.get(url);
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);

@@ -36,7 +36,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
     String token = '';
     token = tokenSecure!;
 
-    final url = Uri.parse('https://merlin.su/account/achievements');
+    final url = Uri.parse('https://app.merlin.su/account/achievements');
     try {
       final response = await http.get(
         url,
@@ -86,7 +86,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
     if (tokenSecure != null) {
       token = tokenSecure;
     }
-    String url = 'https://merlin.su/account/avatar';
+    String url = 'https://app.merlin.su/account/avatar';
     // ignore: unused_local_variable
     var res = await http.patch(Uri.parse(url),
         headers: {

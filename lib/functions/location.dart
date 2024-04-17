@@ -33,7 +33,7 @@ Future<Map<String, String>> getLocation() async {
 }
 
 Future<void> sendLocationDataToServer(Map<String, String> locationData, String? token) async {
-  const url = 'https://merlin.su/account/geo-by-coords';
+  const url = 'https://app.merlin.su/account/geo-by-coords';
   try {
     // ignore: unused_local_variable
     final response = await http.patch(
@@ -56,7 +56,7 @@ Future<void> sendLocationDataToServer(Map<String, String> locationData, String? 
 }
 
 Future<void> convertCoordsToAdress(Map<String, String> locationData) async {
-  final String url = 'https://merlin.su/account/geo-by-coords?latitude=${locationData['latitude']}&longitude=${locationData['longitude']}';
+  final String url = 'https://app.merlin.su/account/geo-by-coords?latitude=${locationData['latitude']}&longitude=${locationData['longitude']}';
 
   try {
     final Uri uri = Uri.parse(url);

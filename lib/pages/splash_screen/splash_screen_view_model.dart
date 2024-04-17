@@ -79,7 +79,7 @@ class SplashSreenViewModel {
     // );
     // debugPrint('вот токен $token');
     if (token != null && token != '') {
-      String url = 'https://merlin.su/account/';
+      String url = 'https://app.merlin.su/account/';
       final data = json.decode((await http.get(Uri.parse(url), headers: {
         'Authorization': 'Bearer $token',
       }))

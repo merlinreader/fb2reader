@@ -108,7 +108,7 @@ class WordCount {
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
       if (timeElapsed.inHours >= 24) {
-      // if (timeElapsed.inMicroseconds >= 1) {
+        // if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset();
 
         await updateCallInfo();
@@ -238,7 +238,7 @@ class WordCount {
 
   Future<List<String>> getNounsByList(List<String> inputWords) async {
     // debugPrint('getNounsByList inputWords $inputWords');
-    String url = 'https://merlin.su/account/words/nouns';
+    String url = 'https://app.merlin.su/account/words/nouns';
     var response = await http.post(
       Uri.parse(url),
       headers: {
@@ -261,7 +261,7 @@ class WordCount {
     final words = await getAllWords();
     // debugPrint('words = $words');
     // debugPrint('words.length = ${words.length}');
-    String url = 'https://merlin.su/account/words/nouns';
+    String url = 'https://app.merlin.su/account/words/nouns';
 
     var response = await http.post(
       Uri.parse(url),

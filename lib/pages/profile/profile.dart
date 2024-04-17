@@ -168,7 +168,7 @@ class _ProfilePage extends State<ProfilePage> {
     if (tokenSecure != null) {
       token = tokenSecure;
     }
-    final url = Uri.parse('https://merlin.su/account/achievements');
+    final url = Uri.parse('https://app.merlin.su/account/achievements');
     final response = await http.get(
       url,
       headers: {'Authorization': 'Bearer $token'},
