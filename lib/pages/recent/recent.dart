@@ -102,7 +102,8 @@ class RecentPageState extends State<RecentPage> {
 
   Future<void> _fetchFromJSON() async {
     // print('_fetchFromJSON...');
-    final Directory? externalDir = await getExternalStorageDirectory();
+    final Directory? externalDir = Platform.isAndroid
+        ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
     final String path = '${externalDir?.path}/books';
     List<FileSystemEntity> files = Directory(path).listSync();
     int length = books.length;
@@ -150,7 +151,8 @@ class RecentPageState extends State<RecentPage> {
   }
 
   Future<void> processFiles() async {
-    final Directory? externalDir = await getExternalStorageDirectory();
+    final Directory? externalDir = Platform.isAndroid
+        ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
     final String path = '${externalDir?.path}/books';
     final Directory booksDir = Directory(path);
 

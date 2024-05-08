@@ -122,7 +122,8 @@ class ImageLoader {
       BookInfo bookData = BookInfo(filePath: path, fileText: text.toString(), title: title, author: name, lastPosition: 0);
       Book book = Book.combine(bookData, imageData);
       Map<String, dynamic> jsonData = book.toJson();
-      final Directory? externalDir = await getExternalStorageDirectory();
+      final Directory? externalDir = Platform.isAndroid
+          ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
       final String pathWithJsons = '${externalDir?.path}/books';
       String targetFileName = '$title.json';
       final Directory directory = Directory(pathWithJsons);

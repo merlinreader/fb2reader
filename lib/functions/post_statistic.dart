@@ -31,7 +31,8 @@ Future<double?> getPageSize() async {
 List<Book> books = [];
 
 Future<void> processFiles() async {
-  final Directory? externalDir = await getExternalStorageDirectory();
+  final Directory? externalDir = Platform.isAndroid
+      ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
   final String path = '${externalDir?.path}/books';
   List<FileSystemEntity> files = Directory(path).listSync();
   List<Future<Book>> futures = [];

@@ -227,7 +227,8 @@ class _ProfilePage extends State<ProfilePage> {
   }
 
   Future<void> saveCurrentTime(String fileName) async {
-    final appDir = await getExternalStorageDirectory();
+    final appDir = Platform.isAndroid
+        ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
     final filePath = '${appDir?.path}/Timer/$fileName.json';
     var timeNow = DateTime.now();
     await saveJsonToFile({'TimeDialog': timeNow.toIso8601String()}, filePath);
@@ -235,7 +236,8 @@ class _ProfilePage extends State<ProfilePage> {
 
   Future<DateTime?> readTimeFromJsonFile(String fileName) async {
     try {
-      final appDir = await getExternalStorageDirectory();
+      final appDir = Platform.isAndroid
+          ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
       final filePath = '${appDir?.path}/Timer/$fileName.json';
       final file = File(filePath);
       if (await file.exists()) {

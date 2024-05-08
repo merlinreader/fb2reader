@@ -166,7 +166,8 @@ class Reader extends State with WidgetsBindingObserver {
   Future<void> initBook() async {
     final prefs = await SharedPreferences.getInstance();
     String? fileTitle = prefs.getString('fileTitle');
-    final Directory? externalDir = await getExternalStorageDirectory();
+    final Directory? externalDir = Platform.isAndroid
+        ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
     final String path = '${externalDir?.path}/books/';
     if (fileTitle != null) {
       List<FileSystemEntity> files = Directory(path).listSync();
@@ -1438,7 +1439,8 @@ class Reader extends State with WidgetsBindingObserver {
 
   Future<DateTime?> readTimeFromJsonFile(String fileName) async {
     try {
-      final appDir = await getExternalStorageDirectory();
+      final appDir = Platform.isAndroid
+          ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
       final filePath = '${appDir?.path}/Timer/$fileName.json';
       final file = File(filePath);
       if (await file.exists()) {
@@ -1455,7 +1457,8 @@ class Reader extends State with WidgetsBindingObserver {
   }
 
   Future<void> saveCurrentTime(String fileName) async {
-    final appDir = await getExternalStorageDirectory();
+    final appDir = Platform.isAndroid
+        ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
     final filePath = '${appDir?.path}/Timer/$fileName.json';
     var timeNow = DateTime.now();
     await saveJsonToFile({'TimeDialog': timeNow.toIso8601String()}, filePath);
@@ -1712,111 +1715,114 @@ class Reader extends State with WidgetsBindingObserver {
                         ),
                       ]),
                     )),
-                bottomNavigationBar: BottomAppBar(
+                bottomNavigationBar:
+                Platform.isIOS
+                    ? BottomAppBar(
+                  height: !visible ? 42 : 110,
                   color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
                   child: Stack(
                     children: [
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 250),
-                        height: visible ? 85 : 20,
+                        height: visible ? 42 : 110,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: !visible
                               ? [
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width / 8,
-                                      alignment: Alignment.topLeft,
-                                      child: Stack(
-                                        alignment: Alignment.centerLeft,
-                                        children: [
-                                          Transform.rotate(
-                                            angle: 90 * 3.14159265 / 180,
-                                            child: Icon(
-                                              Icons.battery_full,
-                                              color: themeProvider.isDarkTheme
-                                                  ? backgroundColor.value == 0xff1d1d21
-                                                      ? MyColors.white
-                                                      : MyColors.black
-                                                  : backgroundColor.value != 0xff1d1d21
-                                                      ? MyColors.black
-                                                      : MyColors.white,
-                                              size: 28,
-                                            ),
-                                          ),
-                                          Text(
-                                            _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
-                                            style: TextStyle(
-                                              color: themeProvider.isDarkTheme
-                                                  ? backgroundColor.value == 0xff1d1d21
-                                                      ? MyColors.black
-                                                      : MyColors.white
-                                                  : backgroundColor.value != 0xff1d1d21
-                                                      ? MyColors.white
-                                                      : MyColors.black,
-                                              fontSize: 7,
-                                              fontFamily: 'Tektur',
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                        ],
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width / 8,
+                                alignment: Alignment.topLeft,
+                                child: Stack(
+                                  alignment: Alignment.centerLeft,
+                                  children: [
+                                    Transform.rotate(
+                                      angle: 90 * 3.14159265 / 180,
+                                      child: Icon(
+                                        Icons.battery_full,
+                                        color: themeProvider.isDarkTheme
+                                            ? backgroundColor.value == 0xff1d1d21
+                                            ? MyColors.white
+                                            : MyColors.black
+                                            : backgroundColor.value != 0xff1d1d21
+                                            ? MyColors.black
+                                            : MyColors.white,
+                                        size: 28,
                                       ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Padding(
-                                      padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-                                      child: Align(
-                                        alignment: Alignment.topCenter,
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          child: Text(
-                                            book.customTitle.isNotEmpty && book.author.isNotEmpty
-                                                ? '${book.author.toString()}. ${book.customTitle.toString()}'
-                                                : 'Нет названия',
-                                            style: TextStyle(
-                                                color: themeProvider.isDarkTheme
-                                                    ? backgroundColor.value == 0xff1d1d21
-                                                        ? MyColors.white
-                                                        : MyColors.black
-                                                    : backgroundColor.value != 0xff1d1d21
-                                                        ? MyColors.black
-                                                        : MyColors.white,
-                                                fontFamily: 'Tektur',
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.bold),
-                                            textAlign: TextAlign.center,
-                                            overflow: TextOverflow.visible,
-                                          ),
-                                        ),
+                                    Text(
+                                      _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
+                                      style: TextStyle(
+                                        color: themeProvider.isDarkTheme
+                                            ? backgroundColor.value == 0xff1d1d21
+                                            ? MyColors.black
+                                            : MyColors.white
+                                            : backgroundColor.value != 0xff1d1d21
+                                            ? MyColors.white
+                                            : MyColors.black,
+                                        fontSize: 7,
+                                        fontFamily: 'Tektur',
+                                        fontWeight: FontWeight.bold,
                                       ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                                child: Align(
+                                  alignment: Alignment.topCenter,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Text(
+                                      book.customTitle.isNotEmpty && book.author.isNotEmpty
+                                          ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                          : 'Нет названия',
+                                      style: TextStyle(
+                                          color: themeProvider.isDarkTheme
+                                              ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black
+                                              : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white,
+                                          fontFamily: 'Tektur',
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold),
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.visible,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width / 8,
-                                      alignment: Alignment.topRight,
-                                      child: Text(
-                                        '${_scrollPosition.toStringAsFixed(1)}%',
-                                        style: TextStyle(
-                                            color: themeProvider.isDarkTheme
-                                                ? backgroundColor.value == 0xff1d1d21
-                                                    ? MyColors.white
-                                                    : MyColors.black
-                                                : backgroundColor.value != 0xff1d1d21
-                                                    ? MyColors.black
-                                                    : MyColors.white,
-                                            fontFamily: 'Tektur',
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                ]
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width / 8,
+                                alignment: Alignment.topRight,
+                                child: Text(
+                                  '${_scrollPosition.toStringAsFixed(1)}%',
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkTheme
+                                          ? backgroundColor.value == 0xff1d1d21
+                                          ? MyColors.white
+                                          : MyColors.black
+                                          : backgroundColor.value != 0xff1d1d21
+                                          ? MyColors.black
+                                          : MyColors.white,
+                                      fontFamily: 'Tektur',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ]
                               : [],
                         ),
                       ),
@@ -1835,76 +1841,331 @@ class Reader extends State with WidgetsBindingObserver {
                                     children: [
                                       _scrollController.hasClients
                                           ? SliderTheme(
-                                              data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                children: [
-                                                  SliderTheme(
-                                                    data: const SliderThemeData(
-                                                        trackHeight: 3,
-                                                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
-                                                        trackShape: RectangularSliderTrackShape()),
-                                                    child: Container(
-                                                      width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
-                                                              orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
-                                                          ? MediaQuery.of(context).size.width / 1.19
-                                                          : MediaQuery.of(context).size.width / 1.12,
-                                                      child: Slider(
-                                                        value: position != 0
-                                                            ? position > _scrollController.position.maxScrollExtent
-                                                                ? _scrollController.position.maxScrollExtent
-                                                                : position
-                                                            : _scrollController.position.pixels,
-                                                        min: 0,
-                                                        max: _scrollController.position.maxScrollExtent,
-                                                        label: visible
-                                                            ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                                ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                                    ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                    : "0.0%"
-                                                            : "",
-                                                        onChanged: (value) {
-                                                          setState(() {
-                                                            position = value;
-                                                          });
-                                                          if (_actionTimer?.isActive ?? false) {
-                                                            _actionTimer?.cancel();
-                                                          }
-                                                          _actionTimer = Timer(const Duration(milliseconds: 250), () {
-                                                            _scrollController.jumpTo(value);
-                                                          });
-                                                        },
-                                                        onChangeEnd: (value) {
-                                                          _actionTimer?.cancel();
-                                                          if (value != _scrollController.position.pixels) {
-                                                            _scrollController.jumpTo(value);
-                                                          }
-                                                        },
-                                                        activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                        inactiveColor: themeProvider.isDarkTheme
-                                                            ? const Color.fromRGBO(96, 96, 96, 1)
-                                                            : const Color.fromRGBO(96, 96, 96, 1),
-                                                        thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Container(
-                                                    width: MediaQuery.of(context).size.width / 11,
-                                                    alignment: Alignment.center,
-                                                    child: Text11(
-                                                        text: visible
-                                                            ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                                ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                                    ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                    : "0.0%"
-                                                            : "",
-                                                        textColor: MyColors.darkGray),
-                                                  )
-                                                ],
+                                        data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
+                                        child:
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Flexible(child: SliderTheme(
+                                              data: const SliderThemeData(
+                                                  trackHeight: 3,
+                                                  thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                  trackShape: RectangularSliderTrackShape()),
+                                              child: Container(
+                                                width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                                                    orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                                                    ? MediaQuery.of(context).size.width / 1.19
+                                                    : MediaQuery.of(context).size.width / 1.12,
+                                                child: Slider(
+                                                  value: position != 0
+                                                      ? position > _scrollController.position.maxScrollExtent
+                                                      ? _scrollController.position.maxScrollExtent
+                                                      : position
+                                                      : _scrollController.position.pixels,
+                                                  min: 0,
+                                                  max: _scrollController.position.maxScrollExtent,
+                                                  label: visible
+                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                      : "0.0%"
+                                                      : "",
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      position = value;
+                                                    });
+                                                    if (_actionTimer?.isActive ?? false) {
+                                                      _actionTimer?.cancel();
+                                                    }
+                                                    _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                      _scrollController.jumpTo(value);
+                                                    });
+                                                  },
+                                                  onChangeEnd: (value) {
+                                                    _actionTimer?.cancel();
+                                                    if (value != _scrollController.position.pixels) {
+                                                      _scrollController.jumpTo(value);
+                                                    }
+                                                  },
+                                                  activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                  inactiveColor: themeProvider.isDarkTheme
+                                                      ? const Color.fromRGBO(96, 96, 96, 1)
+                                                      : const Color.fromRGBO(96, 96, 96, 1),
+                                                  thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                ),
                                               ),
                                             )
+                                            ),
+                                            Container(
+                                              width: MediaQuery.of(context).size.width / 11,
+                                              alignment: Alignment.center,
+                                              child: Text11(
+                                                  text: visible
+                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                      : "0.0%"
+                                                      : "",
+                                                  textColor: MyColors.darkGray),
+                                            )
+                                          ],
+                                        ),
+                                      )
+                                          : const Text("Загрузка..."),
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                                        child: SizedBox(
+                                          width: MediaQuery.of(context).size.width,
+                                          height: 2,
+                                          child: Container(
+                                            color: themeProvider.isDarkTheme ? MyColors.darkGray : MyColors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () async {
+                                              await savePositionAndExtent();
+                                              switchOrientation();
+                                            },
+                                            child: Icon(
+                                              CustomIcons.turn,
+                                              color: Theme.of(context).iconTheme.color,
+                                              size: 27,
+                                            ),
+                                          ),
+                                          const Padding(padding: EdgeInsets.only(right: 30)),
+                                          InkWell(
+                                            onTap: () async {
+                                              final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+                                              themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
+                                              await saveSettings(themeProvider.isDarkTheme);
+                                            },
+                                            child: Icon(
+                                              CustomIcons.theme,
+                                              color: Theme.of(context).iconTheme.color,
+                                              size: 27,
+                                            ),
+                                          ),
+                                          const Padding(padding: EdgeInsets.only(right: 30)),
+                                          GestureDetector(
+                                            onTap: () async {
+                                              toggleWordMode();
+                                            },
+                                            child: Icon(
+                                              CustomIcons.wm,
+                                              color: Theme.of(context).iconTheme.color,
+                                              size: 27,
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    ],
+                                  )),
+                            )),
+                      )
+                    ],
+                  ),
+                )
+                    : BottomAppBar(
+                  color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
+                  child: Stack(
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        height: visible ? 85 : 20,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: !visible
+                              ? [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width / 8,
+                                alignment: Alignment.topLeft,
+                                child: Stack(
+                                  alignment: Alignment.centerLeft,
+                                  children: [
+                                    Transform.rotate(
+                                      angle: 90 * 3.14159265 / 180,
+                                      child: Icon(
+                                        Icons.battery_full,
+                                        color: themeProvider.isDarkTheme
+                                            ? backgroundColor.value == 0xff1d1d21
+                                            ? MyColors.white
+                                            : MyColors.black
+                                            : backgroundColor.value != 0xff1d1d21
+                                            ? MyColors.black
+                                            : MyColors.white,
+                                        size: 28,
+                                      ),
+                                    ),
+                                    Text(
+                                      _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
+                                      style: TextStyle(
+                                        color: themeProvider.isDarkTheme
+                                            ? backgroundColor.value == 0xff1d1d21
+                                            ? MyColors.black
+                                            : MyColors.white
+                                            : backgroundColor.value != 0xff1d1d21
+                                            ? MyColors.white
+                                            : MyColors.black,
+                                        fontSize: 7,
+                                        fontFamily: 'Tektur',
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                                child: Align(
+                                  alignment: Alignment.topCenter,
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Text(
+                                      book.customTitle.isNotEmpty && book.author.isNotEmpty
+                                          ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                          : 'Нет названия',
+                                      style: TextStyle(
+                                          color: themeProvider.isDarkTheme
+                                              ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black
+                                              : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white,
+                                          fontFamily: 'Tektur',
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.bold),
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.visible,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width / 8,
+                                alignment: Alignment.topRight,
+                                child: Text(
+                                  '${_scrollPosition.toStringAsFixed(1)}%',
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkTheme
+                                          ? backgroundColor.value == 0xff1d1d21
+                                          ? MyColors.white
+                                          : MyColors.black
+                                          : backgroundColor.value != 0xff1d1d21
+                                          ? MyColors.black
+                                          : MyColors.white,
+                                      fontFamily: 'Tektur',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ]
+                              : [],
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            height: visible ? 85 : 0,
+                            child: SingleChildScrollView(
+                              child: Container(
+                                  alignment: AlignmentDirectional.topEnd,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  child: Column(
+                                    children: [
+                                      _scrollController.hasClients
+                                          ? SliderTheme(
+                                        data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
+                                        child:
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            Flexible(child: SliderTheme(
+                                              data: const SliderThemeData(
+                                                  trackHeight: 3,
+                                                  thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                  trackShape: RectangularSliderTrackShape()),
+                                              child: Container(
+                                                width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                                                    orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                                                    ? MediaQuery.of(context).size.width / 1.19
+                                                    : MediaQuery.of(context).size.width / 1.12,
+                                                child: Slider(
+                                                  value: position != 0
+                                                      ? position > _scrollController.position.maxScrollExtent
+                                                      ? _scrollController.position.maxScrollExtent
+                                                      : position
+                                                      : _scrollController.position.pixels,
+                                                  min: 0,
+                                                  max: _scrollController.position.maxScrollExtent,
+                                                  label: visible
+                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                      : "0.0%"
+                                                      : "",
+                                                  onChanged: (value) {
+                                                    setState(() {
+                                                      position = value;
+                                                    });
+                                                    if (_actionTimer?.isActive ?? false) {
+                                                      _actionTimer?.cancel();
+                                                    }
+                                                    _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                      _scrollController.jumpTo(value);
+                                                    });
+                                                  },
+                                                  onChangeEnd: (value) {
+                                                    _actionTimer?.cancel();
+                                                    if (value != _scrollController.position.pixels) {
+                                                      _scrollController.jumpTo(value);
+                                                    }
+                                                  },
+                                                  activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                  inactiveColor: themeProvider.isDarkTheme
+                                                      ? const Color.fromRGBO(96, 96, 96, 1)
+                                                      : const Color.fromRGBO(96, 96, 96, 1),
+                                                  thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                ),
+                                              ),
+                                            )
+                                            ),
+                                            Container(
+                                              width: MediaQuery.of(context).size.width / 11,
+                                              alignment: Alignment.center,
+                                              child: Text11(
+                                                  text: visible
+                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                      : "0.0%"
+                                                      : "",
+                                                  textColor: MyColors.darkGray),
+                                            )
+                                          ],
+                                        ),
+                                      )
                                           : const Text("Загрузка..."),
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
