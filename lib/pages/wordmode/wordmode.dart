@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -506,10 +507,10 @@ class AgreementDialog extends StatelessWidget {
                 Expanded(
                     child: Container(
                   decoration: BoxDecoration(
-                    border: Border.all(
+                    border: !Platform.isIOS ? Border.all(
                       color: Colors.black,
                       width: 0.2,
-                    ),
+                    ) : null,
                   ),
                   child: TextButton(
                     onPressed: () {
@@ -524,10 +525,10 @@ class AgreementDialog extends StatelessWidget {
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
-                      border: Border.all(
+                      border: !Platform.isIOS ? Border.all(
                         color: Colors.black,
                         width: 0.2,
-                      ),
+                      ) : null,
                     ),
                     child: TextButton(
                       onPressed: () {
