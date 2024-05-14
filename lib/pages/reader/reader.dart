@@ -24,6 +24,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 class BookInfo {
   String filePath;
@@ -101,6 +102,13 @@ class Reader extends State with WidgetsBindingObserver {
   double pageResult = 0;
   double lastPageCount = 0;
   String translatedText = '';
+  final GlobalKey _four = GlobalKey();
+  final GlobalKey _five = GlobalKey();
+  final GlobalKey _six = GlobalKey();
+  final GlobalKey _seven = GlobalKey();
+  final GlobalKey _eight = GlobalKey();
+  final GlobalKey _nine = GlobalKey();
+  BuildContext? myContext;
 
   @override
   void initState() {
@@ -115,6 +123,7 @@ class Reader extends State with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Future.delayed(const Duration(milliseconds: 300), () async {
+        ShowCaseWidget.of(myContext!).startShowCase([_four, _five, _six, _seven, _eight, _nine]);
         final prefs = await SharedPreferences.getInstance();
         while (!loading) {
           lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
@@ -1521,227 +1530,317 @@ class Reader extends State with WidgetsBindingObserver {
           return true;
         },
         child: !loading
-            ? Scaffold(
-                appBar: visible
-                    ? PreferredSize(
-                        preferredSize: Size(MediaQuery.of(context).size.width, 50),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          child: AppBar(
-                              leading: GestureDetector(
-                                  onTap: () async {
-                                    await book.updateStageInFile(_scrollPosition / 100, position);
-                                    Navigator.pop(context, true);
+            ? ShowCaseWidget(
+            builder: Builder(
+            builder: (context) {
+                myContext = context;
+                return Scaffold(
+                  appBar: visible
+                      ? PreferredSize(
+                    preferredSize: Size(MediaQuery.of(context).size.width, 50),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+                      child: AppBar(
+                          leading: GestureDetector(
+                              onTap: () async {
+                                await book.updateStageInFile(_scrollPosition / 100, position);
+                                Navigator.pop(context, true);
+                              },
+                              child: Theme(
+                                data: lightTheme(),
+                                child: Showcase(
+                                  key: _four,
+                                  disableMovingAnimation: true,
+                                  description: 'Выход из книги',
+                                  onToolTipClick: () {
+                                    ShowCaseWidget.of(context).completed(_four);
                                   },
-                                  child: Theme(
-                                      data: lightTheme(),
-                                      child: Icon(
-                                        CustomIcons.chevronLeft,
-                                        size: 30,
-                                        color: Theme.of(context).iconTheme.color,
-                                      ))),
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              shadowColor: Colors.transparent,
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      clipBehavior: Clip.antiAlias,
-                                      child: Text(
-                                        book.author.isNotEmpty && book.customTitle.isNotEmpty
-                                            ? '${book.author.toString()}. ${book.customTitle.toString()}'
-                                            : 'Нет автора',
-                                        softWrap: false,
-                                        overflow: TextOverflow.fade,
-                                        style: TextStyle(
-                                            fontSize: 16, fontFamily: 'Tektur', color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
-                                      ),
-                                    ),
+                                  child: Icon(
+                                    CustomIcons.chevronLeft,
+                                    size: 30,
+                                    color: Theme.of(context).iconTheme.color,
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(35, 0, 0, 0),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
-                                      },
-                                      child: Icon(
-                                        CustomIcons.sliders,
-                                        size: 28,
-                                        color: Theme.of(context).iconTheme.color,
-                                      ),
-                                    ),
+                                ),
+                              )
+                          ),
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          shadowColor: Colors.transparent,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  clipBehavior: Clip.antiAlias,
+                                  child: Text(
+                                    book.author.isNotEmpty && book.customTitle.isNotEmpty
+                                        ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                        : 'Нет автора',
+                                    softWrap: false,
+                                    overflow: TextOverflow.fade,
+                                    style: TextStyle(
+                                        fontSize: 16, fontFamily: 'Tektur', color: themeProvider.isDarkTheme ? MyColors.white : MyColors.black),
                                   ),
-                                ],
-                              )),
-                        ),
-                      )
-                    : null,
-                body: Container(
-                    decoration: BoxDecoration(
-                        color: backgroundColor,
-                        border: isBorder == true
-                            ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 2)
-                            : Border.all(width: 0, color: Colors.transparent)),
-                    child: SafeArea(
-                      top: true,
-                      minimum: visible
-                          ? const EdgeInsets.only(top: 0, left: 8, right: 8)
-                          : orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
-                                  orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
-                              ? const EdgeInsets.only(top: 0, left: 8, right: 8)
-                              : const EdgeInsets.only(top: 40, left: 8, right: 8),
-                      child: Stack(children: [
-                        ListView.builder(
-                            controller: _scrollController,
-                            itemCount: 1,
-                            itemBuilder: (context, index) {
-                              return _scrollController.hasClients
-                                  ? () {
-                                      return Text(
-                                        isBorder ? translatedText : book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), ''),
-                                        softWrap: true,
-                                        style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
-                                      );
-                                    }()
-                                  : Center(
-                                      child: Text(
-                                        'Нет текста для отображения',
-                                        style: TextStyle(
-                                          fontSize: 18.0,
-                                          color: textColor,
-                                        ),
-                                      ),
-                                    );
-                            }),
-                        GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onTap: () {
-                              // Скролл вниз / следующая страница
-                              _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.925,
-                                  duration: const Duration(milliseconds: 250), curve: Curves.ease);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                              child: IgnorePointer(
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  height: MediaQuery.of(context).size.height,
-                                  color: const Color.fromRGBO(100, 150, 100, 0),
                                 ),
                               ),
-                            )),
-                        isBorder
-                            ? Positioned(
-                                left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
-                                top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(35, 0, 0, 0),
                                 child: GestureDetector(
-                                    behavior: HitTestBehavior.translucent,
-                                    onVerticalDragEnd: (dragEndDetails) async {
-                                      if (dragEndDetails.primaryVelocity! > 0) {
-                                        showSavedWords(context, book.filePath);
-                                      }
+                                  onTap: () {
+                                    Navigator.pushNamed(context, RouteNames.readerSettings).then((value) => loadStylePreferences());
+                                  },
+                                  child: Showcase(
+                                    key: _five,
+                                    onToolTipClick: () {
+                                      ShowCaseWidget.of(context).completed(_five);
                                     },
-                                    onTap: () {
-                                      setState(() {
-                                        visible = !visible;
-                                      });
-                                      if (visible) {
-                                        SystemChrome.setEnabledSystemUIMode(
-                                          SystemUiMode.manual,
-                                          overlays: [
-                                            SystemUiOverlay.top,
-                                            SystemUiOverlay.bottom,
-                                          ],
-                                        );
-                                      } else {
-                                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-                                      }
-                                    },
-                                    child: IgnorePointer(
-                                      child: Container(
-                                        width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
-                                        height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
-                                        color: const Color.fromRGBO(250, 100, 100, 0),
-                                      ),
-                                    )),
-                              )
-                            : Positioned(
-                                left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
-                                top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
-                                child: GestureDetector(
-                                    behavior: HitTestBehavior.translucent,
-                                    onTap: () {
-                                      setState(() {
-                                        visible = !visible;
-                                      });
-                                      if (visible) {
-                                        SystemChrome.setEnabledSystemUIMode(
-                                          SystemUiMode.manual,
-                                          overlays: [
-                                            SystemUiOverlay.top,
-                                            SystemUiOverlay.bottom,
-                                          ],
-                                        );
-                                      } else {
-                                        SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-                                      }
-                                    },
-                                    child: IgnorePointer(
-                                      child: Container(
-                                        width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
-                                        height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
-                                        color: const Color.fromRGBO(250, 100, 100, 0),
-                                      ),
-                                    )),
+                                    disableMovingAnimation: true,
+                                    description: "В Настройках можно менять размер шрифта, яркость текста, а также выбрать один из четырех вариантов цвета текста и фона.\n"
+                                        "Все изменения отображаются в окне «Текстовый тест темы»",
+                                    child: Icon(
+                                      CustomIcons.sliders,
+                                      size: 28,
+                                      color: Theme.of(context).iconTheme.color,
+                                    ),
+                                  ),
+                                  ),
                               ),
-                        Positioned(
-                          left: MediaQuery.of(context).size.width / 6,
-                          child: GestureDetector(
+                            ],
+                          )),
+                    ),
+                  )
+                      : null,
+                  body: Container(
+                      decoration: BoxDecoration(
+                          color: backgroundColor,
+                          border: isBorder == true
+                              ? Border.all(color: const Color.fromRGBO(0, 255, 163, 1), width: 2)
+                              : Border.all(width: 0, color: Colors.transparent)),
+                      child: SafeArea(
+                        top: true,
+                        minimum: visible
+                            ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                            : orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                            orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                            ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                            : const EdgeInsets.only(top: 40, left: 8, right: 8),
+                        child: Stack(children: [
+                          ListView.builder(
+                              controller: _scrollController,
+                              itemCount: 1,
+                              itemBuilder: (context, index) {
+                                return _scrollController.hasClients
+                                    ? () {
+                                  return Text(
+                                    isBorder ? translatedText : book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), ''),
+                                    softWrap: true,
+                                    style: TextStyle(fontSize: fontSize, color: textColor, height: 1.41, locale: const Locale('ru', 'RU')),
+                                  );
+                                }()
+                                    : Center(
+                                  child: Text(
+                                    'Нет текста для отображения',
+                                    style: TextStyle(
+                                      fontSize: 18.0,
+                                      color: textColor,
+                                    ),
+                                  ),
+                                );
+                              }),
+                          GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onTap: () {
-                                // Скролл вверх / предыдущая страница
-                                _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.925,
+                                // Скролл вниз / следующая страница
+                                _scrollController.animateTo(_scrollController.position.pixels + MediaQuery.of(context).size.height * 0.925,
                                     duration: const Duration(milliseconds: 250), curve: Curves.ease);
                               },
-                              child: IgnorePointer(
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width / 1.5,
-                                  height: MediaQuery.of(context).size.height / 5,
-                                  color: const Color.fromRGBO(100, 150, 200, 0),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height,
+                                    color: const Color.fromRGBO(100, 150, 100, 0),
+                                  ),
                                 ),
                               )),
-                        ),
-                      ]),
-                    )),
-                bottomNavigationBar:
-                Platform.isIOS
-                    ? BottomAppBar(
-                  height: !visible ? 42 : 110,
-                  color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
-                  child: Stack(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        height: visible ? 42 : 110,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: !visible
-                              ? [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width / 8,
-                                alignment: Alignment.topLeft,
-                                child: Stack(
-                                  alignment: Alignment.centerLeft,
-                                  children: [
-                                    Transform.rotate(
-                                      angle: 90 * 3.14159265 / 180,
-                                      child: Icon(
-                                        Icons.battery_full,
+                          isBorder
+                              ? Positioned(
+                            left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                            top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                            child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onVerticalDragEnd: (dragEndDetails) async {
+                                  if (dragEndDetails.primaryVelocity! > 0) {
+                                    showSavedWords(context, book.filePath);
+                                  }
+                                },
+                                onTap: () {
+                                  setState(() {
+                                    visible = !visible;
+                                  });
+                                  if (visible) {
+                                    SystemChrome.setEnabledSystemUIMode(
+                                      SystemUiMode.manual,
+                                      overlays: [
+                                        SystemUiOverlay.top,
+                                        SystemUiOverlay.bottom,
+                                      ],
+                                    );
+                                  } else {
+                                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+                                  }
+                                },
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                                    height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                                    color: const Color.fromRGBO(250, 100, 100, 0),
+                                  ),
+                                )),
+                          )
+                              : Positioned(
+                            left: isBorder ? MediaQuery.of(context).size.width / 4.5 : MediaQuery.of(context).size.width / 6,
+                            top: isBorder ? MediaQuery.of(context).size.height / 4.5 : MediaQuery.of(context).size.height / 5,
+                            child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTap: () {
+                                  setState(() {
+                                    visible = !visible;
+                                  });
+                                  if (visible) {
+                                    SystemChrome.setEnabledSystemUIMode(
+                                      SystemUiMode.manual,
+                                      overlays: [
+                                        SystemUiOverlay.top,
+                                        SystemUiOverlay.bottom,
+                                      ],
+                                    );
+                                  } else {
+                                    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
+                                  }
+                                },
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: isBorder ? MediaQuery.of(context).size.width / 2 : MediaQuery.of(context).size.width / 1.5,
+                                    height: isBorder ? MediaQuery.of(context).size.height / 2.5 : MediaQuery.of(context).size.height / 2,
+                                    color: const Color.fromRGBO(250, 100, 100, 0),
+                                  ),
+                                )),
+                          ),
+                          Positioned(
+                            left: MediaQuery.of(context).size.width / 6,
+                            child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTap: () {
+                                  // Скролл вверх / предыдущая страница
+                                  _scrollController.animateTo(_scrollController.position.pixels - MediaQuery.of(context).size.height * 0.925,
+                                      duration: const Duration(milliseconds: 250), curve: Curves.ease);
+                                },
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width / 1.5,
+                                    height: MediaQuery.of(context).size.height / 5,
+                                    color: const Color.fromRGBO(100, 150, 200, 0),
+                                  ),
+                                )),
+                          ),
+                        ]),
+                      )),
+                  bottomNavigationBar:
+                  Platform.isIOS
+                      ? BottomAppBar(
+                    height: !visible ? 42 : 110,
+                    color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
+                    child: Stack(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          height: visible ? 42 : 110,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: !visible
+                                ? [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width / 8,
+                                  alignment: Alignment.topLeft,
+                                  child: Stack(
+                                    alignment: Alignment.centerLeft,
+                                    children: [
+                                      Transform.rotate(
+                                        angle: 90 * 3.14159265 / 180,
+                                        child: Icon(
+                                          Icons.battery_full,
+                                          color: themeProvider.isDarkTheme
+                                              ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black
+                                              : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white,
+                                          size: 28,
+                                        ),
+                                      ),
+                                      Text(
+                                        _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
+                                        style: TextStyle(
+                                          color: themeProvider.isDarkTheme
+                                              ? backgroundColor.value == 0xff1d1d21
+                                              ? MyColors.black
+                                              : MyColors.white
+                                              : backgroundColor.value != 0xff1d1d21
+                                              ? MyColors.white
+                                              : MyColors.black,
+                                          fontSize: 7,
+                                          fontFamily: 'Tektur',
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                                  child: Align(
+                                    alignment: Alignment.topCenter,
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Text(
+                                        book.customTitle.isNotEmpty && book.author.isNotEmpty
+                                            ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                            : 'Нет названия',
+                                        style: TextStyle(
+                                            color: themeProvider.isDarkTheme
+                                                ? backgroundColor.value == 0xff1d1d21
+                                                ? MyColors.white
+                                                : MyColors.black
+                                                : backgroundColor.value != 0xff1d1d21
+                                                ? MyColors.black
+                                                : MyColors.white,
+                                            fontFamily: 'Tektur',
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold),
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow.visible,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width / 8,
+                                  alignment: Alignment.topRight,
+                                  child: Text(
+                                    '${_scrollPosition.toStringAsFixed(1)}%',
+                                    style: TextStyle(
                                         color: themeProvider.isDarkTheme
                                             ? backgroundColor.value == 0xff1d1d21
                                             ? MyColors.white
@@ -1749,40 +1848,286 @@ class Reader extends State with WidgetsBindingObserver {
                                             : backgroundColor.value != 0xff1d1d21
                                             ? MyColors.black
                                             : MyColors.white,
-                                        size: 28,
-                                      ),
-                                    ),
-                                    Text(
-                                      _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
-                                      style: TextStyle(
-                                        color: themeProvider.isDarkTheme
-                                            ? backgroundColor.value == 0xff1d1d21
-                                            ? MyColors.black
-                                            : MyColors.white
-                                            : backgroundColor.value != 0xff1d1d21
-                                            ? MyColors.white
-                                            : MyColors.black,
-                                        fontSize: 7,
                                         fontFamily: 'Tektur',
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-                                child: Align(
-                                  alignment: Alignment.topCenter,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
+                            ]
+                                : [],
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              height: visible ? 85 : 0,
+                              child: SingleChildScrollView(
+                                child: Container(
+                                    alignment: AlignmentDirectional.topEnd,
+                                    color: Theme.of(context).colorScheme.primary,
+                                    child: Column(
+                                      children: [
+                                        _scrollController.hasClients
+                                            ? Showcase(
+                                            key: _six,
+                                            disableMovingAnimation: true,
+                                            onToolTipClick: () {
+                                              ShowCaseWidget.of(context).completed(_six);
+                                            },
+                                            description: "Ползунок прокрутки страниц.",
+                                            child: SliderTheme(
+                                              data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
+                                              child:
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                children: [
+                                                  Flexible(child: SliderTheme(
+                                                    data: const SliderThemeData(
+                                                        trackHeight: 3,
+                                                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                        trackShape: RectangularSliderTrackShape()),
+                                                    child: Container(
+                                                      width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                                                          orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                                                          ? MediaQuery.of(context).size.width / 1.19
+                                                          : MediaQuery.of(context).size.width / 1.12,
+                                                      child: Slider(
+                                                        value: position != 0
+                                                            ? position > _scrollController.position.maxScrollExtent
+                                                            ? _scrollController.position.maxScrollExtent
+                                                            : position
+                                                            : _scrollController.position.pixels,
+                                                        min: 0,
+                                                        max: _scrollController.position.maxScrollExtent,
+                                                        label: visible
+                                                            ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : "0.0%"
+                                                            : "",
+                                                        onChanged: (value) {
+                                                          setState(() {
+                                                            position = value;
+                                                          });
+                                                          if (_actionTimer?.isActive ?? false) {
+                                                            _actionTimer?.cancel();
+                                                          }
+                                                          _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                            _scrollController.jumpTo(value);
+                                                          });
+                                                        },
+                                                        onChangeEnd: (value) {
+                                                          _actionTimer?.cancel();
+                                                          if (value != _scrollController.position.pixels) {
+                                                            _scrollController.jumpTo(value);
+                                                          }
+                                                        },
+                                                        activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                        inactiveColor: themeProvider.isDarkTheme
+                                                            ? const Color.fromRGBO(96, 96, 96, 1)
+                                                            : const Color.fromRGBO(96, 96, 96, 1),
+                                                        thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                      ),
+                                                    ),
+                                                  )
+                                                  ),
+                                                  Container(
+                                                    width: MediaQuery.of(context).size.width / 11,
+                                                    alignment: Alignment.center,
+                                                    child: Text11(
+                                                        text: visible
+                                                            ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                            ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                            : "0.0%"
+                                                            : "",
+                                                        textColor: MyColors.darkGray),
+                                                  )
+                                                ],
+                                              ),
+                                            )
+                                        )
+                                            : const Text("Загрузка..."),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context).size.width,
+                                            height: 2,
+                                            child: Container(
+                                              color: themeProvider.isDarkTheme ? MyColors.darkGray : MyColors.black,
+                                            ),
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () async {
+                                                await savePositionAndExtent();
+                                                switchOrientation();
+                                              },
+
+                                              child: Showcase(
+                                                  key: _seven,
+                                                  disableMovingAnimation: true,
+                                                  onToolTipClick: () {
+                                                    ShowCaseWidget.of(context).completed(_seven);
+                                                  },
+                                                  description: "В нижнем колонтитуле иконка поворота текста на 90°  каждым нажатием на кнопку.",
+                                                  child: Icon(
+                                                    CustomIcons.turn,
+                                                    color: Theme.of(context).iconTheme.color,
+                                                    size: 27,
+                                                  )
+                                              ),
+                                            ),
+                                            const Padding(padding: EdgeInsets.only(right: 30)),
+                                            InkWell(
+                                              onTap: () async {
+                                                final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+                                                themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
+                                                await saveSettings(themeProvider.isDarkTheme);
+                                              },
+                                              child:
+                                              Showcase(
+                                                  key: _eight,
+                                                  description: "Иконка переключения режима «день/ночь»",
+                                                  disableMovingAnimation: true,
+                                                  onToolTipClick: () {
+                                                    ShowCaseWidget.of(context).completed(_eight);
+                                                  },
+                                                  child: Icon(
+                                                    CustomIcons.theme,
+                                                    color: Theme.of(context).iconTheme.color,
+                                                    size: 27,
+                                                  )
+                                              ),
+                                            ),
+                                            const Padding(padding: EdgeInsets.only(right: 30)),
+                                            GestureDetector(
+                                              onTap: () async {
+                                                toggleWordMode();
+                                              },
+                                              child: Showcase(
+                                                  key: _nine,
+                                                  disableMovingAnimation: true,
+                                                  description: "Иконка входа в режим «Слово» 👌",
+                                                  onToolTipClick: () {
+                                                    ShowCaseWidget.of(context).completed(_nine);
+                                                  },
+                                                  child:  Icon(
+                                                    CustomIcons.wm,
+                                                    color: Theme.of(context).iconTheme.color,
+                                                    size: 27,
+                                                  )
+                                              ),
+                                            )
+                                          ],
+                                        )
+                                      ],
+                                    )),
+                              )),
+                        )
+                      ],
+                    ),
+                  )
+                      : BottomAppBar(
+                      color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
+                      height: visible ? 110 : 45,
+                      child: Stack(
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            height: visible ? 85 : 40,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: !visible
+                                  ? [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width / 8,
+                                    alignment: Alignment.topLeft,
+                                    child: Stack(
+                                      alignment: Alignment.centerLeft,
+                                      children: [
+                                        Transform.rotate(
+                                          angle: 90 * 3.14159265 / 180,
+                                          child: Icon(
+                                            Icons.battery_full,
+                                            color: themeProvider.isDarkTheme
+                                                ? backgroundColor.value == 0xff1d1d21
+                                                ? MyColors.white
+                                                : MyColors.black
+                                                : backgroundColor.value != 0xff1d1d21
+                                                ? MyColors.black
+                                                : MyColors.white,
+                                            size: 28,
+                                          ),
+                                        ),
+                                        Text(
+                                          _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
+                                          style: TextStyle(
+                                            color: themeProvider.isDarkTheme
+                                                ? backgroundColor.value == 0xff1d1d21
+                                                ? MyColors.black
+                                                : MyColors.white
+                                                : backgroundColor.value != 0xff1d1d21
+                                                ? MyColors.white
+                                                : MyColors.black,
+                                            fontSize: 7,
+                                            fontFamily: 'Tektur',
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
+                                    child: Align(
+                                      alignment: Alignment.topCenter,
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Text(
+                                          book.customTitle.isNotEmpty && book.author.isNotEmpty
+                                              ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                              : 'Нет названия',
+                                          style: TextStyle(
+                                              color: themeProvider.isDarkTheme
+                                                  ? backgroundColor.value == 0xff1d1d21
+                                                  ? MyColors.white
+                                                  : MyColors.black
+                                                  : backgroundColor.value != 0xff1d1d21
+                                                  ? MyColors.black
+                                                  : MyColors.white,
+                                              fontFamily: 'Tektur',
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold),
+                                          textAlign: TextAlign.center,
+                                          overflow: TextOverflow.visible,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width / 8,
+                                    alignment: Alignment.topRight,
                                     child: Text(
-                                      book.customTitle.isNotEmpty && book.author.isNotEmpty
-                                          ? '${book.author.toString()}. ${book.customTitle.toString()}'
-                                          : 'Нет названия',
+                                      '${_scrollPosition.toStringAsFixed(1)}%',
                                       style: TextStyle(
                                           color: themeProvider.isDarkTheme
                                               ? backgroundColor.value == 0xff1d1d21
@@ -1794,437 +2139,194 @@ class Reader extends State with WidgetsBindingObserver {
                                           fontFamily: 'Tektur',
                                           fontSize: 11,
                                           fontWeight: FontWeight.bold),
-                                      textAlign: TextAlign.center,
-                                      overflow: TextOverflow.visible,
                                     ),
                                   ),
                                 ),
-                              ),
+                              ]
+                                  : [],
                             ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width / 8,
-                                alignment: Alignment.topRight,
-                                child: Text(
-                                  '${_scrollPosition.toStringAsFixed(1)}%',
-                                  style: TextStyle(
-                                      color: themeProvider.isDarkTheme
-                                          ? backgroundColor.value == 0xff1d1d21
-                                          ? MyColors.white
-                                          : MyColors.black
-                                          : backgroundColor.value != 0xff1d1d21
-                                          ? MyColors.black
-                                          : MyColors.white,
-                                      fontFamily: 'Tektur',
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ]
-                              : [],
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            height: visible ? 85 : 0,
-                            child: SingleChildScrollView(
-                              child: Container(
-                                  alignment: AlignmentDirectional.topEnd,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  child: Column(
-                                    children: [
-                                      _scrollController.hasClients
-                                          ? SliderTheme(
-                                        data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
-                                        child:
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Flexible(child: SliderTheme(
-                                              data: const SliderThemeData(
-                                                  trackHeight: 3,
-                                                  thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
-                                                  trackShape: RectangularSliderTrackShape()),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                height: visible ? 85 : 0,
+                                child: SingleChildScrollView(
+                                  child: Container(
+                                      alignment: AlignmentDirectional.topEnd,
+                                      color: Theme.of(context).colorScheme.primary,
+                                      child: Column(
+                                        children: [
+                                          _scrollController.hasClients
+                                              ? Showcase(
+                                              key: _six,
+                                              disableMovingAnimation: true,
+                                              onToolTipClick: () {
+                                                ShowCaseWidget.of(context).completed(_six);
+                                              },
+                                              description: "Ползунок прокрутки страниц.",
+                                              child: SliderTheme(
+                                                data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
+                                                child:
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                  children: [
+                                                    Flexible(child: SliderTheme(
+                                                      data: const SliderThemeData(
+                                                          trackHeight: 3,
+                                                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
+                                                          trackShape: RectangularSliderTrackShape()),
+                                                      child: Container(
+                                                        width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
+                                                            orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
+                                                            ? MediaQuery.of(context).size.width / 1.19
+                                                            : MediaQuery.of(context).size.width / 1.12,
+                                                        child: Slider(
+                                                          value: position != 0
+                                                              ? position > _scrollController.position.maxScrollExtent
+                                                              ? _scrollController.position.maxScrollExtent
+                                                              : position
+                                                              : _scrollController.position.pixels,
+                                                          min: 0,
+                                                          max: _scrollController.position.maxScrollExtent,
+                                                          label: visible
+                                                              ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                              : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                              : "0.0%"
+                                                              : "",
+                                                          onChanged: (value) {
+                                                            setState(() {
+                                                              position = value;
+                                                            });
+                                                            if (_actionTimer?.isActive ?? false) {
+                                                              _actionTimer?.cancel();
+                                                            }
+                                                            _actionTimer = Timer(const Duration(milliseconds: 250), () {
+                                                              _scrollController.jumpTo(value);
+                                                            });
+                                                          },
+                                                          onChangeEnd: (value) {
+                                                            _actionTimer?.cancel();
+                                                            if (value != _scrollController.position.pixels) {
+                                                              _scrollController.jumpTo(value);
+                                                            }
+                                                          },
+                                                          activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                          inactiveColor: themeProvider.isDarkTheme
+                                                              ? const Color.fromRGBO(96, 96, 96, 1)
+                                                              : const Color.fromRGBO(96, 96, 96, 1),
+                                                          thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                        ),
+                                                      ),
+                                                    )
+                                                    ),
+                                                    Container(
+                                                      width: MediaQuery.of(context).size.width / 11,
+                                                      alignment: Alignment.center,
+                                                      child: Text11(
+                                                          text: visible
+                                                              ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
+                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                              : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                              : "0.0%"
+                                                              : "",
+                                                          textColor: MyColors.darkGray),
+                                                    )
+                                                  ],
+                                                ),
+                                              )
+                                          )
+                                              : const Text("Загрузка..."),
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+                                            child: SizedBox(
+                                              width: MediaQuery.of(context).size.width,
+                                              height: 2,
                                               child: Container(
-                                                width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
-                                                    orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
-                                                    ? MediaQuery.of(context).size.width / 1.19
-                                                    : MediaQuery.of(context).size.width / 1.12,
-                                                child: Slider(
-                                                  value: position != 0
-                                                      ? position > _scrollController.position.maxScrollExtent
-                                                      ? _scrollController.position.maxScrollExtent
-                                                      : position
-                                                      : _scrollController.position.pixels,
-                                                  min: 0,
-                                                  max: _scrollController.position.maxScrollExtent,
-                                                  label: visible
-                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                      : "0.0%"
-                                                      : "",
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      position = value;
-                                                    });
-                                                    if (_actionTimer?.isActive ?? false) {
-                                                      _actionTimer?.cancel();
-                                                    }
-                                                    _actionTimer = Timer(const Duration(milliseconds: 250), () {
-                                                      _scrollController.jumpTo(value);
-                                                    });
-                                                  },
-                                                  onChangeEnd: (value) {
-                                                    _actionTimer?.cancel();
-                                                    if (value != _scrollController.position.pixels) {
-                                                      _scrollController.jumpTo(value);
-                                                    }
-                                                  },
-                                                  activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                  inactiveColor: themeProvider.isDarkTheme
-                                                      ? const Color.fromRGBO(96, 96, 96, 1)
-                                                      : const Color.fromRGBO(96, 96, 96, 1),
-                                                  thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                                color: themeProvider.isDarkTheme ? MyColors.darkGray : MyColors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  await savePositionAndExtent();
+                                                  switchOrientation();
+                                                },
+
+                                                child: Showcase(
+                                                    key: _seven,
+                                                    disableMovingAnimation: true,
+                                                    onToolTipClick: () {
+                                                      ShowCaseWidget.of(context).completed(_seven);
+                                                    },
+                                                    description: "В нижнем колонтитуле иконка поворота текста на 90°  каждым нажатием на кнопку.",
+                                                    child: Icon(
+                                                      CustomIcons.turn,
+                                                      color: Theme.of(context).iconTheme.color,
+                                                      size: 27,
+                                                    )
                                                 ),
                                               ),
-                                            )
-                                            ),
-                                            Container(
-                                              width: MediaQuery.of(context).size.width / 11,
-                                              alignment: Alignment.center,
-                                              child: Text11(
-                                                  text: visible
-                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                      : "0.0%"
-                                                      : "",
-                                                  textColor: MyColors.darkGray),
-                                            )
-                                          ],
-                                        ),
-                                      )
-                                          : const Text("Загрузка..."),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                                        child: SizedBox(
-                                          width: MediaQuery.of(context).size.width,
-                                          height: 2,
-                                          child: Container(
-                                            color: themeProvider.isDarkTheme ? MyColors.darkGray : MyColors.black,
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () async {
-                                              await savePositionAndExtent();
-                                              switchOrientation();
-                                            },
-                                            child: Icon(
-                                              CustomIcons.turn,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
-                                          ),
-                                          const Padding(padding: EdgeInsets.only(right: 30)),
-                                          InkWell(
-                                            onTap: () async {
-                                              final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-                                              themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
-                                              await saveSettings(themeProvider.isDarkTheme);
-                                            },
-                                            child: Icon(
-                                              CustomIcons.theme,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
-                                          ),
-                                          const Padding(padding: EdgeInsets.only(right: 30)),
-                                          GestureDetector(
-                                            onTap: () async {
-                                              toggleWordMode();
-                                            },
-                                            child: Icon(
-                                              CustomIcons.wm,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    ],
-                                  )),
-                            )),
-                      )
-                    ],
-                  ),
-                )
-                    : BottomAppBar(
-                  color: visible ? Theme.of(context).colorScheme.primary : backgroundColor,
-                  child: Stack(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        height: visible ? 85 : 20,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: !visible
-                              ? [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width / 8,
-                                alignment: Alignment.topLeft,
-                                child: Stack(
-                                  alignment: Alignment.centerLeft,
-                                  children: [
-                                    Transform.rotate(
-                                      angle: 90 * 3.14159265 / 180,
-                                      child: Icon(
-                                        Icons.battery_full,
-                                        color: themeProvider.isDarkTheme
-                                            ? backgroundColor.value == 0xff1d1d21
-                                            ? MyColors.white
-                                            : MyColors.black
-                                            : backgroundColor.value != 0xff1d1d21
-                                            ? MyColors.black
-                                            : MyColors.white,
-                                        size: 28,
-                                      ),
-                                    ),
-                                    Text(
-                                      _batteryLevel.toInt() >= 100 ? '${_batteryLevel.toString()}%' : ' ${_batteryLevel.toString()}%',
-                                      style: TextStyle(
-                                        color: themeProvider.isDarkTheme
-                                            ? backgroundColor.value == 0xff1d1d21
-                                            ? MyColors.black
-                                            : MyColors.white
-                                            : backgroundColor.value != 0xff1d1d21
-                                            ? MyColors.white
-                                            : MyColors.black,
-                                        fontSize: 7,
-                                        fontFamily: 'Tektur',
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 3, 0, 0),
-                                child: Align(
-                                  alignment: Alignment.topCenter,
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
-                                    child: Text(
-                                      book.customTitle.isNotEmpty && book.author.isNotEmpty
-                                          ? '${book.author.toString()}. ${book.customTitle.toString()}'
-                                          : 'Нет названия',
-                                      style: TextStyle(
-                                          color: themeProvider.isDarkTheme
-                                              ? backgroundColor.value == 0xff1d1d21
-                                              ? MyColors.white
-                                              : MyColors.black
-                                              : backgroundColor.value != 0xff1d1d21
-                                              ? MyColors.black
-                                              : MyColors.white,
-                                          fontFamily: 'Tektur',
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold),
-                                      textAlign: TextAlign.center,
-                                      overflow: TextOverflow.visible,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 3, 10, 0),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width / 8,
-                                alignment: Alignment.topRight,
-                                child: Text(
-                                  '${_scrollPosition.toStringAsFixed(1)}%',
-                                  style: TextStyle(
-                                      color: themeProvider.isDarkTheme
-                                          ? backgroundColor.value == 0xff1d1d21
-                                          ? MyColors.white
-                                          : MyColors.black
-                                          : backgroundColor.value != 0xff1d1d21
-                                          ? MyColors.black
-                                          : MyColors.white,
-                                      fontFamily: 'Tektur',
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ]
-                              : [],
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            height: visible ? 85 : 0,
-                            child: SingleChildScrollView(
-                              child: Container(
-                                  alignment: AlignmentDirectional.topEnd,
-                                  color: Theme.of(context).colorScheme.primary,
-                                  child: Column(
-                                    children: [
-                                      _scrollController.hasClients
-                                          ? SliderTheme(
-                                        data: const SliderThemeData(showValueIndicator: ShowValueIndicator.always),
-                                        child:
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            Flexible(child: SliderTheme(
-                                              data: const SliderThemeData(
-                                                  trackHeight: 3,
-                                                  thumbShape: RoundSliderThumbShape(enabledThumbRadius: 9),
-                                                  trackShape: RectangularSliderTrackShape()),
-                                              child: Container(
-                                                width: orientations[currentOrientationIndex] == DeviceOrientation.landscapeLeft ||
-                                                    orientations[currentOrientationIndex] == DeviceOrientation.landscapeRight
-                                                    ? MediaQuery.of(context).size.width / 1.19
-                                                    : MediaQuery.of(context).size.width / 1.12,
-                                                child: Slider(
-                                                  value: position != 0
-                                                      ? position > _scrollController.position.maxScrollExtent
-                                                      ? _scrollController.position.maxScrollExtent
-                                                      : position
-                                                      : _scrollController.position.pixels,
-                                                  min: 0,
-                                                  max: _scrollController.position.maxScrollExtent,
-                                                  label: visible
-                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                      : "0.0%"
-                                                      : "",
-                                                  onChanged: (value) {
-                                                    setState(() {
-                                                      position = value;
-                                                    });
-                                                    if (_actionTimer?.isActive ?? false) {
-                                                      _actionTimer?.cancel();
-                                                    }
-                                                    _actionTimer = Timer(const Duration(milliseconds: 250), () {
-                                                      _scrollController.jumpTo(value);
-                                                    });
-                                                  },
-                                                  onChangeEnd: (value) {
-                                                    _actionTimer?.cancel();
-                                                    if (value != _scrollController.position.pixels) {
-                                                      _scrollController.jumpTo(value);
-                                                    }
-                                                  },
-                                                  activeColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
-                                                  inactiveColor: themeProvider.isDarkTheme
-                                                      ? const Color.fromRGBO(96, 96, 96, 1)
-                                                      : const Color.fromRGBO(96, 96, 96, 1),
-                                                  thumbColor: themeProvider.isDarkTheme ? MyColors.white : const Color.fromRGBO(29, 29, 33, 1),
+                                              const Padding(padding: EdgeInsets.only(right: 30)),
+                                              InkWell(
+                                                onTap: () async {
+                                                  final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+                                                  themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
+                                                  await saveSettings(themeProvider.isDarkTheme);
+                                                },
+                                                child:
+                                                Showcase(
+                                                    key: _eight,
+                                                    description: "Иконка переключения режима «день/ночь»",
+                                                    disableMovingAnimation: true,
+                                                    onToolTipClick: () {
+                                                      ShowCaseWidget.of(context).completed(_eight);
+                                                    },
+                                                    child: Icon(
+                                                      CustomIcons.theme,
+                                                      color: Theme.of(context).iconTheme.color,
+                                                      size: 27,
+                                                    )
                                                 ),
                                               ),
-                                            )
-                                            ),
-                                            Container(
-                                              width: MediaQuery.of(context).size.width / 11,
-                                              alignment: Alignment.center,
-                                              child: Text11(
-                                                  text: visible
-                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 == 100
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                      : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                      ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                      : "0.0%"
-                                                      : "",
-                                                  textColor: MyColors.darkGray),
-                                            )
-                                          ],
-                                        ),
-                                      )
-                                          : const Text("Загрузка..."),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-                                        child: SizedBox(
-                                          width: MediaQuery.of(context).size.width,
-                                          height: 2,
-                                          child: Container(
-                                            color: themeProvider.isDarkTheme ? MyColors.darkGray : MyColors.black,
-                                          ),
-                                        ),
-                                      ),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () async {
-                                              await savePositionAndExtent();
-                                              switchOrientation();
-                                            },
-                                            child: Icon(
-                                              CustomIcons.turn,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
-                                          ),
-                                          const Padding(padding: EdgeInsets.only(right: 30)),
-                                          InkWell(
-                                            onTap: () async {
-                                              final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-                                              themeProvider.isDarkTheme = !themeProvider.isDarkTheme;
-                                              await saveSettings(themeProvider.isDarkTheme);
-                                            },
-                                            child: Icon(
-                                              CustomIcons.theme,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
-                                          ),
-                                          const Padding(padding: EdgeInsets.only(right: 30)),
-                                          GestureDetector(
-                                            onTap: () async {
-                                              toggleWordMode();
-                                            },
-                                            child: Icon(
-                                              CustomIcons.wm,
-                                              color: Theme.of(context).iconTheme.color,
-                                              size: 27,
-                                            ),
+                                              const Padding(padding: EdgeInsets.only(right: 30)),
+                                              GestureDetector(
+                                                onTap: () async {
+                                                  toggleWordMode();
+                                                },
+                                                child: Showcase(
+                                                    key: _nine,
+                                                    disableMovingAnimation: true,
+                                                    description: "Иконка входа в режим «Слово» 👌",
+                                                    onToolTipClick: () {
+                                                      ShowCaseWidget.of(context).completed(_nine);
+                                                    },
+                                                    child:  Icon(
+                                                      CustomIcons.wm,
+                                                      color: Theme.of(context).iconTheme.color,
+                                                      size: 27,
+                                                    )
+                                                ),
+                                              )
+                                            ],
                                           )
                                         ],
-                                      )
-                                    ],
-                                  )),
-                            )),
+                                      )),
+                                )),
+                          )
+                        ],
                       )
-                    ],
                   ),
-                ),
-              )
+                );
+            }))
             : Scaffold(
                 body: Container(
                   color: Theme.of(context).colorScheme.primary,
