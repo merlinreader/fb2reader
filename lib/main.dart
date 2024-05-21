@@ -6,14 +6,23 @@ import 'package:merlin/UI/router.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:appmetrica_plugin/appmetrica_plugin.dart';
 
-void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (context) => ThemeProvider(), // Создание экземпляра ThemeProvider
-      child: const MerlinApp(),
-    ),
-  );
+AppMetricaConfig get _config =>
+    const AppMetricaConfig('122d6c68-55d1-46bf-bf45-27036d6307cf', logs: true);
+
+
+Future<void> main() async {
+  AppMetrica.runZoneGuarded(() {
+    WidgetsFlutterBinding.ensureInitialized();
+    AppMetrica.activate(_config);
+    runApp(
+      ChangeNotifierProvider(
+        create: (context) => ThemeProvider(), // Создание экземпляра ThemeProvider
+        child: const MerlinApp(),
+      ),
+    );
+  });
 }
 
 class MerlinApp extends StatefulWidget {
@@ -30,6 +39,7 @@ class _MerlinAppState extends State<MerlinApp> {
   @override
   void initState() {
     super.initState();
+    AppMetrica.reportEvent('My first AppMetrica event!');
     //initUniLinks();
   }
 
