@@ -25,6 +25,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery/battery.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:merlin/functions/helper.dart';
 
 class BookInfo {
   String filePath;
@@ -123,7 +124,11 @@ class Reader extends State with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Future.delayed(const Duration(milliseconds: 300), () async {
-        ShowCaseWidget.of(myContext!).startShowCase([_four, _five, _six, _seven, _eight, _nine]);
+        if (await firstRun()) {
+          ShowCaseWidget.of(myContext!).startShowCase(
+              [_four, _five, _six, _seven, _eight, _nine]);
+        }
+        //await firstRunReset();
         final prefs = await SharedPreferences.getInstance();
         while (!loading) {
           lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;

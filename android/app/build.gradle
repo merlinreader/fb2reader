@@ -26,7 +26,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace "com.example.merlin"
+    namespace "com.nexaecommerce.merlin"
     // compileSdkVersion flutter.compileSdkVersion
     compileSdkVersion 34
     ndkVersion flutter.ndkVersion
@@ -44,9 +44,18 @@ android {
         main.java.srcDirs += 'src/main/kotlin'
     }
 
+    signingConfigs {
+        release {
+            keyAlias 'my-key-alias'
+            keyPassword 'imdeveloper1'
+            storeFile file('my-release-key.jks')
+            storePassword 'imdeveloper1'
+        }
+    }
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.merlin"
+        applicationId "com.nexaecommerce.merlin"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion 25
@@ -57,9 +66,10 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 }

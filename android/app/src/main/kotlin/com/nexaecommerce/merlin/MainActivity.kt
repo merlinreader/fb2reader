@@ -1,4 +1,4 @@
-package com.example.merlin
+package com.nexaecommerce.merlin
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -18,6 +18,7 @@ import 'package:merlin/pages/statistic/statistic.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:merlin/functions/helper.dart';
 
 class AppPage extends StatefulWidget {
   const AppPage({super.key});
@@ -47,8 +48,12 @@ class Page extends State<AppPage> {
   void initState() {
     getBookName();
     WidgetsBinding.instance.addPostFrameCallback(
-          (_) => Future.delayed(const Duration(milliseconds: 300), () {
-        ShowCaseWidget.of(myContext!).startShowCase([ _one, _two, _three, _four, _five]);
+          (_) => Future.delayed(const Duration(milliseconds: 300), () async {
+            if (await firstRun()) {
+              ShowCaseWidget.of(myContext!).startShowCase(
+                  [ _one, _two, _three, _four, _five]);
+            }
+            //await firstRunReset();
       }),
     );
     super.initState();
