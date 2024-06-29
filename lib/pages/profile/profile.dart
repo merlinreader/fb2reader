@@ -28,6 +28,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AchievementStatus {
   Achievement achievement;
@@ -514,6 +515,15 @@ class _ProfilePage extends State<ProfilePage> {
                 Center(
                   child: Column(
                     children: [
+                      TextButton(onPressed: () async {
+                        final Uri url = Uri.parse('https://merlin.su');
+                        if (!await launchUrl(url)) {
+                         throw Exception('Ошибка');
+                        }
+                      },
+                      child: const Text18(text: 'merlin.su', textColor: MyColors.black)
+                  ),
+                      const SizedBox(height: 20),
                       Theme(
                           data: purpleButton(),
                           child: const Button(
