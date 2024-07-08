@@ -23,7 +23,7 @@ class Book {
     required this.customTitle,
     required this.author,
     required this.lastPosition,
-    required this.imageBytes,
+    this.imageBytes,
     required this.progress,
   });
 

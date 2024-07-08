@@ -82,8 +82,9 @@ getPageCount(String inputFilePath, bool isWM) async {
   Map<double, bool> dataToSend = {};
 
   for (final entry in books) {
+    Codec<String, String> stringToBase64 = utf8.fuse(base64);
     if (entry.title == inputFilePath) {
-      double countFromStorage = prefs.getDouble('pageCount-${entry.filePath}') ?? 0;
+      double countFromStorage = prefs.getDouble('pageCount-${stringToBase64.encode(entry.filePath)}') ?? 0;
       prefs.remove('pageCount-${entry.title}');
       double lastCountFromStorage = prefs.getDouble('lastPageCount-${entry.filePath}') ?? 0;
       double diff = countFromStorage - lastCountFromStorage;

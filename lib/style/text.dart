@@ -3,37 +3,52 @@ import 'package:flutter/material.dart';
 class Text24 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text24({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.titleLarge
-        //TextStyle(
-        //fontFamily: 'Tektur',
-        //color: textColor,
-        //fontSize: 24,
-        //fontWeight: FontWeight.bold)
-        );
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .titleLarge
+      //TextStyle(
+      //fontFamily: 'Tektur',
+      //color: textColor,
+      //fontSize: 24,
+      //fontWeight: FontWeight.bold)
+    );
   }
 }
 
 class Text22 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text22({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.displayLarge);
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .displayLarge);
   }
 }
 
 class Text14 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text14({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
     return Text(
-      text, style: Theme.of(context).textTheme.bodySmall,
+      text, style: Theme
+        .of(context)
+        .textTheme
+        .bodySmall,
       textAlign: TextAlign.center,
       //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
     );
@@ -43,11 +58,16 @@ class Text14 extends StatelessWidget {
 class Text15 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text15({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
     return Text(
-      text, style: Theme.of(context).textTheme.headlineSmall,
+      text, style: Theme
+        .of(context)
+        .textTheme
+        .headlineSmall,
       textAlign: TextAlign.center,
       //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 15)
     );
@@ -57,47 +77,67 @@ class Text15 extends StatelessWidget {
 class Text12 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text12({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.titleSmall
-        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
-        );
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .titleSmall
+      //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
+    );
   }
 }
 
 class Text10 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text10({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.labelSmall
-        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
-        );
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .labelSmall
+      //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
+    );
   }
 }
 
 class Text7 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text7({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.displaySmall
-        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
-        );
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .displaySmall
+      //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 14)
+    );
   }
 }
 
 class Text18 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text18({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
     return Text(
-      text, style: Theme.of(context).textTheme.titleMedium,
+      text, style: Theme
+        .of(context)
+        .textTheme
+        .titleMedium,
       //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 18)
     );
   }
@@ -106,39 +146,54 @@ class Text18 extends StatelessWidget {
 class Text20 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text20({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.titleLarge
-        //TextStyle(
-        //fontFamily: 'Tektur',
-        //color: textColor,
-        //fontSize: 24,
-        //fontWeight: FontWeight.bold)
-        );
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .titleLarge
+      //TextStyle(
+      //fontFamily: 'Tektur',
+      //color: textColor,
+      //fontSize: 24,
+      //fontWeight: FontWeight.bold)
+    );
   }
 }
 
 class Text16 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text16({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.displayMedium
-        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 16)
-        );
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .displayMedium
+      //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 16)
+    );
   }
 }
 
 class TextForTable extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const TextForTable({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
     return Text(
-      text, style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.left,
+      text, style: Theme
+        .of(context)
+        .textTheme
+        .bodyMedium, textAlign: TextAlign.left,
       //TextStyle(fontFamily: 'Roboto', color: textColor)
     );
   }
@@ -147,38 +202,53 @@ class TextForTable extends StatelessWidget {
 class Text11 extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text11({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.bodySmall
-        //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 11)
-        );
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .bodySmall
+      //TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 11)
+    );
   }
 }
 
 class Text11Bold extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text11Bold({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: 11, fontWeight: FontWeight.bold));
+    return Text(text, style: TextStyle(fontFamily: 'Tektur',
+        color: textColor,
+        fontSize: 11,
+        fontWeight: FontWeight.bold));
   }
 }
 
 class Text14Bold extends StatelessWidget {
   final String text;
   final Color textColor;
+
   const Text14Bold({super.key, required this.text, required this.textColor});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: Theme.of(context).textTheme.bodySmall
-        //TextStyle(
-        //fontFamily: 'Tektur',
-        //color: textColor,
-        //fontSize: 11,
-        //fontWeight: FontWeight.bold)
-        );
+    return Text(text, style: Theme
+        .of(context)
+        .textTheme
+        .bodySmall
+      //TextStyle(
+      //fontFamily: 'Tektur',
+      //color: textColor,
+      //fontSize: 11,
+      //fontWeight: FontWeight.bold)
+    );
   }
 }
 
@@ -187,10 +257,17 @@ class TextTektur extends StatelessWidget {
   final String text;
   final Color textColor;
   final double fontsize;
+  final TextAlign? align;
   FontWeight? fontWeight;
-  TextTektur({super.key, required this.text, required this.fontsize, required this.textColor, this.fontWeight});
+
+  TextTektur(
+      {super.key, required this.text, required this.fontsize, required this.textColor, this.fontWeight, this.align});
+
   @override
   Widget build(BuildContext context) {
-    return Text(text, style: TextStyle(fontFamily: 'Tektur', color: textColor, fontSize: fontsize, fontWeight: fontWeight));
+    return Text(text, style: TextStyle(fontFamily: 'Tektur',
+        color: textColor,
+        fontSize: fontsize,
+        fontWeight: fontWeight), textAlign: align, maxLines: null);
   }
 }

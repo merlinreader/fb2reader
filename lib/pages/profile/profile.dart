@@ -350,7 +350,10 @@ class _ProfilePage extends State<ProfilePage> {
             FutureBuilder(
                 future: getSavedLocation(),
                 builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-                  final locationData = snapshot.data ?? 'Нет данных о местоположении';
+                  String locationData = snapshot.data ?? 'Нет данных о местоположении';
+                  if(snapshot.data != null) {
+                    locationData = locationData.replaceRange(18, 24, '');
+                  }
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

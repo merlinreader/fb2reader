@@ -11,7 +11,7 @@ import 'package:merlin/domain/data_providers/token_provider.dart';
 import 'package:merlin/functions/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:uni_links/uni_links.dart';
+import 'package:app_links/app_links.dart';
 
 class SplashSreenViewModel {
   final BuildContext context;
@@ -32,9 +32,11 @@ class SplashSreenViewModel {
   String? _link = 'unknown';
   Future<void> initUniLinks() async {
     // Подписываемся на поток приходящих ссылок
-    linkStream.listen((String? link) {
+    final appLinks = AppLinks();
+
+    appLinks.uriLinkStream.listen((Uri? link) {
       // Если ссылка есть, обновляем состояние приложения
-      _link = link;
+      _link = link?.path;
     }, onError: (err) {
       // Обработка ошибок
       _link = 'Failed to get latest link: $err';
@@ -42,7 +44,7 @@ class SplashSreenViewModel {
 
     // Получение начальной ссылки
     try {
-      String? initialLink = await getInitialLink();
+      String? initialLink = (await appLinks.getInitialLink())?.path;
       // Fluttertoast.showToast(
       //   msg: 'LINK: $initialLink',
       //   toastLength: Toast.LENGTH_SHORT, // Длительность отображения
