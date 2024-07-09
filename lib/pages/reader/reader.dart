@@ -2265,26 +2265,6 @@ class Reader extends State with WidgetsBindingObserver {
                       top: 40, left: 8, right: 8),
                   child: Stack(children: [
                     GestureDetector(
-                      onTap: () {
-                        if (!isBorder) {
-                          setState(() {
-                            visible = !visible;
-                          });
-                          if (visible) {
-                            SystemChrome.setEnabledSystemUIMode(
-                              SystemUiMode.manual,
-                              overlays: [
-                                SystemUiOverlay.top,
-                                SystemUiOverlay.bottom,
-                              ],
-                            );
-                          } else {
-                            SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.manual,
-                                overlays: []);
-                          }
-                        }
-                      },
                       onScaleUpdate: (details) {
                         vFontSize *= details.scale;
                         vFontSize = min(vFontSize, 24);

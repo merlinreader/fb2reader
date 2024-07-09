@@ -497,7 +497,7 @@ class AgreementDialog extends StatelessWidget {
             alignment: Alignment.center,
             child: Text(
               'Хотите выбрать $getWords слов?',
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontFamily: 'Tektur', fontSize: 18),
             ),
           ),
           actions: [
