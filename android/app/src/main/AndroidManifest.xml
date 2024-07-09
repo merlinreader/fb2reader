@@ -68,5 +68,9 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-4449457472880521~8476795127" />
+        <!-- Disable the use of child's personal data for app monetization.  -->
+        <meta-data
+            android:name="@string/yandex_mobileads_age_restricted_user"
+            android:value="true" />
     </application>
 </manifest>

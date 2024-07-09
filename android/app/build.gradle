@@ -25,6 +25,32 @@ if (flutterVersionName == null) {
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url 'https://android-sdk.is.com/'
+        }
+        maven {
+            url 'https://artifact.bytedance.com/repository/pangle'
+        }
+        maven {
+            url "https://sdk.tapjoy.com/"
+        }
+        maven {
+            url "https://dl-maven-android.mintegral.com/repository/mbridge_android_sdk_oversea"
+        }
+        maven {
+            url "https://cboost.jfrog.io/artifactory/chartboost-ads/"
+        }
+        maven {
+            url "https://dl.appnext.com/"
+        }
+    }
+}
+
+
 android {
     namespace "com.yarmolich.merlin.app"
     // compileSdkVersion flutter.compileSdkVersion
@@ -53,6 +79,7 @@ android {
         }
     }
 
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.yarmolich.merlin.app"
@@ -62,6 +89,11 @@ android {
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     buildTypes {
@@ -80,5 +112,7 @@ flutter {
 
 dependencies {
     // implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.yandex.android:mobileads-mediation:6.1.0.0'
+    implementation 'com.yandex.android:mobileads-mediation:7.2.0.0'
     }
+
+
