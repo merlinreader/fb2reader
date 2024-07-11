@@ -2002,13 +2002,13 @@ class Reader extends State with WidgetsBindingObserver {
         )..layout(maxWidth: size.width);
       }
 
-      pos = tp!
+      /*pos = tp!
           .getPositionForOffset(Offset(0, _scrollController.position.pixels));
       lp = _scrollController.position.pixels -
           tp!
               .getOffsetForCaret(TextPosition(offset: pos.offset - 100),
                   const Rect.fromLTWH(0, 0, 0, 0))
-              .dy;
+              .dy;*/
     }
 
     return WillPopScope(
@@ -2342,7 +2342,7 @@ class Reader extends State with WidgetsBindingObserver {
                                   FlutterScreenWake.setBrightness(brigtness);
                                 },
                               )),
-                          fake
+                          /*fake
                               ? IgnorePointer(
                                   child: Container(
                                     width: size.width,
@@ -2377,7 +2377,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     ),
                                   ),
                                 )
-                              : Container(),
+                              : Container(),*/
                           Positioned(
                               left: 0,
                               height: size.height,
@@ -2385,8 +2385,8 @@ class Reader extends State with WidgetsBindingObserver {
                               child: GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onVerticalDragStart: (details) async {
-                                    fake = true;
-                                    setState(() {});
+                                    /*fake = true;
+                                    setState(() {});*/
                                     print('end');
                                   },
                                   onVerticalDragUpdate: (details) {
@@ -2394,13 +2394,13 @@ class Reader extends State with WidgetsBindingObserver {
                                     vFontSize = min(vFontSize, 28);
                                     vFontSize = max(vFontSize, 10);
                                     if (fontSize.floor() != vFontSize.floor()) {
-                                      ffontSize = vFontSize.floorToDouble();
+                                      /*f*/fontSize = vFontSize.floorToDouble();
                                       setState(() {});
                                     }
                                   },
                                   onVerticalDragEnd: (detalis) {
-                                    fontSize = ffontSize;
-                                    fake = false;
+                                    //fontSize = ffontSize;
+                                    //fake = false;
                                     tp = TextPainter(
                                       text: TextSpan(
                                           text: book.text,
