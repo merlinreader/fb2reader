@@ -120,14 +120,17 @@ class Reader extends State with WidgetsBindingObserver {
   final GlobalKey _eight = GlobalKey();
   final GlobalKey _nine = GlobalKey();
   BuildContext? myContext;
-  bool allowScroll = true;
+  bool fake = false;
   double vFontSize = 18.0;
-  double lineHeight = 50;
-  double prev = 50;
+  double lineHeight = 25;
+  double prev = 25;
   double oldFs = 18;
-  int cnt = 0;
 
   double brigtness = 1;
+  double ffontSize = 18;
+  double oldWidth = 1;
+
+  TextPainter? tp;
 
   @override
   void initState() {
@@ -152,14 +155,11 @@ class Reader extends State with WidgetsBindingObserver {
           lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
           // print('READER lastpagecount $lastPageCount');
           prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
-          pageSize = MediaQuery
-              .of(context)
-              .size
-              .height;
+          pageSize = MediaQuery.of(context).size.height;
           await saveDateTime(pageSize);
 
           if (_scrollController.hasClients) {
-            _scrollController.jumpTo(book.lastPosition);
+            jumpTo(book.lastPosition);
           }
           _loadPageCountFromLocalStorage();
           if (book.text.isNotEmpty) {
@@ -215,8 +215,8 @@ class Reader extends State with WidgetsBindingObserver {
 
       try {
         targetFile = files.firstWhere(
-              (file) =>
-          file is File && file.uri.pathSegments.last == targetFileName,
+          (file) =>
+              file is File && file.uri.pathSegments.last == targetFileName,
         );
       } catch (e) {
         Navigator.pop(context);
@@ -269,7 +269,7 @@ class Reader extends State with WidgetsBindingObserver {
     }
 
     _scrollPosition = (_scrollController.position.pixels /
-        _scrollController.position.maxScrollExtent) *
+            _scrollController.position.maxScrollExtent) *
         100;
     pagesForCount = _scrollController.position.maxScrollExtent / pageSize;
     if (visible) {
@@ -277,7 +277,7 @@ class Reader extends State with WidgetsBindingObserver {
         position = _scrollController.position.pixels;
       });
     } else if (_scrollController.position.pixels - position >=
-        pageSize / 1.25 ||
+            pageSize / 1.25 ||
         position - _scrollController.position.pixels >= pageSize / 1.25 ||
         _scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent) {
@@ -313,9 +313,9 @@ class Reader extends State with WidgetsBindingObserver {
 
   Future<void> loadStylePreferences() async {
     final backgroundColorFromStorage =
-    await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
+        await _colorProvider.getColor(ColorKeys.readerBackgroundColor);
     final textColorFromStorage =
-    await _colorProvider.getColor(ColorKeys.readerTextColor);
+        await _colorProvider.getColor(ColorKeys.readerTextColor);
     final prefs = await SharedPreferences.getInstance();
 
     final fontSizeFromStorage = prefs.getDouble('fontSize');
@@ -338,9 +338,8 @@ class Reader extends State with WidgetsBindingObserver {
                   locale: const Locale('ru', 'RU'))),
           textAlign: TextAlign.left,
           textDirection: ui.TextDirection.ltr,
-        )
-          ..layout(maxWidth: 1000);
-        lineHeight = tp1.preferredLineHeight;
+        )..layout(maxWidth: 1000);
+        lineHeight = tp1.preferredLineHeight * 2;
       }
     });
   }
@@ -362,7 +361,7 @@ class Reader extends State with WidgetsBindingObserver {
       SystemChrome.setPreferredOrientations(
           [orientations[currentOrientationIndex]]);
       if (orientations[currentOrientationIndex] ==
-          DeviceOrientation.landscapeLeft ||
+              DeviceOrientation.landscapeLeft ||
           orientations[currentOrientationIndex] ==
               DeviceOrientation.landscapeRight) {
         forTable = true;
@@ -375,7 +374,7 @@ class Reader extends State with WidgetsBindingObserver {
       double newPositionRatio = savedPosition! / savedMaxExtent!;
       double newPosition = newPositionRatio * newMaxExtent;
       newPosition = min(newPosition, newMaxExtent);
-      _scrollController.jumpTo(newPosition);
+      jumpTo(newPosition);
     }
   }
 
@@ -463,7 +462,7 @@ class Reader extends State with WidgetsBindingObserver {
     final RegExp english = RegExp(r'^[a-zA-Z]+');
     final RegExp ukrainian = RegExp(r'^[ҐЄІЇґєії]+', caseSensitive: false);
     final RegExp kazakh =
-    RegExp(r'^[ҰүҮәӘіІһҺңҢқҚөӨөғҒұҰ]+', caseSensitive: false);
+        RegExp(r'^[ҰүҮәӘіІһҺңҢқҚөӨөғҒұҰ]+', caseSensitive: false);
     final RegExp belarusian = RegExp(r'^[ЎўІі]+', caseSensitive: false);
     // final RegExp russian = RegExp(r'^[\u0400-\u04FF]+');
     final RegExp russian = RegExp(r'^[а-яА-Я]+');
@@ -483,10 +482,9 @@ class Reader extends State with WidgetsBindingObserver {
     // print('wordModeDialog $getWords');
     final result = await showDialog<bool>(
       context: context,
-      builder: (context) =>
-          AgreementDialog(
-            getWords: getWords,
-          ),
+      builder: (context) => AgreementDialog(
+        getWords: getWords,
+      ),
     );
 
     var code = detectLanguage(string: book.title);
@@ -503,7 +501,7 @@ class Reader extends State with WidgetsBindingObserver {
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         // Действие, выполняемое после нажатия "Да"
         final wordCount =
-        WordCount(filePath: book.filePath, fileText: book.text);
+            WordCount(filePath: book.filePath, fileText: book.text);
         // await wordCount.resetCallCount();
         // await showEmptyTable(context, wordCount);
         await saveCurrentTime('timeStep');
@@ -519,7 +517,7 @@ class Reader extends State with WidgetsBindingObserver {
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         // Действие, выполняемое после нажатия "Нет"
         final wordCount =
-        WordCount(filePath: book.filePath, fileText: book.text);
+            WordCount(filePath: book.filePath, fileText: book.text);
         // Если нужно сбросить счётчик времени
         // await wordCount.resetCallCount();
         // await wordCount.checkCallInfo();
@@ -533,8 +531,8 @@ class Reader extends State with WidgetsBindingObserver {
     }
   }
 
-  showTableDialog(BuildContext context, WordCount wordCount,
-      bool confirm) async {
+  showTableDialog(
+      BuildContext context, WordCount wordCount, bool confirm) async {
     var wordsMap = await WordCount(filePath: book.filePath, fileText: book.text)
         .getAllWordCounts();
     showDialog<void>(
@@ -575,735 +573,666 @@ class Reader extends State with WidgetsBindingObserver {
                     },
                     child: confirm == false
                         ? SingleChildScrollView(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: forTable == false
-                              ? MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.6
-                              : MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.8,
-                        ),
-                        child: Container(
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width,
-                          height: forTable == false
-                              ? MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.6
-                              : MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.8,
-                          color: Colors.transparent,
-                          child: Card(
-                            child: SizedBox(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width,
-                              height: forTable == false
-                                  ? MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height *
-                                  0.5
-                                  : MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height *
-                                  0.7,
-                              child: Column(
-                                // mainAxisAlignment: MainAxisAlignment.start,
-                                // crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.end,
-                                    children: [
-                                      IconButton(
-                                        alignment: Alignment.centerRight,
-                                        padding:
-                                        const EdgeInsets.fromLTRB(
-                                            0, 0, 20, 0),
-                                        icon: const Icon(Icons.close),
-                                        onPressed: () async {
-                                          await saveWordCountToLocalstorage(
-                                              wordCount);
-                                          replaceWordsWithTranslation(
-                                              wordCount.wordEntries);
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding:
-                                    const EdgeInsets.only(bottom: 0),
-                                    child: Center(
-                                      child: forTable == false
-                                          ? const Text24(
-                                        text: 'Изучаемые слова',
-                                        textColor: MyColors.black,
-                                      )
-                                          : const Text20(
-                                          text: 'Изучаемые слова',
-                                          textColor: MyColors.black),
-                                    ),
-                                  ),
-                                  Container(
-                                    width:
-                                    MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width,
-                                    child: DataTable(
-                                      columnSpacing:
-                                      forTable == false ? 15 : 0,
-                                      showBottomBorder: false,
-                                      dataTextStyle: const TextStyle(
-                                          fontFamily: 'Roboto',
-                                          color: MyColors.black),
-                                      clipBehavior: Clip.hardEdge,
-                                      horizontalMargin: 10,
-                                      columns: [
-                                        DataColumn(
-                                          label: forTable == false
-                                              ? SizedBox(
-                                            width: MediaQuery
-                                                .of(
-                                                context)
-                                                .size
-                                                .width *
-                                                0.19,
-                                            child: const Text(
-                                              'Слово',
-                                              style: TextStyle(
-                                                fontFamily:
-                                                'Tektur',
-                                                fontSize: 15,
-                                              ),
-                                              textAlign:
-                                              TextAlign.left,
-                                            ),
-                                          )
-                                              : SizedBox(
-                                            width: MediaQuery
-                                                .of(
-                                                context)
-                                                .size
-                                                .width *
-                                                0.285,
-                                            child: const Text(
-                                              'Слово',
-                                              style: TextStyle(
-                                                fontFamily:
-                                                'Tektur',
-                                                fontSize: 15,
-                                              ),
-                                              textAlign:
-                                              TextAlign.left,
-                                            ),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                          label: forTable == false
-                                              ? const Text('Транскрипция',
-                                              style: TextStyle(
-                                                fontFamily: 'Tektur',
-                                                fontSize: 15,
-                                              ),
-                                              textAlign:
-                                              TextAlign.left)
-                                              : SizedBox(
-                                            width: MediaQuery
-                                                .of(
-                                                context)
-                                                .size
-                                                .width *
-                                                0.345,
-                                            child: const Text(
-                                                'Транскрипция',
-                                                style: TextStyle(
-                                                  fontFamily:
-                                                  'Tektur',
-                                                  fontSize: 15,
-                                                ),
-                                                textAlign:
-                                                TextAlign.left),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                          label: forTable == false
-                                              ? Text(
-                                            'Перевод',
-                                            style: const TextStyle(
-                                              fontFamily: 'Tektur',
-                                              fontSize: 15,
-                                            ),
-                                            textAlign: forTable ==
-                                                false
-                                                ? TextAlign.right
-                                                : TextAlign.left,
-                                          )
-                                              : SizedBox(
-                                            width: MediaQuery
-                                                .of(
-                                                context)
-                                                .size
-                                                .width *
-                                                0.3,
-                                            child: Text(
-                                              'Перевод',
-                                              style:
-                                              const TextStyle(
-                                                fontFamily:
-                                                'Tektur',
-                                                fontSize: 15,
-                                              ),
-                                              textAlign: forTable ==
-                                                  false
-                                                  ? TextAlign.right
-                                                  : TextAlign.left,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                      rows: const [],
-                                    ),
-                                  ),
-                                  Container(
-                                    width: forTable == true
-                                        ? MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width
-                                        : null,
-                                    height: forTable == false
-                                        ? MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height *
-                                        0.42
-                                        : MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height *
-                                        0.43,
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.vertical,
-                                      child: DataTable(
-                                        columnSpacing:
-                                        forTable == false ? 33 : 0,
-                                        showBottomBorder: false,
-                                        dataTextStyle: const TextStyle(
-                                            fontFamily: 'Roboto',
-                                            color: MyColors.black),
-                                        clipBehavior: Clip.hardEdge,
-                                        headingRowHeight: 0,
-                                        horizontalMargin: 10,
-                                        columns: const [
-                                          DataColumn(
-                                            label: Flexible(
-                                              child: Text15(
-                                                text: '',
-                                                textColor: MyColors.black,
-                                              ),
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: Flexible(
-                                              child: Text15(
-                                                text: '',
-                                                textColor: MyColors.black,
-                                              ),
-                                            ),
-                                          ),
-                                          DataColumn(
-                                            label: Flexible(
-                                              child: Text15(
-                                                text: '',
-                                                textColor: MyColors.black,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                        rows: wordCount.wordEntries
-                                            .map((entry) {
-                                          final themeProvider =
-                                          Provider.of<ThemeProvider>(
-                                              context);
-
-                                          return DataRow(
-                                            cells: [
-                                              DataCell(
-                                                forTable == false
-                                                    ? SizedBox(
-                                                  width: MediaQuery
-                                                      .of(
-                                                      context)
-                                                      .size
-                                                      .width *
-                                                      0.23,
-                                                  child: Text(
-                                                    entry.word,
-                                                    style: TextStyle(
-                                                        overflow:
-                                                        TextOverflow
-                                                            .ellipsis,
-                                                        color: themeProvider
-                                                            .isDarkTheme
-                                                            ? MyColors
-                                                            .white
-                                                            : MyColors
-                                                            .black),
-                                                  ),
-                                                )
-                                                    : Text(
-                                                  entry.word,
-                                                  style: TextStyle(
-                                                      overflow:
-                                                      TextOverflow
-                                                          .ellipsis,
-                                                      color: themeProvider
-                                                          .isDarkTheme
-                                                          ? MyColors
-                                                          .white
-                                                          : MyColors
-                                                          .black),
-                                                ),
-                                              ),
-                                              DataCell(
-                                                forTable == false
-                                                    ? SizedBox(
-                                                  width: MediaQuery
-                                                      .of(
-                                                      context)
-                                                      .size
-                                                      .width *
-                                                      0.275,
-                                                  child: Text(
-                                                    '[ ${entry.ipa} ]',
-                                                    style: TextStyle(
-                                                        overflow:
-                                                        TextOverflow
-                                                            .ellipsis,
-                                                        color: themeProvider
-                                                            .isDarkTheme
-                                                            ? MyColors
-                                                            .white
-                                                            : MyColors
-                                                            .black),
-                                                  ),
-                                                )
-                                                    : SizedBox(
-                                                  width: MediaQuery
-                                                      .of(
-                                                      context)
-                                                      .size
-                                                      .width *
-                                                      0.14,
-                                                  child: Text(
-                                                    '[ ${entry.ipa} ]',
-                                                    style: TextStyle(
-                                                        overflow:
-                                                        TextOverflow
-                                                            .ellipsis,
-                                                        color: themeProvider
-                                                            .isDarkTheme
-                                                            ? MyColors
-                                                            .white
-                                                            : MyColors
-                                                            .black),
-                                                  ),
-                                                ),
-                                              ),
-                                              DataCell(
-                                                forTable == false
-                                                    ? Padding(
-                                                  padding:
-                                                  const EdgeInsets
-                                                      .only(
-                                                      left: 10),
-                                                  child: SizedBox(
-                                                    width: MediaQuery
-                                                        .of(
-                                                        context)
-                                                        .size
-                                                        .width *
-                                                        0.5,
-                                                    child: Text(
-                                                      entry.translation!
-                                                          .isNotEmpty
-                                                          ? entry
-                                                          .translation!
-                                                          : 'N/A',
-                                                      style: TextStyle(
-                                                          color: themeProvider
-                                                              .isDarkTheme
-                                                              ? MyColors
-                                                              .white
-                                                              : MyColors
-                                                              .black),
-                                                    ),
-                                                  ),
-                                                )
-                                                    : Text(
-                                                  entry.translation!
-                                                      .isNotEmpty
-                                                      ? entry
-                                                      .translation!
-                                                      : 'N/A',
-                                                  style: TextStyle(
-                                                      color: themeProvider
-                                                          .isDarkTheme
-                                                          ? MyColors
-                                                          .white
-                                                          : MyColors
-                                                          .black),
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        }).toList(),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: forTable == false
+                                    ? MediaQuery.of(context).size.height * 0.6
+                                    : MediaQuery.of(context).size.height * 0.8,
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                        : SingleChildScrollView(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: forTable == false
-                              ? MediaQuery
-                              .of(context)
-                              .size
-                              .height
-                              : MediaQuery
-                              .of(context)
-                              .size
-                              .height,
-                        ),
-                        child: Container(
-                          width: MediaQuery
-                              .of(context)
-                              .size
-                              .width,
-                          height: forTable == false
-                              ? MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.7
-                              : MediaQuery
-                              .of(context)
-                              .size
-                              .height * 0.9,
-                          color: Colors.white,
-                          child: Card(
-                            color: Colors.white,
-                            child: SizedBox(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width,
-                              height: forTable == false
-                                  ? MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height *
-                                  0.6
-                                  : MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height *
-                                  0.8,
-                              child: Column(
-                                children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.end,
-                                    children: [
-                                      IconButton(
-                                        alignment: Alignment.centerRight,
-                                        padding:
-                                        const EdgeInsets.fromLTRB(
-                                            0, 0, 20, 0),
-                                        icon: const Icon(Icons.close),
-                                        onPressed: () async {
-                                          await saveWordCountToLocalstorage(
-                                              wordCount);
-                                          replaceWordsWithTranslation(
-                                              wordCount.wordEntries);
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                  Padding(
-                                    padding:
-                                    const EdgeInsets.only(bottom: 20),
-                                    child: Center(
-                                      child: forTable == false
-                                          ? const Text24(
-                                        text: 'Изучаемые слова',
-                                        textColor: MyColors.black,
-                                      )
-                                          : const Text20(
-                                          text: 'Изучаемые слова',
-                                          textColor: MyColors.black),
-                                    ),
-                                  ),
-                                  Container(
-                                    width:
-                                    MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width,
-                                    child: DataTable(
-                                      columnSpacing:
-                                      forTable == false ? 0 : 30,
-                                      showBottomBorder: false,
-                                      dataTextStyle: const TextStyle(
-                                          fontFamily: 'Roboto',
-                                          color: MyColors.black),
-                                      clipBehavior: Clip.hardEdge,
-                                      horizontalMargin: 10,
-                                      columns: [
-                                        DataColumn(
-                                          label: forTable == false
-                                              ? SizedBox(
-                                            width: MediaQuery
-                                                .of(
-                                                context)
-                                                .size
-                                                .width *
-                                                0.6,
-                                            child: const Text(
-                                              'Слово',
-                                              style: TextStyle(
-                                                fontFamily:
-                                                'Tektur',
-                                                fontSize: 15,
-                                              ),
-                                              textAlign:
-                                              TextAlign.left,
-                                            ),
-                                          )
-                                              : SizedBox(
-                                            width: MediaQuery
-                                                .of(
-                                                context)
-                                                .size
-                                                .width *
-                                                0.3,
-                                            child: const Text(
-                                              'Слово',
-                                              style: TextStyle(
-                                                fontFamily:
-                                                'Tektur',
-                                                fontSize: 15,
-                                              ),
-                                              textAlign:
-                                              TextAlign.left,
-                                            ),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                          label: forTable == false
-                                              ? Text(
-                                            'Количество',
-                                            style: const TextStyle(
-                                              fontFamily: 'Tektur',
-                                              fontSize: 15,
-                                            ),
-                                            textAlign: forTable ==
-                                                false
-                                                ? TextAlign.right
-                                                : TextAlign.left,
-                                          )
-                                              : Text(
-                                            'Количество',
-                                            style: const TextStyle(
-                                              fontFamily: 'Tektur',
-                                              fontSize: 15,
-                                            ),
-                                            textAlign: forTable ==
-                                                false
-                                                ? TextAlign.right
-                                                : TextAlign.left,
-                                          ),
-                                        ),
-                                      ],
-                                      rows: const [],
-                                    ),
-                                  ),
-                                  Container(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width,
-                                      height: forTable == false
-                                          ? MediaQuery
-                                          .of(context)
-                                          .size
-                                          .height *
-                                          0.41
-                                          : MediaQuery
-                                          .of(context)
-                                          .size
-                                          .height *
-                                          0.35,
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.vertical,
-                                        child: DataTable(
-                                          columnSpacing: 0,
-                                          showBottomBorder: false,
-                                          dataTextStyle: const TextStyle(
-                                              fontFamily: 'Roboto',
-                                              color: MyColors.black),
-                                          clipBehavior: Clip.hardEdge,
-                                          headingRowHeight: 0,
-                                          horizontalMargin: 10,
-                                          columns: const [
-                                            DataColumn(
-                                              label: Flexible(
-                                                child: Text15(
-                                                  text: '',
-                                                  textColor:
-                                                  MyColors.black,
-                                                ),
-                                              ),
-                                            ),
-                                            DataColumn(
-                                              label: Flexible(
-                                                child: Text15(
-                                                  text: '',
-                                                  textColor:
-                                                  MyColors.black,
-                                                ),
-                                              ),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                height: forTable == false
+                                    ? MediaQuery.of(context).size.height * 0.6
+                                    : MediaQuery.of(context).size.height * 0.8,
+                                color: Colors.transparent,
+                                child: Card(
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: forTable == false
+                                        ? MediaQuery.of(context).size.height *
+                                            0.5
+                                        : MediaQuery.of(context).size.height *
+                                            0.7,
+                                    child: Column(
+                                      // mainAxisAlignment: MainAxisAlignment.start,
+                                      // crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: <Widget>[
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              alignment: Alignment.centerRight,
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      0, 0, 20, 0),
+                                              icon: const Icon(Icons.close),
+                                              onPressed: () async {
+                                                await saveWordCountToLocalstorage(
+                                                    wordCount);
+                                                replaceWordsWithTranslation(
+                                                    wordCount.wordEntries);
+                                                Navigator.pop(context);
+                                              },
                                             ),
                                           ],
-                                          rows: wordCount.wordEntries
-                                              .map((entry) {
-                                            return DataRow(
-                                              cells: [
-                                                DataCell(
-                                                  forTable == false
-                                                      ? SizedBox(
-                                                    width: MediaQuery
-                                                        .of(
-                                                        context)
-                                                        .size
-                                                        .width *
-                                                        0.6,
-                                                    child: InkWell(
-                                                      onTap:
-                                                          () async {
-                                                        await _showWordInputDialog(
-                                                            entry
-                                                                .word,
-                                                            wordCount
-                                                                .wordEntries,
-                                                            wordsMap);
-                                                        setState(
-                                                                () {
-                                                              entry
-                                                                  .word;
-                                                              entry
-                                                                  .count;
-                                                            });
-                                                      },
-                                                      child:
-                                                      TextForTable(
-                                                        text: entry
-                                                            .word,
-                                                        textColor:
-                                                        MyColors
-                                                            .black,
-                                                      ),
-                                                    ),
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 0),
+                                          child: Center(
+                                            child: forTable == false
+                                                ? const Text24(
+                                                    text: 'Изучаемые слова',
+                                                    textColor: MyColors.black,
                                                   )
-                                                      : SizedBox(
-                                                    width: MediaQuery
-                                                        .of(
-                                                        context)
-                                                        .size
-                                                        .width *
-                                                        0.43,
-                                                    child: InkWell(
-                                                      onTap:
-                                                          () async {
-                                                        await _showWordInputDialog(
-                                                            entry
-                                                                .word,
-                                                            wordCount
-                                                                .wordEntries,
-                                                            wordsMap);
-                                                        setState(
-                                                                () {
-                                                              entry
-                                                                  .word;
-                                                              entry
-                                                                  .count;
-                                                            });
-                                                      },
-                                                      child:
-                                                      TextForTable(
-                                                        text: entry
-                                                            .word,
-                                                        textColor:
-                                                        MyColors
-                                                            .black,
+                                                : const Text20(
+                                                    text: 'Изучаемые слова',
+                                                    textColor: MyColors.black),
+                                          ),
+                                        ),
+                                        Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          child: DataTable(
+                                            columnSpacing:
+                                                forTable == false ? 15 : 0,
+                                            showBottomBorder: false,
+                                            dataTextStyle: const TextStyle(
+                                                fontFamily: 'Roboto',
+                                                color: MyColors.black),
+                                            clipBehavior: Clip.hardEdge,
+                                            horizontalMargin: 10,
+                                            columns: [
+                                              DataColumn(
+                                                label: forTable == false
+                                                    ? SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.19,
+                                                        child: const Text(
+                                                          'Слово',
+                                                          style: TextStyle(
+                                                            fontFamily:
+                                                                'Tektur',
+                                                            fontSize: 15,
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.left,
+                                                        ),
+                                                      )
+                                                    : SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.285,
+                                                        child: const Text(
+                                                          'Слово',
+                                                          style: TextStyle(
+                                                            fontFamily:
+                                                                'Tektur',
+                                                            fontSize: 15,
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.left,
+                                                        ),
                                                       ),
+                                              ),
+                                              DataColumn(
+                                                label: forTable == false
+                                                    ? const Text('Транскрипция',
+                                                        style: TextStyle(
+                                                          fontFamily: 'Tektur',
+                                                          fontSize: 15,
+                                                        ),
+                                                        textAlign:
+                                                            TextAlign.left)
+                                                    : SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.345,
+                                                        child: const Text(
+                                                            'Транскрипция',
+                                                            style: TextStyle(
+                                                              fontFamily:
+                                                                  'Tektur',
+                                                              fontSize: 15,
+                                                            ),
+                                                            textAlign:
+                                                                TextAlign.left),
+                                                      ),
+                                              ),
+                                              DataColumn(
+                                                label: forTable == false
+                                                    ? Text(
+                                                        'Перевод',
+                                                        style: const TextStyle(
+                                                          fontFamily: 'Tektur',
+                                                          fontSize: 15,
+                                                        ),
+                                                        textAlign: forTable ==
+                                                                false
+                                                            ? TextAlign.right
+                                                            : TextAlign.left,
+                                                      )
+                                                    : SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.3,
+                                                        child: Text(
+                                                          'Перевод',
+                                                          style:
+                                                              const TextStyle(
+                                                            fontFamily:
+                                                                'Tektur',
+                                                            fontSize: 15,
+                                                          ),
+                                                          textAlign: forTable ==
+                                                                  false
+                                                              ? TextAlign.right
+                                                              : TextAlign.left,
+                                                        ),
+                                                      ),
+                                              ),
+                                            ],
+                                            rows: const [],
+                                          ),
+                                        ),
+                                        Container(
+                                          width: forTable == true
+                                              ? MediaQuery.of(context)
+                                                  .size
+                                                  .width
+                                              : null,
+                                          height: forTable == false
+                                              ? MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.42
+                                              : MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.43,
+                                          child: SingleChildScrollView(
+                                            scrollDirection: Axis.vertical,
+                                            child: DataTable(
+                                              columnSpacing:
+                                                  forTable == false ? 33 : 0,
+                                              showBottomBorder: false,
+                                              dataTextStyle: const TextStyle(
+                                                  fontFamily: 'Roboto',
+                                                  color: MyColors.black),
+                                              clipBehavior: Clip.hardEdge,
+                                              headingRowHeight: 0,
+                                              horizontalMargin: 10,
+                                              columns: const [
+                                                DataColumn(
+                                                  label: Flexible(
+                                                    child: Text15(
+                                                      text: '',
+                                                      textColor: MyColors.black,
                                                     ),
                                                   ),
                                                 ),
-                                                DataCell(
-                                                  SizedBox(
-                                                    width: MediaQuery
-                                                        .of(
-                                                        context)
-                                                        .size
-                                                        .width *
-                                                        0.2,
-                                                    child: TextForTable(
-                                                      text:
-                                                      '${entry.count}',
-                                                      textColor:
-                                                      MyColors.black,
+                                                DataColumn(
+                                                  label: Flexible(
+                                                    child: Text15(
+                                                      text: '',
+                                                      textColor: MyColors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                                DataColumn(
+                                                  label: Flexible(
+                                                    child: Text15(
+                                                      text: '',
+                                                      textColor: MyColors.black,
                                                     ),
                                                   ),
                                                 ),
                                               ],
-                                            );
-                                          }).toList(),
+                                              rows: wordCount.wordEntries
+                                                  .map((entry) {
+                                                final themeProvider =
+                                                    Provider.of<ThemeProvider>(
+                                                        context);
+
+                                                return DataRow(
+                                                  cells: [
+                                                    DataCell(
+                                                      forTable == false
+                                                          ? SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.23,
+                                                              child: Text(
+                                                                entry.word,
+                                                                style: TextStyle(
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    color: themeProvider.isDarkTheme
+                                                                        ? MyColors
+                                                                            .white
+                                                                        : MyColors
+                                                                            .black),
+                                                              ),
+                                                            )
+                                                          : Text(
+                                                              entry.word,
+                                                              style: TextStyle(
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  color: themeProvider.isDarkTheme
+                                                                      ? MyColors
+                                                                          .white
+                                                                      : MyColors
+                                                                          .black),
+                                                            ),
+                                                    ),
+                                                    DataCell(
+                                                      forTable == false
+                                                          ? SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.275,
+                                                              child: Text(
+                                                                '[ ${entry.ipa} ]',
+                                                                style: TextStyle(
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    color: themeProvider.isDarkTheme
+                                                                        ? MyColors
+                                                                            .white
+                                                                        : MyColors
+                                                                            .black),
+                                                              ),
+                                                            )
+                                                          : SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.14,
+                                                              child: Text(
+                                                                '[ ${entry.ipa} ]',
+                                                                style: TextStyle(
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    color: themeProvider.isDarkTheme
+                                                                        ? MyColors
+                                                                            .white
+                                                                        : MyColors
+                                                                            .black),
+                                                              ),
+                                                            ),
+                                                    ),
+                                                    DataCell(
+                                                      forTable == false
+                                                          ? Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      left: 10),
+                                                              child: SizedBox(
+                                                                width: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.5,
+                                                                child: Text(
+                                                                  entry.translation!
+                                                                          .isNotEmpty
+                                                                      ? entry
+                                                                          .translation!
+                                                                      : 'N/A',
+                                                                  style: TextStyle(
+                                                                      color: themeProvider.isDarkTheme
+                                                                          ? MyColors
+                                                                              .white
+                                                                          : MyColors
+                                                                              .black),
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : Text(
+                                                              entry.translation!
+                                                                      .isNotEmpty
+                                                                  ? entry
+                                                                      .translation!
+                                                                  : 'N/A',
+                                                              style: TextStyle(
+                                                                  color: themeProvider.isDarkTheme
+                                                                      ? MyColors
+                                                                          .white
+                                                                      : MyColors
+                                                                          .black),
+                                                            ),
+                                                    ),
+                                                  ],
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
                                         ),
-                                      )),
-                                ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        : SingleChildScrollView(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: forTable == false
+                                    ? MediaQuery.of(context).size.height
+                                    : MediaQuery.of(context).size.height,
+                              ),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width,
+                                height: forTable == false
+                                    ? MediaQuery.of(context).size.height * 0.7
+                                    : MediaQuery.of(context).size.height * 0.9,
+                                color: Colors.white,
+                                child: Card(
+                                  color: Colors.white,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: forTable == false
+                                        ? MediaQuery.of(context).size.height *
+                                            0.6
+                                        : MediaQuery.of(context).size.height *
+                                            0.8,
+                                    child: Column(
+                                      children: <Widget>[
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              alignment: Alignment.centerRight,
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      0, 0, 20, 0),
+                                              icon: const Icon(Icons.close),
+                                              onPressed: () async {
+                                                await saveWordCountToLocalstorage(
+                                                    wordCount);
+                                                replaceWordsWithTranslation(
+                                                    wordCount.wordEntries);
+                                                Navigator.pop(context);
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(bottom: 20),
+                                          child: Center(
+                                            child: forTable == false
+                                                ? const Text24(
+                                                    text: 'Изучаемые слова',
+                                                    textColor: MyColors.black,
+                                                  )
+                                                : const Text20(
+                                                    text: 'Изучаемые слова',
+                                                    textColor: MyColors.black),
+                                          ),
+                                        ),
+                                        Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          child: DataTable(
+                                            columnSpacing:
+                                                forTable == false ? 0 : 30,
+                                            showBottomBorder: false,
+                                            dataTextStyle: const TextStyle(
+                                                fontFamily: 'Roboto',
+                                                color: MyColors.black),
+                                            clipBehavior: Clip.hardEdge,
+                                            horizontalMargin: 10,
+                                            columns: [
+                                              DataColumn(
+                                                label: forTable == false
+                                                    ? SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.6,
+                                                        child: const Text(
+                                                          'Слово',
+                                                          style: TextStyle(
+                                                            fontFamily:
+                                                                'Tektur',
+                                                            fontSize: 15,
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.left,
+                                                        ),
+                                                      )
+                                                    : SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.3,
+                                                        child: const Text(
+                                                          'Слово',
+                                                          style: TextStyle(
+                                                            fontFamily:
+                                                                'Tektur',
+                                                            fontSize: 15,
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.left,
+                                                        ),
+                                                      ),
+                                              ),
+                                              DataColumn(
+                                                label: forTable == false
+                                                    ? Text(
+                                                        'Количество',
+                                                        style: const TextStyle(
+                                                          fontFamily: 'Tektur',
+                                                          fontSize: 15,
+                                                        ),
+                                                        textAlign: forTable ==
+                                                                false
+                                                            ? TextAlign.right
+                                                            : TextAlign.left,
+                                                      )
+                                                    : Text(
+                                                        'Количество',
+                                                        style: const TextStyle(
+                                                          fontFamily: 'Tektur',
+                                                          fontSize: 15,
+                                                        ),
+                                                        textAlign: forTable ==
+                                                                false
+                                                            ? TextAlign.right
+                                                            : TextAlign.left,
+                                                      ),
+                                              ),
+                                            ],
+                                            rows: const [],
+                                          ),
+                                        ),
+                                        Container(
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            height: forTable == false
+                                                ? MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.41
+                                                : MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.35,
+                                            child: SingleChildScrollView(
+                                              scrollDirection: Axis.vertical,
+                                              child: DataTable(
+                                                columnSpacing: 0,
+                                                showBottomBorder: false,
+                                                dataTextStyle: const TextStyle(
+                                                    fontFamily: 'Roboto',
+                                                    color: MyColors.black),
+                                                clipBehavior: Clip.hardEdge,
+                                                headingRowHeight: 0,
+                                                horizontalMargin: 10,
+                                                columns: const [
+                                                  DataColumn(
+                                                    label: Flexible(
+                                                      child: Text15(
+                                                        text: '',
+                                                        textColor:
+                                                            MyColors.black,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  DataColumn(
+                                                    label: Flexible(
+                                                      child: Text15(
+                                                        text: '',
+                                                        textColor:
+                                                            MyColors.black,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                                rows: wordCount.wordEntries
+                                                    .map((entry) {
+                                                  return DataRow(
+                                                    cells: [
+                                                      DataCell(
+                                                        forTable == false
+                                                            ? SizedBox(
+                                                                width: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.6,
+                                                                child: InkWell(
+                                                                  onTap:
+                                                                      () async {
+                                                                    await _showWordInputDialog(
+                                                                        entry
+                                                                            .word,
+                                                                        wordCount
+                                                                            .wordEntries,
+                                                                        wordsMap);
+                                                                    setState(
+                                                                        () {
+                                                                      entry
+                                                                          .word;
+                                                                      entry
+                                                                          .count;
+                                                                    });
+                                                                  },
+                                                                  child:
+                                                                      TextForTable(
+                                                                    text: entry
+                                                                        .word,
+                                                                    textColor:
+                                                                        MyColors
+                                                                            .black,
+                                                                  ),
+                                                                ),
+                                                              )
+                                                            : SizedBox(
+                                                                width: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.43,
+                                                                child: InkWell(
+                                                                  onTap:
+                                                                      () async {
+                                                                    await _showWordInputDialog(
+                                                                        entry
+                                                                            .word,
+                                                                        wordCount
+                                                                            .wordEntries,
+                                                                        wordsMap);
+                                                                    setState(
+                                                                        () {
+                                                                      entry
+                                                                          .word;
+                                                                      entry
+                                                                          .count;
+                                                                    });
+                                                                  },
+                                                                  child:
+                                                                      TextForTable(
+                                                                    text: entry
+                                                                        .word,
+                                                                    textColor:
+                                                                        MyColors
+                                                                            .black,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                      ),
+                                                      DataCell(
+                                                        SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.2,
+                                                          child: TextForTable(
+                                                            text:
+                                                                '${entry.count}',
+                                                            textColor:
+                                                                MyColors.black,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            )),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
                   ));
             }
           },
         );
       },
     );
+  }
+
+  void jumpTo(double val) {
+    _scrollController.jumpTo((val / lineHeight).floorToDouble() * lineHeight);
+  }
+
+  void animateTo(double val,
+      {required Duration duration, required Curve curve}) {
+    _scrollController.animateTo((val / lineHeight).floorToDouble() * lineHeight,
+        duration: duration, curve: Curves.linear);
   }
 
   Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries,
@@ -1317,10 +1246,7 @@ class Reader extends State with WidgetsBindingObserver {
         return SingleChildScrollView(
           child: ConstrainedBox(
             constraints: BoxConstraints(
-                maxHeight: MediaQuery
-                    .of(context)
-                    .size
-                    .height * 0.8),
+                maxHeight: MediaQuery.of(context).size.height * 0.8),
             child: StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
                 final themeProvider = Provider.of<ThemeProvider>(context);
@@ -1368,8 +1294,7 @@ class Reader extends State with WidgetsBindingObserver {
                                       setState(() {
                                         searchText = value.toLowerCase();
                                         filteredWords = wordsMap.keys
-                                            .where((word) =>
-                                            word
+                                            .where((word) => word
                                                 .toLowerCase()
                                                 .startsWith(searchText))
                                             .toList();
@@ -1384,23 +1309,20 @@ class Reader extends State with WidgetsBindingObserver {
                                       labelText: 'Введите текст',
                                       border: const OutlineInputBorder(),
                                       disabledBorder:
-                                      const OutlineInputBorder(),
+                                          const OutlineInputBorder(),
                                       focusedBorder: const OutlineInputBorder(),
                                       focusColor: MyColors.purple,
                                       floatingLabelStyle:
-                                      themeProvider.isDarkTheme
-                                          ? const TextStyle(
-                                          color: MyColors.white)
-                                          : const TextStyle(
-                                          color: MyColors.black),
+                                          themeProvider.isDarkTheme
+                                              ? const TextStyle(
+                                                  color: MyColors.white)
+                                              : const TextStyle(
+                                                  color: MyColors.black),
                                     ),
                                   ),
                                 ),
                                 Container(
-                                  width: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width,
+                                  width: MediaQuery.of(context).size.width,
                                   child: DataTable(
                                       columnSpacing: 45.0,
                                       showBottomBorder: false,
@@ -1428,21 +1350,12 @@ class Reader extends State with WidgetsBindingObserver {
                                       rows: const []),
                                 ),
                                 Container(
-                                    width: MediaQuery
-                                        .of(context)
-                                        .size
-                                        .width,
+                                    width: MediaQuery.of(context).size.width,
                                     height: forTable == false
-                                        ? MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height *
-                                        0.42
-                                        : MediaQuery
-                                        .of(context)
-                                        .size
-                                        .height *
-                                        0.2,
+                                        ? MediaQuery.of(context).size.height *
+                                            0.42
+                                        : MediaQuery.of(context).size.height *
+                                            0.2,
                                     child: SingleChildScrollView(
                                       scrollDirection: Axis.vertical,
                                       child: DataTable(
@@ -1475,95 +1388,90 @@ class Reader extends State with WidgetsBindingObserver {
                                         rows: searchText.isEmpty
                                             ? const <DataRow>[]
                                             : List<DataRow>.generate(
-                                          filteredWords.length,
-                                              (index) =>
-                                              DataRow(
-                                                cells: [
-                                                  DataCell(
-                                                    SizedBox(
-                                                      width: MediaQuery
-                                                          .of(
-                                                          context)
-                                                          .size
-                                                          .width *
-                                                          0.3,
-                                                      child: TextButton(
-                                                        style: const ButtonStyle(
-                                                            alignment: Alignment
-                                                                .centerLeft),
-                                                        onPressed: () async {
-                                                          List<String> test =
-                                                          [
+                                                filteredWords.length,
+                                                (index) => DataRow(
+                                                  cells: [
+                                                    DataCell(
+                                                      SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.3,
+                                                        child: TextButton(
+                                                          style: const ButtonStyle(
+                                                              alignment: Alignment
+                                                                  .centerLeft),
+                                                          onPressed: () async {
+                                                            List<String> test =
+                                                                [
+                                                              filteredWords[
+                                                                  index]
+                                                            ];
+                                                            // print(test);
+                                                            test = await WordCount()
+                                                                .getNounsByList(
+                                                                    test);
+                                                            // print('after $test');
+                                                            if (test.length !=
+                                                                1) {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          'Данное слово не существительное');
+                                                              return;
+                                                            } else {
+                                                              await updateWordInTable(
+                                                                  word,
+                                                                  filteredWords[
+                                                                      index],
+                                                                  wordEntries);
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            }
+                                                          },
+                                                          child: Text(
                                                             filteredWords[
-                                                            index]
-                                                          ];
-                                                          // print(test);
-                                                          test =
-                                                          await WordCount()
-                                                              .getNounsByList(
-                                                              test);
-                                                          // print('after $test');
-                                                          if (test.length !=
-                                                              1) {
-                                                            Fluttertoast
-                                                                .showToast(
-                                                                msg:
-                                                                'Данное слово не существительное');
-                                                            return;
-                                                          } else {
-                                                            await updateWordInTable(
-                                                                word,
-                                                                filteredWords[
                                                                 index],
-                                                                wordEntries);
-                                                            Navigator.of(
-                                                                context)
-                                                                .pop();
-                                                          }
-                                                        },
-                                                        child: Text(
-                                                          filteredWords[
-                                                          index],
-                                                          style: TextStyle(
-                                                              fontFamily:
-                                                              'Roboto',
-                                                              fontSize: 15,
-                                                              fontWeight:
-                                                              FontWeight
-                                                                  .normal,
-                                                              overflow:
-                                                              TextOverflow
-                                                                  .ellipsis,
-                                                              color: themeProvider
-                                                                  .isDarkTheme
-                                                                  ? MyColors
-                                                                  .white
-                                                                  : MyColors
-                                                                  .black),
+                                                            style: TextStyle(
+                                                                fontFamily:
+                                                                    'Roboto',
+                                                                fontSize: 15,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .normal,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                color: themeProvider
+                                                                        .isDarkTheme
+                                                                    ? MyColors
+                                                                        .white
+                                                                    : MyColors
+                                                                        .black),
+                                                          ),
                                                         ),
                                                       ),
                                                     ),
-                                                  ),
-                                                  DataCell(
-                                                    SizedBox(
-                                                      width: MediaQuery
-                                                          .of(
-                                                          context)
-                                                          .size
-                                                          .width *
-                                                          0.3,
-                                                      child: TextForTable(
-                                                        text:
-                                                        '${wordsMap[filteredWords[index]] ??
-                                                            0}',
-                                                        textColor:
-                                                        MyColors.black,
+                                                    DataCell(
+                                                      SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.3,
+                                                        child: TextForTable(
+                                                          text:
+                                                              '${wordsMap[filteredWords[index]] ?? 0}',
+                                                          textColor:
+                                                              MyColors.black,
+                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
+                                                  ],
+                                                ),
                                               ),
-                                        ),
                                       ),
                                     ))
                               ],
@@ -1582,15 +1490,15 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
-  Future<void> updateWordInTable(String oldWord, String newWord,
-      List<WordEntry> wordEntries) async {
+  Future<void> updateWordInTable(
+      String oldWord, String newWord, List<WordEntry> wordEntries) async {
     final index = wordEntries.indexWhere((entry) => entry.word == oldWord);
     if (index != -1) {
       final count = WordCount(filePath: book.filePath, fileText: book.text)
           .getWordCount(newWord);
       final translation =
-      await WordCount(filePath: book.filePath, fileText: book.text)
-          .translateToEnglish(newWord);
+          await WordCount(filePath: book.filePath, fileText: book.text)
+              .translateToEnglish(newWord);
       final ipa = await WordCount(filePath: book.filePath, fileText: book.text)
           .getIPA(translation);
 
@@ -1644,46 +1552,22 @@ class Reader extends State with WidgetsBindingObserver {
                     child: ConstrainedBox(
                       constraints: BoxConstraints(
                         maxHeight: forTable == false
-                            ? MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.6
-                            : MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.8,
+                            ? MediaQuery.of(context).size.height * 0.6
+                            : MediaQuery.of(context).size.height * 0.8,
                       ),
                       child: Container(
-                        width: MediaQuery
-                            .of(context)
-                            .size
-                            .width,
+                        width: MediaQuery.of(context).size.width,
                         height: forTable == false
-                            ? MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.6
-                            : MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.8,
+                            ? MediaQuery.of(context).size.height * 0.6
+                            : MediaQuery.of(context).size.height * 0.8,
                         color: Colors.transparent,
                         child: Card(
                           color: Colors.white,
                           child: SizedBox(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width,
+                            width: MediaQuery.of(context).size.width,
                             height: forTable == false
-                                ? MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.5
-                                : MediaQuery
-                                .of(context)
-                                .size
-                                .height * 0.7,
+                                ? MediaQuery.of(context).size.height * 0.5
+                                : MediaQuery.of(context).size.height * 0.7,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1707,19 +1591,16 @@ class Reader extends State with WidgetsBindingObserver {
                                   child: Center(
                                     child: forTable == false
                                         ? const Text24(
-                                      text: 'Изучаемые слова',
-                                      textColor: MyColors.black,
-                                    )
+                                            text: 'Изучаемые слова',
+                                            textColor: MyColors.black,
+                                          )
                                         : const Text20(
-                                        text: 'Изучаемые слова',
-                                        textColor: MyColors.black),
+                                            text: 'Изучаемые слова',
+                                            textColor: MyColors.black),
                                   ),
                                 ),
                                 Container(
-                                  width: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width,
+                                  width: MediaQuery.of(context).size.width,
                                   child: DataTable(
                                     columnSpacing: forTable == false ? 15 : 0,
                                     showBottomBorder: false,
@@ -1732,88 +1613,84 @@ class Reader extends State with WidgetsBindingObserver {
                                       DataColumn(
                                         label: forTable == false
                                             ? SizedBox(
-                                          width: MediaQuery
-                                              .of(context)
-                                              .size
-                                              .width *
-                                              0.19,
-                                          child: const Text(
-                                            'Слово',
-                                            style: TextStyle(
-                                              fontFamily: 'Tektur',
-                                              fontSize: 15,
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        )
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.19,
+                                                child: const Text(
+                                                  'Слово',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Tektur',
+                                                    fontSize: 15,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              )
                                             : SizedBox(
-                                          width: MediaQuery
-                                              .of(context)
-                                              .size
-                                              .width *
-                                              0.285,
-                                          child: const Text(
-                                            'Слово',
-                                            style: TextStyle(
-                                              fontFamily: 'Tektur',
-                                              fontSize: 15,
-                                            ),
-                                            textAlign: TextAlign.left,
-                                          ),
-                                        ),
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.285,
+                                                child: const Text(
+                                                  'Слово',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Tektur',
+                                                    fontSize: 15,
+                                                  ),
+                                                  textAlign: TextAlign.left,
+                                                ),
+                                              ),
                                       ),
                                       DataColumn(
                                         label: forTable == false
                                             ? const Text('Транскрипция',
-                                            style: TextStyle(
-                                              fontFamily: 'Tektur',
-                                              fontSize: 15,
-                                            ),
-                                            textAlign: TextAlign.left)
+                                                style: TextStyle(
+                                                  fontFamily: 'Tektur',
+                                                  fontSize: 15,
+                                                ),
+                                                textAlign: TextAlign.left)
                                             : SizedBox(
-                                          width: MediaQuery
-                                              .of(context)
-                                              .size
-                                              .width *
-                                              0.345,
-                                          child: const Text(
-                                              'Транскрипция',
-                                              style: TextStyle(
-                                                fontFamily: 'Tektur',
-                                                fontSize: 15,
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.345,
+                                                child: const Text(
+                                                    'Транскрипция',
+                                                    style: TextStyle(
+                                                      fontFamily: 'Tektur',
+                                                      fontSize: 15,
+                                                    ),
+                                                    textAlign: TextAlign.left),
                                               ),
-                                              textAlign: TextAlign.left),
-                                        ),
                                       ),
                                       DataColumn(
                                         label: forTable == false
                                             ? Text(
-                                          'Перевод',
-                                          style: const TextStyle(
-                                            fontFamily: 'Tektur',
-                                            fontSize: 15,
-                                          ),
-                                          textAlign: forTable == false
-                                              ? TextAlign.right
-                                              : TextAlign.left,
-                                        )
+                                                'Перевод',
+                                                style: const TextStyle(
+                                                  fontFamily: 'Tektur',
+                                                  fontSize: 15,
+                                                ),
+                                                textAlign: forTable == false
+                                                    ? TextAlign.right
+                                                    : TextAlign.left,
+                                              )
                                             : SizedBox(
-                                          width: MediaQuery
-                                              .of(context)
-                                              .size
-                                              .width *
-                                              0.3,
-                                          child: Text(
-                                            'Перевод',
-                                            style: const TextStyle(
-                                              fontFamily: 'Tektur',
-                                              fontSize: 15,
-                                            ),
-                                            textAlign: forTable == false
-                                                ? TextAlign.right
-                                                : TextAlign.left,
-                                          ),
-                                        ),
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.3,
+                                                child: Text(
+                                                  'Перевод',
+                                                  style: const TextStyle(
+                                                    fontFamily: 'Tektur',
+                                                    fontSize: 15,
+                                                  ),
+                                                  textAlign: forTable == false
+                                                      ? TextAlign.right
+                                                      : TextAlign.left,
+                                                ),
+                                              ),
                                       ),
                                     ],
                                     rows: const [],
@@ -1821,22 +1698,13 @@ class Reader extends State with WidgetsBindingObserver {
                                 ),
                                 Container(
                                   width: forTable == true
-                                      ? MediaQuery
-                                      .of(context)
-                                      .size
-                                      .width
+                                      ? MediaQuery.of(context).size.width
                                       : null,
                                   height: forTable == false
-                                      ? MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height *
-                                      0.42
-                                      : MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height *
-                                      0.43,
+                                      ? MediaQuery.of(context).size.height *
+                                          0.42
+                                      : MediaQuery.of(context).size.height *
+                                          0.43,
                                   child: SingleChildScrollView(
                                     scrollDirection: Axis.vertical,
                                     child: DataTable(
@@ -1876,126 +1744,122 @@ class Reader extends State with WidgetsBindingObserver {
                                       ],
                                       rows: wordCount.wordEntries.map((entry) {
                                         final themeProvider =
-                                        Provider.of<ThemeProvider>(context);
+                                            Provider.of<ThemeProvider>(context);
 
                                         return DataRow(
                                           cells: [
                                             DataCell(
                                               forTable == false
                                                   ? SizedBox(
-                                                width:
-                                                MediaQuery
-                                                    .of(context)
-                                                    .size
-                                                    .width *
-                                                    0.23,
-                                                child: Text(
-                                                  entry.word,
-                                                  style: TextStyle(
-                                                      overflow:
-                                                      TextOverflow
-                                                          .ellipsis,
-                                                      color: themeProvider
-                                                          .isDarkTheme
-                                                          ? MyColors.white
-                                                          : MyColors
-                                                          .black),
-                                                ),
-                                              )
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.23,
+                                                      child: Text(
+                                                        entry.word,
+                                                        style: TextStyle(
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            color: themeProvider
+                                                                    .isDarkTheme
+                                                                ? MyColors.white
+                                                                : MyColors
+                                                                    .black),
+                                                      ),
+                                                    )
                                                   : Text(
-                                                entry.word,
-                                                style: TextStyle(
-                                                    overflow: TextOverflow
-                                                        .ellipsis,
-                                                    color: themeProvider
-                                                        .isDarkTheme
-                                                        ? MyColors.white
-                                                        : MyColors.black),
-                                              ),
+                                                      entry.word,
+                                                      style: TextStyle(
+                                                          overflow: TextOverflow
+                                                              .ellipsis,
+                                                          color: themeProvider
+                                                                  .isDarkTheme
+                                                              ? MyColors.white
+                                                              : MyColors.black),
+                                                    ),
                                             ),
                                             DataCell(
                                               forTable == false
                                                   ? SizedBox(
-                                                width:
-                                                MediaQuery
-                                                    .of(context)
-                                                    .size
-                                                    .width *
-                                                    0.275,
-                                                child: Text(
-                                                  '[ ${entry.ipa} ]',
-                                                  style: TextStyle(
-                                                      overflow:
-                                                      TextOverflow
-                                                          .ellipsis,
-                                                      color: themeProvider
-                                                          .isDarkTheme
-                                                          ? MyColors.white
-                                                          : MyColors
-                                                          .black),
-                                                ),
-                                              )
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.275,
+                                                      child: Text(
+                                                        '[ ${entry.ipa} ]',
+                                                        style: TextStyle(
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            color: themeProvider
+                                                                    .isDarkTheme
+                                                                ? MyColors.white
+                                                                : MyColors
+                                                                    .black),
+                                                      ),
+                                                    )
                                                   : SizedBox(
-                                                width:
-                                                MediaQuery
-                                                    .of(context)
-                                                    .size
-                                                    .width *
-                                                    0.14,
-                                                child: Text(
-                                                  '[ ${entry.ipa} ]',
-                                                  style: TextStyle(
-                                                      overflow:
-                                                      TextOverflow
-                                                          .ellipsis,
-                                                      color: themeProvider
-                                                          .isDarkTheme
-                                                          ? MyColors.white
-                                                          : MyColors
-                                                          .black),
-                                                ),
-                                              ),
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.14,
+                                                      child: Text(
+                                                        '[ ${entry.ipa} ]',
+                                                        style: TextStyle(
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            color: themeProvider
+                                                                    .isDarkTheme
+                                                                ? MyColors.white
+                                                                : MyColors
+                                                                    .black),
+                                                      ),
+                                                    ),
                                             ),
                                             DataCell(
                                               forTable == false
                                                   ? Padding(
-                                                padding:
-                                                const EdgeInsets.only(
-                                                    left: 10),
-                                                child: SizedBox(
-                                                  width: MediaQuery
-                                                      .of(
-                                                      context)
-                                                      .size
-                                                      .width *
-                                                      0.5,
-                                                  child: Text(
-                                                    entry.translation!
-                                                        .isNotEmpty
-                                                        ? entry
-                                                        .translation!
-                                                        : 'N/A',
-                                                    style: TextStyle(
-                                                        color: themeProvider
-                                                            .isDarkTheme
-                                                            ? MyColors
-                                                            .white
-                                                            : MyColors
-                                                            .black),
-                                                  ),
-                                                ),
-                                              )
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 10),
+                                                      child: SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.5,
+                                                        child: Text(
+                                                          entry.translation!
+                                                                  .isNotEmpty
+                                                              ? entry
+                                                                  .translation!
+                                                              : 'N/A',
+                                                          style: TextStyle(
+                                                              color: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? MyColors
+                                                                      .white
+                                                                  : MyColors
+                                                                      .black),
+                                                        ),
+                                                      ),
+                                                    )
                                                   : Text(
-                                                entry.translation!
-                                                    .isNotEmpty
-                                                    ? entry.translation!
-                                                    : 'N/A',
-                                                style: TextStyle(
-                                                    color: themeProvider
-                                                        .isDarkTheme
-                                                        ? MyColors.white
-                                                        : MyColors.black),
-                                              ),
+                                                      entry.translation!
+                                                              .isNotEmpty
+                                                          ? entry.translation!
+                                                          : 'N/A',
+                                                      style: TextStyle(
+                                                          color: themeProvider
+                                                                  .isDarkTheme
+                                                              ? MyColors.white
+                                                              : MyColors.black),
+                                                    ),
                                             ),
                                           ],
                                         );
@@ -2027,8 +1891,8 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
-  Future<void> saveJsonToFile(Map<String, dynamic> jsonData,
-      String filePath) async {
+  Future<void> saveJsonToFile(
+      Map<String, dynamic> jsonData, String filePath) async {
     try {
       final file = File(filePath);
       final directory = Directory(file.parent.path);
@@ -2120,9 +1984,32 @@ class Reader extends State with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final size = MediaQuery
-        .of(context)
-        .size;
+    final size = MediaQuery.of(context).size;
+    TextPosition? pos;
+    double lp = 0;
+    if (fake) {
+      if (tp == null || tp!.width != size.width) {
+        tp ??= TextPainter(
+          text: TextSpan(
+              text: book.text,
+              style: TextStyle(
+                  color: Colors.black,
+                  fontSize: fontSize,
+                  height: 1.41,
+                  locale: const Locale('ru', 'RU'))),
+          textAlign: TextAlign.left,
+          textDirection: ui.TextDirection.ltr,
+        )..layout(maxWidth: size.width);
+      }
+
+      pos = tp!
+          .getPositionForOffset(Offset(0, _scrollController.position.pixels));
+      lp = _scrollController.position.pixels -
+          tp!
+              .getOffsetForCaret(TextPosition(offset: pos.offset - 100),
+                  const Rect.fromLTWH(0, 0, 0, 0))
+              .dy;
+    }
 
     return WillPopScope(
         onWillPop: () async {
@@ -2136,1385 +2023,1336 @@ class Reader extends State with WidgetsBindingObserver {
         },
         child: !loading
             ? ShowCaseWidget(builder: (context) {
-          myContext = context;
-          return Scaffold(
-            appBar: visible
-                ? PreferredSize(
-              preferredSize:
-              Size(MediaQuery
-                  .of(context)
-                  .size
-                  .width, 50),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                child: AppBar(
-                    leading: GestureDetector(
-                        onTap: () async {
-                          await book.updateStageInFile(
-                              _scrollPosition / 100, position);
-                          Navigator.pop(context, true);
-                        },
-                        child: Theme(
-                          data: lightTheme(),
-                          child: Showcase(
-                            key: _four,
-                            disableMovingAnimation: true,
-                            description: 'Выход из книги',
-                            onToolTipClick: () {
-                              ShowCaseWidget.of(context)
-                                  .completed(_four);
-                            },
-                            child: Icon(
-                              CustomIcons.chevronLeft,
-                              size: 30,
-                              color:
-                              Theme
-                                  .of(context)
-                                  .iconTheme
-                                  .color,
-                            ),
-                          ),
-                        )),
-                    backgroundColor:
-                    Theme
-                        .of(context)
-                        .colorScheme
-                        .primary,
-                    shadowColor: Colors.transparent,
-                    title: Row(
-                      mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            clipBehavior: Clip.antiAlias,
-                            child: Text(
-                              book.author.isNotEmpty &&
-                                  book.customTitle.isNotEmpty
-                                  ? '${book.author.toString()}. ${book
-                                  .customTitle.toString()}'
-                                  : 'Нет автора',
-                              softWrap: false,
-                              overflow: TextOverflow.fade,
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontFamily: 'Tektur',
-                                  color: themeProvider.isDarkTheme
-                                      ? MyColors.white
-                                      : MyColors.black),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                              35, 0, 0, 0),
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context,
-                                  RouteNames.readerSettings)
-                                  .then((value) =>
-                                  loadStylePreferences());
-                            },
-                            child: Showcase(
-                              key: _five,
-                              onToolTipClick: () {
-                                ShowCaseWidget.of(context)
-                                    .completed(_five);
-                              },
-                              disableMovingAnimation: true,
-                              description:
-                              "В Настройках можно менять размер шрифта, яркость текста, а также выбрать один из четырех вариантов цвета текста и фона.\n"
-                                  "Все изменения отображаются в окне «Текстовый тест темы»",
-                              child: Icon(
-                                CustomIcons.sliders,
-                                size: 28,
-                                color: Theme
-                                    .of(context)
-                                    .iconTheme
-                                    .color,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )),
-              ),
-            )
-                : null,
-            body: Container(
-                decoration: BoxDecoration(
-                    color: backgroundColor,
-                    border: isBorder == true
-                        ? Border.all(
-                        color: const Color.fromRGBO(0, 255, 163, 1),
-                        width: 2)
-                        : Border.all(
-                        width: 0, color: Colors.transparent)),
-                child: SafeArea(
-                  top: true,
-                  minimum: visible
-                      ? const EdgeInsets.only(top: 0, left: 8, right: 8)
-                      : orientations[currentOrientationIndex] ==
-                      DeviceOrientation.landscapeLeft ||
-                      orientations[currentOrientationIndex] ==
-                          DeviceOrientation.landscapeRight
-                      ? const EdgeInsets.only(
-                      top: 0, left: 8, right: 8)
-                      : const EdgeInsets.only(
-                      top: 40, left: 8, right: 8),
-                  child: Stack(children: [
-                    GestureDetector(
-                      onScaleUpdate: (details) {
-                        vFontSize *= details.scale;
-                        vFontSize = min(vFontSize, 24);
-                        vFontSize = max(vFontSize, 8);
-                        if (fontSize.floor() != vFontSize.floor()) {
-                          fontSize = vFontSize.floorToDouble();
-                          setState(() {});
-                        }
-                      },
-                      onScaleEnd: (details) {
-                        print('end');
-                        allowScroll = true;
-                        final tp = TextPainter(
-                          text: TextSpan(
-                              text: book.text,
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: oldFs,
-                                  height: 1.41,
-                                  locale: const Locale('ru', 'RU'))),
-                          textAlign: TextAlign.left,
-                          textDirection: ui.TextDirection.ltr,
-                        )
-                          ..layout(maxWidth: size.width);
-                        final tp1 = TextPainter(
-                          text: TextSpan(
-                              text: book.text,
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: fontSize,
-                                  height: 1.41,
-                                  locale: const Locale('ru', 'RU'))),
-                          textAlign: TextAlign.left,
-                          textDirection: ui.TextDirection.ltr,
-                        )
-                          ..layout(maxWidth: size.width);
-                        final off = tp1.getOffsetForCaret(
-                            tp.getPositionForOffset(Offset(
-                                0, _scrollController.position.pixels)),
-                            const Rect.fromLTWH(0, 0, 1, 1));
-                        lineHeight = tp1.preferredLineHeight;
-                        _scrollController.jumpTo(off.dy);
-
-                        setState(() {});
-                      },
-                      onScaleStart: (details) {},
-                      child: LayoutBuilder(
-                        builder: (context, constraints) => SizedBox(
-                          height: (constraints.maxHeight / lineHeight).floorToDouble() * lineHeight,
-                          child: ListView.builder(
-                              physics: (cnt > 1)
-                                  ? const NeverScrollableScrollPhysics()
-                                  : CustomScroll(
-                                  lineHeight: () => lineHeight),
-                              controller: _scrollController,
-                              itemCount: 1,
-                              itemBuilder: (context, index) =>
-                              _scrollController.hasClients
-                                  ? Text(
-                                  isBorder
-                                      ? translatedText
-                                      : book.text
-                                      .replaceAll(
-                                      RegExp(r'\['), '')
-                                      .replaceAll(
-                                      RegExp(r'\]'), ''),
-                                  softWrap: true,
-                                  style: TextStyle(
-                                      fontSize: fontSize,
-                                      color: textColor,
-                                      height: 1.41,
-                                      locale:
-                                      const Locale('ru', 'RU')))
-                                  : Center(
-                                child: Text(
-                                  'Нет текста для отображения',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    color: textColor,
-                                  ),
-                                ),
-                              )),
-                        ),
-                      ),
-                    ),
-                    isBorder
-                        ? Positioned(
-                      left: isBorder
-                          ? MediaQuery
-                          .of(context)
-                          .size
-                          .width / 4.5
-                          : MediaQuery
-                          .of(context)
-                          .size
-                          .width / 6,
-                      top: isBorder
-                          ? MediaQuery
-                          .of(context)
-                          .size
-                          .height / 4.5
-                          : MediaQuery
-                          .of(context)
-                          .size
-                          .height / 5,
-                      child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onVerticalDragEnd:
-                              (dragEndDetails) async {
-                            if (dragEndDetails.primaryVelocity! >
-                                0) {
-                              showSavedWords(
-                                  context, book.filePath);
-                            }
-                          },
-                          onTap: () {
-                            setState(() {
-                              visible = !visible;
-                            });
-                            if (visible) {
-                              SystemChrome.setEnabledSystemUIMode(
-                                SystemUiMode.manual,
-                                overlays: [
-                                  SystemUiOverlay.top,
-                                  SystemUiOverlay.bottom,
-                                ],
-                              );
-                            } else {
-                              SystemChrome.setEnabledSystemUIMode(
-                                  SystemUiMode.immersive);
-                            }
-                          },
-                          child: IgnorePointer(
-                            child: Container(
-                              width: isBorder
-                                  ? MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width /
-                                  2
-                                  : MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width /
-                                  1.5,
-                              height: isBorder
-                                  ? MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height /
-                                  2.5
-                                  : MediaQuery
-                                  .of(context)
-                                  .size
-                                  .height /
-                                  2,
-                              color: const Color.fromRGBO(
-                                  250, 100, 100, 0),
-                            ),
-                          )),
-                    )
-                        : Container(),
-                    Listener(
-                      behavior: HitTestBehavior.translucent,
-                      onPointerUp: (det) {
-                        if (det.position.dx > size.width / 6 &&
-                            det.position.dx < size.width / (8 / 9) &&
-                            det.position.dy < size.height / 5) {
-                          _scrollController.animateTo(
-                              _scrollController.position.pixels -
-                                  MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height *
-                                      0.925,
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.ease);
-                        }
-
-                        print('end');
-                        setState(() {
-                          cnt--;
-                        });
-                      },
-                      onPointerDown: (event) {
-                        print('start');
-                        setState(() {
-                          cnt++;
-                        });
-                      },
-                    ),
-                    Positioned(
-                        right: 0,
-                        height: size.height,
-                        width: 50,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onVerticalDragStart: (details) async {
-                            brigtness = await FlutterScreenWake.brightness;
-                          },
-                          onVerticalDragUpdate: (details) {
-                            brigtness -= details.delta.dy * 0.01;
-                            brigtness = min(
-                                1, max(0, brigtness));
-                                FlutterScreenWake.setBrightness(brigtness);
-                          },
-                        ))
-                  ]),
-                )),
-            bottomNavigationBar: Platform.isIOS
-                ? BottomAppBar(
-              height: !visible ? 42 : 110,
-              color: visible
-                  ? Theme
-                  .of(context)
-                  .colorScheme
-                  .primary
-                  : backgroundColor,
-              child: Stack(
-                children: [
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    height: visible ? 42 : 110,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: !visible
-                          ? [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                              10, 0, 0, 0),
-                          child: Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width /
-                                8,
-                            alignment: Alignment.topLeft,
-                            child: Stack(
-                              alignment: Alignment.centerLeft,
-                              children: [
-                                Transform.rotate(
-                                  angle:
-                                  90 * 3.14159265 / 180,
-                                  child: Icon(
-                                    Icons.battery_full,
-                                    color: themeProvider
-                                        .isDarkTheme
-                                        ? backgroundColor
-                                        .value ==
-                                        0xff1d1d21
-                                        ? MyColors.white
-                                        : MyColors.black
-                                        : backgroundColor
-                                        .value !=
-                                        0xff1d1d21
-                                        ? MyColors.black
-                                        : MyColors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                                Text(
-                                  _batteryLevel.toInt() >= 100
-                                      ? '${_batteryLevel.toString()}%'
-                                      : ' ${_batteryLevel.toString()}%',
-                                  style: TextStyle(
-                                    color: themeProvider
-                                        .isDarkTheme
-                                        ? backgroundColor
-                                        .value ==
-                                        0xff1d1d21
-                                        ? MyColors.black
-                                        : MyColors.white
-                                        : backgroundColor
-                                        .value !=
-                                        0xff1d1d21
-                                        ? MyColors.white
-                                        : MyColors.black,
-                                    fontSize: 7,
-                                    fontFamily: 'Tektur',
-                                    fontWeight:
-                                    FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding:
-                            const EdgeInsets.fromLTRB(
-                                0, 3, 0, 0),
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: SingleChildScrollView(
-                                scrollDirection:
-                                Axis.horizontal,
-                                child: Text(
-                                  book.customTitle
-                                      .isNotEmpty &&
-                                      book.author
-                                          .isNotEmpty
-                                      ? '${book.author.toString()}. ${book
-                                      .customTitle.toString()}'
-                                      : 'Нет названия',
-                                  style: TextStyle(
-                                      color: themeProvider
-                                          .isDarkTheme
-                                          ? backgroundColor
-                                          .value ==
-                                          0xff1d1d21
-                                          ? MyColors.white
-                                          : MyColors.black
-                                          : backgroundColor
-                                          .value !=
-                                          0xff1d1d21
-                                          ? MyColors.black
-                                          : MyColors
-                                          .white,
-                                      fontFamily: 'Tektur',
-                                      fontSize: 11,
-                                      fontWeight:
-                                      FontWeight.bold),
-                                  textAlign: TextAlign.center,
-                                  overflow:
-                                  TextOverflow.visible,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(
-                              0, 3, 10, 0),
-                          child: Container(
-                            width: MediaQuery
-                                .of(context)
-                                .size
-                                .width /
-                                8,
-                            alignment: Alignment.topRight,
-                            child: Text(
-                              '${_scrollPosition.toStringAsFixed(1)}%',
-                              style: TextStyle(
-                                  color: themeProvider
-                                      .isDarkTheme
-                                      ? backgroundColor
-                                      .value ==
-                                      0xff1d1d21
-                                      ? MyColors.white
-                                      : MyColors.black
-                                      : backgroundColor
-                                      .value !=
-                                      0xff1d1d21
-                                      ? MyColors.black
-                                      : MyColors.white,
-                                  fontFamily: 'Tektur',
-                                  fontSize: 11,
-                                  fontWeight:
-                                  FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ]
-                          : [],
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 250),
-                        height: visible ? 85 : 0,
-                        child: SingleChildScrollView(
-                          child: Container(
-                              alignment:
-                              AlignmentDirectional.topEnd,
-                              color: Theme
-                                  .of(context)
-                                  .colorScheme
-                                  .primary,
-                              child: Column(
-                                children: [
-                                  _scrollController.hasClients
-                                      ? Showcase(
-                                      key: _six,
-                                      disableMovingAnimation:
-                                      true,
-                                      onToolTipClick: () {
-                                        ShowCaseWidget.of(
-                                            context)
-                                            .completed(_six);
-                                      },
-                                      description:
-                                      "Ползунок прокрутки страниц.",
-                                      child: SliderTheme(
-                                        data: const SliderThemeData(
-                                            showValueIndicator:
-                                            ShowValueIndicator
-                                                .always),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .spaceEvenly,
-                                          children: [
-                                            Flexible(
-                                                child:
-                                                SliderTheme(
-                                                  data: const SliderThemeData(
-                                                      trackHeight:
-                                                      3,
-                                                      thumbShape:
-                                                      RoundSliderThumbShape(
-                                                          enabledThumbRadius:
-                                                          9),
-                                                      trackShape:
-                                                      RectangularSliderTrackShape()),
-                                                  child: Container(
-                                                    width: orientations[currentOrientationIndex] ==
-                                                        DeviceOrientation
-                                                            .landscapeLeft ||
-                                                        orientations[currentOrientationIndex] ==
-                                                            DeviceOrientation
-                                                                .landscapeRight
-                                                        ? MediaQuery
-                                                        .of(context)
-                                                        .size
-                                                        .width /
-                                                        1.19
-                                                        : MediaQuery
-                                                        .of(context)
-                                                        .size
-                                                        .width /
-                                                        1.12,
-                                                    child: Slider(
-                                                      value: position !=
-                                                          0
-                                                          ? position >
-                                                          _scrollController
-                                                              .position
-                                                              .maxScrollExtent
-                                                          ? _scrollController
-                                                          .position
-                                                          .maxScrollExtent
-                                                          : position
-                                                          : _scrollController
-                                                          .position
-                                                          .pixels,
-                                                      min: 0,
-                                                      max: _scrollController
-                                                          .position
-                                                          .maxScrollExtent,
-                                                      label: visible
-                                                          ? (position /
-                                                          _scrollController
-                                                              .position
-                                                              .maxScrollExtent) *
-                                                          100 ==
-                                                          100
-                                                          ? "${((position /
-                                                          _scrollController
-                                                              .position
-                                                              .maxScrollExtent) *
-                                                          100).toStringAsFixed(
-                                                          1)}%"
-                                                          : (position /
-                                                          _scrollController
-                                                              .position
-                                                              .maxScrollExtent) *
-                                                          100 > 0
-                                                          ? "${((position /
-                                                          _scrollController
-                                                              .position
-                                                              .maxScrollExtent) *
-                                                          100).toStringAsFixed(
-                                                          1)}%"
-                                                          : "0.0%"
-                                                          : "",
-                                                      onChanged:
-                                                          (value) {
-                                                        setState(
-                                                                () {
-                                                              position =
-                                                                  value;
-                                                            });
-                                                        if (_actionTimer
-                                                            ?.isActive ??
-                                                            false) {
-                                                          _actionTimer
-                                                              ?.cancel();
-                                                        }
-                                                        _actionTimer = Timer(
-                                                            const Duration(
-                                                                milliseconds:
-                                                                250),
-                                                                () {
-                                                              _scrollController
-                                                                  .jumpTo(
-                                                                  value);
-                                                            });
-                                                      },
-                                                      onChangeEnd:
-                                                          (value) {
-                                                        _actionTimer
-                                                            ?.cancel();
-                                                        if (value !=
-                                                            _scrollController
-                                                                .position
-                                                                .pixels) {
-                                                          _scrollController
-                                                              .jumpTo(
-                                                              value);
-                                                        }
-                                                      },
-                                                      activeColor: themeProvider
-                                                          .isDarkTheme
-                                                          ? MyColors
-                                                          .white
-                                                          : const Color
-                                                          .fromRGBO(
-                                                          29,
-                                                          29,
-                                                          33,
-                                                          1),
-                                                      inactiveColor: themeProvider
-                                                          .isDarkTheme
-                                                          ? const Color
-                                                          .fromRGBO(
-                                                          96,
-                                                          96,
-                                                          96,
-                                                          1)
-                                                          : const Color
-                                                          .fromRGBO(
-                                                          96,
-                                                          96,
-                                                          96,
-                                                          1),
-                                                      thumbColor: themeProvider
-                                                          .isDarkTheme
-                                                          ? MyColors
-                                                          .white
-                                                          : const Color
-                                                          .fromRGBO(
-                                                          29,
-                                                          29,
-                                                          33,
-                                                          1),
-                                                    ),
-                                                  ),
-                                                )),
-                                            Container(
-                                              width: MediaQuery
-                                                  .of(
-                                                  context)
-                                                  .size
-                                                  .width /
-                                                  11,
-                                              alignment:
-                                              Alignment
-                                                  .center,
-                                              child: Text11(
-                                                  text: visible
-                                                      ? (position /
-                                                      _scrollController.position
-                                                          .maxScrollExtent) *
-                                                      100 ==
-                                                      100
-                                                      ? "${((position /
-                                                      _scrollController.position
-                                                          .maxScrollExtent) *
-                                                      100).toStringAsFixed(1)}%"
-                                                      : (position /
-                                                      _scrollController.position
-                                                          .maxScrollExtent) *
-                                                      100 >
-                                                      0
-                                                      ? "${((position /
-                                                      _scrollController.position
-                                                          .maxScrollExtent) *
-                                                      100).toStringAsFixed(1)}%"
-                                                      : "0.0%"
-                                                      : "",
-                                                  textColor:
-                                                  MyColors
-                                                      .darkGray),
-                                            )
-                                          ],
-                                        ),
-                                      ))
-                                      : const Text("Загрузка..."),
-                                  Padding(
-                                    padding:
-                                    const EdgeInsets.fromLTRB(
-                                        0, 0, 0, 8),
-                                    child: SizedBox(
-                                      width: MediaQuery
-                                          .of(context)
-                                          .size
-                                          .width,
-                                      height: 2,
-                                      child: Container(
-                                        color: themeProvider
-                                            .isDarkTheme
-                                            ? MyColors.darkGray
-                                            : MyColors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.center,
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () async {
-                                          await savePositionAndExtent();
-                                          switchOrientation();
-                                        },
-                                        child: Showcase(
-                                            key: _seven,
-                                            disableMovingAnimation:
-                                            true,
-                                            onToolTipClick: () {
-                                              ShowCaseWidget.of(
-                                                  context)
-                                                  .completed(
-                                                  _seven);
-                                            },
-                                            description:
-                                            "В нижнем колонтитуле иконка поворота текста на 90°  каждым нажатием на кнопку.",
-                                            child: Icon(
-                                              CustomIcons.turn,
-                                              color:
-                                              Theme
-                                                  .of(context)
-                                                  .iconTheme
-                                                  .color,
-                                              size: 27,
-                                            )),
-                                      ),
-                                      const Padding(
-                                          padding: EdgeInsets.only(
-                                              right: 30)),
-                                      InkWell(
-                                        onTap: () async {
-                                          final themeProvider =
-                                          Provider.of<
-                                              ThemeProvider>(
-                                              context,
-                                              listen: false);
-                                          themeProvider
-                                              .isDarkTheme =
-                                          !themeProvider
-                                              .isDarkTheme;
-                                          await saveSettings(
-                                              themeProvider
-                                                  .isDarkTheme);
-                                        },
-                                        child: Showcase(
-                                            key: _eight,
-                                            description:
-                                            "Иконка переключения режима «день/ночь»",
-                                            disableMovingAnimation:
-                                            true,
-                                            onToolTipClick: () {
-                                              ShowCaseWidget.of(
-                                                  context)
-                                                  .completed(
-                                                  _eight);
-                                            },
-                                            child: Icon(
-                                              CustomIcons.theme,
-                                              color:
-                                              Theme
-                                                  .of(context)
-                                                  .iconTheme
-                                                  .color,
-                                              size: 27,
-                                            )),
-                                      ),
-                                      const Padding(
-                                          padding: EdgeInsets.only(
-                                              right: 30)),
-                                      GestureDetector(
-                                        onTap: () async {
-                                          toggleWordMode();
-                                        },
-                                        child: Showcase(
-                                            key: _nine,
-                                            disableMovingAnimation:
-                                            true,
-                                            description:
-                                            "Иконка входа в режим «Слово» 👌",
-                                            onToolTipClick: () {
-                                              ShowCaseWidget.of(
-                                                  context)
-                                                  .completed(_nine);
-                                            },
-                                            child: Icon(
-                                              CustomIcons.wm,
-                                              color:
-                                              Theme
-                                                  .of(context)
-                                                  .iconTheme
-                                                  .color,
-                                              size: 27,
-                                            )),
-                                      )
-                                    ],
-                                  )
-                                ],
-                              )),
-                        )),
-                  )
-                ],
-              ),
-            )
-                : BottomAppBar(
-                color: visible
-                    ? Theme
-                    .of(context)
-                    .colorScheme
-                    .primary
-                    : backgroundColor,
-                height: visible ? 110 : 45,
-                child: Stack(
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      height: visible ? 85 : 40,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: !visible
-                            ? [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                                0, 0, 0, 0),
-                            child: Container(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width /
-                                  8,
-                              alignment: Alignment.topLeft,
-                              child: Stack(
-                                alignment: Alignment.centerLeft,
-                                children: [
-                                  Transform.rotate(
-                                    angle:
-                                    90 * 3.14159265 / 180,
-                                    child: Icon(
-                                      Icons.battery_full,
-                                      color: themeProvider
-                                          .isDarkTheme
-                                          ? backgroundColor
-                                          .value ==
-                                          0xff1d1d21
-                                          ? MyColors.white
-                                          : MyColors.black
-                                          : backgroundColor
-                                          .value !=
-                                          0xff1d1d21
-                                          ? MyColors.black
-                                          : MyColors.white,
-                                      size: 28,
-                                    ),
-                                  ),
-                                  Text(
-                                    _batteryLevel.toInt() >= 100
-                                        ? '${_batteryLevel.toString()}%'
-                                        : ' ${_batteryLevel.toString()}%',
-                                    style: TextStyle(
-                                      color: themeProvider
-                                          .isDarkTheme
-                                          ? backgroundColor
-                                          .value ==
-                                          0xff1d1d21
-                                          ? MyColors.black
-                                          : MyColors.white
-                                          : backgroundColor
-                                          .value !=
-                                          0xff1d1d21
-                                          ? MyColors.white
-                                          : MyColors.black,
-                                      fontSize: 7,
-                                      fontFamily: 'Tektur',
-                                      fontWeight:
-                                      FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Padding(
-                              padding:
-                              const EdgeInsets.fromLTRB(
-                                  0, 3, 0, 0),
-                              child: Align(
-                                alignment: Alignment.topCenter,
-                                child: SingleChildScrollView(
-                                  scrollDirection:
-                                  Axis.horizontal,
-                                  child: Text(
-                                    book.customTitle
-                                        .isNotEmpty &&
-                                        book.author
-                                            .isNotEmpty
-                                        ? '${book.author.toString()}. ${book
-                                        .customTitle.toString()}'
-                                        : 'Нет названия',
-                                    style: TextStyle(
-                                        color: themeProvider
-                                            .isDarkTheme
-                                            ? backgroundColor
-                                            .value ==
-                                            0xff1d1d21
-                                            ? MyColors.white
-                                            : MyColors.black
-                                            : backgroundColor
-                                            .value !=
-                                            0xff1d1d21
-                                            ? MyColors.black
-                                            : MyColors
-                                            .white,
-                                        fontFamily: 'Tektur',
-                                        fontSize: 11,
-                                        fontWeight:
-                                        FontWeight.bold),
-                                    textAlign: TextAlign.center,
-                                    overflow:
-                                    TextOverflow.visible,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(
-                                0, 3, 10, 0),
-                            child: Container(
-                              width: MediaQuery
-                                  .of(context)
-                                  .size
-                                  .width /
-                                  8,
-                              alignment: Alignment.topRight,
-                              child: Text(
-                                '${_scrollPosition.toStringAsFixed(1)}%',
-                                style: TextStyle(
-                                    color: themeProvider
-                                        .isDarkTheme
-                                        ? backgroundColor
-                                        .value ==
-                                        0xff1d1d21
-                                        ? MyColors.white
-                                        : MyColors.black
-                                        : backgroundColor
-                                        .value !=
-                                        0xff1d1d21
-                                        ? MyColors.black
-                                        : MyColors.white,
-                                    fontFamily: 'Tektur',
-                                    fontSize: 11,
-                                    fontWeight:
-                                    FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                        ]
-                            : [],
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          height: visible ? 85 : 0,
-                          child: SingleChildScrollView(
-                            child: Container(
-                                alignment:
-                                AlignmentDirectional.topEnd,
-                                color: Theme
-                                    .of(context)
-                                    .colorScheme
-                                    .primary,
-                                child: Column(
-                                  children: [
-                                    _scrollController.hasClients
-                                        ? Showcase(
-                                        key: _six,
-                                        disableMovingAnimation:
-                                        true,
+                myContext = context;
+                return Scaffold(
+                  appBar: visible
+                      ? PreferredSize(
+                          preferredSize:
+                              Size(MediaQuery.of(context).size.width, 50),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            child: AppBar(
+                                leading: GestureDetector(
+                                    onTap: () async {
+                                      await book.updateStageInFile(
+                                          _scrollPosition / 100, position);
+                                      Navigator.pop(context, true);
+                                    },
+                                    child: Theme(
+                                      data: lightTheme(),
+                                      child: Showcase(
+                                        key: _four,
+                                        disableMovingAnimation: true,
+                                        description: 'Выход из книги',
                                         onToolTipClick: () {
-                                          ShowCaseWidget.of(
-                                              context)
-                                              .completed(_six);
+                                          ShowCaseWidget.of(context)
+                                              .completed(_four);
                                         },
-                                        description:
-                                        "Ползунок прокрутки страниц.",
-                                        child: SliderTheme(
-                                          data: const SliderThemeData(
-                                              showValueIndicator:
-                                              ShowValueIndicator
-                                                  .always),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment
-                                                .spaceEvenly,
-                                            children: [
-                                              Flexible(
-                                                  child:
-                                                  SliderTheme(
-                                                    data: const SliderThemeData(
-                                                        trackHeight:
-                                                        3,
-                                                        thumbShape:
-                                                        RoundSliderThumbShape(
-                                                            enabledThumbRadius:
-                                                            9),
-                                                        trackShape:
-                                                        RectangularSliderTrackShape()),
-                                                    child: Container(
-                                                      width: orientations[currentOrientationIndex] ==
-                                                          DeviceOrientation
-                                                              .landscapeLeft ||
-                                                          orientations[currentOrientationIndex] ==
-                                                              DeviceOrientation
-                                                                  .landscapeRight
-                                                          ? MediaQuery
-                                                          .of(context)
-                                                          .size
-                                                          .width /
-                                                          1.19
-                                                          : MediaQuery
-                                                          .of(context)
-                                                          .size
-                                                          .width /
-                                                          1.12,
-                                                      child: Slider(
-                                                        value: position !=
-                                                            0
-                                                            ? position >
-                                                            _scrollController
-                                                                .position
-                                                                .maxScrollExtent
-                                                            ? _scrollController
-                                                            .position
-                                                            .maxScrollExtent
-                                                            : max(
-                                                            0,
-                                                            position)
-                                                            : max(
-                                                            0,
-                                                            _scrollController
-                                                                .position
-                                                                .pixels),
-                                                        min: 0,
-                                                        max: _scrollController
-                                                            .position
-                                                            .maxScrollExtent,
-                                                        label: visible
-                                                            ? (position /
-                                                            _scrollController
-                                                                .position
-                                                                .maxScrollExtent) *
-                                                            100 ==
-                                                            100
-                                                            ? "${((position /
-                                                            _scrollController
-                                                                .position
-                                                                .maxScrollExtent) *
-                                                            100)
-                                                            .toStringAsFixed(
-                                                            1)}%"
-                                                            : (position /
-                                                            _scrollController
-                                                                .position
-                                                                .maxScrollExtent) *
-                                                            100 > 0
-                                                            ? "${((position /
-                                                            _scrollController
-                                                                .position
-                                                                .maxScrollExtent) *
-                                                            100)
-                                                            .toStringAsFixed(
-                                                            1)}%"
-                                                            : "0.0%"
-                                                            : "",
-                                                        onChanged:
-                                                            (value) {
-                                                          setState(
-                                                                  () {
-                                                                position =
-                                                                    value;
-                                                              });
-                                                          if (_actionTimer
-                                                              ?.isActive ??
-                                                              false) {
-                                                            _actionTimer
-                                                                ?.cancel();
-                                                          }
-                                                          _actionTimer = Timer(
-                                                              const Duration(
-                                                                  milliseconds:
-                                                                  250),
-                                                                  () {
-                                                                _scrollController
-                                                                    .jumpTo(
-                                                                    value);
-                                                              });
-                                                        },
-                                                        onChangeEnd:
-                                                            (value) {
-                                                          _actionTimer
-                                                              ?.cancel();
-                                                          if (value !=
-                                                              _scrollController
-                                                                  .position
-                                                                  .pixels) {
-                                                            _scrollController
-                                                                .jumpTo(
-                                                                value);
-                                                          }
-                                                        },
-                                                        activeColor: themeProvider
-                                                            .isDarkTheme
-                                                            ? MyColors
-                                                            .white
-                                                            : const Color
-                                                            .fromRGBO(
-                                                            29,
-                                                            29,
-                                                            33,
-                                                            1),
-                                                        inactiveColor: themeProvider
-                                                            .isDarkTheme
-                                                            ? const Color
-                                                            .fromRGBO(
-                                                            96,
-                                                            96,
-                                                            96,
-                                                            1)
-                                                            : const Color
-                                                            .fromRGBO(
-                                                            96,
-                                                            96,
-                                                            96,
-                                                            1),
-                                                        thumbColor: themeProvider
-                                                            .isDarkTheme
-                                                            ? MyColors
-                                                            .white
-                                                            : const Color
-                                                            .fromRGBO(
-                                                            29,
-                                                            29,
-                                                            33,
-                                                            1),
-                                                      ),
-                                                    ),
-                                                  )),
-                                              Container(
-                                                width: MediaQuery
-                                                    .of(
-                                                    context)
-                                                    .size
-                                                    .width /
-                                                    11,
-                                                alignment:
-                                                Alignment
-                                                    .center,
-                                                child: Text11(
-                                                    text: visible
-                                                        ? (position /
-                                                        _scrollController
-                                                            .position
-                                                            .maxScrollExtent) *
-                                                        100 ==
-                                                        100
-                                                        ? "${((position /
-                                                        _scrollController
-                                                            .position
-                                                            .maxScrollExtent) *
-                                                        100).toStringAsFixed(
-                                                        1)}%"
-                                                        : (position /
-                                                        _scrollController
-                                                            .position
-                                                            .maxScrollExtent) *
-                                                        100 >
-                                                        0
-                                                        ? "${((position /
-                                                        _scrollController
-                                                            .position
-                                                            .maxScrollExtent) *
-                                                        100).toStringAsFixed(
-                                                        1)}%"
-                                                        : "0.0%"
-                                                        : "",
-                                                    textColor:
-                                                    MyColors
-                                                        .darkGray),
-                                              )
-                                            ],
-                                          ),
-                                        ))
-                                        : const Text("Загрузка..."),
-                                    Padding(
-                                      padding:
-                                      const EdgeInsets.fromLTRB(
-                                          0, 0, 0, 8),
-                                      child: SizedBox(
-                                        width: MediaQuery
-                                            .of(context)
-                                            .size
-                                            .width,
-                                        height: 2,
-                                        child: Container(
-                                          color: themeProvider
-                                              .isDarkTheme
-                                              ? MyColors.darkGray
-                                              : MyColors.black,
+                                        child: Icon(
+                                          CustomIcons.chevronLeft,
+                                          size: 30,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
+                                        ),
+                                      ),
+                                    )),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                shadowColor: Colors.transparent,
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        clipBehavior: Clip.antiAlias,
+                                        child: Text(
+                                          book.author.isNotEmpty &&
+                                                  book.customTitle.isNotEmpty
+                                              ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                              : 'Нет автора',
+                                          softWrap: false,
+                                          overflow: TextOverflow.fade,
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontFamily: 'Tektur',
+                                              color: themeProvider.isDarkTheme
+                                                  ? MyColors.white
+                                                  : MyColors.black),
                                         ),
                                       ),
                                     ),
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.center,
-                                      children: [
-                                        GestureDetector(
-                                          onTap: () async {
-                                            await savePositionAndExtent();
-                                            switchOrientation();
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          35, 0, 0, 0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.pushNamed(context,
+                                                  RouteNames.readerSettings)
+                                              .then((value) =>
+                                                  loadStylePreferences());
+                                        },
+                                        child: Showcase(
+                                          key: _five,
+                                          onToolTipClick: () {
+                                            ShowCaseWidget.of(context)
+                                                .completed(_five);
                                           },
-                                          child: Showcase(
-                                              key: _seven,
-                                              disableMovingAnimation:
-                                              true,
-                                              onToolTipClick: () {
-                                                ShowCaseWidget.of(
-                                                    context)
-                                                    .completed(
-                                                    _seven);
-                                              },
-                                              description:
-                                              "В нижнем колонтитуле иконка поворота текста на 90°  каждым нажатием на кнопку.",
-                                              child: Icon(
-                                                CustomIcons.turn,
-                                                color:
-                                                Theme
-                                                    .of(context)
-                                                    .iconTheme
-                                                    .color,
-                                                size: 27,
-                                              )),
+                                          disableMovingAnimation: true,
+                                          description:
+                                              "В Настройках можно менять размер шрифта, яркость текста, а также выбрать один из четырех вариантов цвета текста и фона.\n"
+                                              "Все изменения отображаются в окне «Текстовый тест темы»",
+                                          child: Icon(
+                                            CustomIcons.sliders,
+                                            size: 28,
+                                            color: Theme.of(context)
+                                                .iconTheme
+                                                .color,
+                                          ),
                                         ),
-                                        const Padding(
-                                            padding: EdgeInsets.only(
-                                                right: 30)),
-                                        InkWell(
-                                          onTap: () async {
-                                            final themeProvider =
-                                            Provider.of<
-                                                ThemeProvider>(
-                                                context,
-                                                listen: false);
-                                            themeProvider
-                                                .isDarkTheme =
-                                            !themeProvider
-                                                .isDarkTheme;
-                                            await saveSettings(
-                                                themeProvider
-                                                    .isDarkTheme);
-                                          },
-                                          child: Showcase(
-                                              key: _eight,
-                                              description:
-                                              "Иконка переключения режима «день/ночь»",
-                                              disableMovingAnimation:
-                                              true,
-                                              onToolTipClick: () {
-                                                ShowCaseWidget.of(
-                                                    context)
-                                                    .completed(
-                                                    _eight);
-                                              },
-                                              child: Icon(
-                                                CustomIcons.theme,
-                                                color:
-                                                Theme
-                                                    .of(context)
-                                                    .iconTheme
-                                                    .color,
-                                                size: 27,
-                                              )),
-                                        ),
-                                        const Padding(
-                                            padding: EdgeInsets.only(
-                                                right: 30)),
-                                        GestureDetector(
-                                          onTap: () async {
-                                            toggleWordMode();
-                                          },
-                                          child: Showcase(
-                                              key: _nine,
-                                              disableMovingAnimation:
-                                              true,
-                                              description:
-                                              "Иконка входа в режим «Слово» 👌",
-                                              onToolTipClick: () {
-                                                ShowCaseWidget.of(
-                                                    context)
-                                                    .completed(_nine);
-                                              },
-                                              child: Icon(
-                                                CustomIcons.wm,
-                                                color:
-                                                Theme
-                                                    .of(context)
-                                                    .iconTheme
-                                                    .color,
-                                                size: 27,
-                                              )),
-                                        )
-                                      ],
-                                    )
+                                      ),
+                                    ),
                                   ],
                                 )),
+                          ),
+                        )
+                      : null,
+                  body: Container(
+                      decoration: BoxDecoration(
+                          color: backgroundColor,
+                          border: isBorder == true
+                              ? Border.all(
+                                  color: const Color.fromRGBO(0, 255, 163, 1),
+                                  width: 2)
+                              : Border.all(
+                                  width: 0, color: Colors.transparent)),
+                      child: SafeArea(
+                        top: true,
+                        minimum: visible
+                            ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                            : orientations[currentOrientationIndex] ==
+                                        DeviceOrientation.landscapeLeft ||
+                                    orientations[currentOrientationIndex] ==
+                                        DeviceOrientation.landscapeRight
+                                ? const EdgeInsets.only(
+                                    top: 0, left: 8, right: 8)
+                                : const EdgeInsets.only(
+                                    top: 40, left: 8, right: 8),
+                        child: Stack(children: [
+                          ListView.builder(
+                              controller: _scrollController,
+                              itemCount: 1,
+                              itemBuilder: (context, index) => _scrollController
+                                      .hasClients
+                                  ? RichText(
+                                      text: TextSpan(
+                                      text: isBorder
+                                          ? translatedText
+                                          : book.text
+                                              .replaceAll(RegExp(r'\['), '')
+                                              .replaceAll(RegExp(r'\]'), ''),
+                                      style: TextStyle(
+                                          fontSize: fontSize,
+                                          color: textColor,
+                                          height: 1.41,
+                                          locale: const Locale('ru', 'RU')),
+                                    ))
+                                  : Center(
+                                      child: Text(
+                                        'Нет текста для отображения',
+                                        style: TextStyle(
+                                          fontSize: 18.0,
+                                          color: textColor,
+                                        ),
+                                      ),
+                                    )),
+                          GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () {
+                                // Скролл вниз / следующая страница
+                                animateTo(
+                                    (_scrollController.position.pixels +
+                                        MediaQuery.of(context).size.height *
+                                            0.9),
+                                    duration: const Duration(milliseconds: 250),
+                                    curve: Curves.ease);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height,
+                                    color:
+                                        const Color.fromRGBO(100, 150, 100, 0),
+                                  ),
+                                ),
+                              )),
+                          isBorder
+                              ? Positioned(
+                                  left: isBorder
+                                      ? MediaQuery.of(context).size.width / 4.5
+                                      : MediaQuery.of(context).size.width / 6,
+                                  top: isBorder
+                                      ? MediaQuery.of(context).size.height / 4.5
+                                      : MediaQuery.of(context).size.height / 5,
+                                  child: GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
+                                      onVerticalDragEnd:
+                                          (dragEndDetails) async {
+                                        if (dragEndDetails.primaryVelocity! >
+                                            0) {
+                                          showSavedWords(
+                                              context, book.filePath);
+                                        }
+                                      },
+                                      onTap: () {
+                                        setState(() {
+                                          visible = !visible;
+                                        });
+                                        if (visible) {
+                                          SystemChrome.setEnabledSystemUIMode(
+                                            SystemUiMode.manual,
+                                            overlays: [
+                                              SystemUiOverlay.top,
+                                              SystemUiOverlay.bottom,
+                                            ],
+                                          );
+                                        } else {
+                                          SystemChrome.setEnabledSystemUIMode(
+                                              SystemUiMode.immersive);
+                                        }
+                                      },
+                                      child: IgnorePointer(
+                                        child: Container(
+                                          width: isBorder
+                                              ? MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  2
+                                              : MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  1.5,
+                                          height: isBorder
+                                              ? MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  2.5
+                                              : MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  2,
+                                          color: const Color.fromRGBO(
+                                              250, 100, 100, 0),
+                                        ),
+                                      )),
+                                )
+                              : Positioned(
+                                  left: isBorder
+                                      ? MediaQuery.of(context).size.width / 4.5
+                                      : MediaQuery.of(context).size.width / 6,
+                                  top: isBorder
+                                      ? MediaQuery.of(context).size.height / 4.5
+                                      : MediaQuery.of(context).size.height / 5,
+                                  child: GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
+                                      onTap: () {
+                                        setState(() {
+                                          visible = !visible;
+                                        });
+                                        if (visible) {
+                                          SystemChrome.setEnabledSystemUIMode(
+                                            SystemUiMode.manual,
+                                            overlays: [
+                                              SystemUiOverlay.top,
+                                              SystemUiOverlay.bottom,
+                                            ],
+                                          );
+                                        } else {
+                                          SystemChrome.setEnabledSystemUIMode(
+                                              SystemUiMode.manual,
+                                              overlays: []);
+                                        }
+                                      },
+                                      child: IgnorePointer(
+                                        child: Container(
+                                          width: isBorder
+                                              ? MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  2
+                                              : MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  1.5,
+                                          height: isBorder
+                                              ? MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  2.5
+                                              : MediaQuery.of(context)
+                                                      .size
+                                                      .height /
+                                                  2,
+                                          color: const Color.fromRGBO(
+                                              250, 100, 100, 0),
+                                        ),
+                                      )),
+                                ),
+                          Positioned(
+                            left: MediaQuery.of(context).size.width / 6,
+                            child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTap: () {
+                                  // Скролл вверх / предыдущая страница
+                                  animateTo(
+                                      _scrollController.position.pixels -
+                                          MediaQuery.of(context).size.height *
+                                              0.9,
+                                      duration:
+                                          const Duration(milliseconds: 250),
+                                      curve: Curves.ease);
+                                },
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.5,
+                                    height:
+                                        MediaQuery.of(context).size.height / 5,
+                                    color:
+                                        const Color.fromRGBO(100, 150, 200, 0),
+                                  ),
+                                )),
+                          ),
+                          Positioned(
+                              right: 0,
+                              height: size.height,
+                              width: 50,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onVerticalDragStart: (details) async {
+                                  brigtness =
+                                      await FlutterScreenWake.brightness;
+                                },
+                                onVerticalDragUpdate: (details) {
+                                  brigtness -= details.delta.dy / 1000;
+                                  brigtness = min(1, max(0, brigtness));
+                                  FlutterScreenWake.setBrightness(brigtness);
+                                },
+                              )),
+                          fake
+                              ? IgnorePointer(
+                                  child: Container(
+                                    width: size.width,
+                                    height: size.height,
+                                    color: Colors.white,
+                                    child: Transform.translate(
+                                      offset: Offset(0, -lp),
+                                      child: Transform.translate(
+                                        offset: Offset(0, lp),
+                                        child: RichText(
+                                            text: TextSpan(
+                                                text: (isBorder
+                                                        ? translatedText
+                                                        : book.text
+                                                            .replaceAll(
+                                                                RegExp(r'\['),
+                                                                '')
+                                                            .replaceAll(
+                                                                RegExp(r'\]'),
+                                                                ''))
+                                                    .substring(
+                                                        pos!.offset - 100,
+                                                        min(book.text.length,
+                                                            pos.offset + 3000)),
+                                                style: TextStyle(
+                                                    fontSize: ffontSize,
+                                                    color: textColor,
+                                                    height: 1.41,
+                                                    locale: const Locale(
+                                                        'ru', 'RU')))),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              : Container(),
+                          Positioned(
+                              left: 0,
+                              height: size.height,
+                              width: 50,
+                              child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onVerticalDragStart: (details) async {
+                                    fake = true;
+                                    setState(() {});
+                                    print('end');
+                                  },
+                                  onVerticalDragUpdate: (details) {
+                                    vFontSize -= details.delta.dy / 10;
+                                    vFontSize = min(vFontSize, 28);
+                                    vFontSize = max(vFontSize, 10);
+                                    if (fontSize.floor() != vFontSize.floor()) {
+                                      ffontSize = vFontSize.floorToDouble();
+                                      setState(() {});
+                                    }
+                                  },
+                                  onVerticalDragEnd: (detalis) {
+                                    fontSize = ffontSize;
+                                    fake = false;
+                                    tp = TextPainter(
+                                      text: TextSpan(
+                                          text: book.text,
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: fontSize,
+                                              height: 1.41,
+                                              locale:
+                                                  const Locale('ru', 'RU'))),
+                                      textAlign: TextAlign.left,
+                                      textDirection: ui.TextDirection.ltr,
+                                    )..layout(maxWidth: size.width);
+                                    lineHeight = tp!.preferredLineHeight * 2;
+                                    final off = tp!.getOffsetForCaret(
+                                        pos!, const Rect.fromLTWH(0, 0, 0, 0));
+                                    jumpTo(off.dy);
+                                    setState(() {});
+                                  })),
+                        ]),
+                      )),
+                  bottomNavigationBar: Platform.isIOS
+                      ? BottomAppBar(
+                          height: !visible ? 42 : 110,
+                          color: visible
+                              ? Theme.of(context).colorScheme.primary
+                              : backgroundColor,
+                          child: Stack(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                height: visible ? 42 : 110,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: !visible
+                                      ? [
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                10, 0, 0, 0),
+                                            child: Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  8,
+                                              alignment: Alignment.topLeft,
+                                              child: Stack(
+                                                alignment: Alignment.centerLeft,
+                                                children: [
+                                                  Transform.rotate(
+                                                    angle:
+                                                        90 * 3.14159265 / 180,
+                                                    child: Icon(
+                                                      Icons.battery_full,
+                                                      color: themeProvider
+                                                              .isDarkTheme
+                                                          ? backgroundColor
+                                                                      .value ==
+                                                                  0xff1d1d21
+                                                              ? MyColors.white
+                                                              : MyColors.black
+                                                          : backgroundColor
+                                                                      .value !=
+                                                                  0xff1d1d21
+                                                              ? MyColors.black
+                                                              : MyColors.white,
+                                                      size: 28,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    _batteryLevel.toInt() >= 100
+                                                        ? '${_batteryLevel.toString()}%'
+                                                        : ' ${_batteryLevel.toString()}%',
+                                                    style: TextStyle(
+                                                      color: themeProvider
+                                                              .isDarkTheme
+                                                          ? backgroundColor
+                                                                      .value ==
+                                                                  0xff1d1d21
+                                                              ? MyColors.black
+                                                              : MyColors.white
+                                                          : backgroundColor
+                                                                      .value !=
+                                                                  0xff1d1d21
+                                                              ? MyColors.white
+                                                              : MyColors.black,
+                                                      fontSize: 7,
+                                                      fontFamily: 'Tektur',
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      0, 3, 0, 0),
+                                              child: Align(
+                                                alignment: Alignment.topCenter,
+                                                child: SingleChildScrollView(
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  child: Text(
+                                                    book.customTitle
+                                                                .isNotEmpty &&
+                                                            book.author
+                                                                .isNotEmpty
+                                                        ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                                        : 'Нет названия',
+                                                    style: TextStyle(
+                                                        color: themeProvider
+                                                                .isDarkTheme
+                                                            ? backgroundColor
+                                                                        .value ==
+                                                                    0xff1d1d21
+                                                                ? MyColors.white
+                                                                : MyColors.black
+                                                            : backgroundColor
+                                                                        .value !=
+                                                                    0xff1d1d21
+                                                                ? MyColors.black
+                                                                : MyColors
+                                                                    .white,
+                                                        fontFamily: 'Tektur',
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                    textAlign: TextAlign.center,
+                                                    overflow:
+                                                        TextOverflow.visible,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                0, 3, 10, 0),
+                                            child: Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  8,
+                                              alignment: Alignment.topRight,
+                                              child: Text(
+                                                '${_scrollPosition.toStringAsFixed(1)}%',
+                                                style: TextStyle(
+                                                    color: themeProvider
+                                                            .isDarkTheme
+                                                        ? backgroundColor
+                                                                    .value ==
+                                                                0xff1d1d21
+                                                            ? MyColors.white
+                                                            : MyColors.black
+                                                        : backgroundColor
+                                                                    .value !=
+                                                                0xff1d1d21
+                                                            ? MyColors.black
+                                                            : MyColors.white,
+                                                    fontFamily: 'Tektur',
+                                                    fontSize: 11,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    height: visible ? 85 : 0,
+                                    child: SingleChildScrollView(
+                                      child: Container(
+                                          alignment:
+                                              AlignmentDirectional.topEnd,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          child: Column(
+                                            children: [
+                                              _scrollController.hasClients
+                                                  ? Showcase(
+                                                      key: _six,
+                                                      disableMovingAnimation:
+                                                          true,
+                                                      onToolTipClick: () {
+                                                        ShowCaseWidget.of(
+                                                                context)
+                                                            .completed(_six);
+                                                      },
+                                                      description:
+                                                          "Ползунок прокрутки страниц.",
+                                                      child: SliderTheme(
+                                                        data: const SliderThemeData(
+                                                            showValueIndicator:
+                                                                ShowValueIndicator
+                                                                    .always),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          children: [
+                                                            Flexible(
+                                                                child:
+                                                                    SliderTheme(
+                                                              data: const SliderThemeData(
+                                                                  trackHeight:
+                                                                      3,
+                                                                  thumbShape:
+                                                                      RoundSliderThumbShape(
+                                                                          enabledThumbRadius:
+                                                                              9),
+                                                                  trackShape:
+                                                                      RectangularSliderTrackShape()),
+                                                              child: Container(
+                                                                width: orientations[currentOrientationIndex] ==
+                                                                            DeviceOrientation
+                                                                                .landscapeLeft ||
+                                                                        orientations[currentOrientationIndex] ==
+                                                                            DeviceOrientation
+                                                                                .landscapeRight
+                                                                    ? MediaQuery.of(context)
+                                                                            .size
+                                                                            .width /
+                                                                        1.19
+                                                                    : MediaQuery.of(context)
+                                                                            .size
+                                                                            .width /
+                                                                        1.12,
+                                                                child: Slider(
+                                                                  value: position !=
+                                                                          0
+                                                                      ? position >
+                                                                              _scrollController
+                                                                                  .position.maxScrollExtent
+                                                                          ? _scrollController
+                                                                              .position
+                                                                              .maxScrollExtent
+                                                                          : position
+                                                                      : _scrollController
+                                                                          .position
+                                                                          .pixels,
+                                                                  min: 0,
+                                                                  max: _scrollController
+                                                                      .position
+                                                                      .maxScrollExtent,
+                                                                  label: visible
+                                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 ==
+                                                                              100
+                                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                                          : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                                              : "0.0%"
+                                                                      : "",
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    setState(
+                                                                        () {
+                                                                      position =
+                                                                          value;
+                                                                    });
+                                                                    if (_actionTimer
+                                                                            ?.isActive ??
+                                                                        false) {
+                                                                      _actionTimer
+                                                                          ?.cancel();
+                                                                    }
+                                                                    _actionTimer = Timer(
+                                                                        const Duration(
+                                                                            milliseconds:
+                                                                                250),
+                                                                        () {
+                                                                      jumpTo(
+                                                                          value);
+                                                                    });
+                                                                  },
+                                                                  onChangeEnd:
+                                                                      (value) {
+                                                                    _actionTimer
+                                                                        ?.cancel();
+                                                                    if (value !=
+                                                                        _scrollController
+                                                                            .position
+                                                                            .pixels) {
+                                                                      jumpTo(
+                                                                          value);
+                                                                    }
+                                                                  },
+                                                                  activeColor: themeProvider.isDarkTheme
+                                                                      ? MyColors
+                                                                          .white
+                                                                      : const Color
+                                                                          .fromRGBO(
+                                                                          29,
+                                                                          29,
+                                                                          33,
+                                                                          1),
+                                                                  inactiveColor: themeProvider
+                                                                          .isDarkTheme
+                                                                      ? const Color
+                                                                          .fromRGBO(
+                                                                          96,
+                                                                          96,
+                                                                          96,
+                                                                          1)
+                                                                      : const Color
+                                                                          .fromRGBO(
+                                                                          96,
+                                                                          96,
+                                                                          96,
+                                                                          1),
+                                                                  thumbColor: themeProvider.isDarkTheme
+                                                                      ? MyColors
+                                                                          .white
+                                                                      : const Color
+                                                                          .fromRGBO(
+                                                                          29,
+                                                                          29,
+                                                                          33,
+                                                                          1),
+                                                                ),
+                                                              ),
+                                                            )),
+                                                            Container(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width /
+                                                                  11,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              child: Text11(
+                                                                  text: visible
+                                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 ==
+                                                                              100
+                                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                                          : (position / _scrollController.position.maxScrollExtent) * 100 >
+                                                                                  0
+                                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                                              : "0.0%"
+                                                                      : "",
+                                                                  textColor:
+                                                                      MyColors
+                                                                          .darkGray),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ))
+                                                  : const Text("Загрузка..."),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        0, 0, 0, 8),
+                                                child: SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  height: 2,
+                                                  child: Container(
+                                                    color: themeProvider
+                                                            .isDarkTheme
+                                                        ? MyColors.darkGray
+                                                        : MyColors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      await savePositionAndExtent();
+                                                      switchOrientation();
+                                                    },
+                                                    child: Showcase(
+                                                        key: _seven,
+                                                        disableMovingAnimation:
+                                                            true,
+                                                        onToolTipClick: () {
+                                                          ShowCaseWidget.of(
+                                                                  context)
+                                                              .completed(
+                                                                  _seven);
+                                                        },
+                                                        description:
+                                                            "В нижнем колонтитуле иконка поворота текста на 90°  каждым нажатием на кнопку.",
+                                                        child: Icon(
+                                                          CustomIcons.turn,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .iconTheme
+                                                                  .color,
+                                                          size: 27,
+                                                        )),
+                                                  ),
+                                                  const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          right: 30)),
+                                                  InkWell(
+                                                    onTap: () async {
+                                                      final themeProvider =
+                                                          Provider.of<
+                                                                  ThemeProvider>(
+                                                              context,
+                                                              listen: false);
+                                                      themeProvider
+                                                              .isDarkTheme =
+                                                          !themeProvider
+                                                              .isDarkTheme;
+                                                      await saveSettings(
+                                                          themeProvider
+                                                              .isDarkTheme);
+                                                    },
+                                                    child: Showcase(
+                                                        key: _eight,
+                                                        description:
+                                                            "Иконка переключения режима «день/ночь»",
+                                                        disableMovingAnimation:
+                                                            true,
+                                                        onToolTipClick: () {
+                                                          ShowCaseWidget.of(
+                                                                  context)
+                                                              .completed(
+                                                                  _eight);
+                                                        },
+                                                        child: Icon(
+                                                          CustomIcons.theme,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .iconTheme
+                                                                  .color,
+                                                          size: 27,
+                                                        )),
+                                                  ),
+                                                  const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          right: 30)),
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      toggleWordMode();
+                                                    },
+                                                    child: Showcase(
+                                                        key: _nine,
+                                                        disableMovingAnimation:
+                                                            true,
+                                                        description:
+                                                            "Иконка входа в режим «Слово» 👌",
+                                                        onToolTipClick: () {
+                                                          ShowCaseWidget.of(
+                                                                  context)
+                                                              .completed(_nine);
+                                                        },
+                                                        child: Icon(
+                                                          CustomIcons.wm,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .iconTheme
+                                                                  .color,
+                                                          size: 27,
+                                                        )),
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          )),
+                                    )),
+                              )
+                            ],
+                          ),
+                        )
+                      : BottomAppBar(
+                          color: visible
+                              ? Theme.of(context).colorScheme.primary
+                              : backgroundColor,
+                          height: visible ? 110 : 45,
+                          child: Stack(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                height: visible ? 85 : 40,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: !visible
+                                      ? [
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                0, 0, 0, 0),
+                                            child: Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  8,
+                                              alignment: Alignment.topLeft,
+                                              child: Stack(
+                                                alignment: Alignment.centerLeft,
+                                                children: [
+                                                  Transform.rotate(
+                                                    angle:
+                                                        90 * 3.14159265 / 180,
+                                                    child: Icon(
+                                                      Icons.battery_full,
+                                                      color: themeProvider
+                                                              .isDarkTheme
+                                                          ? backgroundColor
+                                                                      .value ==
+                                                                  0xff1d1d21
+                                                              ? MyColors.white
+                                                              : MyColors.black
+                                                          : backgroundColor
+                                                                      .value !=
+                                                                  0xff1d1d21
+                                                              ? MyColors.black
+                                                              : MyColors.white,
+                                                      size: 28,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    _batteryLevel.toInt() >= 100
+                                                        ? '${_batteryLevel.toString()}%'
+                                                        : ' ${_batteryLevel.toString()}%',
+                                                    style: TextStyle(
+                                                      color: themeProvider
+                                                              .isDarkTheme
+                                                          ? backgroundColor
+                                                                      .value ==
+                                                                  0xff1d1d21
+                                                              ? MyColors.black
+                                                              : MyColors.white
+                                                          : backgroundColor
+                                                                      .value !=
+                                                                  0xff1d1d21
+                                                              ? MyColors.white
+                                                              : MyColors.black,
+                                                      fontSize: 7,
+                                                      fontFamily: 'Tektur',
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      0, 3, 0, 0),
+                                              child: Align(
+                                                alignment: Alignment.topCenter,
+                                                child: SingleChildScrollView(
+                                                  scrollDirection:
+                                                      Axis.horizontal,
+                                                  child: Text(
+                                                    book.customTitle
+                                                                .isNotEmpty &&
+                                                            book.author
+                                                                .isNotEmpty
+                                                        ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                                        : 'Нет названия',
+                                                    style: TextStyle(
+                                                        color: themeProvider
+                                                                .isDarkTheme
+                                                            ? backgroundColor
+                                                                        .value ==
+                                                                    0xff1d1d21
+                                                                ? MyColors.white
+                                                                : MyColors.black
+                                                            : backgroundColor
+                                                                        .value !=
+                                                                    0xff1d1d21
+                                                                ? MyColors.black
+                                                                : MyColors
+                                                                    .white,
+                                                        fontFamily: 'Tektur',
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                    textAlign: TextAlign.center,
+                                                    overflow:
+                                                        TextOverflow.visible,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                0, 3, 10, 0),
+                                            child: Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  8,
+                                              alignment: Alignment.topRight,
+                                              child: Text(
+                                                '${_scrollPosition.toStringAsFixed(1)}%',
+                                                style: TextStyle(
+                                                    color: themeProvider
+                                                            .isDarkTheme
+                                                        ? backgroundColor
+                                                                    .value ==
+                                                                0xff1d1d21
+                                                            ? MyColors.white
+                                                            : MyColors.black
+                                                        : backgroundColor
+                                                                    .value !=
+                                                                0xff1d1d21
+                                                            ? MyColors.black
+                                                            : MyColors.white,
+                                                    fontFamily: 'Tektur',
+                                                    fontSize: 11,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ),
+                                          ),
+                                        ]
+                                      : [],
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 250),
+                                    height: visible ? 85 : 0,
+                                    child: SingleChildScrollView(
+                                      child: Container(
+                                          alignment:
+                                              AlignmentDirectional.topEnd,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
+                                          child: Column(
+                                            children: [
+                                              _scrollController.hasClients
+                                                  ? Showcase(
+                                                      key: _six,
+                                                      disableMovingAnimation:
+                                                          true,
+                                                      onToolTipClick: () {
+                                                        ShowCaseWidget.of(
+                                                                context)
+                                                            .completed(_six);
+                                                      },
+                                                      description:
+                                                          "Ползунок прокрутки страниц.",
+                                                      child: SliderTheme(
+                                                        data: const SliderThemeData(
+                                                            showValueIndicator:
+                                                                ShowValueIndicator
+                                                                    .always),
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          children: [
+                                                            Flexible(
+                                                                child:
+                                                                    SliderTheme(
+                                                              data: const SliderThemeData(
+                                                                  trackHeight:
+                                                                      3,
+                                                                  thumbShape:
+                                                                      RoundSliderThumbShape(
+                                                                          enabledThumbRadius:
+                                                                              9),
+                                                                  trackShape:
+                                                                      RectangularSliderTrackShape()),
+                                                              child: Container(
+                                                                width: orientations[currentOrientationIndex] ==
+                                                                            DeviceOrientation
+                                                                                .landscapeLeft ||
+                                                                        orientations[currentOrientationIndex] ==
+                                                                            DeviceOrientation
+                                                                                .landscapeRight
+                                                                    ? MediaQuery.of(context)
+                                                                            .size
+                                                                            .width /
+                                                                        1.19
+                                                                    : MediaQuery.of(context)
+                                                                            .size
+                                                                            .width /
+                                                                        1.12,
+                                                                child: Slider(
+                                                                  value: position !=
+                                                                          0
+                                                                      ? position >
+                                                                              _scrollController
+                                                                                  .position.maxScrollExtent
+                                                                          ? _scrollController
+                                                                              .position
+                                                                              .maxScrollExtent
+                                                                          : max(
+                                                                              0,
+                                                                              position)
+                                                                      : max(
+                                                                          0,
+                                                                          _scrollController
+                                                                              .position
+                                                                              .pixels),
+                                                                  min: 0,
+                                                                  max: _scrollController
+                                                                      .position
+                                                                      .maxScrollExtent,
+                                                                  label: visible
+                                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 ==
+                                                                              100
+                                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                                          : (position / _scrollController.position.maxScrollExtent) * 100 > 0
+                                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                                              : "0.0%"
+                                                                      : "",
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    setState(
+                                                                        () {
+                                                                      position =
+                                                                          value;
+                                                                    });
+                                                                    if (_actionTimer
+                                                                            ?.isActive ??
+                                                                        false) {
+                                                                      _actionTimer
+                                                                          ?.cancel();
+                                                                    }
+                                                                    _actionTimer = Timer(
+                                                                        const Duration(
+                                                                            milliseconds:
+                                                                                250),
+                                                                        () {
+                                                                      jumpTo(
+                                                                          value);
+                                                                    });
+                                                                  },
+                                                                  onChangeEnd:
+                                                                      (value) {
+                                                                    _actionTimer
+                                                                        ?.cancel();
+                                                                    if (value !=
+                                                                        _scrollController
+                                                                            .position
+                                                                            .pixels) {
+                                                                      jumpTo(
+                                                                          value);
+                                                                    }
+                                                                  },
+                                                                  activeColor: themeProvider.isDarkTheme
+                                                                      ? MyColors
+                                                                          .white
+                                                                      : const Color
+                                                                          .fromRGBO(
+                                                                          29,
+                                                                          29,
+                                                                          33,
+                                                                          1),
+                                                                  inactiveColor: themeProvider
+                                                                          .isDarkTheme
+                                                                      ? const Color
+                                                                          .fromRGBO(
+                                                                          96,
+                                                                          96,
+                                                                          96,
+                                                                          1)
+                                                                      : const Color
+                                                                          .fromRGBO(
+                                                                          96,
+                                                                          96,
+                                                                          96,
+                                                                          1),
+                                                                  thumbColor: themeProvider.isDarkTheme
+                                                                      ? MyColors
+                                                                          .white
+                                                                      : const Color
+                                                                          .fromRGBO(
+                                                                          29,
+                                                                          29,
+                                                                          33,
+                                                                          1),
+                                                                ),
+                                                              ),
+                                                            )),
+                                                            Container(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width /
+                                                                  11,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              child: Text11(
+                                                                  text: visible
+                                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 ==
+                                                                              100
+                                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                                          : (position / _scrollController.position.maxScrollExtent) * 100 >
+                                                                                  0
+                                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
+                                                                              : "0.0%"
+                                                                      : "",
+                                                                  textColor:
+                                                                      MyColors
+                                                                          .darkGray),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ))
+                                                  : const Text("Загрузка..."),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        0, 0, 0, 8),
+                                                child: SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  height: 2,
+                                                  child: Container(
+                                                    color: themeProvider
+                                                            .isDarkTheme
+                                                        ? MyColors.darkGray
+                                                        : MyColors.black,
+                                                  ),
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      await savePositionAndExtent();
+                                                      switchOrientation();
+                                                    },
+                                                    child: Showcase(
+                                                        key: _seven,
+                                                        disableMovingAnimation:
+                                                            true,
+                                                        onToolTipClick: () {
+                                                          ShowCaseWidget.of(
+                                                                  context)
+                                                              .completed(
+                                                                  _seven);
+                                                        },
+                                                        description:
+                                                            "В нижнем колонтитуле иконка поворота текста на 90°  каждым нажатием на кнопку.",
+                                                        child: Icon(
+                                                          CustomIcons.turn,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .iconTheme
+                                                                  .color,
+                                                          size: 27,
+                                                        )),
+                                                  ),
+                                                  const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          right: 30)),
+                                                  InkWell(
+                                                    onTap: () async {
+                                                      final themeProvider =
+                                                          Provider.of<
+                                                                  ThemeProvider>(
+                                                              context,
+                                                              listen: false);
+                                                      themeProvider
+                                                              .isDarkTheme =
+                                                          !themeProvider
+                                                              .isDarkTheme;
+                                                      await saveSettings(
+                                                          themeProvider
+                                                              .isDarkTheme);
+                                                    },
+                                                    child: Showcase(
+                                                        key: _eight,
+                                                        description:
+                                                            "Иконка переключения режима «день/ночь»",
+                                                        disableMovingAnimation:
+                                                            true,
+                                                        onToolTipClick: () {
+                                                          ShowCaseWidget.of(
+                                                                  context)
+                                                              .completed(
+                                                                  _eight);
+                                                        },
+                                                        child: Icon(
+                                                          CustomIcons.theme,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .iconTheme
+                                                                  .color,
+                                                          size: 27,
+                                                        )),
+                                                  ),
+                                                  const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          right: 30)),
+                                                  GestureDetector(
+                                                    onTap: () async {
+                                                      toggleWordMode();
+                                                    },
+                                                    child: Showcase(
+                                                        key: _nine,
+                                                        disableMovingAnimation:
+                                                            true,
+                                                        description:
+                                                            "Иконка входа в режим «Слово» 👌",
+                                                        onToolTipClick: () {
+                                                          ShowCaseWidget.of(
+                                                                  context)
+                                                              .completed(_nine);
+                                                        },
+                                                        child: Icon(
+                                                          CustomIcons.wm,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .iconTheme
+                                                                  .color,
+                                                          size: 27,
+                                                        )),
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          )),
+                                    )),
+                              )
+                            ],
                           )),
-                    )
-                  ],
-                )),
-          );
-        })
+                );
+              })
             : Scaffold(
-          body: Container(
-            color: Theme
-                .of(context)
-                .colorScheme
-                .primary,
-          ),
-        ));
+                body: Container(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ));
   }
 }
