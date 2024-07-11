@@ -2173,8 +2173,7 @@ class Reader extends State with WidgetsBindingObserver {
                                 // Скролл вниз / следующая страница
                                 animateTo(
                                     (_scrollController.position.pixels +
-                                        MediaQuery.of(context).size.height *
-                                            0.9),
+                                        ((MediaQuery.of(context).size.height / lineHeight).floorToDouble() - 1) * lineHeight),
                                     duration: const Duration(milliseconds: 250),
                                     curve: Curves.ease);
                               },
@@ -2309,8 +2308,7 @@ class Reader extends State with WidgetsBindingObserver {
                                   // Скролл вверх / предыдущая страница
                                   animateTo(
                                       _scrollController.position.pixels -
-                                          MediaQuery.of(context).size.height *
-                                              0.9,
+                                          ((MediaQuery.of(context).size.height / lineHeight).floorToDouble() - 1) * lineHeight,
                                       duration:
                                           const Duration(milliseconds: 250),
                                       curve: Curves.ease);
@@ -2403,7 +2401,7 @@ class Reader extends State with WidgetsBindingObserver {
                                     //fake = false;
                                     tp = TextPainter(
                                       text: TextSpan(
-                                          text: book.text,
+                                          text: "book.text",
                                           style: TextStyle(
                                               color: Colors.black,
                                               fontSize: fontSize,
@@ -2414,9 +2412,9 @@ class Reader extends State with WidgetsBindingObserver {
                                       textDirection: ui.TextDirection.ltr,
                                     )..layout(maxWidth: size.width);
                                     lineHeight = tp!.preferredLineHeight * 2;
-                                    final off = tp!.getOffsetForCaret(
+                                    /*final off = tp!.getOffsetForCaret(
                                         pos!, const Rect.fromLTWH(0, 0, 0, 0));
-                                    jumpTo(off.dy);
+                                    jumpTo(off.dy);*/
                                     setState(() {});
                                   })),
                         ]),
