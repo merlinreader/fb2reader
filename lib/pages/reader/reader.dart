@@ -79,6 +79,7 @@ class ReaderPage extends StatefulWidget {
 
 class Reader extends State with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
+  late Timer timer;
   Book book = Book(
       filePath: "filePath",
       text: "text",
@@ -130,7 +131,7 @@ class Reader extends State with WidgetsBindingObserver {
   double ffontSize = 18;
   double oldWidth = 1;
 
-  TextPainter? tp;
+  TextPainter? tp, tp1;
 
   @override
   void initState() {
@@ -143,14 +144,26 @@ class Reader extends State with WidgetsBindingObserver {
     loadStylePreferences();
     _initPage();
 
+    timer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
+      FlutterScreenWake.setBrightness(brigtness);
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       Future.delayed(const Duration(milliseconds: 300), () async {
-        if (await firstRun()) {
+        final prefs = await SharedPreferences.getInstance();
+        bool isFirstRun;
+        try {
+          isFirstRun = prefs.getBool("hi") ?? true;
+        } on Exception {
+          isFirstRun = true;
+        }
+        await prefs.setBool("hi", false);
+
+        if (isFirstRun) {
           ShowCaseWidget.of(myContext!)
               .startShowCase([_four, _five, _six, _seven, _eight, _nine]);
         }
         //await firstRunReset();
-        final prefs = await SharedPreferences.getInstance();
         while (!loading) {
           lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
           // print('READER lastpagecount $lastPageCount');
@@ -175,6 +188,7 @@ class Reader extends State with WidgetsBindingObserver {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     WidgetsBinding.instance.removeObserver(this);
     SystemChrome.setPreferredOrientations([orientations[0]]);
+    timer.cancel();
     super.dispose();
   }
 
@@ -328,7 +342,7 @@ class Reader extends State with WidgetsBindingObserver {
       }
       if (fontSizeFromStorage != null) {
         fontSize = vFontSize = fontSizeFromStorage;
-        final tp1 = TextPainter(
+        tp = TextPainter(
           text: TextSpan(
               text: 'abcde',
               style: TextStyle(
@@ -339,7 +353,7 @@ class Reader extends State with WidgetsBindingObserver {
           textAlign: TextAlign.left,
           textDirection: ui.TextDirection.ltr,
         )..layout(maxWidth: 1000);
-        lineHeight = tp1.preferredLineHeight * 2;
+        lineHeight = tp!.preferredLineHeight;
       }
     });
   }
@@ -2139,285 +2153,315 @@ class Reader extends State with WidgetsBindingObserver {
                                     top: 0, left: 8, right: 8)
                                 : const EdgeInsets.only(
                                     top: 40, left: 8, right: 8),
-                        child: Stack(children: [
-                          ListView.builder(
-                              controller: _scrollController,
-                              itemCount: 1,
-                              itemBuilder: (context, index) => _scrollController
-                                      .hasClients
-                                  ? RichText(
-                                      text: TextSpan(
-                                      text: isBorder
-                                          ? translatedText
-                                          : book.text
-                                              .replaceAll(RegExp(r'\['), '')
-                                              .replaceAll(RegExp(r'\]'), ''),
-                                      style: TextStyle(
-                                          fontSize: fontSize,
-                                          color: textColor,
-                                          height: 1.41,
-                                          locale: const Locale('ru', 'RU')),
-                                    ))
-                                  : Center(
-                                      child: Text(
-                                        'Нет текста для отображения',
-                                        style: TextStyle(
-                                          fontSize: 18.0,
-                                          color: textColor,
-                                        ),
-                                      ),
-                                    )),
-                          GestureDetector(
-                              behavior: HitTestBehavior.translucent,
-                              onTap: () {
-                                // Скролл вниз / следующая страница
-                                animateTo(
-                                    (_scrollController.position.pixels +
-                                        ((MediaQuery.of(context).size.height / lineHeight).floorToDouble() - 1) * lineHeight),
-                                    duration: const Duration(milliseconds: 250),
-                                    curve: Curves.ease);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                child: IgnorePointer(
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: MediaQuery.of(context).size.height,
-                                    color:
-                                        const Color.fromRGBO(100, 150, 100, 0),
-                                  ),
-                                ),
-                              )),
-                          isBorder
-                              ? Positioned(
-                                  left: isBorder
-                                      ? MediaQuery.of(context).size.width / 4.5
-                                      : MediaQuery.of(context).size.width / 6,
-                                  top: isBorder
-                                      ? MediaQuery.of(context).size.height / 4.5
-                                      : MediaQuery.of(context).size.height / 5,
-                                  child: GestureDetector(
-                                      behavior: HitTestBehavior.translucent,
-                                      onVerticalDragEnd:
-                                          (dragEndDetails) async {
-                                        if (dragEndDetails.primaryVelocity! >
-                                            0) {
-                                          showSavedWords(
-                                              context, book.filePath);
-                                        }
-                                      },
-                                      onTap: () {
-                                        setState(() {
-                                          visible = !visible;
-                                        });
-                                        if (visible) {
-                                          SystemChrome.setEnabledSystemUIMode(
-                                            SystemUiMode.manual,
-                                            overlays: [
-                                              SystemUiOverlay.top,
-                                              SystemUiOverlay.bottom,
-                                            ],
-                                          );
-                                        } else {
-                                          SystemChrome.setEnabledSystemUIMode(
-                                              SystemUiMode.immersive);
-                                        }
-                                      },
-                                      child: IgnorePointer(
-                                        child: Container(
-                                          width: isBorder
-                                              ? MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  2
-                                              : MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  1.5,
-                                          height: isBorder
-                                              ? MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  2.5
-                                              : MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  2,
-                                          color: const Color.fromRGBO(
-                                              250, 100, 100, 0),
-                                        ),
-                                      )),
-                                )
-                              : Positioned(
-                                  left: isBorder
-                                      ? MediaQuery.of(context).size.width / 4.5
-                                      : MediaQuery.of(context).size.width / 6,
-                                  top: isBorder
-                                      ? MediaQuery.of(context).size.height / 4.5
-                                      : MediaQuery.of(context).size.height / 5,
-                                  child: GestureDetector(
-                                      behavior: HitTestBehavior.translucent,
-                                      onTap: () {
-                                        setState(() {
-                                          visible = !visible;
-                                        });
-                                        if (visible) {
-                                          SystemChrome.setEnabledSystemUIMode(
-                                            SystemUiMode.manual,
-                                            overlays: [
-                                              SystemUiOverlay.top,
-                                              SystemUiOverlay.bottom,
-                                            ],
-                                          );
-                                        } else {
-                                          SystemChrome.setEnabledSystemUIMode(
-                                              SystemUiMode.manual,
-                                              overlays: []);
-                                        }
-                                      },
-                                      child: IgnorePointer(
-                                        child: Container(
-                                          width: isBorder
-                                              ? MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  2
-                                              : MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  1.5,
-                                          height: isBorder
-                                              ? MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  2.5
-                                              : MediaQuery.of(context)
-                                                      .size
-                                                      .height /
-                                                  2,
-                                          color: const Color.fromRGBO(
-                                              250, 100, 100, 0),
-                                        ),
-                                      )),
-                                ),
-                          Positioned(
-                            left: MediaQuery.of(context).size.width / 6,
-                            child: GestureDetector(
+                        child: LayoutBuilder(
+                          builder: (context, cc) => Stack(children: [
+                            ListView.builder(
+                                controller: _scrollController,
+                                itemCount: 1,
+                                itemBuilder: (context, index) =>
+                                    _scrollController.hasClients
+                                        ? RichText(
+                                            text: TextSpan(
+                                            text: isBorder
+                                                ? translatedText
+                                                : book.text
+                                                    .replaceAll(
+                                                        RegExp(r'\['), '')
+                                                    .replaceAll(
+                                                        RegExp(r'\]'), ''),
+                                            style: TextStyle(
+                                                fontSize: fontSize,
+                                                color: textColor,
+                                                height: 1.41,
+                                                locale:
+                                                    const Locale('ru', 'RU')),
+                                          ))
+                                        : Center(
+                                            child: Text(
+                                              'Нет текста для отображения',
+                                              style: TextStyle(
+                                                fontSize: 18.0,
+                                                color: textColor,
+                                              ),
+                                            ),
+                                          )),
+                            GestureDetector(
                                 behavior: HitTestBehavior.translucent,
                                 onTap: () {
-                                  // Скролл вверх / предыдущая страница
+                                  // Скролл вниз / следующая страница
                                   animateTo(
-                                      _scrollController.position.pixels -
-                                          ((MediaQuery.of(context).size.height / lineHeight).floorToDouble() - 1) * lineHeight,
+                                      (_scrollController.position.pixels +
+                                          cc.maxHeight),
                                       duration:
                                           const Duration(milliseconds: 250),
                                       curve: Curves.ease);
                                 },
-                                child: IgnorePointer(
-                                  child: Container(
-                                    width:
-                                        MediaQuery.of(context).size.width / 1.5,
-                                    height:
-                                        MediaQuery.of(context).size.height / 5,
-                                    color:
-                                        const Color.fromRGBO(100, 150, 200, 0),
-                                  ),
-                                )),
-                          ),
-                          Positioned(
-                              right: 0,
-                              height: size.height,
-                              width: 50,
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onVerticalDragStart: (details) async {
-                                  brigtness =
-                                      await FlutterScreenWake.brightness;
-                                },
-                                onVerticalDragUpdate: (details) {
-                                  brigtness -= details.delta.dy / 1000;
-                                  brigtness = min(1, max(0, brigtness));
-                                  FlutterScreenWake.setBrightness(brigtness);
-                                },
-                              )),
-                          /*fake
-                              ? IgnorePointer(
-                                  child: Container(
-                                    width: size.width,
-                                    height: size.height,
-                                    color: Colors.white,
-                                    child: Transform.translate(
-                                      offset: Offset(0, -lp),
-                                      child: Transform.translate(
-                                        offset: Offset(0, lp),
-                                        child: RichText(
-                                            text: TextSpan(
-                                                text: (isBorder
-                                                        ? translatedText
-                                                        : book.text
-                                                            .replaceAll(
-                                                                RegExp(r'\['),
-                                                                '')
-                                                            .replaceAll(
-                                                                RegExp(r'\]'),
-                                                                ''))
-                                                    .substring(
-                                                        pos!.offset - 100,
-                                                        min(book.text.length,
-                                                            pos.offset + 3000)),
-                                                style: TextStyle(
-                                                    fontSize: ffontSize,
-                                                    color: textColor,
-                                                    height: 1.41,
-                                                    locale: const Locale(
-                                                        'ru', 'RU')))),
-                                      ),
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                                  child: IgnorePointer(
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      height:
+                                          MediaQuery.of(context).size.height,
+                                      color: const Color.fromRGBO(
+                                          100, 150, 100, 0),
                                     ),
                                   ),
-                                )
-                              : Container(),*/
-                          Positioned(
-                              left: 0,
-                              height: size.height,
-                              width: 50,
+                                )),
+                            isBorder
+                                ? Positioned(
+                                    left: isBorder
+                                        ? MediaQuery.of(context).size.width /
+                                            4.5
+                                        : MediaQuery.of(context).size.width / 6,
+                                    top: isBorder
+                                        ? MediaQuery.of(context).size.height /
+                                            4.5
+                                        : MediaQuery.of(context).size.height /
+                                            5,
+                                    child: GestureDetector(
+                                        behavior: HitTestBehavior.translucent,
+                                        onVerticalDragEnd:
+                                            (dragEndDetails) async {
+                                          if (dragEndDetails.primaryVelocity! >
+                                              0) {
+                                            showSavedWords(
+                                                context, book.filePath);
+                                          }
+                                        },
+                                        onTap: () {
+                                          setState(() {
+                                            visible = !visible;
+                                          });
+                                          if (visible) {
+                                            SystemChrome.setEnabledSystemUIMode(
+                                              SystemUiMode.manual,
+                                              overlays: [
+                                                SystemUiOverlay.top,
+                                                SystemUiOverlay.bottom,
+                                              ],
+                                            );
+                                          } else {
+                                            SystemChrome.setEnabledSystemUIMode(
+                                                SystemUiMode.immersive);
+                                          }
+                                        },
+                                        child: IgnorePointer(
+                                          child: Container(
+                                            width: isBorder
+                                                ? MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    2
+                                                : MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    1.5,
+                                            height: isBorder
+                                                ? MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    2.5
+                                                : MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    2,
+                                            color: const Color.fromRGBO(
+                                                250, 100, 100, 0),
+                                          ),
+                                        )),
+                                  )
+                                : Positioned(
+                                    left: isBorder
+                                        ? MediaQuery.of(context).size.width /
+                                            4.5
+                                        : MediaQuery.of(context).size.width / 6,
+                                    top: isBorder
+                                        ? MediaQuery.of(context).size.height /
+                                            4.5
+                                        : MediaQuery.of(context).size.height /
+                                            5,
+                                    child: GestureDetector(
+                                        behavior: HitTestBehavior.translucent,
+                                        onTap: () {
+                                          setState(() {
+                                            visible = !visible;
+                                          });
+                                          if (visible) {
+                                            SystemChrome.setEnabledSystemUIMode(
+                                              SystemUiMode.manual,
+                                              overlays: [
+                                                SystemUiOverlay.top,
+                                                SystemUiOverlay.bottom,
+                                              ],
+                                            );
+                                          } else {
+                                            SystemChrome.setEnabledSystemUIMode(
+                                                SystemUiMode.manual,
+                                                overlays: []);
+                                          }
+                                        },
+                                        child: IgnorePointer(
+                                          child: Container(
+                                            width: isBorder
+                                                ? MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    2
+                                                : MediaQuery.of(context)
+                                                        .size
+                                                        .width /
+                                                    1.5,
+                                            height: isBorder
+                                                ? MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    2.5
+                                                : MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    2,
+                                            color: const Color.fromRGBO(
+                                                250, 100, 100, 0),
+                                          ),
+                                        )),
+                                  ),
+                            Positioned(
+                              left: MediaQuery.of(context).size.width / 6,
                               child: GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  onTap: () {
+                                    // Скролл вверх / предыдущая страница
+                                    animateTo(
+                                        _scrollController.position.pixels -
+                                            cc.maxHeight +
+                                            lineHeight,
+                                        duration:
+                                            const Duration(milliseconds: 250),
+                                        curve: Curves.ease);
+                                  },
+                                  child: IgnorePointer(
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width /
+                                          1.5,
+                                      height:
+                                          MediaQuery.of(context).size.height /
+                                              5,
+                                      color: const Color.fromRGBO(
+                                          100, 150, 200, 0),
+                                    ),
+                                  )),
+                            ),
+                            Positioned(
+                                right: 0,
+                                height: size.height,
+                                width: 100,
+                                child: GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onVerticalDragStart: (details) async {
-                                    /*fake = true;
-                                    setState(() {});*/
-                                    print('end');
+                                    brigtness =
+                                        await FlutterScreenWake.brightness;
                                   },
                                   onVerticalDragUpdate: (details) {
-                                    vFontSize -= details.delta.dy / 10;
-                                    vFontSize = min(vFontSize, 28);
-                                    vFontSize = max(vFontSize, 10);
-                                    if (fontSize.floor() != vFontSize.floor()) {
-                                      /*f*/fontSize = vFontSize.floorToDouble();
-                                      setState(() {});
-                                    }
+                                    brigtness -= details.delta.dy / 1000;
+                                    brigtness = min(1, max(0, brigtness));
                                   },
-                                  onVerticalDragEnd: (detalis) {
-                                    //fontSize = ffontSize;
-                                    //fake = false;
-                                    tp = TextPainter(
-                                      text: TextSpan(
-                                          text: "book.text",
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: fontSize,
-                                              height: 1.41,
-                                              locale:
-                                                  const Locale('ru', 'RU'))),
-                                      textAlign: TextAlign.left,
-                                      textDirection: ui.TextDirection.ltr,
-                                    )..layout(maxWidth: size.width);
-                                    lineHeight = tp!.preferredLineHeight * 2;
-                                    /*final off = tp!.getOffsetForCaret(
-                                        pos!, const Rect.fromLTWH(0, 0, 0, 0));
-                                    jumpTo(off.dy);*/
-                                    setState(() {});
-                                  })),
-                        ]),
+                                )),
+                            /*fake
+                                ? IgnorePointer(
+                                    child: Container(
+                                      width: size.width,
+                                      height: size.height,
+                                      color: Colors.white,
+                                      child: Transform.translate(
+                                        offset: Offset(0, -lp),
+                                        child: Transform.translate(
+                                          offset: Offset(0, lp),
+                                          child: RichText(
+                                              text: TextSpan(
+                                                  text: (isBorder
+                                                          ? translatedText
+                                                          : book.text
+                                                              .replaceAll(
+                                                                  RegExp(r'\['),
+                                                                  '')
+                                                              .replaceAll(
+                                                                  RegExp(r'\]'),
+                                                                  ''))
+                                                      .substring(
+                                                          pos!.offset - 100,
+                                                          min(book.text.length,
+                                                              pos.offset + 3000)),
+                                                  style: TextStyle(
+                                                      fontSize: ffontSize,
+                                                      color: textColor,
+                                                      height: 1.41,
+                                                      locale: const Locale(
+                                                          'ru', 'RU')))),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Container(),*/
+                            Positioned(
+                                left: 0,
+                                height: size.height,
+                                width: 100,
+                                child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onVerticalDragStart: (details) async {
+                                      /*fake = true;
+                                      setState(() {});*/
+                                      print(_scrollController.position.pixels);
+                                    },
+                                    onVerticalDragUpdate: (details) {
+                                      vFontSize -= details.delta.dy / 20;
+                                      vFontSize = min(vFontSize, 28);
+                                      vFontSize = max(vFontSize, 10);
+                                      if ((fontSize - vFontSize).abs() > 0.5) {
+                                        /*f*/ fontSize = vFontSize;
+                                        setState(() {});
+                                      }
+                                    },
+                                    onVerticalDragEnd: (detalis) {
+                                      //fontSize = ffontSize;
+                                      //fake = false;
+                                      tp = TextPainter(
+                                        text: TextSpan(
+                                            text: book.text,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: fontSize,
+                                                height: 1.41,
+                                                locale:
+                                                    const Locale('ru', 'RU'))),
+                                        textAlign: TextAlign.left,
+                                        textDirection: ui.TextDirection.ltr,
+                                      )..layout(maxWidth: size.width);
+
+                                      lineHeight = tp!.preferredLineHeight;
+                                      setState(() {});
+                                      if (tp1 == null) {
+                                        tp1 = tp;
+                                        return;
+                                      }
+                                      _scrollController.jumpTo(tp!
+                                          .getOffsetForCaret(
+                                              tp1!.getPositionForOffset(Offset(
+                                                  0,
+                                                  _scrollController
+                                                      .position.pixels)),
+                                              const Rect.fromLTWH(0, 0, 0, 0))
+                                          .dy);
+                                      tp1 = tp;
+
+                                      /*final off = tp!.getOffsetForCaret(
+                                          pos!, const Rect.fromLTWH(0, 0, 0, 0));
+                                      jumpTo(off.dy);*/
+                                    })),
+                          ]),
+                        ),
                       )),
                   bottomNavigationBar: Platform.isIOS
                       ? BottomAppBar(
