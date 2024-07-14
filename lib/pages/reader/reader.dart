@@ -113,7 +113,7 @@ class Reader extends State with WidgetsBindingObserver {
   double pageFormula = 0;
   double pageResult = 0;
   double lastPageCount = 0;
-  String translatedText = '';
+  List<String> translatedText = List.empty();
   final GlobalKey _four = GlobalKey();
   final GlobalKey _five = GlobalKey();
   final GlobalKey _six = GlobalKey();
@@ -124,14 +124,12 @@ class Reader extends State with WidgetsBindingObserver {
   bool fake = false;
   double vFontSize = 18.0;
   double lineHeight = 25;
-  double prev = 25;
-  double oldFs = 18;
+  TextPosition? textPosOld;
 
   double brigtness = 1;
   double ffontSize = 18;
-  double oldWidth = 1;
 
-  TextPainter? tp, tp1;
+  List<String> text = List.empty();
 
   @override
   void initState() {
@@ -144,8 +142,11 @@ class Reader extends State with WidgetsBindingObserver {
     loadStylePreferences();
     _initPage();
 
-    timer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
-      FlutterScreenWake.setBrightness(brigtness);
+    FlutterScreenWake.brightness.then((value) {
+      brigtness = value;
+      timer = Timer.periodic(const Duration(milliseconds: 100), (Timer t) {
+        FlutterScreenWake.setBrightness(brigtness);
+      });
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -247,6 +248,7 @@ class Reader extends State with WidgetsBindingObserver {
         String content = await (targetFile as File).readAsString();
         Map<String, dynamic> jsonMap = jsonDecode(content);
         book = Book.fromJson(jsonMap);
+        text = book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '').split("\n");
         loading = false;
         setState(() {});
       } catch (e) {
@@ -342,7 +344,7 @@ class Reader extends State with WidgetsBindingObserver {
       }
       if (fontSizeFromStorage != null) {
         fontSize = vFontSize = fontSizeFromStorage;
-        tp = TextPainter(
+        final tp = TextPainter(
           text: TextSpan(
               text: 'abcde',
               style: TextStyle(
@@ -353,7 +355,7 @@ class Reader extends State with WidgetsBindingObserver {
           textAlign: TextAlign.left,
           textDirection: ui.TextDirection.ltr,
         )..layout(maxWidth: 1000);
-        lineHeight = tp!.preferredLineHeight;
+        lineHeight = tp.preferredLineHeight;
       }
     });
   }
@@ -408,7 +410,7 @@ class Reader extends State with WidgetsBindingObserver {
 
     prefs.setBool('${book.filePath}-isTrans', true);
     isBorder = true;
-    translatedText =
+    var tt =
         book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '');
 
     for (var entry in wordEntries) {
@@ -416,11 +418,13 @@ class Reader extends State with WidgetsBindingObserver {
       var pattern = '(?<!\\p{L})$escapedWord(?!\\p{L})';
       var wordRegExp = RegExp(pattern, caseSensitive: false, unicode: true);
 
-      translatedText = translatedText.replaceAllMapped(wordRegExp, (match) {
+      tt = tt.replaceAllMapped(wordRegExp, (match) {
         final matchedWord = match.group(0)!;
         return matchCase(matchedWord, entry.translation ?? '');
       });
     }
+
+    translatedText = tt.split("\n");
 
     await prefs.setString(
         'lastCallTranslate', DateTime.now().toIso8601String());
@@ -1995,45 +1999,22 @@ class Reader extends State with WidgetsBindingObserver {
     }
   }
 
+  double oldFs = 18.0;
+  TextPainter? textPaint;
+  int pos = 0;
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final size = MediaQuery.of(context).size;
-    TextPosition? pos;
-    double lp = 0;
-    if (fake) {
-      if (tp == null || tp!.width != size.width) {
-        tp ??= TextPainter(
-          text: TextSpan(
-              text: book.text,
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: fontSize,
-                  height: 1.41,
-                  locale: const Locale('ru', 'RU'))),
-          textAlign: TextAlign.left,
-          textDirection: ui.TextDirection.ltr,
-        )..layout(maxWidth: size.width);
-      }
 
-      /*pos = tp!
-          .getPositionForOffset(Offset(0, _scrollController.position.pixels));
-      lp = _scrollController.position.pixels -
-          tp!
-              .getOffsetForCaret(TextPosition(offset: pos.offset - 100),
-                  const Rect.fromLTWH(0, 0, 0, 0))
-              .dy;*/
-    }
-
-    return WillPopScope(
-        onWillPop: () async {
+    return PopScope(
+        onPopInvoked: (bool didPop) async {
           await book.updateStageInFile(
               _scrollPosition / 100, _scrollController.position.pixels);
 
           await _savePageCountToLocalStorage();
           await getPageCount(book.title, isBorder);
-          Navigator.pop(context, true);
-          return true;
         },
         child: !loading
             ? ShowCaseWidget(builder: (context) {
@@ -2102,10 +2083,23 @@ class Reader extends State with WidgetsBindingObserver {
                                           35, 0, 0, 0),
                                       child: GestureDetector(
                                         onTap: () {
+                                          timer.cancel();
                                           Navigator.pushNamed(context,
                                                   RouteNames.readerSettings)
-                                              .then((value) =>
-                                                  loadStylePreferences());
+                                              .then((value) {
+                                            FlutterScreenWake.brightness
+                                                .then((value) {
+                                              brigtness = value;
+                                              timer = Timer.periodic(
+                                                  const Duration(
+                                                      milliseconds: 100),
+                                                  (Timer t) {
+                                                FlutterScreenWake.setBrightness(
+                                                    brigtness);
+                                              });
+                                            });
+                                            loadStylePreferences();
+                                          });
                                         },
                                         child: Showcase(
                                           key: _five,
@@ -2153,22 +2147,20 @@ class Reader extends State with WidgetsBindingObserver {
                                     top: 0, left: 8, right: 8)
                                 : const EdgeInsets.only(
                                     top: 40, left: 8, right: 8),
-                        child: LayoutBuilder(
-                          builder: (context, cc) => Stack(children: [
+                        child: LayoutBuilder(builder: (context, cc) {
+                          return Stack(children: [
                             ListView.builder(
                                 controller: _scrollController,
-                                itemCount: 1,
+                                itemCount: isBorder
+                                    ? translatedText.length
+                                    : text.length,
                                 itemBuilder: (context, index) =>
                                     _scrollController.hasClients
                                         ? RichText(
                                             text: TextSpan(
                                             text: isBorder
-                                                ? translatedText
-                                                : book.text
-                                                    .replaceAll(
-                                                        RegExp(r'\['), '')
-                                                    .replaceAll(
-                                                        RegExp(r'\]'), ''),
+                                                ? translatedText[index]
+                                                : text[index],
                                             style: TextStyle(
                                                 fontSize: fontSize,
                                                 color: textColor,
@@ -2368,42 +2360,44 @@ class Reader extends State with WidgetsBindingObserver {
                                     brigtness = min(1, max(0, brigtness));
                                   },
                                 )),
-                            /*fake
+                            fake
                                 ? IgnorePointer(
                                     child: Container(
                                       width: size.width,
                                       height: size.height,
                                       color: Colors.white,
-                                      child: Transform.translate(
-                                        offset: Offset(0, -lp),
-                                        child: Transform.translate(
-                                          offset: Offset(0, lp),
-                                          child: RichText(
-                                              text: TextSpan(
-                                                  text: (isBorder
-                                                          ? translatedText
-                                                          : book.text
-                                                              .replaceAll(
-                                                                  RegExp(r'\['),
-                                                                  '')
-                                                              .replaceAll(
-                                                                  RegExp(r'\]'),
-                                                                  ''))
-                                                      .substring(
-                                                          pos!.offset - 100,
-                                                          min(book.text.length,
-                                                              pos.offset + 3000)),
-                                                  style: TextStyle(
-                                                      fontSize: ffontSize,
-                                                      color: textColor,
-                                                      height: 1.41,
-                                                      locale: const Locale(
-                                                          'ru', 'RU')))),
-                                        ),
-                                      ),
+                                      child: RichText(
+                                          text: TextSpan(
+                                              text: (isBorder
+                                                      ? translatedText
+                                                      : book.text
+                                                          .replaceAll(
+                                                              RegExp(r'\['), '')
+                                                          .replaceAll(
+                                                              RegExp(r'\]'),
+                                                              ''))
+                                                  .substring(
+                                                      min(
+                                                          book.text.length - 1,
+                                                          max(
+                                                              0,
+                                                              (textPosOld?.offset ??
+                                                                      0) -
+                                                                  1)),
+                                                      min(
+                                                          book.text.length - 2,
+                                                          ((textPosOld?.offset ??
+                                                                  0) +
+                                                              4000))),
+                                              style: TextStyle(
+                                                  fontSize: ffontSize,
+                                                  color: textColor,
+                                                  height: 1.41,
+                                                  locale: const Locale(
+                                                      'ru', 'RU')))),
                                     ),
                                   )
-                                : Container(),*/
+                                : Container(),
                             Positioned(
                                 left: 0,
                                 height: size.height,
@@ -2411,23 +2405,9 @@ class Reader extends State with WidgetsBindingObserver {
                                 child: GestureDetector(
                                     behavior: HitTestBehavior.opaque,
                                     onVerticalDragStart: (details) async {
-                                      /*fake = true;
-                                      setState(() {});*/
-                                      print(_scrollController.position.pixels);
-                                    },
-                                    onVerticalDragUpdate: (details) {
-                                      vFontSize -= details.delta.dy / 20;
-                                      vFontSize = min(vFontSize, 28);
-                                      vFontSize = max(vFontSize, 10);
-                                      if ((fontSize - vFontSize).abs() > 0.5) {
-                                        /*f*/ fontSize = vFontSize;
-                                        setState(() {});
-                                      }
-                                    },
-                                    onVerticalDragEnd: (detalis) {
-                                      //fontSize = ffontSize;
-                                      //fake = false;
-                                      tp = TextPainter(
+                                      fake = true;
+                                      setState(() {});
+                                      final tp = TextPainter(
                                         text: TextSpan(
                                             text: book.text,
                                             style: TextStyle(
@@ -2438,30 +2418,53 @@ class Reader extends State with WidgetsBindingObserver {
                                                     const Locale('ru', 'RU'))),
                                         textAlign: TextAlign.left,
                                         textDirection: ui.TextDirection.ltr,
-                                      )..layout(maxWidth: size.width);
-
-                                      lineHeight = tp!.preferredLineHeight;
-                                      setState(() {});
-                                      if (tp1 == null) {
-                                        tp1 = tp;
-                                        return;
+                                      )..layout(maxWidth: cc.maxWidth);
+                                      textPosOld = tp.getPositionForOffset(
+                                          Offset(
+                                              0,
+                                              _scrollController
+                                                  .position.pixels));
+                                    },
+                                    onVerticalDragUpdate: (details) {
+                                      vFontSize -= details.delta.dy / 20;
+                                      vFontSize = min(vFontSize, 28);
+                                      vFontSize = max(vFontSize, 10);
+                                      if ((fontSize - vFontSize).abs() > 0.5) {
+                                        ffontSize = vFontSize;
+                                        setState(() {});
                                       }
-                                      _scrollController.jumpTo(tp!
-                                          .getOffsetForCaret(
-                                              tp1!.getPositionForOffset(Offset(
-                                                  0,
-                                                  _scrollController
-                                                      .position.pixels)),
-                                              const Rect.fromLTWH(0, 0, 0, 0))
-                                          .dy);
-                                      tp1 = tp;
+                                    },
+                                    onVerticalDragEnd: (detalis) {
+                                      fontSize = ffontSize;
+                                      fake = false;
+                                      final tp = TextPainter(
+                                        text: TextSpan(
+                                            text: book.text,
+                                            style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: fontSize,
+                                                height: 1.41,
+                                                locale:
+                                                    const Locale('ru', 'RU'))),
+                                        textAlign: TextAlign.left,
+                                        textDirection: ui.TextDirection.ltr,
+                                      )..layout(maxWidth: cc.maxWidth);
+
+                                      lineHeight = tp.preferredLineHeight;
+                                      _scrollController.jumpTo(tp
+                                          .getBoxesForSelection(TextSelection(
+                                              baseOffset: textPosOld!.offset,
+                                              extentOffset:
+                                                  textPosOld!.offset + 1))[0]
+                                          .top);
+                                      setState(() {});
 
                                       /*final off = tp!.getOffsetForCaret(
                                           pos!, const Rect.fromLTWH(0, 0, 0, 0));
                                       jumpTo(off.dy);*/
                                     })),
-                          ]),
-                        ),
+                          ]);
+                        }),
                       )),
                   bottomNavigationBar: Platform.isIOS
                       ? BottomAppBar(
