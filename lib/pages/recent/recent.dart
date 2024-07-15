@@ -18,6 +18,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 class RecentPage extends StatefulWidget {
   const RecentPage({super.key});
+
   @override
   State<RecentPage> createState() => RecentPageState();
 }
@@ -29,7 +30,12 @@ class ImageInfo {
   String fileName;
   double progress;
 
-  ImageInfo({this.imageBytes, required this.title, required this.author, required this.fileName, required this.progress});
+  ImageInfo(
+      {this.imageBytes,
+      required this.title,
+      required this.author,
+      required this.fileName,
+      required this.progress});
 
   Map<String, dynamic> toJson() {
     return {
@@ -100,47 +106,50 @@ class RecentPageState extends State<RecentPage> {
     await _initData();
   }
 
-  Future<void> _fetchFromJSON() async {
+  Future<void> _fetchFromJSON() {
     // print('_fetchFromJSON...');
-    final Directory? externalDir = Platform.isAndroid
-        ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
-    final String path = '${externalDir?.path}/books';
-    List<FileSystemEntity> files = Directory(path).listSync();
-    int length = books.length;
-    int index = 0;
-    for (FileSystemEntity file in files) {
-      if (file is File) {
-        if (index > length) {
-          return;
-        } else {
-          String content = await file.readAsString();
-          Map<String, dynamic> jsonMap = jsonDecode(content);
+    return Future.delayed(const Duration(milliseconds: 200), () async {
+      final Directory? externalDir = Platform.isAndroid
+          ? await getExternalStorageDirectory()
+          : await getApplicationDocumentsDirectory();
+      final String path = '${externalDir?.path}/books';
+      List<FileSystemEntity> files = Directory(path).listSync();
+      int length = books.length;
+      int index = 0;
+      for (FileSystemEntity file in files) {
+        if (file is File) {
+          if (index > length) {
+            return;
+          } else {
+            String content = await file.readAsString();
+            Map<String, dynamic> jsonMap = jsonDecode(content);
 
-          if (jsonMap['customTitle'] != books[index].customTitle) {
-            books[index].customTitle = jsonMap['customTitle'];
-            // print('Updating customTitle...');
+            if (jsonMap['customTitle'] != books[index].customTitle) {
+              books[index].customTitle = jsonMap['customTitle'];
+              // print('Updating customTitle...');
+            }
+            if (jsonMap['author'] != books[index].author) {
+              books[index].author = jsonMap['author'];
+              // print('Updating author...');
+            }
+            if (jsonMap['progress'] != books[index].progress) {
+              // print('Updating progress...');
+              // print('Inside Book ${books[index].progress}');
+              // print('Inside JSON ${jsonMap['progress']}');
+              setState(() {
+                books[index].progress = jsonMap['progress'];
+              });
+            }
           }
-          if (jsonMap['author'] != books[index].author) {
-            books[index].author = jsonMap['author'];
-            // print('Updating author...');
-          }
-          if (jsonMap['progress'] != books[index].progress) {
-            // print('Updating progress...');
-            // print('Inside Book ${books[index].progress}');
-            // print('Inside JSON ${jsonMap['progress']}');
-            setState(() {
-              books[index].progress = jsonMap['progress'];
-            });
-          }
+          index = index + 1;
         }
-        index = index + 1;
       }
-    }
-    // for (var item in books) {
-    //   print('Book ${item.customTitle} = ${item.progress}');
-    // }
-    setState(() {
-      books;
+      // for (var item in books) {
+      //   print('Book ${item.customTitle} = ${item.progress}');
+      // }
+      setState(() {
+        books;
+      });
     });
   }
 
@@ -152,7 +161,8 @@ class RecentPageState extends State<RecentPage> {
 
   Future<void> processFiles() async {
     final Directory? externalDir = Platform.isAndroid
-        ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
+        ? await getExternalStorageDirectory()
+        : await getApplicationDocumentsDirectory();
     final String path = '${externalDir?.path}/books';
     final Directory booksDir = Directory(path);
 
@@ -185,7 +195,15 @@ class RecentPageState extends State<RecentPage> {
       return book;
     } catch (e) {
       // print('Error reading file: $e');
-      return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0, customTitle: '');
+      return Book(
+          filePath: '',
+          text: '',
+          title: '',
+          author: '',
+          lastPosition: 0,
+          imageBytes: null,
+          progress: 0,
+          customTitle: '');
     }
   }
 
@@ -208,7 +226,9 @@ class RecentPageState extends State<RecentPage> {
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
           child: AlertDialog(
-            title: Text(yourVariable == 'authorInput' ? 'Изменить автора' : 'Изменить название'),
+            title: Text(yourVariable == 'authorInput'
+                ? 'Изменить автора'
+                : 'Изменить название'),
             content: TextField(
               onChanged: (value) {
                 updatedValue = value;
@@ -225,7 +245,8 @@ class RecentPageState extends State<RecentPage> {
                 },
               ),
               TextButton(
-                child: const Text('Сохранить', style: TextStyle(color: Colors.blue)),
+                child: const Text('Сохранить',
+                    style: TextStyle(color: Colors.blue)),
                 onPressed: () async {
                   if (updatedValue.isEmpty) {
                     Fluttertoast.showToast(
@@ -271,7 +292,8 @@ class RecentPageState extends State<RecentPage> {
   }
 
   void _showBlurMenu(context, int index) async {
-    final RenderObject? overlay = Overlay.of(context).context.findRenderObject();
+    final RenderObject? overlay =
+        Overlay.of(context).context.findRenderObject();
     final result = await showMenu(
       context: context,
       color: const Color.fromARGB(255, 73, 73, 73).withAlpha(200),
@@ -329,7 +351,8 @@ class RecentPageState extends State<RecentPage> {
             return BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
               child: AlertDialog(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0)),
                 title: Text(books[index].customTitle),
                 content: const Text("Вы уверены, что хотите удалить книгу?"),
                 actions: <Widget>[
@@ -367,9 +390,13 @@ class RecentPageState extends State<RecentPage> {
 
   @override
   Widget build(BuildContext context) {
-    double bookWidth = MediaQuery.of(context).size.shortestSide > 600 ? 150 * 1.5 : 150;
-    double bookHeight = MediaQuery.of(context).size.shortestSide > 600 ? 230 * 1.5 : 230;
-    int booksInWidth = ((MediaQuery.of(context).size.width - 2 * 18 + 10) / (bookWidth + 10)).floor();
+    double bookWidth =
+        MediaQuery.of(context).size.shortestSide > 600 ? 150 * 1.5 : 150;
+    double bookHeight =
+        MediaQuery.of(context).size.shortestSide > 600 ? 230 * 1.5 : 230;
+    int booksInWidth =
+        ((MediaQuery.of(context).size.width - 2 * 18 + 10) / (bookWidth + 10))
+            .floor();
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -384,7 +411,13 @@ class RecentPageState extends State<RecentPage> {
             Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [if (books.isEmpty) TextTektur(text: "Пока вы не добавили никаких книг", fontsize: 16, textColor: MyColors.grey)],
+                children: [
+                  if (books.isEmpty)
+                    TextTektur(
+                        text: "Пока вы не добавили никаких книг",
+                        fontsize: 16,
+                        textColor: MyColors.grey)
+                ],
               ),
             ),
             Padding(
@@ -406,7 +439,10 @@ class RecentPageState extends State<RecentPage> {
                             if (isSended) {
                               isSended = false;
                               // ignore: use_build_context_synchronously
-                              Navigator.of(context).pushNamed(RouteNames.reader).then((value) async => await _fetchFromJSON());
+                              Navigator.of(context)
+                                  .pushNamed(RouteNames.reader)
+                                  .then(
+                                      (value) async => await _fetchFromJSON());
                             }
                           } catch (e) {
                             // Обработка ошибок, если необходимо
@@ -468,7 +504,9 @@ class RecentPageState extends State<RecentPage> {
                                       minHeight: 4,
                                       value: books[index].progress,
                                       backgroundColor: Colors.white,
-                                      valueColor: const AlwaysStoppedAnimation<Color>(MyColors.purple),
+                                      valueColor:
+                                          const AlwaysStoppedAnimation<Color>(
+                                              MyColors.purple),
                                     )),
                               ],
                             ),

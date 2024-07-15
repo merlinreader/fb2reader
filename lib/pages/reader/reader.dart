@@ -22,50 +22,30 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:merlin/functions/helper.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
-import 'package:merlin/pages/reader/scroller.dart';
 
-class BookInfo {
-  String filePath;
-  String fileText;
-  String title;
-  String author;
-  double lastPosition = 0; // маяк BookInfo
+class LastPosition {
+  double offset;
+  int paragraph;
 
-  BookInfo({
-    required this.filePath,
-    required this.fileText,
-    required this.title,
-    required this.author,
-    required this.lastPosition,
-  });
+  LastPosition({required this.offset, required this.paragraph});
 
   Map<String, dynamic> toJson() {
     return {
-      'filePath': filePath,
-      'fileText': fileText,
-      'title': title,
-      'author': author,
-      'lastPosition': lastPosition,
+      'offset': offset,
+      'paragraph': paragraph,
     };
   }
 
-  void setPosZero() {
-    lastPosition = 0;
-  }
-
-  factory BookInfo.fromJson(Map<String, dynamic> json) {
-    return BookInfo(
-      filePath: json['filePath'],
-      fileText: json['fileText'],
-      title: json['title'],
-      author: json['author'],
-      lastPosition: json['lastPosition'],
+  factory LastPosition.fromJson(Map<String, dynamic> json) {
+    return LastPosition(
+      offset: json['offset'],
+      paragraph: json['paragraph'],
     );
   }
 }
@@ -78,7 +58,6 @@ class ReaderPage extends StatefulWidget {
 }
 
 class Reader extends State with WidgetsBindingObserver {
-  final ScrollController _scrollController = ScrollController();
   late Timer timer;
   Book book = Book(
       filePath: "filePath",
@@ -93,7 +72,7 @@ class Reader extends State with WidgetsBindingObserver {
   bool isDarkTheme = false;
   bool visible = false;
   int _batteryLevel = 0;
-  double _scrollPosition = 0.0;
+
   List<DeviceOrientation> orientations = [
     DeviceOrientation.portraitUp,
     DeviceOrientation.landscapeLeft,
@@ -101,42 +80,80 @@ class Reader extends State with WidgetsBindingObserver {
     DeviceOrientation.landscapeRight,
   ];
   int currentOrientationIndex = 0;
-  double position = 0;
   Timer? _actionTimer;
   bool isBorder = false;
   bool? isTrans = false;
   final Battery _battery = Battery();
+
   double pageSize = 0;
   double pageCount = 0;
-  double pagesForCount = 0;
-  double nowPage = 0;
-  double pageFormula = 0;
-  double pageResult = 0;
+
   double lastPageCount = 0;
+
+  double percentage = 0;
+
   List<String> translatedText = List.empty();
+
   final GlobalKey _four = GlobalKey();
   final GlobalKey _five = GlobalKey();
   final GlobalKey _six = GlobalKey();
   final GlobalKey _seven = GlobalKey();
   final GlobalKey _eight = GlobalKey();
   final GlobalKey _nine = GlobalKey();
+
   BuildContext? myContext;
-  bool fake = false;
   double vFontSize = 18.0;
   double lineHeight = 25;
-  TextPosition? textPosOld;
 
   double brigtness = 1;
-  double ffontSize = 18;
 
   List<String> text = List.empty();
+
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
+  final ScrollOffsetController _scrollOffsetController =
+      ScrollOffsetController();
+  final ScrollOffsetListener _scrollOffsetListener =
+      ScrollOffsetListener.create();
+
+  TextPainter? tp;
+  double height = 100;
+
+  int? textPosOld;
+  int? textPosOldIndex;
+
+  double curr = 0;
+
+  double width = 100;
+
+  double position(double height) {
+    return (_itemPositionsListener
+                .itemPositions.value.firstOrNull?.itemLeadingEdge
+                .abs() ??
+            0) *
+        height;
+  }
+
+  int? paragraph() {
+    return _itemPositionsListener.itemPositions.value.firstOrNull?.index;
+  }
 
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     _getBatteryLevel();
-    _scrollController.addListener(_updateScrollPercentage);
     WidgetsBinding.instance.addObserver(this);
+
+    _scrollOffsetListener.changes.listen((event) {
+      percentage =
+          ((_itemPositionsListener.itemPositions.value.firstOrNull?.index ??
+                          0) /
+                      text.length) *
+                  100 +
+              position(height) / 5000;
+      curr = event;
+    });
 
     super.initState();
     loadStylePreferences();
@@ -172,9 +189,15 @@ class Reader extends State with WidgetsBindingObserver {
           pageSize = MediaQuery.of(context).size.height;
           await saveDateTime(pageSize);
 
-          if (_scrollController.hasClients) {
-            jumpTo(book.lastPosition);
-          }
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (book.version == 2) {
+              _itemScrollController.jumpTo(index: book.lp!.paragraph);
+              _scrollOffsetController.animateScroll(
+                  offset: book.lp!.offset,
+                  duration: const Duration(microseconds: 1));
+            }
+          });
+
           _loadPageCountFromLocalStorage();
           if (book.text.isNotEmpty) {
             break;
@@ -199,16 +222,19 @@ class Reader extends State with WidgetsBindingObserver {
       await _savePageCountToLocalStorage();
       await getPageCount(book.title, isBorder);
       final prefs = await SharedPreferences.getInstance();
-      await book.updateStageInFile(
-          _scrollPosition / 100, _scrollController.position.pixels);
+      await update();
       lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
       prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
     }
   }
 
+  Future<void> update() async {
+    await book.updateStageInFile((paragraph()?.toDouble() ?? 0) / text.length,
+        position(height), paragraph() ?? 0);
+  }
+
   Future<void> disposeBook() async {
-    await book.updateStageInFile(
-        _scrollPosition / 100, _scrollController.position.pixels);
+    await update();
   }
 
   Future<void> _initPage() async {
@@ -248,11 +274,22 @@ class Reader extends State with WidgetsBindingObserver {
         String content = await (targetFile as File).readAsString();
         Map<String, dynamic> jsonMap = jsonDecode(content);
         book = Book.fromJson(jsonMap);
-        text = book.text.replaceAll(RegExp(r'\['), '').replaceAll(RegExp(r'\]'), '').split("\n");
+        text = book.text
+            .replaceAll(RegExp(r'\['), '')
+            .replaceAll(RegExp(r'\]'), '')
+            .split("\n");
         loading = false;
         setState(() {});
+        Future.delayed(const Duration(seconds: 1), () {
+          if (book.version != 2) {
+            _scrollOffsetController.animateScroll(
+                offset: book.lastPosition ?? 0,
+                duration: const Duration(microseconds: 1));
+            book.version = 2;
+          }
+        });
       } catch (e) {
-        // print('Error reading file: $e');
+        print('Error reading file: $e');
         Navigator.pop(context);
         Fluttertoast.showToast(
           msg: 'Ошибка чтения файла',
@@ -279,35 +316,6 @@ class Reader extends State with WidgetsBindingObserver {
     prefs.setDouble('pageSize', pageSize);
   }
 
-  void _updateScrollPercentage() {
-    if (_scrollController.position.maxScrollExtent == 0) {
-      return;
-    }
-
-    _scrollPosition = (_scrollController.position.pixels /
-            _scrollController.position.maxScrollExtent) *
-        100;
-    pagesForCount = _scrollController.position.maxScrollExtent / pageSize;
-    if (visible) {
-      setState(() {
-        position = _scrollController.position.pixels;
-      });
-    } else if (_scrollController.position.pixels - position >=
-            pageSize / 1.25 ||
-        position - _scrollController.position.pixels >= pageSize / 1.25 ||
-        _scrollController.position.pixels ==
-            _scrollController.position.maxScrollExtent) {
-      setState(() {
-        position = _scrollController.position.pixels;
-      });
-    }
-    setState(() {
-      nowPage = _scrollController.position.pixels / pageSize;
-      pageFormula = pagesForCount / (book.text.length.toDouble() / 1860);
-      pageResult = nowPage / pageFormula;
-    });
-  }
-
   Future<void> _loadPageCountFromLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     pageCount = (prefs.getDouble('pageCount-${book.filePath}') ?? 0.0);
@@ -315,11 +323,10 @@ class Reader extends State with WidgetsBindingObserver {
 
   Future<void> _savePageCountToLocalStorage() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    pageCount = ((_scrollPosition / 100) * pagesForCount);
     // print("Сохраняем pageCount $pageCount");
     Codec<String, String> stringToBase64 = utf8.fuse(base64);
-    prefs.setDouble(
-        'pageCount-${stringToBase64.encode(book.filePath)}', pageResult);
+    prefs.setDouble('pageCount-${stringToBase64.encode(book.filePath)}',
+        ((curr / 100) * (height / lineHeight)));
     // print("Сохраняем pageCount ${pageResult.round()}");
   }
 
@@ -344,7 +351,7 @@ class Reader extends State with WidgetsBindingObserver {
       }
       if (fontSizeFromStorage != null) {
         fontSize = vFontSize = fontSizeFromStorage;
-        final tp = TextPainter(
+        tp = TextPainter(
           text: TextSpan(
               text: 'abcde',
               style: TextStyle(
@@ -355,43 +362,67 @@ class Reader extends State with WidgetsBindingObserver {
           textAlign: TextAlign.left,
           textDirection: ui.TextDirection.ltr,
         )..layout(maxWidth: 1000);
-        lineHeight = tp.preferredLineHeight;
+        lineHeight = tp!.preferredLineHeight;
       }
     });
   }
 
-  double? savedPosition;
-  double? savedMaxExtent;
-
-  Future<void> savePositionAndExtent() async {
-    savedPosition = _scrollController.position.pixels;
-    savedMaxExtent = _scrollController.position.maxScrollExtent;
-  }
-
   bool forTable = false;
 
-  void switchOrientation() async {
-    if (savedPosition != null && savedMaxExtent != null) {
-      currentOrientationIndex =
-          (currentOrientationIndex + 1) % orientations.length;
-      SystemChrome.setPreferredOrientations(
-          [orientations[currentOrientationIndex]]);
-      if (orientations[currentOrientationIndex] ==
-              DeviceOrientation.landscapeLeft ||
-          orientations[currentOrientationIndex] ==
-              DeviceOrientation.landscapeRight) {
-        forTable = true;
-      } else {
-        forTable = false;
-      }
+  Future<void> switchOrientation() async {
+    final frst = _itemPositionsListener
+        .itemPositions.value.first.index;
+    final tp = TextPainter(
+      text: TextSpan(
+          text: isBorder
+              ? translatedText[frst]
+              : text[frst],
+          style: TextStyle(
+              color: Colors.black,
+              fontSize: fontSize,
+              height: 1.41,
+              locale:
+              const Locale('ru', 'RU'))),
+      textAlign: TextAlign.left,
+      textDirection: ui.TextDirection.ltr,
+    )..layout(maxWidth: width);
+    textPosOld = tp
+        .getPositionForOffset(
+        Offset(0, position(height)))
+        .offset;
+    textPosOldIndex = frst;
 
-      await Future.delayed(const Duration(milliseconds: 200));
-      double newMaxExtent = _scrollController.position.maxScrollExtent;
-      double newPositionRatio = savedPosition! / savedMaxExtent!;
-      double newPosition = newPositionRatio * newMaxExtent;
-      newPosition = min(newPosition, newMaxExtent);
-      jumpTo(newPosition);
+    currentOrientationIndex =
+        (currentOrientationIndex + 1) % orientations.length;
+    SystemChrome.setPreferredOrientations(
+        [orientations[currentOrientationIndex]]);
+    if (orientations[currentOrientationIndex] ==
+            DeviceOrientation.landscapeLeft ||
+        orientations[currentOrientationIndex] ==
+            DeviceOrientation.landscapeRight) {
+      forTable = true;
+    } else {
+      forTable = false;
     }
+
+    await Future.delayed(const Duration(milliseconds: 200));
+
+    tp.layout(maxWidth: width);
+
+    final off = tp
+        .getBoxesForSelection(TextSelection(
+        baseOffset: textPosOld!,
+        extentOffset: textPosOld! + 1))[0]
+        .top;
+    _itemScrollController.jumpTo(
+        index: textPosOldIndex!);
+    if (off > 0.001) {
+      _scrollOffsetController.animateScroll(
+          offset: off,
+          duration: const Duration(
+              milliseconds: 1));
+    }
+    setState(() {});
   }
 
   Future<void> saveSettings(bool isDarkTheme) async {
@@ -403,8 +434,7 @@ class Reader extends State with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     await _savePageCountToLocalStorage();
     await getPageCount(book.title, isBorder);
-    await book.updateStageInFile(
-        _scrollPosition / 100, _scrollController.position.pixels);
+    await update();
     lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
     prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
 
@@ -513,8 +543,9 @@ class Reader extends State with WidgetsBindingObserver {
         await _savePageCountToLocalStorage();
         await getPageCount(book.title, isBorder);
         final prefs = await SharedPreferences.getInstance();
-        await book.updateStageInFile(
-            _scrollPosition / 100, _scrollController.position.pixels);
+
+        await update();
+
         lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         // Действие, выполняемое после нажатия "Да"
@@ -529,8 +560,7 @@ class Reader extends State with WidgetsBindingObserver {
         await _savePageCountToLocalStorage();
         await getPageCount(book.title, isBorder);
         final prefs = await SharedPreferences.getInstance();
-        await book.updateStageInFile(
-            _scrollPosition / 100, _scrollController.position.pixels);
+        await update();
         lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         // Действие, выполняемое после нажатия "Нет"
@@ -1243,14 +1273,24 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
-  void jumpTo(double val) {
-    _scrollController.jumpTo((val / lineHeight).floorToDouble() * lineHeight);
-  }
-
-  void animateTo(double val,
-      {required Duration duration, required Curve curve}) {
-    _scrollController.animateTo((val / lineHeight).floorToDouble() * lineHeight,
-        duration: duration, curve: Curves.linear);
+  void animateTo(bool up) {
+    if (up) {
+      final prev =
+          (position(height) / lineHeight).floorToDouble() * lineHeight -
+              position(height);
+      _scrollOffsetController.animateScroll(
+          offset: -((height + prev) / lineHeight).floorToDouble() * lineHeight,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.linear);
+    } else {
+      final prev =
+          (position(height) / lineHeight).floorToDouble() * lineHeight -
+              position(height);
+      _scrollOffsetController.animateScroll(
+          offset: ((height + prev) / lineHeight).floorToDouble() * lineHeight,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.linear);
+    }
   }
 
   Future<void> _showWordInputDialog(String word, List<WordEntry> wordEntries,
@@ -1978,8 +2018,7 @@ class Reader extends State with WidgetsBindingObserver {
         await _savePageCountToLocalStorage();
         await getPageCount(book.title, isBorder);
         final prefs = await SharedPreferences.getInstance();
-        await book.updateStageInFile(
-            _scrollPosition / 100, _scrollController.position.pixels);
+        await update();
         lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         isBorder = false;
@@ -1999,10 +2038,6 @@ class Reader extends State with WidgetsBindingObserver {
     }
   }
 
-  double oldFs = 18.0;
-  TextPainter? textPaint;
-  int pos = 0;
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -2010,8 +2045,7 @@ class Reader extends State with WidgetsBindingObserver {
 
     return PopScope(
         onPopInvoked: (bool didPop) async {
-          await book.updateStageInFile(
-              _scrollPosition / 100, _scrollController.position.pixels);
+          await update();
 
           await _savePageCountToLocalStorage();
           await getPageCount(book.title, isBorder);
@@ -2020,112 +2054,6 @@ class Reader extends State with WidgetsBindingObserver {
             ? ShowCaseWidget(builder: (context) {
                 myContext = context;
                 return Scaffold(
-                  appBar: visible
-                      ? PreferredSize(
-                          preferredSize:
-                              Size(MediaQuery.of(context).size.width, 50),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            child: AppBar(
-                                leading: GestureDetector(
-                                    onTap: () async {
-                                      await book.updateStageInFile(
-                                          _scrollPosition / 100, position);
-                                      Navigator.pop(context, true);
-                                    },
-                                    child: Theme(
-                                      data: lightTheme(),
-                                      child: Showcase(
-                                        key: _four,
-                                        disableMovingAnimation: true,
-                                        description: 'Выход из книги',
-                                        onToolTipClick: () {
-                                          ShowCaseWidget.of(context)
-                                              .completed(_four);
-                                        },
-                                        child: Icon(
-                                          CustomIcons.chevronLeft,
-                                          size: 30,
-                                          color:
-                                              Theme.of(context).iconTheme.color,
-                                        ),
-                                      ),
-                                    )),
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                shadowColor: Colors.transparent,
-                                title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        clipBehavior: Clip.antiAlias,
-                                        child: Text(
-                                          book.author.isNotEmpty &&
-                                                  book.customTitle.isNotEmpty
-                                              ? '${book.author.toString()}. ${book.customTitle.toString()}'
-                                              : 'Нет автора',
-                                          softWrap: false,
-                                          overflow: TextOverflow.fade,
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontFamily: 'Tektur',
-                                              color: themeProvider.isDarkTheme
-                                                  ? MyColors.white
-                                                  : MyColors.black),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.fromLTRB(
-                                          35, 0, 0, 0),
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          timer.cancel();
-                                          Navigator.pushNamed(context,
-                                                  RouteNames.readerSettings)
-                                              .then((value) {
-                                            FlutterScreenWake.brightness
-                                                .then((value) {
-                                              brigtness = value;
-                                              timer = Timer.periodic(
-                                                  const Duration(
-                                                      milliseconds: 100),
-                                                  (Timer t) {
-                                                FlutterScreenWake.setBrightness(
-                                                    brigtness);
-                                              });
-                                            });
-                                            loadStylePreferences();
-                                          });
-                                        },
-                                        child: Showcase(
-                                          key: _five,
-                                          onToolTipClick: () {
-                                            ShowCaseWidget.of(context)
-                                                .completed(_five);
-                                          },
-                                          disableMovingAnimation: true,
-                                          description:
-                                              "В Настройках можно менять размер шрифта, яркость текста, а также выбрать один из четырех вариантов цвета текста и фона.\n"
-                                              "Все изменения отображаются в окне «Текстовый тест темы»",
-                                          child: Icon(
-                                            CustomIcons.sliders,
-                                            size: 28,
-                                            color: Theme.of(context)
-                                                .iconTheme
-                                                .color,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )),
-                          ),
-                        )
-                      : null,
                   body: Container(
                       decoration: BoxDecoration(
                           color: backgroundColor,
@@ -2135,336 +2063,381 @@ class Reader extends State with WidgetsBindingObserver {
                                   width: 2)
                               : Border.all(
                                   width: 0, color: Colors.transparent)),
-                      child: SafeArea(
-                        top: true,
-                        minimum: visible
-                            ? const EdgeInsets.only(top: 0, left: 8, right: 8)
-                            : orientations[currentOrientationIndex] ==
-                                        DeviceOrientation.landscapeLeft ||
-                                    orientations[currentOrientationIndex] ==
-                                        DeviceOrientation.landscapeRight
-                                ? const EdgeInsets.only(
-                                    top: 0, left: 8, right: 8)
-                                : const EdgeInsets.only(
-                                    top: 40, left: 8, right: 8),
-                        child: LayoutBuilder(builder: (context, cc) {
-                          return Stack(children: [
-                            ListView.builder(
-                                controller: _scrollController,
-                                itemCount: isBorder
-                                    ? translatedText.length
-                                    : text.length,
-                                itemBuilder: (context, index) =>
-                                    _scrollController.hasClients
-                                        ? RichText(
-                                            text: TextSpan(
-                                            text: isBorder
-                                                ? translatedText[index]
-                                                : text[index],
+                      child: Stack(
+                        children: [
+                          visible
+                              ? PreferredSize(
+                            preferredSize:
+                            Size(MediaQuery.of(context).size.width, 50),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              child: AppBar(
+                                  leading: GestureDetector(
+                                      onTap: () async {
+                                        await update();
+                                        Navigator.pop(context, true);
+                                      },
+                                      child: Theme(
+                                        data: lightTheme(),
+                                        child: Showcase(
+                                          key: _four,
+                                          disableMovingAnimation: true,
+                                          description: 'Выход из книги',
+                                          onToolTipClick: () {
+                                            ShowCaseWidget.of(context)
+                                                .completed(_four);
+                                          },
+                                          child: Icon(
+                                            CustomIcons.chevronLeft,
+                                            size: 30,
+                                            color:
+                                            Theme.of(context).iconTheme.color,
+                                          ),
+                                        ),
+                                      )),
+                                  backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                                  shadowColor: Colors.transparent,
+                                  title: Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          clipBehavior: Clip.antiAlias,
+                                          child: Text(
+                                            book.author.isNotEmpty &&
+                                                book.customTitle.isNotEmpty
+                                                ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                                : 'Нет автора',
+                                            softWrap: false,
+                                            overflow: TextOverflow.fade,
                                             style: TextStyle(
-                                                fontSize: fontSize,
-                                                color: textColor,
-                                                height: 1.41,
-                                                locale:
-                                                    const Locale('ru', 'RU')),
-                                          ))
-                                        : Center(
-                                            child: Text(
-                                              'Нет текста для отображения',
-                                              style: TextStyle(
-                                                fontSize: 18.0,
-                                                color: textColor,
-                                              ),
+                                                fontSize: 16,
+                                                fontFamily: 'Tektur',
+                                                color: themeProvider.isDarkTheme
+                                                    ? MyColors.white
+                                                    : MyColors.black),
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            35, 0, 0, 0),
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            timer.cancel();
+                                            Navigator.pushNamed(context,
+                                                RouteNames.readerSettings)
+                                                .then((value) {
+                                              FlutterScreenWake.brightness
+                                                  .then((value) {
+                                                brigtness = value;
+                                                timer = Timer.periodic(
+                                                    const Duration(
+                                                        milliseconds: 100),
+                                                        (Timer t) {
+                                                      FlutterScreenWake.setBrightness(
+                                                          brigtness);
+                                                    });
+                                              });
+                                              loadStylePreferences();
+                                            });
+                                          },
+                                          child: Showcase(
+                                            key: _five,
+                                            onToolTipClick: () {
+                                              ShowCaseWidget.of(context)
+                                                  .completed(_five);
+                                            },
+                                            disableMovingAnimation: true,
+                                            description:
+                                            "В Настройках можно менять размер шрифта, яркость текста, а также выбрать один из четырех вариантов цвета текста и фона.\n"
+                                                "Все изменения отображаются в окне «Текстовый тест темы»",
+                                            child: Icon(
+                                              CustomIcons.sliders,
+                                              size: 28,
+                                              color: Theme.of(context)
+                                                  .iconTheme
+                                                  .color,
                                             ),
-                                          )),
-                            GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onTap: () {
-                                  // Скролл вниз / следующая страница
-                                  animateTo(
-                                      (_scrollController.position.pixels +
-                                          cc.maxHeight),
-                                      duration:
-                                          const Duration(milliseconds: 250),
-                                      curve: Curves.ease);
-                                },
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                  child: IgnorePointer(
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width,
-                                      height:
-                                          MediaQuery.of(context).size.height,
-                                      color: const Color.fromRGBO(
-                                          100, 150, 100, 0),
-                                    ),
-                                  ),
-                                )),
-                            isBorder
-                                ? Positioned(
-                                    left: isBorder
-                                        ? MediaQuery.of(context).size.width /
-                                            4.5
-                                        : MediaQuery.of(context).size.width / 6,
-                                    top: isBorder
-                                        ? MediaQuery.of(context).size.height /
-                                            4.5
-                                        : MediaQuery.of(context).size.height /
-                                            5,
-                                    child: GestureDetector(
-                                        behavior: HitTestBehavior.translucent,
-                                        onVerticalDragEnd:
-                                            (dragEndDetails) async {
-                                          if (dragEndDetails.primaryVelocity! >
-                                              0) {
-                                            showSavedWords(
-                                                context, book.filePath);
-                                          }
-                                        },
-                                        onTap: () {
-                                          setState(() {
-                                            visible = !visible;
-                                          });
-                                          if (visible) {
-                                            SystemChrome.setEnabledSystemUIMode(
-                                              SystemUiMode.manual,
-                                              overlays: [
-                                                SystemUiOverlay.top,
-                                                SystemUiOverlay.bottom,
-                                              ],
-                                            );
-                                          } else {
-                                            SystemChrome.setEnabledSystemUIMode(
-                                                SystemUiMode.immersive);
-                                          }
-                                        },
-                                        child: IgnorePointer(
-                                          child: Container(
-                                            width: isBorder
-                                                ? MediaQuery.of(context)
-                                                        .size
-                                                        .width /
-                                                    2
-                                                : MediaQuery.of(context)
-                                                        .size
-                                                        .width /
-                                                    1.5,
-                                            height: isBorder
-                                                ? MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    2.5
-                                                : MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    2,
-                                            color: const Color.fromRGBO(
-                                                250, 100, 100, 0),
                                           ),
-                                        )),
-                                  )
-                                : Positioned(
-                                    left: isBorder
-                                        ? MediaQuery.of(context).size.width /
-                                            4.5
-                                        : MediaQuery.of(context).size.width / 6,
-                                    top: isBorder
-                                        ? MediaQuery.of(context).size.height /
-                                            4.5
-                                        : MediaQuery.of(context).size.height /
-                                            5,
-                                    child: GestureDetector(
-                                        behavior: HitTestBehavior.translucent,
-                                        onTap: () {
-                                          setState(() {
-                                            visible = !visible;
-                                          });
-                                          if (visible) {
-                                            SystemChrome.setEnabledSystemUIMode(
-                                              SystemUiMode.manual,
-                                              overlays: [
-                                                SystemUiOverlay.top,
-                                                SystemUiOverlay.bottom,
-                                              ],
-                                            );
-                                          } else {
-                                            SystemChrome.setEnabledSystemUIMode(
-                                                SystemUiMode.manual,
-                                                overlays: []);
-                                          }
-                                        },
-                                        child: IgnorePointer(
-                                          child: Container(
-                                            width: isBorder
-                                                ? MediaQuery.of(context)
-                                                        .size
-                                                        .width /
-                                                    2
-                                                : MediaQuery.of(context)
-                                                        .size
-                                                        .width /
-                                                    1.5,
-                                            height: isBorder
-                                                ? MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    2.5
-                                                : MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    2,
-                                            color: const Color.fromRGBO(
-                                                250, 100, 100, 0),
-                                          ),
-                                        )),
-                                  ),
-                            Positioned(
-                              left: MediaQuery.of(context).size.width / 6,
-                              child: GestureDetector(
-                                  behavior: HitTestBehavior.translucent,
-                                  onTap: () {
-                                    // Скролл вверх / предыдущая страница
-                                    animateTo(
-                                        _scrollController.position.pixels -
-                                            cc.maxHeight +
-                                            lineHeight,
-                                        duration:
-                                            const Duration(milliseconds: 250),
-                                        curve: Curves.ease);
-                                  },
-                                  child: IgnorePointer(
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width /
-                                          1.5,
-                                      height:
-                                          MediaQuery.of(context).size.height /
-                                              5,
-                                      color: const Color.fromRGBO(
-                                          100, 150, 200, 0),
-                                    ),
+                                        ),
+                                      ),
+                                    ],
                                   )),
                             ),
-                            Positioned(
-                                right: 0,
-                                height: size.height,
-                                width: 100,
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onVerticalDragStart: (details) async {
-                                    brigtness =
-                                        await FlutterScreenWake.brightness;
-                                  },
-                                  onVerticalDragUpdate: (details) {
-                                    brigtness -= details.delta.dy / 1000;
-                                    brigtness = min(1, max(0, brigtness));
-                                  },
-                                )),
-                            fake
-                                ? IgnorePointer(
-                                    child: Container(
-                                      width: size.width,
-                                      height: size.height,
-                                      color: Colors.white,
-                                      child: RichText(
-                                          text: TextSpan(
-                                              text: (isBorder
-                                                      ? translatedText
-                                                      : book.text
-                                                          .replaceAll(
-                                                              RegExp(r'\['), '')
-                                                          .replaceAll(
-                                                              RegExp(r'\]'),
-                                                              ''))
-                                                  .substring(
-                                                      min(
-                                                          book.text.length - 1,
-                                                          max(
-                                                              0,
-                                                              (textPosOld?.offset ??
-                                                                      0) -
-                                                                  1)),
-                                                      min(
-                                                          book.text.length - 2,
-                                                          ((textPosOld?.offset ??
-                                                                  0) +
-                                                              4000))),
-                                              style: TextStyle(
-                                                  fontSize: ffontSize,
-                                                  color: textColor,
-                                                  height: 1.41,
-                                                  locale: const Locale(
-                                                      'ru', 'RU')))),
-                                    ),
-                                  )
-                                : Container(),
-                            Positioned(
-                                left: 0,
-                                height: size.height,
-                                width: 100,
-                                child: GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onVerticalDragStart: (details) async {
-                                      fake = true;
-                                      setState(() {});
-                                      final tp = TextPainter(
-                                        text: TextSpan(
-                                            text: book.text,
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: fontSize,
-                                                height: 1.41,
-                                                locale:
-                                                    const Locale('ru', 'RU'))),
-                                        textAlign: TextAlign.left,
-                                        textDirection: ui.TextDirection.ltr,
-                                      )..layout(maxWidth: cc.maxWidth);
-                                      textPosOld = tp.getPositionForOffset(
-                                          Offset(
-                                              0,
-                                              _scrollController
-                                                  .position.pixels));
-                                    },
-                                    onVerticalDragUpdate: (details) {
-                                      vFontSize -= details.delta.dy / 20;
-                                      vFontSize = min(vFontSize, 28);
-                                      vFontSize = max(vFontSize, 10);
-                                      if ((fontSize - vFontSize).abs() > 0.5) {
-                                        ffontSize = vFontSize;
-                                        setState(() {});
-                                      }
-                                    },
-                                    onVerticalDragEnd: (detalis) {
-                                      fontSize = ffontSize;
-                                      fake = false;
-                                      final tp = TextPainter(
-                                        text: TextSpan(
-                                            text: book.text,
-                                            style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: fontSize,
-                                                height: 1.41,
-                                                locale:
-                                                    const Locale('ru', 'RU'))),
-                                        textAlign: TextAlign.left,
-                                        textDirection: ui.TextDirection.ltr,
-                                      )..layout(maxWidth: cc.maxWidth);
+                          )
+                              : Container(),
+                          SafeArea(
+                            top: true,
+                            minimum: visible
+                                ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                                : orientations[currentOrientationIndex] ==
+                                            DeviceOrientation.landscapeLeft ||
+                                        orientations[currentOrientationIndex] ==
+                                            DeviceOrientation.landscapeRight
+                                    ? const EdgeInsets.only(
+                                        top: 0, left: 8, right: 8)
+                                    : const EdgeInsets.only(
+                                        top: 40, left: 8, right: 8),
+                            child: LayoutBuilder(builder: (context, cc) {
+                              height = cc.maxHeight;
+                              width = cc.maxWidth;
+                              return Stack(children: [
+                                ScrollablePositionedList.builder(
+                                    itemPositionsListener: _itemPositionsListener,
+                                    itemScrollController: _itemScrollController,
+                                    itemCount: isBorder
+                                        ? translatedText.length
+                                        : text.length,
+                                    scrollOffsetController: _scrollOffsetController,
+                                    scrollOffsetListener: _scrollOffsetListener,
+                                    itemBuilder: (context, index) => RichText(
+                                            text: TextSpan(
+                                          text: isBorder
+                                              ? translatedText[index]
+                                              : text[index],
+                                          style: TextStyle(
+                                              fontSize: fontSize,
+                                              color: textColor,
+                                              height: 1.41,
+                                              locale: const Locale('ru', 'RU')),
+                                        ))),
+                                Positioned(
+                                  left: 100,
+                                  right: 100,
+                                  bottom: 0,
+                                  height: 150,
+                                  child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () {
+                                        // Скролл вниз / следующая страница
+                                        animateTo(false);
+                                      }),
+                                ),
+                                isBorder
+                                    ? Positioned(
+                                        left: isBorder
+                                            ? MediaQuery.of(context).size.width /
+                                                4.5
+                                            : MediaQuery.of(context).size.width / 6,
+                                        top: isBorder
+                                            ? MediaQuery.of(context).size.height /
+                                                4.5
+                                            : MediaQuery.of(context).size.height /
+                                                5,
+                                        child: GestureDetector(
+                                            behavior: HitTestBehavior.translucent,
+                                            onVerticalDragEnd:
+                                                (dragEndDetails) async {
+                                              if (dragEndDetails.primaryVelocity! >
+                                                  0) {
+                                                showSavedWords(
+                                                    context, book.filePath);
+                                              }
+                                            },
+                                            onTap: () {
+                                              setState(() {
+                                                visible = !visible;
+                                              });
+                                              if (visible) {
+                                                SystemChrome.setEnabledSystemUIMode(
+                                                  SystemUiMode.manual,
+                                                  overlays: [
+                                                    SystemUiOverlay.top,
+                                                    SystemUiOverlay.bottom,
+                                                  ],
+                                                );
+                                              } else {
+                                                SystemChrome.setEnabledSystemUIMode(
+                                                    SystemUiMode.immersive);
+                                              }
+                                            },
+                                            child: IgnorePointer(
+                                              child: Container(
+                                                width: isBorder
+                                                    ? MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        1.5,
+                                                height: isBorder
+                                                    ? MediaQuery.of(context)
+                                                            .size
+                                                            .height /
+                                                        2.5
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .height /
+                                                        2,
+                                                color: const Color.fromRGBO(
+                                                    250, 100, 100, 0),
+                                              ),
+                                            )),
+                                      )
+                                    : Positioned(
+                                        left: isBorder
+                                            ? MediaQuery.of(context).size.width /
+                                                4.5
+                                            : MediaQuery.of(context).size.width / 6,
+                                        top: isBorder
+                                            ? MediaQuery.of(context).size.height /
+                                                4.5
+                                            : MediaQuery.of(context).size.height /
+                                                5,
+                                        child: GestureDetector(
+                                            behavior: HitTestBehavior.translucent,
+                                            onTap: () {
+                                              setState(() {
+                                                visible = !visible;
+                                              });
+                                              if (visible) {
+                                                SystemChrome.setEnabledSystemUIMode(
+                                                  SystemUiMode.manual,
+                                                  overlays: [
+                                                    SystemUiOverlay.top,
+                                                    SystemUiOverlay.bottom,
+                                                  ],
+                                                );
+                                              } else {
+                                                SystemChrome.setEnabledSystemUIMode(
+                                                    SystemUiMode.manual,
+                                                    overlays: []);
+                                              }
+                                            },
+                                            child: IgnorePointer(
+                                              child: Container(
+                                                width: isBorder
+                                                    ? MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        1.5,
+                                                height: isBorder
+                                                    ? MediaQuery.of(context)
+                                                            .size
+                                                            .height /
+                                                        2.5
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .height /
+                                                        2,
+                                                color: const Color.fromRGBO(
+                                                    250, 100, 100, 0),
+                                              ),
+                                            )),
+                                      ),
+                                Positioned(
+                                    left: 0,
+                                    right: 0,
+                                    height: 150,
+                                    child: GestureDetector(
+                                        behavior: HitTestBehavior.opaque,
+                                        onTap: () {
+                                          // Скролл вверх / предыдущая страница
+                                          animateTo(true);
+                                        })),
+                                Positioned(
+                                    right: 0,
+                                    top: 100,
+                                    bottom: 100,
+                                    width: 100,
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onVerticalDragStart: (details) async {
+                                        brigtness =
+                                            await FlutterScreenWake.brightness;
+                                      },
+                                      onVerticalDragUpdate: (details) {
+                                        brigtness -= details.delta.dy / 1000;
+                                        brigtness = min(1, max(0, brigtness));
+                                      },
+                                    )),
+                                Positioned(
+                                    left: 0,
+                                    top: 100,
+                                    bottom: 100,
+                                    width: 100,
+                                    child: GestureDetector(
+                                        behavior: HitTestBehavior.opaque,
+                                        onVerticalDragStart: (details) {
+                                          final frst = _itemPositionsListener
+                                              .itemPositions.value.first.index;
+                                          final tp = TextPainter(
+                                            text: TextSpan(
+                                                text: isBorder
+                                                    ? translatedText[frst]
+                                                    : text[frst],
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: fontSize,
+                                                    height: 1.41,
+                                                    locale:
+                                                        const Locale('ru', 'RU'))),
+                                            textAlign: TextAlign.left,
+                                            textDirection: ui.TextDirection.ltr,
+                                          )..layout(maxWidth: cc.maxWidth);
+                                          textPosOld = tp
+                                              .getPositionForOffset(
+                                                  Offset(0, position(cc.maxHeight)))
+                                              .offset;
+                                          textPosOldIndex = frst;
+                                        },
+                                        onVerticalDragUpdate: (details) {
+                                          vFontSize -= details.delta.dy / 20;
+                                          vFontSize = min(vFontSize, 28);
+                                          vFontSize = max(vFontSize, 10);
+                                          if ((fontSize * 2).floorToDouble() !=
+                                              (vFontSize * 2).floorToDouble()) {
+                                            fontSize =
+                                                (vFontSize * 2).floorToDouble() / 2;
+                                            _itemScrollController.jumpTo(
+                                                index: textPosOldIndex!);
+                                          }
+                                        },
+                                        onVerticalDragEnd: (detalis) {
+                                          final txt = isBorder
+                                              ? translatedText[textPosOldIndex!]
+                                              : text[textPosOldIndex!];
+                                          final tp = TextPainter(
+                                            text: TextSpan(
+                                                text: txt,
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: fontSize,
+                                                    height: 1.41,
+                                                    locale:
+                                                        const Locale('ru', 'RU'))),
+                                            textAlign: TextAlign.left,
+                                            textDirection: ui.TextDirection.ltr,
+                                          )..layout(maxWidth: cc.maxWidth);
 
-                                      lineHeight = tp.preferredLineHeight;
-                                      _scrollController.jumpTo(tp
-                                          .getBoxesForSelection(TextSelection(
-                                              baseOffset: textPosOld!.offset,
-                                              extentOffset:
-                                                  textPosOld!.offset + 1))[0]
-                                          .top);
-                                      setState(() {});
-
-                                      /*final off = tp!.getOffsetForCaret(
-                                          pos!, const Rect.fromLTWH(0, 0, 0, 0));
-                                      jumpTo(off.dy);*/
-                                    })),
-                          ]);
-                        }),
+                                          lineHeight = tp.preferredLineHeight;
+                                          final off = tp
+                                              .getBoxesForSelection(TextSelection(
+                                                  baseOffset: textPosOld!,
+                                                  extentOffset: textPosOld! + 1))[0]
+                                              .top;
+                                          if (off > 0.001) {
+                                            _scrollOffsetController.animateScroll(
+                                                offset: off,
+                                                duration: const Duration(
+                                                    microseconds: 1));
+                                          }
+                                          setState(() {});
+                                        })),
+                              ]);
+                            }),
+                          ),
+                        ],
                       )),
                   bottomNavigationBar: Platform.isIOS
                       ? BottomAppBar(
@@ -2595,7 +2568,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                   8,
                                               alignment: Alignment.topRight,
                                               child: Text(
-                                                '${_scrollPosition.toStringAsFixed(1)}%',
+                                                '${100}%',
                                                 style: TextStyle(
                                                     color: themeProvider
                                                             .isDarkTheme
@@ -2636,176 +2609,147 @@ class Reader extends State with WidgetsBindingObserver {
                                               .primary,
                                           child: Column(
                                             children: [
-                                              _scrollController.hasClients
-                                                  ? Showcase(
-                                                      key: _six,
-                                                      disableMovingAnimation:
-                                                          true,
-                                                      onToolTipClick: () {
-                                                        ShowCaseWidget.of(
-                                                                context)
-                                                            .completed(_six);
-                                                      },
-                                                      description:
-                                                          "Ползунок прокрутки страниц.",
-                                                      child: SliderTheme(
-                                                        data: const SliderThemeData(
-                                                            showValueIndicator:
-                                                                ShowValueIndicator
-                                                                    .always),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceEvenly,
-                                                          children: [
-                                                            Flexible(
-                                                                child:
-                                                                    SliderTheme(
-                                                              data: const SliderThemeData(
-                                                                  trackHeight:
-                                                                      3,
-                                                                  thumbShape:
-                                                                      RoundSliderThumbShape(
-                                                                          enabledThumbRadius:
-                                                                              9),
-                                                                  trackShape:
-                                                                      RectangularSliderTrackShape()),
-                                                              child: Container(
-                                                                width: orientations[currentOrientationIndex] ==
-                                                                            DeviceOrientation
-                                                                                .landscapeLeft ||
-                                                                        orientations[currentOrientationIndex] ==
-                                                                            DeviceOrientation
-                                                                                .landscapeRight
-                                                                    ? MediaQuery.of(context)
-                                                                            .size
-                                                                            .width /
-                                                                        1.19
-                                                                    : MediaQuery.of(context)
-                                                                            .size
-                                                                            .width /
-                                                                        1.12,
-                                                                child: Slider(
-                                                                  value: position !=
-                                                                          0
-                                                                      ? position >
-                                                                              _scrollController
-                                                                                  .position.maxScrollExtent
-                                                                          ? _scrollController
-                                                                              .position
-                                                                              .maxScrollExtent
-                                                                          : position
-                                                                      : _scrollController
-                                                                          .position
-                                                                          .pixels,
-                                                                  min: 0,
-                                                                  max: _scrollController
-                                                                      .position
-                                                                      .maxScrollExtent,
-                                                                  label: visible
-                                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 ==
-                                                                              100
-                                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                          : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                              : "0.0%"
-                                                                      : "",
-                                                                  onChanged:
-                                                                      (value) {
-                                                                    setState(
-                                                                        () {
-                                                                      position =
-                                                                          value;
-                                                                    });
-                                                                    if (_actionTimer
-                                                                            ?.isActive ??
-                                                                        false) {
-                                                                      _actionTimer
-                                                                          ?.cancel();
-                                                                    }
-                                                                    _actionTimer = Timer(
-                                                                        const Duration(
-                                                                            milliseconds:
-                                                                                250),
-                                                                        () {
-                                                                      jumpTo(
-                                                                          value);
-                                                                    });
-                                                                  },
-                                                                  onChangeEnd:
-                                                                      (value) {
-                                                                    _actionTimer
-                                                                        ?.cancel();
-                                                                    if (value !=
+                                              Showcase(
+                                                  key: _six,
+                                                  disableMovingAnimation: true,
+                                                  onToolTipClick: () {
+                                                    ShowCaseWidget.of(context)
+                                                        .completed(_six);
+                                                  },
+                                                  description:
+                                                      "Ползунок прокрутки страниц.",
+                                                  child: SliderTheme(
+                                                    data: const SliderThemeData(
+                                                        showValueIndicator:
+                                                            ShowValueIndicator
+                                                                .always),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        Flexible(
+                                                            child: SliderTheme(
+                                                          data: const SliderThemeData(
+                                                              trackHeight: 3,
+                                                              thumbShape:
+                                                                  RoundSliderThumbShape(
+                                                                      enabledThumbRadius:
+                                                                          9),
+                                                              trackShape:
+                                                                  RectangularSliderTrackShape()),
+                                                          child: Container(
+                                                            width: orientations[
+                                                                            currentOrientationIndex] ==
+                                                                        DeviceOrientation
+                                                                            .landscapeLeft ||
+                                                                    orientations[
+                                                                            currentOrientationIndex] ==
+                                                                        DeviceOrientation
+                                                                            .landscapeRight
+                                                                ? MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width /
+                                                                    1.19
+                                                                : MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width /
+                                                                    1.12,
+                                                            child: Slider(
+                                                              value: percentage,
+                                                              min: 0,
+                                                              max: 100,
+                                                              label:
+                                                                  "$percentage%",
+                                                              onChanged:
+                                                                  (value) {
+                                                                setState(() {
+                                                                  percentage =
+                                                                      value;
+                                                                });
+                                                                if (_actionTimer
+                                                                        ?.isActive ??
+                                                                    false) {
+                                                                  _actionTimer
+                                                                      ?.cancel();
+                                                                }
+                                                                _actionTimer = Timer(
+                                                                    const Duration(
+                                                                        milliseconds:
+                                                                            250),
+                                                                    () {
+                                                                  /*TODO jumpTo(
+                                                                          value);*/
+                                                                });
+                                                              },
+                                                              onChangeEnd:
+                                                                  (value) {
+                                                                _actionTimer
+                                                                    ?.cancel();
+                                                                /*TODO if (value !=
                                                                         _scrollController
                                                                             .position
                                                                             .pixels) {
                                                                       jumpTo(
                                                                           value);
-                                                                    }
-                                                                  },
-                                                                  activeColor: themeProvider.isDarkTheme
-                                                                      ? MyColors
-                                                                          .white
-                                                                      : const Color
-                                                                          .fromRGBO(
-                                                                          29,
-                                                                          29,
-                                                                          33,
-                                                                          1),
-                                                                  inactiveColor: themeProvider
-                                                                          .isDarkTheme
-                                                                      ? const Color
-                                                                          .fromRGBO(
-                                                                          96,
-                                                                          96,
-                                                                          96,
-                                                                          1)
-                                                                      : const Color
-                                                                          .fromRGBO(
-                                                                          96,
-                                                                          96,
-                                                                          96,
-                                                                          1),
-                                                                  thumbColor: themeProvider.isDarkTheme
-                                                                      ? MyColors
-                                                                          .white
-                                                                      : const Color
-                                                                          .fromRGBO(
-                                                                          29,
-                                                                          29,
-                                                                          33,
-                                                                          1),
-                                                                ),
-                                                              ),
-                                                            )),
-                                                            Container(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width /
-                                                                  11,
-                                                              alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                              child: Text11(
-                                                                  text: visible
-                                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 ==
-                                                                              100
-                                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                          : (position / _scrollController.position.maxScrollExtent) * 100 >
-                                                                                  0
-                                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                              : "0.0%"
-                                                                      : "",
-                                                                  textColor:
-                                                                      MyColors
-                                                                          .darkGray),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ))
-                                                  : const Text("Загрузка..."),
+                                                                    }*/
+                                                              },
+                                                              activeColor: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? MyColors
+                                                                      .white
+                                                                  : const Color
+                                                                      .fromRGBO(
+                                                                      29,
+                                                                      29,
+                                                                      33,
+                                                                      1),
+                                                              inactiveColor: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? const Color
+                                                                      .fromRGBO(
+                                                                      96,
+                                                                      96,
+                                                                      96,
+                                                                      1)
+                                                                  : const Color
+                                                                      .fromRGBO(
+                                                                      96,
+                                                                      96,
+                                                                      96,
+                                                                      1),
+                                                              thumbColor: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? MyColors
+                                                                      .white
+                                                                  : const Color
+                                                                      .fromRGBO(
+                                                                      29,
+                                                                      29,
+                                                                      33,
+                                                                      1),
+                                                            ),
+                                                          ),
+                                                        )),
+                                                        Container(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width /
+                                                              11,
+                                                          alignment:
+                                                              Alignment.center,
+                                                          child: Text11(
+                                                              text:
+                                                                  "${percentage}%",
+                                                              textColor: MyColors
+                                                                  .darkGray),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  )),
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
@@ -2829,8 +2773,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                 children: [
                                                   GestureDetector(
                                                     onTap: () async {
-                                                      await savePositionAndExtent();
-                                                      switchOrientation();
+                                                      await switchOrientation();
                                                     },
                                                     child: Showcase(
                                                         key: _seven,
@@ -3056,7 +2999,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                   8,
                                               alignment: Alignment.topRight,
                                               child: Text(
-                                                '${_scrollPosition.toStringAsFixed(1)}%',
+                                                '${percentage.toStringAsFixed(1)}%',
                                                 style: TextStyle(
                                                     color: themeProvider
                                                             .isDarkTheme
@@ -3097,180 +3040,123 @@ class Reader extends State with WidgetsBindingObserver {
                                               .primary,
                                           child: Column(
                                             children: [
-                                              _scrollController.hasClients
-                                                  ? Showcase(
-                                                      key: _six,
-                                                      disableMovingAnimation:
-                                                          true,
-                                                      onToolTipClick: () {
-                                                        ShowCaseWidget.of(
-                                                                context)
-                                                            .completed(_six);
-                                                      },
-                                                      description:
-                                                          "Ползунок прокрутки страниц.",
-                                                      child: SliderTheme(
-                                                        data: const SliderThemeData(
-                                                            showValueIndicator:
-                                                                ShowValueIndicator
-                                                                    .always),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceEvenly,
-                                                          children: [
-                                                            Flexible(
-                                                                child:
-                                                                    SliderTheme(
-                                                              data: const SliderThemeData(
-                                                                  trackHeight:
-                                                                      3,
-                                                                  thumbShape:
-                                                                      RoundSliderThumbShape(
-                                                                          enabledThumbRadius:
-                                                                              9),
-                                                                  trackShape:
-                                                                      RectangularSliderTrackShape()),
-                                                              child: Container(
-                                                                width: orientations[currentOrientationIndex] ==
-                                                                            DeviceOrientation
-                                                                                .landscapeLeft ||
-                                                                        orientations[currentOrientationIndex] ==
-                                                                            DeviceOrientation
-                                                                                .landscapeRight
-                                                                    ? MediaQuery.of(context)
-                                                                            .size
-                                                                            .width /
-                                                                        1.19
-                                                                    : MediaQuery.of(context)
-                                                                            .size
-                                                                            .width /
-                                                                        1.12,
-                                                                child: Slider(
-                                                                  value: position !=
-                                                                          0
-                                                                      ? position >
-                                                                              _scrollController
-                                                                                  .position.maxScrollExtent
-                                                                          ? _scrollController
-                                                                              .position
-                                                                              .maxScrollExtent
-                                                                          : max(
-                                                                              0,
-                                                                              position)
-                                                                      : max(
-                                                                          0,
-                                                                          _scrollController
-                                                                              .position
-                                                                              .pixels),
-                                                                  min: 0,
-                                                                  max: _scrollController
-                                                                      .position
-                                                                      .maxScrollExtent,
-                                                                  label: visible
-                                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 ==
-                                                                              100
-                                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                          : (position / _scrollController.position.maxScrollExtent) * 100 > 0
-                                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                              : "0.0%"
-                                                                      : "",
-                                                                  onChanged:
-                                                                      (value) {
-                                                                    setState(
-                                                                        () {
-                                                                      position =
-                                                                          value;
-                                                                    });
-                                                                    if (_actionTimer
-                                                                            ?.isActive ??
-                                                                        false) {
-                                                                      _actionTimer
-                                                                          ?.cancel();
-                                                                    }
-                                                                    _actionTimer = Timer(
-                                                                        const Duration(
-                                                                            milliseconds:
-                                                                                250),
-                                                                        () {
-                                                                      jumpTo(
-                                                                          value);
-                                                                    });
-                                                                  },
-                                                                  onChangeEnd:
-                                                                      (value) {
-                                                                    _actionTimer
-                                                                        ?.cancel();
-                                                                    if (value !=
-                                                                        _scrollController
-                                                                            .position
-                                                                            .pixels) {
-                                                                      jumpTo(
-                                                                          value);
-                                                                    }
-                                                                  },
-                                                                  activeColor: themeProvider.isDarkTheme
-                                                                      ? MyColors
-                                                                          .white
-                                                                      : const Color
-                                                                          .fromRGBO(
-                                                                          29,
-                                                                          29,
-                                                                          33,
-                                                                          1),
-                                                                  inactiveColor: themeProvider
-                                                                          .isDarkTheme
-                                                                      ? const Color
-                                                                          .fromRGBO(
-                                                                          96,
-                                                                          96,
-                                                                          96,
-                                                                          1)
-                                                                      : const Color
-                                                                          .fromRGBO(
-                                                                          96,
-                                                                          96,
-                                                                          96,
-                                                                          1),
-                                                                  thumbColor: themeProvider.isDarkTheme
-                                                                      ? MyColors
-                                                                          .white
-                                                                      : const Color
-                                                                          .fromRGBO(
-                                                                          29,
-                                                                          29,
-                                                                          33,
-                                                                          1),
-                                                                ),
-                                                              ),
-                                                            )),
-                                                            Container(
-                                                              width: MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width /
-                                                                  11,
-                                                              alignment:
-                                                                  Alignment
-                                                                      .center,
-                                                              child: Text11(
-                                                                  text: visible
-                                                                      ? (position / _scrollController.position.maxScrollExtent) * 100 ==
-                                                                              100
-                                                                          ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                          : (position / _scrollController.position.maxScrollExtent) * 100 >
-                                                                                  0
-                                                                              ? "${((position / _scrollController.position.maxScrollExtent) * 100).toStringAsFixed(1)}%"
-                                                                              : "0.0%"
-                                                                      : "",
-                                                                  textColor:
-                                                                      MyColors
-                                                                          .darkGray),
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ))
-                                                  : const Text("Загрузка..."),
+                                              Showcase(
+                                                  key: _six,
+                                                  disableMovingAnimation: true,
+                                                  onToolTipClick: () {
+                                                    ShowCaseWidget.of(context)
+                                                        .completed(_six);
+                                                  },
+                                                  description:
+                                                      "Ползунок прокрутки страниц.",
+                                                  child: SliderTheme(
+                                                    data: const SliderThemeData(
+                                                        showValueIndicator:
+                                                            ShowValueIndicator
+                                                                .always),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        Flexible(
+                                                            child: SliderTheme(
+                                                          data: const SliderThemeData(
+                                                              trackHeight: 3,
+                                                              thumbShape:
+                                                                  RoundSliderThumbShape(
+                                                                      enabledThumbRadius:
+                                                                          9),
+                                                              trackShape:
+                                                                  RectangularSliderTrackShape()),
+                                                          child: Container(
+                                                            width: orientations[
+                                                                            currentOrientationIndex] ==
+                                                                        DeviceOrientation
+                                                                            .landscapeLeft ||
+                                                                    orientations[
+                                                                            currentOrientationIndex] ==
+                                                                        DeviceOrientation
+                                                                            .landscapeRight
+                                                                ? MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width /
+                                                                    1.19
+                                                                : MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width /
+                                                                    1.12,
+                                                            child: Slider(
+                                                              value: percentage,
+                                                              min: 0,
+                                                              max: 100,
+                                                              label:
+                                                                  "${percentage.toStringAsFixed(1)}%",
+                                                              onChanged:
+                                                                  (value) {
+                                                                jumpToPercent(
+                                                                    value);
+                                                                setState(() {
+                                                                  percentage =
+                                                                      value;
+                                                                });
+                                                              },
+                                                              activeColor: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? MyColors
+                                                                      .white
+                                                                  : const Color
+                                                                      .fromRGBO(
+                                                                      29,
+                                                                      29,
+                                                                      33,
+                                                                      1),
+                                                              inactiveColor: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? const Color
+                                                                      .fromRGBO(
+                                                                      96,
+                                                                      96,
+                                                                      96,
+                                                                      1)
+                                                                  : const Color
+                                                                      .fromRGBO(
+                                                                      96,
+                                                                      96,
+                                                                      96,
+                                                                      1),
+                                                              thumbColor: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? MyColors
+                                                                      .white
+                                                                  : const Color
+                                                                      .fromRGBO(
+                                                                      29,
+                                                                      29,
+                                                                      33,
+                                                                      1),
+                                                            ),
+                                                          ),
+                                                        )),
+                                                        Container(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width /
+                                                              11,
+                                                          alignment:
+                                                              Alignment.center,
+                                                          child: Text11(
+                                                              text:
+                                                                  "${percentage.toStringAsFixed(1)}%",
+                                                              textColor: MyColors
+                                                                  .darkGray),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  )),
                                               Padding(
                                                 padding:
                                                     const EdgeInsets.fromLTRB(
@@ -3294,8 +3180,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                 children: [
                                                   GestureDetector(
                                                     onTap: () async {
-                                                      await savePositionAndExtent();
-                                                      switchOrientation();
+                                                      await switchOrientation();
                                                     },
                                                     child: Showcase(
                                                         key: _seven,
@@ -3400,4 +3285,17 @@ class Reader extends State with WidgetsBindingObserver {
                 ),
               ));
   }
+
+  void jumpToPercent(double value) {
+    final vall = value.floor() * text.length ~/ 100;
+    _itemScrollController.jumpTo(
+        index: vall, alignment: vall - vall.floorToDouble());
+  }
+}
+
+class TextPos {
+  int paragraph;
+  double offset;
+
+  TextPos({required this.paragraph, required this.offset});
 }
