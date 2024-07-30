@@ -1,4 +1,6 @@
 // ignore_for_file: deprecated_member_use, sized_box_for_whitespace
+import 'dart:math';
+
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:merlin/style/colors.dart';
@@ -14,8 +16,30 @@ class StatisticPage extends StatefulWidget {
   _StatisticPageState createState() => _StatisticPageState();
 }
 
-class _StatisticPageState extends State<StatisticPage> {
+class _StatisticPageState extends State<StatisticPage> with TickerProviderStateMixin {
   int _currentPageIndex = 0; // Индекс текущей страницы
+  int currentIndex = 0;
+  late TabController tabController;
+
+  void updateIndex() {
+    setState(() {
+      currentIndex = tabController.index;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    tabController = TabController(length: 5, vsync: this);
+    tabController.addListener(updateIndex);
+  }
+
+  @override
+  void dispose() {
+    tabController.removeListener(updateIndex);
+    tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,258 +114,86 @@ class _StatisticPageState extends State<StatisticPage> {
           ),
         ),
         Expanded(
-          child: IndexedStack(
-            index: _currentPageIndex,
-            children: const [
-              Country(), // Страница "Страна"
-              Region(), // Страница "Регион"
-              City(), // Страница "Город"
-            ],
-          ),
+          child: FutureBuilder<String>(
+            future: getSavedLocation(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasData) {
+                  final locationData = snapshot.data!.split(', ');
+                  if (locationData.length > _currentPageIndex) {
+                    final country = locationData.elementAtOrNull(0) ?? '';
+                    final area = _currentPageIndex >= 1 ? locationData.elementAtOrNull(1) : '';
+                    final city = _currentPageIndex >= 2 ? locationData.elementAtOrNull(2) : '';
+                    return Swipe(
+                      updateIndex: (int val) {
+                        currentIndex = val;
+                        tabController.animateTo(val);
+                      },
+                      currentIndex: currentIndex,
+                      child: Expanded(
+                        child: TabBarView(
+                          controller: tabController,
+                          children: [
+                            StatTable(
+                              path: 'daily',
+                              country: country,
+                              area: area,
+                              city: city,
+                            ),
+                            StatTable(
+                              path: 'weekly',
+                              country: country,
+                              area: area,
+                              city: city,
+                            ),
+                            StatTable(
+                              path: 'monthly',
+                              country: country,
+                              area: area,
+                              city: city,
+                            ),
+                            StatTable(
+                              path: 'semi-annual',
+                              country: country,
+                              area: area,
+                              city: city,
+                            ),
+                            StatTable(
+                              path: 'annual',
+                              country: country,
+                              area: area,
+                              city: city,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                }
+
+                return Center(child: TextTektur(text: 'Нет данных о местоположении', fontsize: 16, textColor: MyColors.grey));
+              }
+              return const CircularProgressIndicator(
+                color: MyColors.purple,
+              );
+            },
+          )
         ),
       ],
     );
   }
 }
 
-class Country extends StatelessWidget {
-  const Country({super.key});
+class Swipe extends StatelessWidget {
+  final int currentIndex;
+  final void Function(int val) updateIndex;
+  Widget child;
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: getSavedLocation(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            final locationData = snapshot.data!.split(', ');
-            if (locationData.length >= 3) {
-              final country = locationData[0];
-              return Swipe(
-                statDay: StatTable(
-                  path: 'daily',
-                  country: country.isNotEmpty ? country : 'Russia',
-                  area: '',
-                  city: '',
-                ),
-                statWeek: StatTable(
-                  path: 'weekly',
-                  country: country.isNotEmpty ? country : 'Russia',
-                  area: '',
-                  city: '',
-                ),
-                statMonth: StatTable(
-                  path: 'monthly',
-                  country: country.isNotEmpty ? country : 'Russia',
-                  area: '',
-                  city: '',
-                ),
-                statSemiAnnual: StatTable(
-                  path: 'semi-annual',
-                  country: country.isNotEmpty ? country : 'Russia',
-                  area: '',
-                  city: '',
-                ),
-                statAnnual: StatTable(
-                  path: 'annual',
-                  country: country.isNotEmpty ? country : 'Russia',
-                  area: '',
-                  city: '',
-                ),
-              );
-            }
-          }
-
-          return Center(child: TextTektur(text: 'Нет данных о местоположении', fontsize: 16, textColor: MyColors.grey));
-        }
-        return const CircularProgressIndicator(
-          color: MyColors.purple,
-        );
-      },
-    );
-  }
-}
-
-class Region extends StatelessWidget {
-  const Region({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: getSavedLocation(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            final locationData = snapshot.data!.split(', ');
-            if (locationData.length >= 3) {
-              final country = locationData[0];
-              final area = locationData[1];
-              return Swipe(
-                statDay: StatTable(
-                  path: 'daily',
-                  country: country,
-                  area: area,
-                  city: '',
-                ),
-                statWeek: StatTable(
-                  path: 'weekly',
-                  country: country,
-                  area: area,
-                  city: '',
-                ),
-                statMonth: StatTable(
-                  path: 'monthly',
-                  country: country,
-                  area: area,
-                  city: '',
-                ),
-                statSemiAnnual: StatTable(
-                  path: 'semi-annual',
-                  country: country,
-                  area: area,
-                  city: '',
-                ),
-                statAnnual: StatTable(
-                  path: 'annual',
-                  country: country,
-                  area: area,
-                  city: '',
-                ),
-              );
-            }
-          }
-
-          return Center(child: TextTektur(text: 'Нет данных о местоположении', fontsize: 16, textColor: MyColors.grey));
-        }
-        return const CircularProgressIndicator(
-          color: MyColors.purple,
-        );
-      },
-    );
-  }
-}
-
-class City extends StatelessWidget {
-  const City({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: getSavedLocation(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            final locationData = snapshot.data!.split(', ');
-            if (locationData.length >= 3) {
-              final country = locationData[0];
-              final area = locationData[1];
-              final city = locationData[2];
-              return Swipe(
-                statDay: StatTable(
-                  path: 'daily',
-                  country: country,
-                  area: area,
-                  city: city,
-                ),
-                statWeek: StatTable(
-                  path: 'weekly',
-                  country: country,
-                  area: area,
-                  city: city,
-                ),
-                statMonth: StatTable(
-                  path: 'monthly',
-                  country: country,
-                  area: area,
-                  city: city,
-                ),
-                statSemiAnnual: StatTable(
-                  path: 'semi-annual',
-                  country: country,
-                  area: area,
-                  city: city,
-                ),
-                statAnnual: StatTable(
-                  path: 'annual',
-                  country: country,
-                  area: area,
-                  city: city,
-                ),
-              );
-            }
-          }
-
-          return Center(child: TextTektur(text: 'Нет данных о местоположении', fontsize: 16, textColor: MyColors.grey));
-        }
-        return const CircularProgressIndicator(
-          color: MyColors.purple,
-        );
-      },
-    );
-  }
-}
-
-class Swipe extends StatefulWidget {
-  final StatTable statDay;
-  final StatTable statWeek;
-  final StatTable statMonth;
-  final StatTable statSemiAnnual;
-  final StatTable statAnnual;
-
-  const Swipe({
-    super.key,
-    required this.statDay,
-    required this.statWeek,
-    required this.statMonth,
-    required this.statSemiAnnual,
-    required this.statAnnual,
+  Swipe({super.key,
+    required this.updateIndex,
+    required this.currentIndex,
+    required this.child
   });
-
-  @override
-  // ignore: no_logic_in_create_state
-  SwipeState createState() =>
-      // ignore: no_logic_in_create_state
-      SwipeState(statDay: statDay, statWeek: statWeek, statMonth: statMonth, statSemiAnnual: statSemiAnnual, statAnnual: statAnnual);
-}
-
-class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
-  final StatTable statDay;
-  final StatTable statWeek;
-  final StatTable statMonth;
-  final StatTable statSemiAnnual;
-  final StatTable statAnnual;
-
-  SwipeState({
-    required this.statDay,
-    required this.statWeek,
-    required this.statMonth,
-    required this.statSemiAnnual,
-    required this.statAnnual,
-    Key? key,
-  }) : super();
-
-  late TabController tabController;
-  int currentIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    tabController = TabController(length: 5, vsync: this);
-    tabController.addListener(updateIndex);
-  }
-
-  @override
-  void dispose() {
-    tabController.removeListener(updateIndex);
-    tabController.dispose();
-    super.dispose();
-  }
-
-  void updateIndex() {
-    setState(() {
-      currentIndex = tabController.index;
-    });
-  }
 
   Widget buildTab(Container tabButton, bool isActive) {
     return Column(
@@ -377,10 +229,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                   height: 24,
                   child: InkWell(
                     onTap: () {
-                      tabController.animateTo(0);
-                      setState(() {
-                        currentIndex = 0;
-                      });
+                      updateIndex(0);
                     },
                     child: Text14Bold(
                       text: 'День',
@@ -396,10 +245,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                   height: 24,
                   child: InkWell(
                     onTap: () {
-                      tabController.animateTo(1);
-                      setState(() {
-                        currentIndex = 1;
-                      });
+                      updateIndex(1);
                     },
                     child: Text14Bold(
                       text: 'Неделя',
@@ -415,10 +261,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                   height: 24,
                   child: InkWell(
                     onTap: () {
-                      tabController.animateTo(2);
-                      setState(() {
-                        currentIndex = 2;
-                      });
+                      updateIndex(2);
                     },
                     child: Text14Bold(
                       text: 'Месяц',
@@ -434,10 +277,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                   height: 24,
                   child: InkWell(
                     onTap: () {
-                      tabController.animateTo(3);
-                      setState(() {
-                        currentIndex = 3;
-                      });
+                      updateIndex(3);
                     },
                     child: Text14Bold(
                       text: 'Полгода',
@@ -453,10 +293,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
                   height: 24,
                   child: InkWell(
                     onTap: () {
-                      tabController.animateTo(4);
-                      setState(() {
-                        currentIndex = 4;
-                      });
+                      updateIndex(4);
                     },
                     child: Text14Bold(
                       text: 'Год',
@@ -469,18 +306,7 @@ class SwipeState extends State<Swipe> with SingleTickerProviderStateMixin {
             ],
           ),
         ),
-        Expanded(
-          child: TabBarView(
-            controller: tabController,
-            children: [
-              statDay,
-              statWeek,
-              statMonth,
-              statSemiAnnual,
-              statAnnual,
-            ],
-          ),
-        ),
+        child
       ],
     );
   }

@@ -40,7 +40,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
     try {
       final response = await http.get(
         url,
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {"User-Agent": "Merlin/1.0", 'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
@@ -90,6 +90,7 @@ class ChooseAvatarDialogViewModel extends ChangeNotifier {
     // ignore: unused_local_variable
     var res = await http.patch(Uri.parse(url),
         headers: {
+          "User-Agent": "Merlin/1.0",
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },

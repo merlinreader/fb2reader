@@ -11,7 +11,7 @@ class Text24 extends StatelessWidget {
     return Text(text, style: Theme
         .of(context)
         .textTheme
-        .titleLarge
+        .titleLarge?.copyWith(color: textColor)
       //TextStyle(
       //fontFamily: 'Tektur',
       //color: textColor,

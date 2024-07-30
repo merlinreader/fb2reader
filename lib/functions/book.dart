@@ -139,7 +139,7 @@ class Book {
             ? Uint8List.fromList(json['imageBytes'].cast<int>())
             : null,
         lp: LastPosition.fromJson(json['lp'] ?? {'paragraph': 0, 'offset': 0.0}),
-        version: json['version']);
+        version: json['version'] ?? 0);
   }
 
   Future<void> saveJsonToFile(
@@ -299,6 +299,7 @@ class Book {
       jsonMap['lp'] = <String, dynamic>{};
       jsonMap['lp']['offset'] = newLastPosition;
       jsonMap['lp']['paragraph'] = pg;
+      jsonMap['version'] = 2;
 
       await file.writeAsString(jsonEncode(jsonMap));
     } catch (e) {

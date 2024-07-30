@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.yarmolich.merlin.app">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.nexaecommerce.merlin">
 
 
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
@@ -8,7 +8,15 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
+    <queries>
+        <!-- to opens https URLs -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
 
     <application
         android:label="Merlin"
@@ -47,8 +55,17 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="merlin"
+                    android:scheme="https"
+                    android:host="app.merlin.su"
+                    android:pathPrefix="/account/auth"
                 />
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="merlin" />
             </intent-filter>
 
             <!-- <intent-filter>
@@ -59,8 +76,8 @@
                     android:scheme="https"
                     android:host="merlinfb2reader.com" />
             </intent-filter> -->
-
         </activity>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

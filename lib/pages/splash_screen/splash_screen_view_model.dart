@@ -37,6 +37,9 @@ class SplashSreenViewModel {
     appLinks.uriLinkStream.listen((Uri? link) {
       // Если ссылка есть, обновляем состояние приложения
       _link = link?.path;
+      if(link != null) {
+        TokenProvider().setToken(link.queryParameters['token']!);
+      }
     }, onError: (err) {
       // Обработка ошибок
       _link = 'Failed to get latest link: $err';
@@ -83,6 +86,7 @@ class SplashSreenViewModel {
     if (token != null && token != '') {
       String url = 'https://app.merlin.su/account/';
       final data = json.decode((await http.get(Uri.parse(url), headers: {
+        "User-Agent": "Merlin/1.0",
         'Authorization': 'Bearer $token',
       }))
           .body);

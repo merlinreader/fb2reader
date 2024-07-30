@@ -173,6 +173,7 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pa
     final response = await http.post(
       url,
       headers: <String, String>{
+        "User-Agent": "Merlin/1.0",
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
       },
@@ -224,6 +225,7 @@ Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordM
     final response = await http.post(
       url,
       headers: <String, String>{
+        "User-Agent": "Merlin/1.0",
         'Content-Type': 'application/json',
       },
       body: jsonEncode(data),

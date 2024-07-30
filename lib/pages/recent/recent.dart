@@ -194,7 +194,7 @@ class RecentPageState extends State<RecentPage> {
       Book book = Book.fromJson(jsonMap);
       return book;
     } catch (e) {
-      // print('Error reading file: $e');
+      print('Error reading file: $e');
       return Book(
           filePath: '',
           text: '',

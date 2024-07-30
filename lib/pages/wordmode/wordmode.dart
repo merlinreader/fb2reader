@@ -108,7 +108,7 @@ class WordCount {
       final timeElapsed = now.difference(_lastCallTimestamp!);
 
       // Проверяем, прошло ли более 24 часов с момента последнего вызова
-      if (timeElapsed.inHours >= 24) {
+      if (timeElapsed.inHours >= 24) { // TODO
         // if (timeElapsed.inMicroseconds >= 1) {
         await countWordsWithOffset();
 
@@ -243,6 +243,7 @@ class WordCount {
     var response = await http.post(
       Uri.parse(url),
       headers: {
+        "User-Agent": "Merlin/1.0",
         'accept': 'application/json',
         'Content-Type': 'application/json',
       },
@@ -267,6 +268,7 @@ class WordCount {
     var response = await http.post(
       Uri.parse(url),
       headers: {
+        "User-Agent": "Merlin/1.0",
         'accept': 'application/json',
         'Content-Type': 'application/json',
       },

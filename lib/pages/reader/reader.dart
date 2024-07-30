@@ -108,6 +108,7 @@ class Reader extends State with WidgetsBindingObserver {
   double brigtness = 1;
 
   List<String> text = List.empty();
+  List<int> pref = List.empty();
 
   final ItemScrollController _itemScrollController = ItemScrollController();
   final ItemPositionsListener _itemPositionsListener =
@@ -117,19 +118,30 @@ class Reader extends State with WidgetsBindingObserver {
   final ScrollOffsetListener _scrollOffsetListener =
       ScrollOffsetListener.create();
 
-  TextPainter? tp;
   double height = 100;
-
   int? textPosOld;
   int? textPosOldIndex;
-
   double curr = 0;
-
   double width = 100;
+  Timer? textTimer;
+
+  double baseline = 20.092498779296875;
+
+  late Timer perTimer;
+
+  double oldFs = 18;
 
   double position(double height) {
     return (_itemPositionsListener
                 .itemPositions.value.firstOrNull?.itemLeadingEdge
+                .abs() ??
+            0) *
+        height;
+  }
+
+  double positionDown(double height) {
+    return (_itemPositionsListener
+                .itemPositions.value.firstOrNull?.itemTrailingEdge
                 .abs() ??
             0) *
         height;
@@ -146,18 +158,23 @@ class Reader extends State with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     _scrollOffsetListener.changes.listen((event) {
-      percentage =
-          ((_itemPositionsListener.itemPositions.value.firstOrNull?.index ??
-                          0) /
-                      text.length) *
-                  100 +
-              position(height) / 5000;
       curr = event;
     });
 
     super.initState();
     loadStylePreferences();
     _initPage();
+
+    perTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      setState(() {
+        percentage =
+            ((_itemPositionsListener.itemPositions.value.firstOrNull?.index ??
+                            0) /
+                        text.length) *
+                    100 +
+                position(height) / 5000;
+      });
+    });
 
     FlutterScreenWake.brightness.then((value) {
       brigtness = value;
@@ -192,9 +209,10 @@ class Reader extends State with WidgetsBindingObserver {
           Future.delayed(const Duration(milliseconds: 100), () {
             if (book.version == 2) {
               _itemScrollController.jumpTo(index: book.lp!.paragraph);
-              _scrollOffsetController.animateScroll(
-                  offset: book.lp!.offset,
-                  duration: const Duration(microseconds: 1));
+              WidgetsBinding.instance.addPostFrameCallback((timeStamp) =>
+                  _scrollOffsetController.animateScroll(
+                      offset: book.lp!.offset,
+                      duration: const Duration(microseconds: 1)));
             }
           });
 
@@ -213,6 +231,7 @@ class Reader extends State with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     SystemChrome.setPreferredOrientations([orientations[0]]);
     timer.cancel();
+    perTimer.cancel();
     super.dispose();
   }
 
@@ -278,6 +297,11 @@ class Reader extends State with WidgetsBindingObserver {
             .replaceAll(RegExp(r'\['), '')
             .replaceAll(RegExp(r'\]'), '')
             .split("\n");
+        pref = List.filled(text.length + 1, 0);
+        for (int i = 1; i < text.length; i++) {
+          pref[i] = pref[i - 1] + text[i - 1].length;
+        }
+
         loading = false;
         setState(() {});
         Future.delayed(const Duration(seconds: 1), () {
@@ -325,8 +349,11 @@ class Reader extends State with WidgetsBindingObserver {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     // print("Сохраняем pageCount $pageCount");
     Codec<String, String> stringToBase64 = utf8.fuse(base64);
-    prefs.setDouble('pageCount-${stringToBase64.encode(book.filePath)}',
-        ((curr / 100) * (height / lineHeight)));
+    prefs.setDouble(
+        'pageCount-${stringToBase64.encode(book.filePath)}',
+        (pref[_itemPositionsListener.itemPositions.value.firstOrNull?.index ??
+                0] /
+            1860));
     // print("Сохраняем pageCount ${pageResult.round()}");
   }
 
@@ -351,7 +378,7 @@ class Reader extends State with WidgetsBindingObserver {
       }
       if (fontSizeFromStorage != null) {
         fontSize = vFontSize = fontSizeFromStorage;
-        tp = TextPainter(
+        final tp = TextPainter(
           text: TextSpan(
               text: 'abcde',
               style: TextStyle(
@@ -362,7 +389,8 @@ class Reader extends State with WidgetsBindingObserver {
           textAlign: TextAlign.left,
           textDirection: ui.TextDirection.ltr,
         )..layout(maxWidth: 1000);
-        lineHeight = tp!.preferredLineHeight;
+        lineHeight = tp.preferredLineHeight;
+        baseline = tp.computeDistanceToActualBaseline(TextBaseline.alphabetic);
       }
     });
   }
@@ -370,26 +398,19 @@ class Reader extends State with WidgetsBindingObserver {
   bool forTable = false;
 
   Future<void> switchOrientation() async {
-    final frst = _itemPositionsListener
-        .itemPositions.value.first.index;
+    final frst = _itemPositionsListener.itemPositions.value.first.index;
     final tp = TextPainter(
       text: TextSpan(
-          text: isBorder
-              ? translatedText[frst]
-              : text[frst],
+          text: isBorder ? translatedText[frst] : text[frst],
           style: TextStyle(
               color: Colors.black,
               fontSize: fontSize,
               height: 1.41,
-              locale:
-              const Locale('ru', 'RU'))),
+              locale: const Locale('ru', 'RU'))),
       textAlign: TextAlign.left,
       textDirection: ui.TextDirection.ltr,
     )..layout(maxWidth: width);
-    textPosOld = tp
-        .getPositionForOffset(
-        Offset(0, position(height)))
-        .offset;
+    textPosOld = tp.getPositionForOffset(Offset(0, position(height))).offset;
     textPosOldIndex = frst;
 
     currentOrientationIndex =
@@ -408,19 +429,19 @@ class Reader extends State with WidgetsBindingObserver {
     await Future.delayed(const Duration(milliseconds: 200));
 
     tp.layout(maxWidth: width);
+    lineHeight = tp.preferredLineHeight;
+    baseline = tp.computeDistanceToActualBaseline(TextBaseline.alphabetic);
 
     final off = tp
         .getBoxesForSelection(TextSelection(
-        baseOffset: textPosOld!,
-        extentOffset: textPosOld! + 1))[0]
+            baseOffset: textPosOld!, extentOffset: textPosOld! + 1))[0]
         .top;
-    _itemScrollController.jumpTo(
-        index: textPosOldIndex!);
+    _itemScrollController.jumpTo(index: textPosOldIndex!);
     if (off > 0.001) {
-      _scrollOffsetController.animateScroll(
-          offset: off,
-          duration: const Duration(
-              milliseconds: 1));
+      WidgetsBinding.instance.addPostFrameCallback((time) {
+        _scrollOffsetController.animateScroll(
+            offset: off, duration: const Duration(milliseconds: 1));
+      });
     }
     setState(() {});
   }
@@ -455,6 +476,10 @@ class Reader extends State with WidgetsBindingObserver {
     }
 
     translatedText = tt.split("\n");
+    pref = List.filled(translatedText.length - 1, 0);
+    for (int i = 1; i < translatedText.length; i++) {
+      pref[i] = pref[i - 1] + translatedText[i - 1].length;
+    }
 
     await prefs.setString(
         'lastCallTranslate', DateTime.now().toIso8601String());
@@ -585,8 +610,9 @@ class Reader extends State with WidgetsBindingObserver {
         .getAllWordCounts();
     showDialog<void>(
       context: context,
-      barrierDismissible: false,
       builder: (BuildContext context) {
+        final themeProvider =
+            Provider.of<ThemeProvider>(context, listen: false);
         return FutureBuilder(
           future: wordCount.checkCallInfo(confirm),
           builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
@@ -617,7 +643,7 @@ class Reader extends State with WidgetsBindingObserver {
                       // debugPrint("DONE");
                       await saveWordCountToLocalstorage(wordCount);
                       replaceWordsWithTranslation(wordCount.wordEntries);
-                      Navigator.pop(context);
+                      //Navigator.pop(context);
                     },
                     child: confirm == false
                         ? SingleChildScrollView(
@@ -634,6 +660,9 @@ class Reader extends State with WidgetsBindingObserver {
                                     : MediaQuery.of(context).size.height * 0.8,
                                 color: Colors.transparent,
                                 child: Card(
+                                  color: themeProvider.isDarkTheme
+                                      ? MyColors.black
+                                      : MyColors.white,
                                   child: SizedBox(
                                     width: MediaQuery.of(context).size.width,
                                     height: forTable == false
@@ -984,21 +1013,19 @@ class Reader extends State with WidgetsBindingObserver {
                               ),
                             ),
                           )
-                        : SingleChildScrollView(
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxHeight: forTable == false
-                                    ? MediaQuery.of(context).size.height
-                                    : MediaQuery.of(context).size.height,
-                              ),
-                              child: Container(
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
                                 width: MediaQuery.of(context).size.width,
                                 height: forTable == false
                                     ? MediaQuery.of(context).size.height * 0.7
                                     : MediaQuery.of(context).size.height * 0.9,
-                                color: Colors.white,
                                 child: Card(
-                                  color: Colors.white,
+                                  color: themeProvider.isDarkTheme
+                                      ? MyColors.black
+                                      : MyColors.white,
                                   child: SizedBox(
                                     width: MediaQuery.of(context).size.width,
                                     height: forTable == false
@@ -1007,6 +1034,7 @@ class Reader extends State with WidgetsBindingObserver {
                                         : MediaQuery.of(context).size.height *
                                             0.8,
                                     child: Column(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: <Widget>[
                                         Row(
                                           mainAxisAlignment:
@@ -1033,13 +1061,19 @@ class Reader extends State with WidgetsBindingObserver {
                                               const EdgeInsets.only(bottom: 20),
                                           child: Center(
                                             child: forTable == false
-                                                ? const Text24(
+                                                ? Text24(
                                                     text: 'Изучаемые слова',
-                                                    textColor: MyColors.black,
+                                                    textColor: themeProvider
+                                                            .isDarkTheme
+                                                        ? MyColors.white
+                                                        : MyColors.black,
                                                   )
-                                                : const Text20(
+                                                : Text20(
                                                     text: 'Изучаемые слова',
-                                                    textColor: MyColors.black),
+                                                    textColor: themeProvider
+                                                            .isDarkTheme
+                                                        ? MyColors.white
+                                                        : MyColors.black),
                                           ),
                                         ),
                                         Container(
@@ -1263,7 +1297,7 @@ class Reader extends State with WidgetsBindingObserver {
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                   ));
             }
@@ -1273,21 +1307,30 @@ class Reader extends State with WidgetsBindingObserver {
     );
   }
 
+  static double safemod(double a, double n) {
+    final res = a % n;
+    if ((res - n).abs() < 0.1) {
+      return 0.0;
+    }
+    return res;
+  }
+
   void animateTo(bool up) {
     if (up) {
-      final prev =
-          (position(height) / lineHeight).floorToDouble() * lineHeight -
-              position(height);
+      final plh = (position(height) / lineHeight);
+      final prev = plh.ceilToDouble() * lineHeight - position(height);
       _scrollOffsetController.animateScroll(
-          offset: -((height + prev) / lineHeight).floorToDouble() * lineHeight,
+          offset: prev - (height / lineHeight).floorToDouble() * lineHeight,
           duration: const Duration(milliseconds: 250),
           curve: Curves.linear);
     } else {
-      final prev =
-          (position(height) / lineHeight).floorToDouble() * lineHeight -
-              position(height);
+      final rem = safemod(positionDown(height), lineHeight);
       _scrollOffsetController.animateScroll(
-          offset: ((height + prev) / lineHeight).floorToDouble() * lineHeight,
+          offset: (rem.abs() > 1 ? rem - lineHeight : 0) +
+              (height / lineHeight).floorToDouble() * lineHeight +
+              ((safemod(height, lineHeight) > baseline && rem.abs() < 0.1)
+                  ? lineHeight
+                  : 0),
           duration: const Duration(milliseconds: 250),
           curve: Curves.linear);
     }
@@ -1300,248 +1343,276 @@ class Reader extends State with WidgetsBindingObserver {
 
     showDialog(
       context: context,
+      barrierDismissible: true,
+      barrierLabel: "",
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.8),
-            child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                final themeProvider = Provider.of<ThemeProvider>(context);
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Card(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                icon: const Icon(Icons.close),
-                                onPressed: () async {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ],
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 0),
-                            child: Center(
-                              child: Text24(
-                                text: 'Выберите слова',
-                                textColor: MyColors.black,
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  final themeProvider = Provider.of<ThemeProvider>(context);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Card(
+                        color: themeProvider.isDarkTheme
+                            ? MyColors.black
+                            : MyColors.white,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  alignment: Alignment.centerRight,
+                                  padding:
+                                      const EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () async {
+                                    Navigator.pop(context);
+                                  },
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 0),
+                              child: Center(
+                                child: Text24(
+                                  text: 'Выберите слова',
+                                  textColor: themeProvider.isDarkTheme
+                                      ? MyColors.white
+                                      : MyColors.black,
+                                ),
                               ),
                             ),
-                          ),
-                          Flexible(
-                            flex: 1,
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 8),
-                                  child: TextField(
-                                    onChanged: (value) {
-                                      setState(() {
-                                        searchText = value.toLowerCase();
-                                        filteredWords = wordsMap.keys
-                                            .where((word) => word
-                                                .toLowerCase()
-                                                .startsWith(searchText))
-                                            .toList();
-                                        filteredWords
-                                            .sort((a, b) => a.compareTo(b));
-                                        filteredWords.sort((a, b) =>
-                                            wordsMap[b]!
-                                                .compareTo(wordsMap[a]!));
-                                      });
-                                    },
-                                    decoration: InputDecoration(
-                                      labelText: 'Введите текст',
-                                      border: const OutlineInputBorder(),
-                                      disabledBorder:
-                                          const OutlineInputBorder(),
-                                      focusedBorder: const OutlineInputBorder(),
-                                      focusColor: MyColors.purple,
-                                      floatingLabelStyle:
-                                          themeProvider.isDarkTheme
-                                              ? const TextStyle(
-                                                  color: MyColors.white)
-                                              : const TextStyle(
-                                                  color: MyColors.black),
+                            Flexible(
+                              flex: 1,
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 8),
+                                    child: TextField(
+                                      cursorColor: Colors.black,
+                                      onChanged: (value) {
+                                        setState(() {
+                                          searchText = value.toLowerCase();
+                                          filteredWords = wordsMap.keys
+                                              .where((word) => word
+                                                  .toLowerCase()
+                                                  .startsWith(searchText))
+                                              .toList();
+                                          filteredWords
+                                              .sort((a, b) => a.compareTo(b));
+                                          filteredWords.sort((a, b) =>
+                                              wordsMap[b]!
+                                                  .compareTo(wordsMap[a]!));
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                        labelText: 'Введите текст',
+                                        border: const OutlineInputBorder(),
+                                        disabledBorder:
+                                            const OutlineInputBorder(),
+                                        focusedBorder:
+                                            const OutlineInputBorder(),
+                                        focusColor: MyColors.purple,
+                                        floatingLabelStyle:
+                                            themeProvider.isDarkTheme
+                                                ? const TextStyle(
+                                                    color: MyColors.black)
+                                                : const TextStyle(
+                                                    color: MyColors.white),
+                                      ),
                                     ),
                                   ),
-                                ),
-                                Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  child: DataTable(
-                                      columnSpacing: 45.0,
-                                      showBottomBorder: false,
-                                      horizontalMargin: 20,
-                                      dataTextStyle: const TextStyle(
-                                          fontFamily: 'Roboto',
-                                          color: MyColors.black),
-                                      columns: const [
-                                        DataColumn(
-                                          label: SizedBox(
-                                            child: Text15(
-                                                text: 'Слово',
-                                                textColor: MyColors.black),
-                                          ),
-                                        ),
-                                        DataColumn(
-                                          label: SizedBox(
-                                            child: Text15(
-                                              text: 'Количество',
-                                              textColor: MyColors.black,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                      rows: const []),
-                                ),
-                                Container(
+                                  Container(
                                     width: MediaQuery.of(context).size.width,
-                                    height: forTable == false
-                                        ? MediaQuery.of(context).size.height *
-                                            0.42
-                                        : MediaQuery.of(context).size.height *
-                                            0.2,
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.vertical,
-                                      child: DataTable(
-                                        columnSpacing: 0.0,
+                                    child: DataTable(
+                                        columnSpacing: 45.0,
                                         showBottomBorder: false,
-                                        dataTextStyle: const TextStyle(
+                                        horizontalMargin: 20,
+                                        dataTextStyle: TextStyle(
                                             fontFamily: 'Roboto',
-                                            color: MyColors.black),
-                                        clipBehavior: Clip.hardEdge,
-                                        headingRowHeight: 0,
-                                        horizontalMargin: 10,
-                                        columns: const [
+                                            color: themeProvider.isDarkTheme
+                                                ? MyColors.white
+                                                : MyColors.black),
+                                        columns: [
                                           DataColumn(
-                                            label: Flexible(
+                                            label: SizedBox(
                                               child: Text15(
-                                                text: '',
-                                                textColor: MyColors.black,
-                                              ),
+                                                  text: 'Слово',
+                                                  textColor:
+                                                      themeProvider.isDarkTheme
+                                                          ? MyColors.white
+                                                          : MyColors.black),
                                             ),
                                           ),
                                           DataColumn(
-                                            label: Flexible(
+                                            label: SizedBox(
                                               child: Text15(
-                                                text: '',
-                                                textColor: MyColors.black,
+                                                text: 'Количество',
+                                                textColor:
+                                                    themeProvider.isDarkTheme
+                                                        ? MyColors.white
+                                                        : MyColors.black,
                                               ),
                                             ),
                                           ),
                                         ],
-                                        rows: searchText.isEmpty
-                                            ? const <DataRow>[]
-                                            : List<DataRow>.generate(
-                                                filteredWords.length,
-                                                (index) => DataRow(
-                                                  cells: [
-                                                    DataCell(
-                                                      SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.3,
-                                                        child: TextButton(
-                                                          style: const ButtonStyle(
-                                                              alignment: Alignment
-                                                                  .centerLeft),
-                                                          onPressed: () async {
-                                                            List<String> test =
-                                                                [
-                                                              filteredWords[
-                                                                  index]
-                                                            ];
-                                                            // print(test);
-                                                            test = await WordCount()
-                                                                .getNounsByList(
-                                                                    test);
-                                                            // print('after $test');
-                                                            if (test.length !=
-                                                                1) {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          'Данное слово не существительное');
-                                                              return;
-                                                            } else {
-                                                              await updateWordInTable(
-                                                                  word,
-                                                                  filteredWords[
-                                                                      index],
-                                                                  wordEntries);
-                                                              Navigator.of(
+                                        rows: const []),
+                                  ),
+                                  Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: forTable == false
+                                          ? MediaQuery.of(context).size.height *
+                                              0.42
+                                          : MediaQuery.of(context).size.height *
+                                              0.2,
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.vertical,
+                                        child: DataTable(
+                                          columnSpacing: 0.0,
+                                          showBottomBorder: false,
+                                          dataTextStyle: TextStyle(
+                                              fontFamily: 'Roboto',
+                                              color: themeProvider.isDarkTheme
+                                                  ? MyColors.white
+                                                  : MyColors.black),
+                                          clipBehavior: Clip.hardEdge,
+                                          headingRowHeight: 0,
+                                          horizontalMargin: 10,
+                                          columns: [
+                                            DataColumn(
+                                              label: Flexible(
+                                                child: Text15(
+                                                  text: '',
+                                                  textColor:
+                                                      themeProvider.isDarkTheme
+                                                          ? MyColors.white
+                                                          : MyColors.black,
+                                                ),
+                                              ),
+                                            ),
+                                            DataColumn(
+                                              label: Flexible(
+                                                child: Text15(
+                                                  text: '',
+                                                  textColor:
+                                                      themeProvider.isDarkTheme
+                                                          ? MyColors.white
+                                                          : MyColors.black,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                          rows: searchText.isEmpty
+                                              ? const <DataRow>[]
+                                              : List<DataRow>.generate(
+                                                  filteredWords.length,
+                                                  (index) => DataRow(
+                                                    cells: [
+                                                      DataCell(
+                                                        SizedBox(
+                                                          width: MediaQuery.of(
                                                                       context)
-                                                                  .pop();
-                                                            }
-                                                          },
-                                                          child: Text(
-                                                            filteredWords[
-                                                                index],
-                                                            style: TextStyle(
-                                                                fontFamily:
-                                                                    'Roboto',
-                                                                fontSize: 15,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .normal,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                color: themeProvider
-                                                                        .isDarkTheme
-                                                                    ? MyColors
-                                                                        .white
-                                                                    : MyColors
-                                                                        .black),
+                                                                  .size
+                                                                  .width *
+                                                              0.3,
+                                                          child: TextButton(
+                                                            style: const ButtonStyle(
+                                                                alignment: Alignment
+                                                                    .centerLeft),
+                                                            onPressed:
+                                                                () async {
+                                                              List<String>
+                                                                  test = [
+                                                                filteredWords[
+                                                                    index]
+                                                              ];
+                                                              // print(test);
+                                                              test = await WordCount()
+                                                                  .getNounsByList(
+                                                                      test);
+                                                              // print('after $test');
+                                                              if (test.length !=
+                                                                  1) {
+                                                                Fluttertoast
+                                                                    .showToast(
+                                                                        msg:
+                                                                            'Данное слово не существительное');
+                                                                return;
+                                                              } else {
+                                                                await updateWordInTable(
+                                                                    word,
+                                                                    filteredWords[
+                                                                        index],
+                                                                    wordEntries);
+                                                                Navigator.of(
+                                                                        context)
+                                                                    .pop();
+                                                              }
+                                                            },
+                                                            child: Text(
+                                                              filteredWords[
+                                                                  index],
+                                                              style: TextStyle(
+                                                                  fontFamily:
+                                                                      'Roboto',
+                                                                  fontSize: 15,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .normal,
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  color: themeProvider.isDarkTheme
+                                                                      ? MyColors
+                                                                          .white
+                                                                      : MyColors
+                                                                          .black),
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    DataCell(
-                                                      SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.3,
-                                                        child: TextForTable(
-                                                          text:
-                                                              '${wordsMap[filteredWords[index]] ?? 0}',
-                                                          textColor:
-                                                              MyColors.black,
+                                                      DataCell(
+                                                        SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.3,
+                                                          child: TextForTable(
+                                                            text:
+                                                                '${wordsMap[filteredWords[index]] ?? 0}',
+                                                            textColor:
+                                                                MyColors.black,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
-                                              ),
-                                      ),
-                                    ))
-                              ],
+                                        ),
+                                      ))
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
+                    ],
+                  );
+                },
+              )
+            ],
           ),
         );
       },
@@ -1574,8 +1645,8 @@ class Reader extends State with WidgetsBindingObserver {
   Future<void> showSavedWords(BuildContext context, String filePath) async {
     showDialog<void>(
       context: context,
-      barrierDismissible: false,
       builder: (BuildContext context) {
+        final themeProvider = Provider.of<ThemeProvider>(context);
         return FutureBuilder<WordCount>(
           future: loadWordCountFromLocalStorage(),
           builder: (BuildContext context, AsyncSnapshot<WordCount> snapshot) {
@@ -1596,7 +1667,8 @@ class Reader extends State with WidgetsBindingObserver {
                 if (wordCount == null || wordCount.wordEntries.isEmpty) {
                   Fluttertoast.showToast(
                     msg: 'Нет сохраненных слов',
-                    toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                    toastLength: Toast.LENGTH_SHORT,
+                    // Длительность отображения
                     gravity: ToastGravity.BOTTOM,
                   );
                   Navigator.pop(context);
@@ -1620,7 +1692,9 @@ class Reader extends State with WidgetsBindingObserver {
                             : MediaQuery.of(context).size.height * 0.8,
                         color: Colors.transparent,
                         child: Card(
-                          color: Colors.white,
+                          color: themeProvider.isDarkTheme
+                              ? MyColors.black
+                              : MyColors.white,
                           child: SizedBox(
                             width: MediaQuery.of(context).size.width,
                             height: forTable == false
@@ -1648,13 +1722,17 @@ class Reader extends State with WidgetsBindingObserver {
                                   padding: const EdgeInsets.only(bottom: 0),
                                   child: Center(
                                     child: forTable == false
-                                        ? const Text24(
+                                        ? Text24(
                                             text: 'Изучаемые слова',
-                                            textColor: MyColors.black,
+                                            textColor: themeProvider.isDarkTheme
+                                                ? MyColors.white
+                                                : MyColors.black,
                                           )
-                                        : const Text20(
+                                        : Text20(
                                             text: 'Изучаемые слова',
-                                            textColor: MyColors.black),
+                                            textColor: themeProvider.isDarkTheme
+                                                ? MyColors.white
+                                                : MyColors.black),
                                   ),
                                 ),
                                 Container(
@@ -1801,9 +1879,6 @@ class Reader extends State with WidgetsBindingObserver {
                                         ),
                                       ],
                                       rows: wordCount.wordEntries.map((entry) {
-                                        final themeProvider =
-                                            Provider.of<ThemeProvider>(context);
-
                                         return DataRow(
                                           cells: [
                                             DataCell(
@@ -2002,7 +2077,13 @@ class Reader extends State with WidgetsBindingObserver {
         var timeLast = await readTimeFromJsonFile(fileName);
         if (timeLast != null) {
           var elapsedTime = timeNow.difference(timeLast);
-          if (elapsedTime.inHours >= 24) {
+          final prefs = await SharedPreferences.getInstance();
+          String key = 'WMWORDS';
+          String? storedData = prefs.getString(key);
+          if (storedData == null) {
+            await prefs.setString('lastCallTimestamp', "19710101T030000+0300");
+          }
+          if (elapsedTime.inHours >= 24 || storedData == null) {
             wordModeDialog(context);
           } else {
             var tempWE = await loadWordCountFromLocalStorage();
@@ -2025,7 +2106,7 @@ class Reader extends State with WidgetsBindingObserver {
         setState(() {});
         var timeLast = await readTimeFromJsonFile(fileName);
         if (timeLast != null) {
-          final formattedTime = DateFormat('MM.dd HH:mm')
+          final formattedTime = DateFormat('dd.MM.yy HH:mm')
               .format(timeLast.add(const Duration(days: 1)));
 
           Fluttertoast.showToast(
@@ -2041,7 +2122,7 @@ class Reader extends State with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.of(context);
 
     return PopScope(
         onPopInvoked: (bool didPop) async {
@@ -2054,6 +2135,111 @@ class Reader extends State with WidgetsBindingObserver {
             ? ShowCaseWidget(builder: (context) {
                 myContext = context;
                 return Scaffold(
+                  appBar: visible
+                      ? PreferredSize(
+                          preferredSize:
+                              Size(MediaQuery.of(context).size.width, 50),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            child: AppBar(
+                                leading: GestureDetector(
+                                    onTap: () async {
+                                      await update();
+                                      Navigator.pop(context, true);
+                                    },
+                                    child: Theme(
+                                      data: lightTheme(),
+                                      child: Showcase(
+                                        key: _four,
+                                        disableMovingAnimation: true,
+                                        description: 'Выход из книги',
+                                        onToolTipClick: () {
+                                          ShowCaseWidget.of(context)
+                                              .completed(_four);
+                                        },
+                                        child: Icon(
+                                          CustomIcons.chevronLeft,
+                                          size: 30,
+                                          color:
+                                              Theme.of(context).iconTheme.color,
+                                        ),
+                                      ),
+                                    )),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                shadowColor: Colors.transparent,
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        clipBehavior: Clip.antiAlias,
+                                        child: Text(
+                                          book.author.isNotEmpty &&
+                                                  book.customTitle.isNotEmpty
+                                              ? '${book.author.toString()}. ${book.customTitle.toString()}'
+                                              : 'Нет автора',
+                                          softWrap: false,
+                                          overflow: TextOverflow.fade,
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontFamily: 'Tektur',
+                                              color: themeProvider.isDarkTheme
+                                                  ? MyColors.white
+                                                  : MyColors.black),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          35, 0, 0, 0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          timer.cancel();
+                                          Navigator.pushNamed(context,
+                                                  RouteNames.readerSettings)
+                                              .then((value) {
+                                            FlutterScreenWake.brightness
+                                                .then((value) {
+                                              brigtness = value;
+                                              timer = Timer.periodic(
+                                                  const Duration(
+                                                      milliseconds: 100),
+                                                  (Timer t) {
+                                                FlutterScreenWake.setBrightness(
+                                                    brigtness);
+                                              });
+                                            });
+                                            loadStylePreferences();
+                                          });
+                                        },
+                                        child: Showcase(
+                                          key: _five,
+                                          onToolTipClick: () {
+                                            ShowCaseWidget.of(context)
+                                                .completed(_five);
+                                          },
+                                          disableMovingAnimation: true,
+                                          description:
+                                              "В Настройках можно менять размер шрифта, яркость текста, а также выбрать один из четырех вариантов цвета текста и фона.\n"
+                                              "Все изменения отображаются в окне «Текстовый тест темы»",
+                                          child: Icon(
+                                            CustomIcons.sliders,
+                                            size: 28,
+                                            color: Theme.of(context)
+                                                .iconTheme
+                                                .color,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                          ),
+                        )
+                      : null,
                   body: Container(
                       decoration: BoxDecoration(
                           color: backgroundColor,
@@ -2065,115 +2251,11 @@ class Reader extends State with WidgetsBindingObserver {
                                   width: 0, color: Colors.transparent)),
                       child: Stack(
                         children: [
-                          visible
-                              ? PreferredSize(
-                            preferredSize:
-                            Size(MediaQuery.of(context).size.width, 50),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 250),
-                              child: AppBar(
-                                  leading: GestureDetector(
-                                      onTap: () async {
-                                        await update();
-                                        Navigator.pop(context, true);
-                                      },
-                                      child: Theme(
-                                        data: lightTheme(),
-                                        child: Showcase(
-                                          key: _four,
-                                          disableMovingAnimation: true,
-                                          description: 'Выход из книги',
-                                          onToolTipClick: () {
-                                            ShowCaseWidget.of(context)
-                                                .completed(_four);
-                                          },
-                                          child: Icon(
-                                            CustomIcons.chevronLeft,
-                                            size: 30,
-                                            color:
-                                            Theme.of(context).iconTheme.color,
-                                          ),
-                                        ),
-                                      )),
-                                  backgroundColor:
-                                  Theme.of(context).colorScheme.primary,
-                                  shadowColor: Colors.transparent,
-                                  title: Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.horizontal,
-                                          clipBehavior: Clip.antiAlias,
-                                          child: Text(
-                                            book.author.isNotEmpty &&
-                                                book.customTitle.isNotEmpty
-                                                ? '${book.author.toString()}. ${book.customTitle.toString()}'
-                                                : 'Нет автора',
-                                            softWrap: false,
-                                            overflow: TextOverflow.fade,
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                fontFamily: 'Tektur',
-                                                color: themeProvider.isDarkTheme
-                                                    ? MyColors.white
-                                                    : MyColors.black),
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            35, 0, 0, 0),
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            timer.cancel();
-                                            Navigator.pushNamed(context,
-                                                RouteNames.readerSettings)
-                                                .then((value) {
-                                              FlutterScreenWake.brightness
-                                                  .then((value) {
-                                                brigtness = value;
-                                                timer = Timer.periodic(
-                                                    const Duration(
-                                                        milliseconds: 100),
-                                                        (Timer t) {
-                                                      FlutterScreenWake.setBrightness(
-                                                          brigtness);
-                                                    });
-                                              });
-                                              loadStylePreferences();
-                                            });
-                                          },
-                                          child: Showcase(
-                                            key: _five,
-                                            onToolTipClick: () {
-                                              ShowCaseWidget.of(context)
-                                                  .completed(_five);
-                                            },
-                                            disableMovingAnimation: true,
-                                            description:
-                                            "В Настройках можно менять размер шрифта, яркость текста, а также выбрать один из четырех вариантов цвета текста и фона.\n"
-                                                "Все изменения отображаются в окне «Текстовый тест темы»",
-                                            child: Icon(
-                                              CustomIcons.sliders,
-                                              size: 28,
-                                              color: Theme.of(context)
-                                                  .iconTheme
-                                                  .color,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )),
-                            ),
-                          )
-                              : Container(),
                           SafeArea(
                             top: true,
                             minimum: visible
-                                ? const EdgeInsets.only(top: 0, left: 8, right: 8)
+                                ? const EdgeInsets.only(
+                                    top: 0, left: 8, right: 8)
                                 : orientations[currentOrientationIndex] ==
                                             DeviceOrientation.landscapeLeft ||
                                         orientations[currentOrientationIndex] ==
@@ -2186,172 +2268,55 @@ class Reader extends State with WidgetsBindingObserver {
                               height = cc.maxHeight;
                               width = cc.maxWidth;
                               return Stack(children: [
-                                ScrollablePositionedList.builder(
-                                    itemPositionsListener: _itemPositionsListener,
-                                    itemScrollController: _itemScrollController,
-                                    itemCount: isBorder
-                                        ? translatedText.length
-                                        : text.length,
-                                    scrollOffsetController: _scrollOffsetController,
-                                    scrollOffsetListener: _scrollOffsetListener,
-                                    itemBuilder: (context, index) => RichText(
-                                            text: TextSpan(
-                                          text: isBorder
-                                              ? translatedText[index]
-                                              : text[index],
-                                          style: TextStyle(
-                                              fontSize: fontSize,
-                                              color: textColor,
-                                              height: 1.41,
-                                              locale: const Locale('ru', 'RU')),
-                                        ))),
-                                Positioned(
-                                  left: 100,
-                                  right: 100,
-                                  bottom: 0,
-                                  height: 150,
-                                  child: GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: () {
-                                        // Скролл вниз / следующая страница
-                                        animateTo(false);
-                                      }),
+                                GestureDetector(
+                                  onTap: () {
+                                    // Скролл вниз / следующая страница
+                                    animateTo(false);
+                                  },
+                                  child: ScrollablePositionedList.builder(
+                                      itemPositionsListener:
+                                          _itemPositionsListener,
+                                      itemScrollController:
+                                          _itemScrollController,
+                                      itemCount: isBorder
+                                          ? translatedText.length
+                                          : text.length,
+                                      scrollOffsetController:
+                                          _scrollOffsetController,
+                                      scrollOffsetListener:
+                                          _scrollOffsetListener,
+                                      itemBuilder: (context, index) => RichText(
+                                              text: TextSpan(
+                                            text: isBorder
+                                                ? translatedText[index]
+                                                : text[index],
+                                            style: TextStyle(
+                                                fontSize: fontSize,
+                                                color: textColor,
+                                                height: 1.41,
+                                                locale:
+                                                    const Locale('ru', 'RU')),
+                                          ))),
                                 ),
-                                isBorder
-                                    ? Positioned(
-                                        left: isBorder
-                                            ? MediaQuery.of(context).size.width /
-                                                4.5
-                                            : MediaQuery.of(context).size.width / 6,
-                                        top: isBorder
-                                            ? MediaQuery.of(context).size.height /
-                                                4.5
-                                            : MediaQuery.of(context).size.height /
-                                                5,
-                                        child: GestureDetector(
-                                            behavior: HitTestBehavior.translucent,
-                                            onVerticalDragEnd:
-                                                (dragEndDetails) async {
-                                              if (dragEndDetails.primaryVelocity! >
-                                                  0) {
-                                                showSavedWords(
-                                                    context, book.filePath);
-                                              }
-                                            },
-                                            onTap: () {
-                                              setState(() {
-                                                visible = !visible;
-                                              });
-                                              if (visible) {
-                                                SystemChrome.setEnabledSystemUIMode(
-                                                  SystemUiMode.manual,
-                                                  overlays: [
-                                                    SystemUiOverlay.top,
-                                                    SystemUiOverlay.bottom,
-                                                  ],
-                                                );
-                                              } else {
-                                                SystemChrome.setEnabledSystemUIMode(
-                                                    SystemUiMode.immersive);
-                                              }
-                                            },
-                                            child: IgnorePointer(
-                                              child: Container(
-                                                width: isBorder
-                                                    ? MediaQuery.of(context)
-                                                            .size
-                                                            .width /
-                                                        2
-                                                    : MediaQuery.of(context)
-                                                            .size
-                                                            .width /
-                                                        1.5,
-                                                height: isBorder
-                                                    ? MediaQuery.of(context)
-                                                            .size
-                                                            .height /
-                                                        2.5
-                                                    : MediaQuery.of(context)
-                                                            .size
-                                                            .height /
-                                                        2,
-                                                color: const Color.fromRGBO(
-                                                    250, 100, 100, 0),
-                                              ),
-                                            )),
-                                      )
-                                    : Positioned(
-                                        left: isBorder
-                                            ? MediaQuery.of(context).size.width /
-                                                4.5
-                                            : MediaQuery.of(context).size.width / 6,
-                                        top: isBorder
-                                            ? MediaQuery.of(context).size.height /
-                                                4.5
-                                            : MediaQuery.of(context).size.height /
-                                                5,
-                                        child: GestureDetector(
-                                            behavior: HitTestBehavior.translucent,
-                                            onTap: () {
-                                              setState(() {
-                                                visible = !visible;
-                                              });
-                                              if (visible) {
-                                                SystemChrome.setEnabledSystemUIMode(
-                                                  SystemUiMode.manual,
-                                                  overlays: [
-                                                    SystemUiOverlay.top,
-                                                    SystemUiOverlay.bottom,
-                                                  ],
-                                                );
-                                              } else {
-                                                SystemChrome.setEnabledSystemUIMode(
-                                                    SystemUiMode.manual,
-                                                    overlays: []);
-                                              }
-                                            },
-                                            child: IgnorePointer(
-                                              child: Container(
-                                                width: isBorder
-                                                    ? MediaQuery.of(context)
-                                                            .size
-                                                            .width /
-                                                        2
-                                                    : MediaQuery.of(context)
-                                                            .size
-                                                            .width /
-                                                        1.5,
-                                                height: isBorder
-                                                    ? MediaQuery.of(context)
-                                                            .size
-                                                            .height /
-                                                        2.5
-                                                    : MediaQuery.of(context)
-                                                            .size
-                                                            .height /
-                                                        2,
-                                                color: const Color.fromRGBO(
-                                                    250, 100, 100, 0),
-                                              ),
-                                            )),
-                                      ),
                                 Positioned(
-                                    left: 0,
-                                    right: 0,
-                                    height: 150,
+                                    left: 100,
+                                    right: 100,
+                                    height: visible
+                                        ? 2 * cc.maxHeight / 3
+                                        : cc.maxHeight / 2,
                                     child: GestureDetector(
-                                        behavior: HitTestBehavior.opaque,
+                                        behavior: HitTestBehavior.translucent,
                                         onTap: () {
                                           // Скролл вверх / предыдущая страница
                                           animateTo(true);
                                         })),
                                 Positioned(
                                     right: 0,
-                                    top: 100,
-                                    bottom: 100,
+                                    top: cc.maxHeight / 6,
+                                    bottom: cc.maxHeight / 6,
                                     width: 100,
                                     child: GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
+                                      behavior: HitTestBehavior.translucent,
                                       onVerticalDragStart: (details) async {
                                         brigtness =
                                             await FlutterScreenWake.brightness;
@@ -2363,12 +2328,13 @@ class Reader extends State with WidgetsBindingObserver {
                                     )),
                                 Positioned(
                                     left: 0,
-                                    top: 100,
-                                    bottom: 100,
+                                    top: cc.maxHeight / 6,
+                                    bottom: cc.maxHeight / 6,
                                     width: 100,
                                     child: GestureDetector(
-                                        behavior: HitTestBehavior.opaque,
+                                        behavior: HitTestBehavior.translucent,
                                         onVerticalDragStart: (details) {
+                                          oldFs = fontSize;
                                           final frst = _itemPositionsListener
                                               .itemPositions.value.first.index;
                                           final tp = TextPainter(
@@ -2380,30 +2346,53 @@ class Reader extends State with WidgetsBindingObserver {
                                                     color: Colors.black,
                                                     fontSize: fontSize,
                                                     height: 1.41,
-                                                    locale:
-                                                        const Locale('ru', 'RU'))),
+                                                    locale: const Locale(
+                                                        'ru', 'RU'))),
                                             textAlign: TextAlign.left,
                                             textDirection: ui.TextDirection.ltr,
                                           )..layout(maxWidth: cc.maxWidth);
                                           textPosOld = tp
-                                              .getPositionForOffset(
-                                                  Offset(0, position(cc.maxHeight)))
+                                              .getPositionForOffset(Offset(
+                                                  0, position(cc.maxHeight)))
                                               .offset;
                                           textPosOldIndex = frst;
+
+                                          textTimer?.cancel();
+                                          textTimer = Timer.periodic(
+                                              const Duration(milliseconds: 60),
+                                              (timer) {
+                                            if ((fontSize * 2)
+                                                    .floorToDouble() !=
+                                                (vFontSize * 2)
+                                                    .floorToDouble()) {
+                                              fontSize = (vFontSize * 2)
+                                                      .floorToDouble() /
+                                                  2;
+                                              _itemScrollController.jumpTo(
+                                                  index: textPosOldIndex!);
+                                            }
+                                          });
                                         },
                                         onVerticalDragUpdate: (details) {
                                           vFontSize -= details.delta.dy / 20;
-                                          vFontSize = min(vFontSize, 28);
+                                          vFontSize = min(vFontSize, 72);
                                           vFontSize = max(vFontSize, 10);
+                                        },
+                                        onVerticalDragEnd: (detalis) async {
+                                          textTimer?.cancel();
+                                          if ((fontSize - oldFs).abs() < 0.1) {
+                                            return;
+                                          }
+
                                           if ((fontSize * 2).floorToDouble() !=
                                               (vFontSize * 2).floorToDouble()) {
-                                            fontSize =
-                                                (vFontSize * 2).floorToDouble() / 2;
+                                            fontSize = (vFontSize * 2)
+                                                    .floorToDouble() /
+                                                2;
                                             _itemScrollController.jumpTo(
                                                 index: textPosOldIndex!);
                                           }
-                                        },
-                                        onVerticalDragEnd: (detalis) {
+
                                           final txt = isBorder
                                               ? translatedText[textPosOldIndex!]
                                               : text[textPosOldIndex!];
@@ -2414,26 +2403,108 @@ class Reader extends State with WidgetsBindingObserver {
                                                     color: Colors.black,
                                                     fontSize: fontSize,
                                                     height: 1.41,
-                                                    locale:
-                                                        const Locale('ru', 'RU'))),
+                                                    locale: const Locale(
+                                                        'ru', 'RU'))),
                                             textAlign: TextAlign.left,
                                             textDirection: ui.TextDirection.ltr,
                                           )..layout(maxWidth: cc.maxWidth);
 
                                           lineHeight = tp.preferredLineHeight;
+                                          baseline = tp
+                                              .computeDistanceToActualBaseline(
+                                                  TextBaseline.alphabetic);
                                           final off = tp
-                                              .getBoxesForSelection(TextSelection(
-                                                  baseOffset: textPosOld!,
-                                                  extentOffset: textPosOld! + 1))[0]
+                                              .getBoxesForSelection(
+                                                  TextSelection(
+                                                      baseOffset: textPosOld!,
+                                                      extentOffset:
+                                                          textPosOld! + 1))[0]
                                               .top;
-                                          if (off > 0.001) {
-                                            _scrollOffsetController.animateScroll(
-                                                offset: off,
-                                                duration: const Duration(
-                                                    microseconds: 1));
+                                          if (off > 5) {
+                                            WidgetsBinding.instance
+                                                .addPostFrameCallback((time) =>
+                                                    _scrollOffsetController
+                                                        .animateScroll(
+                                                            offset: off,
+                                                            duration:
+                                                                const Duration(
+                                                                    microseconds:
+                                                                        1)));
                                           }
                                           setState(() {});
                                         })),
+                                isBorder
+                                    ? Positioned(
+                                        top: cc.maxHeight / 6,
+                                        bottom: visible
+                                            ? cc.maxHeight / 4
+                                            : cc.maxHeight / 5,
+                                        left: 100,
+                                        right: 100,
+                                        child: GestureDetector(
+                                            behavior:
+                                                HitTestBehavior.translucent,
+                                            onVerticalDragEnd:
+                                                (dragEndDetails) async {
+                                              if (dragEndDetails
+                                                      .primaryVelocity! >
+                                                  0) {
+                                                showSavedWords(
+                                                    context, book.filePath);
+                                              }
+                                            },
+                                            onTap: () {
+                                              setState(() {
+                                                visible = !visible;
+                                              });
+                                              if (visible) {
+                                                SystemChrome
+                                                    .setEnabledSystemUIMode(
+                                                  SystemUiMode.manual,
+                                                  overlays: [
+                                                    SystemUiOverlay.top,
+                                                    SystemUiOverlay.bottom,
+                                                  ],
+                                                );
+                                              } else {
+                                                SystemChrome
+                                                    .setEnabledSystemUIMode(
+                                                        SystemUiMode.immersive);
+                                              }
+                                            }))
+                                    : Positioned(
+                                        top: visible
+                                            ? cc.maxHeight / 4
+                                            : cc.maxHeight / 5,
+                                        bottom: visible
+                                            ? cc.maxHeight / 4
+                                            : cc.maxHeight / 5,
+                                        left: 100,
+                                        right: 100,
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.translucent,
+                                          onTap: () {
+                                            setState(() {
+                                              visible = !visible;
+                                            });
+                                            if (visible) {
+                                              SystemChrome
+                                                  .setEnabledSystemUIMode(
+                                                SystemUiMode.manual,
+                                                overlays: [
+                                                  SystemUiOverlay.top,
+                                                  SystemUiOverlay.bottom,
+                                                ],
+                                              );
+                                            } else {
+                                              SystemChrome
+                                                  .setEnabledSystemUIMode(
+                                                      SystemUiMode.manual,
+                                                      overlays: []);
+                                            }
+                                          },
+                                        ),
+                                      ),
                               ]);
                             }),
                           ),
@@ -3246,7 +3317,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                       padding: EdgeInsets.only(
                                                           right: 30)),
                                                   GestureDetector(
-                                                    onTap: () async {
+                                                    onTap: () {
                                                       toggleWordMode();
                                                     },
                                                     child: Showcase(

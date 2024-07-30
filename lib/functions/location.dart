@@ -27,7 +27,7 @@ Future<Map<String, String>> getLocation() async {
   if (tokenSecure != null) {
     await sendLocationDataToServer(locationData, tokenSecure.toString());
   } else {
-    convertCoordsToAdress(locationData);
+    convertCoordsToAdress(locationData).catchError((e) => print(e));
   }
   return locationData;
 }
@@ -39,6 +39,7 @@ Future<void> sendLocationDataToServer(Map<String, String> locationData, String? 
     final response = await http.patch(
       Uri.parse(url),
       headers: {
+        "User-Agent": "Merlin/1.0",
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
@@ -55,7 +56,7 @@ Future<void> sendLocationDataToServer(Map<String, String> locationData, String? 
   } catch (_) {}
 }
 
-Future<void> convertCoordsToAdress(Map<String, String> locationData) async {
+Future<String> convertCoordsToAdress(Map<String, String> locationData) async {
   final String url = 'https://app.merlin.su/account/geo-by-coords?latitude=${locationData['latitude']}&longitude=${locationData['longitude']}';
 
   try {
@@ -68,16 +69,26 @@ Future<void> convertCoordsToAdress(Map<String, String> locationData) async {
       // print('Данные успешно отправлены на сервер');
       final jsonResponse = json.decode(response.body);
       setLocation(jsonResponse);
+
+      final country = jsonResponse['country'] ?? 'Russian Federation (the)';
+      final area = jsonResponse['area'] ?? '';
+      final city = jsonResponse['city'] ?? '';
+
+      if (country.isNotEmpty && area.isNotEmpty && city.isNotEmpty) {
+        final locationString = '$country, $area, $city';
+        return locationString;
+      }
       // print(jsonResponse);
     } else {
       // print('Ошибка при отправке данных на сервер: ${response.reasonPhrase}');
     }
   } catch (_) {}
+  throw Exception("Failed to get location");
 }
 
 Future<void> setLocation(Map<String, dynamic> jsonResponse) async {
   final prefs = await SharedPreferences.getInstance();
-  final country = jsonResponse['country'] ?? 'Russia';
+  final country = jsonResponse['country'] ?? 'Russian Federation (the)';
   final area = jsonResponse['area'] ?? '';
   final city = jsonResponse['city'] ?? '';
 

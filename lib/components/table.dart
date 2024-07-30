@@ -11,9 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class StatTable extends StatefulWidget {
   final String path;
-  final String country;
-  final String area;
-  final String city;
+  final String? country;
+  final String? area;
+  final String? city;
 
   const StatTable({
     required this.path,
@@ -54,7 +54,7 @@ class _StatTableState extends State<StatTable> {
     try {
       final response = await http.get(
         Uri.parse(url),
-        headers: {'Authorization': 'Bearer $token'},
+        headers: {"User-Agent": "Merlin/1.0", 'Authorization': 'Bearer $token'},
       );
       final data = json.decode(response.body);
       final fetchedId = data['_id'];
@@ -84,7 +84,9 @@ class _StatTableState extends State<StatTable> {
   Future<List<dynamic>> fetchJson() async {
     final url = Uri.parse(
         'https://app.merlin.su/statistic/${widget.path}?sortBy=totalPageCountWordMode&country=${widget.country}&area=${widget.area}&city=${widget.city}&userId=$id');
-    final response = await http.get(url);
+    final response = await http.get(url, headers: {
+      "User-Agent": "Merlin/1.0"
+    });
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
       return jsonResponse ?? [];

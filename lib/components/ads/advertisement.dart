@@ -8,6 +8,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:merlin/components/ads/ad_info_field.dart';
 import 'package:yandex_mobileads/mobile_ads.dart';
 import 'package:merlin/components/ads/network_provider.dart';
 
@@ -40,7 +41,7 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
   RewardedAd? _ad;
   late final Future<RewardedAdLoader> _adLoader = _createRewardedAdLoader();
   var adRequest = const AdRequest();
-  late final _adRequestConfiguration = AdRequestConfiguration(adUnitId: adUnitId);
+  late var _adRequestConfiguration = AdRequestConfiguration(adUnitId: adUnitId);
   var isLoading = false;
 
   @override
@@ -53,16 +54,15 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
         child: Column(
           children: [
             const SizedBox(height: 16.0),
-            // AdInfoField(
-            //   networks: networks,
-            //   onChanged: (id, request) => setState(() {
-            //     isLoading = false;
-            //     _ad = null;
-            //     adUnitId = id;
-            //     adRequest = request;
-            //     _updateAdRequestConfiguration(id, request);
-            //   }),
-            // ),
+             AdInfoField(
+               networks: networks,
+               onChanged: (id, request) => setState(() {
+                 isLoading = false;
+                 _ad = null;
+                 adUnitId = id;
+                 adRequest = request;
+                 _updateAdRequestConfiguration(id, request);}),
+             ),
             const SizedBox(height: 16.0),
             Expanded(
               child: LogTile(
@@ -133,15 +133,15 @@ class _RewardedAdPageState extends State<RewardedAdPage> with TextLogger {
             onRewarded: (Reward reward) => logMessage('callback: reward: ${reward.amount} of ${reward.type}')));
   }
 
-  // void _updateAdRequestConfiguration(String adUnitId, AdRequest configuration) {
-  //   _adRequestConfiguration = AdRequestConfiguration(
-  //       adUnitId: adUnitId,
-  //       age: configuration.age,
-  //       contextQuery: configuration.contextQuery,
-  //       contextTags: configuration.contextTags,
-  //       gender: configuration.gender,
-  //       location: configuration.location,
-  //       parameters: configuration.parameters,
-  //       preferredTheme: configuration.preferredTheme);
-  // }
+   void _updateAdRequestConfiguration(String adUnitId, AdRequest configuration) {
+     _adRequestConfiguration = AdRequestConfiguration(
+         adUnitId: adUnitId,
+         age: configuration.age,
+         contextQuery: configuration.contextQuery,
+         contextTags: configuration.contextTags,
+         gender: configuration.gender,
+         location: configuration.location,
+         parameters: configuration.parameters,
+         preferredTheme: configuration.preferredTheme);
+  }
 }

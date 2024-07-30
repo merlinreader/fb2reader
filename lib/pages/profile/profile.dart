@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class AchievementStatus {
 
 class Profile extends StatelessWidget {
   const Profile({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const ProfilePage();
@@ -47,6 +49,7 @@ class Profile extends StatelessWidget {
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
   @override
   State<ProfilePage> createState() => _ProfilePage();
 }
@@ -60,6 +63,7 @@ class _ProfilePage extends State<ProfilePage> {
   String token = '';
   String firstName = 'Merlin';
   List<AchievementStatus> getAchievements = [];
+
   // ignore: prefer_typing_uninitialized_variables
   late var achievements;
 
@@ -69,17 +73,22 @@ class _ProfilePage extends State<ProfilePage> {
   RewardedAd? _ad;
   late final RewardedAdLoader _adLoader;
   var adRequest = const AdRequest();
-  late final AdRequestConfiguration _adRequestConfiguration = AdRequestConfiguration(adUnitId: adUnitId);
+  late final AdRequestConfiguration _adRequestConfiguration =
+      AdRequestConfiguration(adUnitId: adUnitId);
   var isLoading = false;
 
   // кол-во доступных юзеру слов
   int words = 10;
   late int getWords;
 
+  late Future<String> locationFuture;
+  StreamController<String> controller = StreamController<String>();
+
   @override
   void initState() {
     super.initState();
     //initUniLinks();
+    getSavedLocation().then((str) => controller.add(str));
     getTokenFromLocalStorage();
     getFirstNameFromLocalStorage();
     getWordsFromLocalStorage();
@@ -172,7 +181,7 @@ class _ProfilePage extends State<ProfilePage> {
     final url = Uri.parse('https://app.merlin.su/account/achievements');
     final response = await http.get(
       url,
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {"User-Agent": "Merlin/1.0", 'Authorization': 'Bearer $token'},
     );
     if (response.statusCode == 200) {
       final jsonResponse = json.decode(response.body);
@@ -212,7 +221,8 @@ class _ProfilePage extends State<ProfilePage> {
     }
   }
 
-  Future<void> saveJsonToFile(Map<String, dynamic> jsonData, String filePath) async {
+  Future<void> saveJsonToFile(
+      Map<String, dynamic> jsonData, String filePath) async {
     try {
       final file = File(filePath);
       final directory = Directory(file.parent.path);
@@ -229,7 +239,8 @@ class _ProfilePage extends State<ProfilePage> {
 
   Future<void> saveCurrentTime(String fileName) async {
     final appDir = Platform.isAndroid
-        ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
+        ? await getExternalStorageDirectory()
+        : await getApplicationDocumentsDirectory();
     final filePath = '${appDir?.path}/Timer/$fileName.json';
     var timeNow = DateTime.now();
     await saveJsonToFile({'TimeDialog': timeNow.toIso8601String()}, filePath);
@@ -238,7 +249,8 @@ class _ProfilePage extends State<ProfilePage> {
   Future<DateTime?> readTimeFromJsonFile(String fileName) async {
     try {
       final appDir = Platform.isAndroid
-          ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
+          ? await getExternalStorageDirectory()
+          : await getApplicationDocumentsDirectory();
       final filePath = '${appDir?.path}/Timer/$fileName.json';
       final file = File(filePath);
       if (await file.exists()) {
@@ -261,12 +273,13 @@ class _ProfilePage extends State<ProfilePage> {
     if (timeLast != null) {
       var elapsedTime = timeNow.difference(timeLast);
       if (elapsedTime.inHours >= 24) {
-        _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
+        _adLoader.loadAd(adRequestConfiguration: const AdRequestConfiguration(adUnitId: 'R-M-10590682-1'));
         await saveCurrentTime('timeStepAD');
       } else {
         var timeLast = await readTimeFromJsonFile(fileName);
         if (timeLast != null) {
-          final formattedTime = DateFormat('MM.dd HH:mm').format(timeLast.add(const Duration(days: 1)));
+          final formattedTime = DateFormat('dd.MM.yy HH:mm')
+              .format(timeLast.add(const Duration(days: 1)));
 
           Fluttertoast.showToast(
             msg: 'Новые слова будут доступны $formattedTime',
@@ -276,7 +289,7 @@ class _ProfilePage extends State<ProfilePage> {
         }
       }
     } else {
-      _adLoader.loadAd(adRequestConfiguration: _adRequestConfiguration);
+      _adLoader.loadAd(adRequestConfiguration: const AdRequestConfiguration(adUnitId: 'R-M-10590682-1'));
       await saveCurrentTime('timeStepAD');
     }
   }
@@ -332,7 +345,8 @@ class _ProfilePage extends State<ProfilePage> {
                     right: MediaQuery.of(context).size.width / 2 - 48 - 24,
                     child: IconButton(
                         onPressed: () async {
-                          final avatarChanged = await showChooseAvatarDialog(context);
+                          final avatarChanged =
+                              await showChooseAvatarDialog(context);
                           setNewAvatar(avatarChanged);
                         },
                         icon: Icon(
@@ -347,12 +361,14 @@ class _ProfilePage extends State<ProfilePage> {
               text: firstName,
               textColor: MyColors.black,
             ),
-            FutureBuilder(
-                future: getSavedLocation(),
-                builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-                  String locationData = snapshot.data ?? 'Нет данных о местоположении';
-                  if(snapshot.data != null) {
-                    locationData = locationData.replaceRange(18, 24, '');
+            StreamBuilder(
+                stream: controller.stream,
+                builder:
+                    (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                  String locationData =
+                      snapshot.data ?? 'Нет данных о местоположении';
+                  if (snapshot.data != null) {
+                    locationData = locationData.replaceFirst(' (the)', '');
                   }
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -360,10 +376,14 @@ class _ProfilePage extends State<ProfilePage> {
                       SizedBox(width: 2 * size),
                       Center(
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: width > 650 ? 400 : MediaQuery.of(context).size.width * 0.75),
+                          constraints: BoxConstraints(
+                              maxWidth: width > 650
+                                  ? 400
+                                  : MediaQuery.of(context).size.width * 0.75),
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            child: Text16(text: locationData, textColor: MyColors.black),
+                            child: Text16(
+                                text: locationData, textColor: MyColors.black),
                           ),
                         ),
                       ),
@@ -394,8 +414,10 @@ class _ProfilePage extends State<ProfilePage> {
                           textColor: MyColors.white,
                           fontSize: 14,
                           onPressed: () {
-                            final tgUrl = Uri.parse('https://t.me/merlin_auth_bot?start=1');
-                            launchUrl(tgUrl, mode: LaunchMode.externalApplication);
+                            final tgUrl = Uri.parse(
+                                'https://t.me/merlin_auth_bot?start=1');
+                            launchUrl(tgUrl,
+                                mode: LaunchMode.externalApplication);
                             //exit(0);
                             SystemNavigator.pop();
                           },
@@ -409,14 +431,17 @@ class _ProfilePage extends State<ProfilePage> {
                         child: Align(
                             alignment: AlignmentDirectional.bottomCenter,
                             child: Theme(
-                              data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
+                              data: themeProvider.isDarkTheme
+                                  ? darkTheme()
+                                  : lightTheme(),
                               child: Button(
                                   text: 'Написать нам',
                                   width: 312,
                                   height: 48,
                                   horizontalPadding: 97,
                                   verticalPadding: 12,
-                                  textColor: Theme.of(context).colorScheme.onSurface,
+                                  textColor:
+                                      Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   onPressed: () {
@@ -472,14 +497,17 @@ class _ProfilePage extends State<ProfilePage> {
                         child: Align(
                             alignment: AlignmentDirectional.bottomCenter,
                             child: Theme(
-                              data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
+                              data: themeProvider.isDarkTheme
+                                  ? darkTheme()
+                                  : lightTheme(),
                               child: Button(
                                   text: 'Написать нам',
                                   width: 312,
                                   height: 48,
                                   horizontalPadding: 97,
                                   verticalPadding: 12,
-                                  textColor: Theme.of(context).colorScheme.onSurface,
+                                  textColor:
+                                      Theme.of(context).colorScheme.onSurface,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                   onPressed: () {
@@ -504,28 +532,32 @@ class _ProfilePage extends State<ProfilePage> {
               title: Center(
                 child: TextButton(
                     onPressed: () {
-                      Clipboard.setData(const ClipboardData(text: 'readermerlin@gmail.com'));
+                      Clipboard.setData(
+                          const ClipboardData(text: 'readermerlin@gmail.com'));
                       Fluttertoast.showToast(
                         msg: 'Почта скопирована',
                         toastLength: Toast.LENGTH_SHORT,
                         gravity: ToastGravity.BOTTOM,
                       );
                     },
-                    child: const Text18(text: 'readermerlin@gmail.com', textColor: MyColors.black)),
+                    child: const Text18(
+                        text: 'readermerlin@gmail.com',
+                        textColor: MyColors.black)),
               ),
               alignment: Alignment.center,
               actions: [
                 Center(
                   child: Column(
                     children: [
-                      TextButton(onPressed: () async {
-                        final Uri url = Uri.parse('https://merlin.su');
-                        if (!await launchUrl(url)) {
-                         throw Exception('Ошибка');
-                        }
-                      },
-                      child: const Text18(text: 'merlin.su', textColor: MyColors.black)
-                  ),
+                      TextButton(
+                          onPressed: () async {
+                            final Uri url = Uri.parse('https://merlin.su');
+                            if (!await launchUrl(url)) {
+                              throw Exception('Ошибка');
+                            }
+                          },
+                          child: const Text18(
+                              text: 'merlin.su', textColor: MyColors.black)),
                       const SizedBox(height: 20),
                       Theme(
                           data: purpleButton(),
@@ -541,14 +573,17 @@ class _ProfilePage extends State<ProfilePage> {
                               fontWeight: FontWeight.bold)),
                       const SizedBox(height: 20),
                       Theme(
-                          data: themeProvider.isDarkTheme ? darkTheme() : lightTheme(),
+                          data: themeProvider.isDarkTheme
+                              ? darkTheme()
+                              : lightTheme(),
                           child: Button(
                               text: "Отмена",
                               width: 250,
                               height: 50,
                               horizontalPadding: 10,
                               verticalPadding: 10,
-                              textColor: Theme.of(context).colorScheme.onSurface,
+                              textColor:
+                                  Theme.of(context).colorScheme.onSurface,
                               fontSize: 14,
                               onPressed: () {
                                 Navigator.of(context).pop();
@@ -559,6 +594,92 @@ class _ProfilePage extends State<ProfilePage> {
                 )
               ],
             ));
+  }
+
+  Future<GeoPoint?> showSimplePickerLocation({
+    required BuildContext context,
+    Widget? titleWidget,
+    String? title,
+    TextStyle? titleStyle,
+    String? textConfirmPicker,
+    String? textCancelPicker,
+    EdgeInsets contentPadding = EdgeInsets.zero,
+    double radius = 0.0,
+    GeoPoint? initPosition,
+    ZoomOption zoomOption = const ZoomOption(),
+    bool isDismissible = false,
+    UserTrackingOption? initCurrentUserPosition,
+  }) async {
+    assert(title == null || titleWidget == null);
+    assert(((initCurrentUserPosition != null) && initPosition == null) ||
+        ((initCurrentUserPosition == null) && initPosition != null));
+    final MapController controller = MapController(
+      initMapWithUserPosition: initCurrentUserPosition,
+      initPosition: initPosition,
+    );
+
+    GeoPoint? point = await showDialog(
+      context: context,
+      builder: (ctx) {
+        return PopScope(
+          canPop: isDismissible,
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height / 2.4,
+            width: MediaQuery.of(context).size.height / 2,
+            child: AlertDialog(
+              title: title != null
+                  ? Text(
+                      title,
+                      style: titleStyle,
+                    )
+                  : titleWidget,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(radius),
+                ),
+              ),
+              contentPadding: contentPadding,
+              content: SizedBox(
+                height: MediaQuery.of(context).size.height / 2.5,
+                width: MediaQuery.of(context).size.height / 2,
+                child: OSMFlutter(
+                  controller: controller,
+                  osmOption: OSMOption(
+                    zoomOption: zoomOption,
+                    isPicker: true,
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textCancelPicker ??
+                        MaterialLocalizations.of(context).cancelButtonLabel,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final p = await controller
+                        .getCurrentPositionAdvancedPositionPicker();
+                    await controller.cancelAdvancedPositionPicker();
+                    Navigator.pop(ctx, p);
+                  },
+                  child: Text(
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    textConfirmPicker ??
+                        MaterialLocalizations.of(context).okButtonLabel,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    return point;
   }
 
   Future<GeoPoint?> _openLocationPicker(BuildContext context) async {
@@ -581,8 +702,13 @@ class _ProfilePage extends State<ProfilePage> {
       Map<String, String> location = convertGeoPointToMap(pickedLocation);
       // print("Picked Location: $location");
       if (token == '' || token.isEmpty) {
-        convertCoordsToAdress(location);
+        convertCoordsToAdress(location).then((event) {
+          controller.add(event);
+        }).catchError((e) => print(e));
       } else {
+        convertCoordsToAdress(location).then((event) {
+          controller.add(event);
+        }).catchError((e) => print(e));
         await sendLocationDataToServer(location, token);
       }
     }

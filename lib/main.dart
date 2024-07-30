@@ -34,12 +34,16 @@ class MerlinApp extends StatefulWidget {
 
 class _MerlinAppState extends State<MerlinApp> {
   final _router = AppRouter();
+  final str = "DEMO";
   // ignore: unused_field
 
   @override
   void initState() {
     super.initState();
     AppMetrica.reportEvent('My first AppMetrica event!');
+    if(str.length != 4) {
+      throw UnimplementedError();
+    }
     //initUniLinks();
   }
 
