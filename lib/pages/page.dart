@@ -331,7 +331,6 @@ class Page extends State<AppPage> {
             );
           },
         ),
-        const Text('DEMO'),
       ],
     );
   }
