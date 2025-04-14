@@ -92,7 +92,7 @@ ThemeData lightTheme() => ThemeData(
         onError: Colors.red,
         background: MyColors.white,
         onBackground: Colors.black,
-        surface: MyColors.blackGray,
+        surface: MyColors.white,
         onSurface: Colors.black,
         scrim: MyColors.whiteAch),
     textTheme: const TextTheme(

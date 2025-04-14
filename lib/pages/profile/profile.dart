@@ -10,6 +10,7 @@ import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/components/achievement.dart';
 import 'package:merlin/components/ads/network_provider.dart';
 import 'package:merlin/components/svg/svg_widget.dart';
+import 'package:merlin/domain/data_providers/token_provider.dart';
 import 'package:merlin/domain/dto/achievements/get_achievements_response.dart';
 import 'package:merlin/pages/profile/dialogs/choose_avatar_dialog/choose_avatar_dialog.dart';
 import 'package:merlin/pages/profile/profile_view_model.dart';
@@ -84,6 +85,8 @@ class _ProfilePage extends State<ProfilePage> {
   late Future<String> locationFuture;
   StreamController<String> controller = StreamController<String>();
 
+  bool authMode = false;
+
   @override
   void initState() {
     super.initState();
@@ -94,6 +97,13 @@ class _ProfilePage extends State<ProfilePage> {
     getWordsFromLocalStorage();
     MobileAds.initialize();
     _initAds();
+
+    TokenProvider().onTokenChanged.listen((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_){
+        setState(() {
+        });
+      });
+    });
   }
 
   Future<void> saveWordsToLocalStorage(int wordsInput) async {
@@ -273,7 +283,9 @@ class _ProfilePage extends State<ProfilePage> {
     if (timeLast != null) {
       var elapsedTime = timeNow.difference(timeLast);
       if (elapsedTime.inHours >= 24) {
-        _adLoader.loadAd(adRequestConfiguration: const AdRequestConfiguration(adUnitId: 'R-M-10590682-1'));
+        _adLoader.loadAd(
+            adRequestConfiguration:
+                const AdRequestConfiguration(adUnitId: 'R-M-10590682-1'));
         await saveCurrentTime('timeStepAD');
       } else {
         var timeLast = await readTimeFromJsonFile(fileName);
@@ -289,13 +301,21 @@ class _ProfilePage extends State<ProfilePage> {
         }
       }
     } else {
-      _adLoader.loadAd(adRequestConfiguration: const AdRequestConfiguration(adUnitId: 'R-M-10590682-1'));
+      _adLoader.loadAd(
+          adRequestConfiguration:
+              const AdRequestConfiguration(adUnitId: 'R-M-10590682-1'));
       await saveCurrentTime('timeStepAD');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    if(authMode) {
+      authMode = false;
+      getTokenFromLocalStorage();
+      getFirstNameFromLocalStorage();
+      getWordsFromLocalStorage();
+    }
     // print('ШИРИНА');
     // print(width);
     // double aspectRatio = height/width;
@@ -382,8 +402,7 @@ class _ProfilePage extends State<ProfilePage> {
                                   : MediaQuery.of(context).size.width * 0.75),
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            child: Text16(
-                                text: locationData, textColor: MyColors.black),
+                            child: Text16(text: locationData),
                           ),
                         ),
                       ),
@@ -413,13 +432,12 @@ class _ProfilePage extends State<ProfilePage> {
                           verticalPadding: 12,
                           textColor: MyColors.white,
                           fontSize: 14,
-                          onPressed: () {
+                          onPressed: () async {
                             final tgUrl = Uri.parse(
-                                'https://t.me/merlin_auth_bot?start=1');
-                            launchUrl(tgUrl,
-                                mode: LaunchMode.externalApplication);
+                                'tg://resolve?domain=merlin_auth_bot&start=1');
+                            await launchUrl(tgUrl, mode: LaunchMode.externalApplication);
+                            authMode = true;
                             //exit(0);
-                            SystemNavigator.pop();
                           },
                           fontWeight: FontWeight.bold,
                         ),
@@ -556,8 +574,7 @@ class _ProfilePage extends State<ProfilePage> {
                               throw Exception('Ошибка');
                             }
                           },
-                          child: const Text18(
-                              text: 'merlin.su', textColor: MyColors.black)),
+                          child: const Text18(text: 'merlin.su')),
                       const SizedBox(height: 20),
                       Theme(
                           data: purpleButton(),
@@ -611,13 +628,16 @@ class _ProfilePage extends State<ProfilePage> {
     UserTrackingOption? initCurrentUserPosition,
   }) async {
     assert(title == null || titleWidget == null);
-    assert(((initCurrentUserPosition != null) && initPosition == null) ||
-        ((initCurrentUserPosition == null) && initPosition != null));
+    assert(
+      ((initCurrentUserPosition != null) && initPosition == null) ||
+          ((initCurrentUserPosition == null) && initPosition != null),
+    );
     final MapController controller = MapController(
       initMapWithUserPosition: initCurrentUserPosition,
       initPosition: initPosition,
     );
-
+    GeoPoint? center;
+    GeoPoint? old;
     GeoPoint? point = await showDialog(
       context: context,
       builder: (ctx) {
@@ -627,47 +647,61 @@ class _ProfilePage extends State<ProfilePage> {
             height: MediaQuery.of(context).size.height / 2.4,
             width: MediaQuery.of(context).size.height / 2,
             child: AlertDialog(
-              title: title != null
-                  ? Text(
-                      title,
-                      style: titleStyle,
-                    )
-                  : titleWidget,
+              title:
+                  title != null ? Text(title, style: titleStyle) : titleWidget,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(radius),
-                ),
+                borderRadius: BorderRadius.all(Radius.circular(radius)),
               ),
               contentPadding: contentPadding,
               content: SizedBox(
                 height: MediaQuery.of(context).size.height / 2.5,
                 width: MediaQuery.of(context).size.height / 2,
-                child: OSMFlutter(
-                  controller: controller,
-                  osmOption: OSMOption(
-                    zoomOption: zoomOption,
-                    isPicker: true,
-                  ),
+                child: StatefulBuilder(
+                  builder: (context, setState) {
+                    return Stack(
+                      children: [
+                        Positioned.fill(
+                          child: OSMFlutter(
+                            controller: controller,
+                            onMapMoved: (regsion) {
+                              setState(() {
+                                old = center;
+                                center = regsion.center;
+                              });
+                            },
+                            osmOption: OSMOption(
+                              zoomOption: zoomOption,
+                              isPicker: true,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          child: AnimatedCenterMarker(center: center),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: Text(
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface),
                     textCancelPicker ??
                         MaterialLocalizations.of(context).cancelButtonLabel,
                   ),
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    final p = await controller
-                        .getCurrentPositionAdvancedPositionPicker();
-                    await controller.cancelAdvancedPositionPicker();
-                    Navigator.pop(ctx, p);
+                    final center = await controller.centerMap;
+                    if (!ctx.mounted) return;
+                    Navigator.pop(ctx, center);
                   },
                   child: Text(
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface),
                     textConfirmPicker ??
                         MaterialLocalizations.of(context).okButtonLabel,
                   ),

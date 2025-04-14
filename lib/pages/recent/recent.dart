@@ -405,7 +405,6 @@ class RecentPageState extends State<RecentPage> {
               padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
               child: Text24(
                 text: "Последнее",
-                textColor: MyColors.black,
               ),
             ),
             Center(

@@ -196,7 +196,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    const Text22(text: "Система", textColor: MyColors.black),
+                    const Text22(text: "Система"),
                     // TextTektur(
                     //   text: "Система",
                     //   fontsize: 18,

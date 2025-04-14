@@ -78,7 +78,7 @@ class Page extends State<AppPage> {
     final prefs = await SharedPreferences.getInstance();
     bookName = prefs.getString('fileTitle') ?? '';
 
-    if(DateTime.now().millisecondsSinceEpoch - (prefs.getInt("allowed") ?? 0) > 2628000000) {
+    /*if(DateTime.now().millisecondsSinceEpoch - (prefs.getInt("allowed") ?? 0) > 2628000000) {
       final url = Uri.parse('https://app.merlin.su/version.json');
       http.get(url, headers: {"User-Agent": "Merlin/1.0"}).then(
             (response) {
@@ -123,7 +123,7 @@ class Page extends State<AppPage> {
           }
         },
       );
-    }
+    }*/
   }
 
   void onSelectTab(int index) async {
@@ -179,7 +179,7 @@ class Page extends State<AppPage> {
                           SvgAsset.merlinLogo,
                         ),
                       ),
-                      const Text24(text: 'Merlin', textColor: MyColors.black),
+                      const Text24(text: 'Merlin'),
                     ],
                   ),
                 ),

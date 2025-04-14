@@ -61,7 +61,7 @@ class _ChooseAvatarDialog extends StatelessWidget {
                           ))
                       : const MerlinWidget()),
             ),
-            const Text24(text: 'Аватар', textColor: MyColors.black),
+            const Text24(text: 'Аватар'),
             const SizedBox(
               height: 10,
             ),
@@ -78,7 +78,7 @@ class _ChooseAvatarDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Center(
-              child: Text16(text: 'Выберите аватар', textColor: MyColors.black),
+              child: Text16(text: 'Выберите аватар'),
             ),
             Container(
               padding: const EdgeInsets.only(top: 15),
@@ -132,10 +132,10 @@ class _ChooseAvatarDialog extends StatelessWidget {
         actions: [
           TextButton(
               onPressed: onResetClick,
-              child: const Text16(text: 'Сбросить', textColor: MyColors.black)),
+              child: const Text16(text: 'Сбросить')),
           TextButton(
               onPressed: onSaveClick,
-              child: const Text16(text: 'Сохранить', textColor: MyColors.black))
+              child: const Text16(text: 'Сохранить'))
         ],
       ),
     );

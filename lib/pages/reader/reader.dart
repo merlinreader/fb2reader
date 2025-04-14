@@ -223,6 +223,10 @@ class Reader extends State with WidgetsBindingObserver {
         }
       });
     });
+
+    sub = _battery.onBatteryStateChanged.listen((event) {
+      _getBatteryLevel();
+    });
   }
 
   @override
@@ -232,6 +236,7 @@ class Reader extends State with WidgetsBindingObserver {
     SystemChrome.setPreferredOrientations([orientations[0]]);
     timer.cancel();
     perTimer.cancel();
+    sub.cancel();
     super.dispose();
   }
 
@@ -397,6 +402,8 @@ class Reader extends State with WidgetsBindingObserver {
 
   bool forTable = false;
 
+  late StreamSubscription<BatteryState> sub;
+
   Future<void> switchOrientation() async {
     final frst = _itemPositionsListener.itemPositions.value.first.index;
     final tp = TextPainter(
@@ -477,7 +484,7 @@ class Reader extends State with WidgetsBindingObserver {
 
     translatedText = tt.split("\n");
     pref = List.filled(translatedText.length - 1, 0);
-    for (int i = 1; i < translatedText.length; i++) {
+    for (int i = 1; i < translatedText.length - 1; i++) {
       pref[i] = pref[i - 1] + translatedText[i - 1].length;
     }
 
@@ -2253,6 +2260,7 @@ class Reader extends State with WidgetsBindingObserver {
                         children: [
                           SafeArea(
                             top: true,
+                            bottom: false,
                             minimum: visible
                                 ? const EdgeInsets.only(
                                     top: 0, left: 8, right: 8)
@@ -2924,13 +2932,18 @@ class Reader extends State with WidgetsBindingObserver {
                                                                   context)
                                                               .completed(_nine);
                                                         },
-                                                        child: Icon(
-                                                          CustomIcons.wm,
-                                                          color:
-                                                              Theme.of(context)
+                                                        child: Column(
+                                                          children: [
+                                                            Icon(
+                                                              CustomIcons.wm,
+                                                              color: Theme.of(
+                                                                      context)
                                                                   .iconTheme
                                                                   .color,
-                                                          size: 27,
+                                                              size: 27,
+                                                            ),
+                                                            const Text('Слово')
+                                                          ],
                                                         )),
                                                   )
                                                 ],
@@ -2946,12 +2959,12 @@ class Reader extends State with WidgetsBindingObserver {
                           color: visible
                               ? Theme.of(context).colorScheme.primary
                               : backgroundColor,
-                          height: visible ? 110 : 45,
+                          height: visible ? 107 : 45,
                           child: Stack(
                             children: [
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
-                                height: visible ? 85 : 40,
+                                height: visible ? 110 : 40,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -3101,7 +3114,7 @@ class Reader extends State with WidgetsBindingObserver {
                                 right: 0,
                                 child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 250),
-                                    height: visible ? 85 : 0,
+                                    height: visible ? 97 : 0,
                                     child: SingleChildScrollView(
                                       child: Container(
                                           alignment:
@@ -3265,18 +3278,30 @@ class Reader extends State with WidgetsBindingObserver {
                                                         },
                                                         description:
                                                             "В нижнем колонтитуле иконка поворота текста на 90°  каждым нажатием на кнопку.",
-                                                        child: Icon(
-                                                          CustomIcons.turn,
-                                                          color:
-                                                              Theme.of(context)
+                                                        child: Column(
+                                                          children: [
+                                                            Icon(
+                                                              CustomIcons.turn,
+                                                              color: Theme.of(
+                                                                      context)
                                                                   .iconTheme
                                                                   .color,
-                                                          size: 27,
+                                                              size: 27,
+                                                            ),
+                                                            const Text(
+                                                                'Поворот',
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontFamily:
+                                                                      'Tektur',
+                                                                  fontSize: 10,
+                                                                ))
+                                                          ],
                                                         )),
                                                   ),
                                                   const Padding(
                                                       padding: EdgeInsets.only(
-                                                          right: 30)),
+                                                          right: 23)),
                                                   InkWell(
                                                     onTap: () async {
                                                       final themeProvider =
@@ -3304,14 +3329,25 @@ class Reader extends State with WidgetsBindingObserver {
                                                               .completed(
                                                                   _eight);
                                                         },
-                                                        child: Icon(
-                                                          CustomIcons.theme,
-                                                          color:
-                                                              Theme.of(context)
-                                                                  .iconTheme
-                                                                  .color,
-                                                          size: 27,
-                                                        )),
+                                                        child:
+                                                            Column(children: [
+                                                          Icon(
+                                                            CustomIcons.theme,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .iconTheme
+                                                                .color,
+                                                            size: 27,
+                                                          ),
+                                                          const Text(
+                                                            'Тема',
+                                                            style: TextStyle(
+                                                              fontFamily:
+                                                                  'Tektur',
+                                                              fontSize: 10,
+                                                            ),
+                                                          )
+                                                        ])),
                                                   ),
                                                   const Padding(
                                                       padding: EdgeInsets.only(
@@ -3331,15 +3367,29 @@ class Reader extends State with WidgetsBindingObserver {
                                                                   context)
                                                               .completed(_nine);
                                                         },
-                                                        child: Icon(
-                                                          CustomIcons.wm,
-                                                          color:
-                                                              Theme.of(context)
+                                                        child: Column(
+                                                          children: [
+                                                            Icon(
+                                                              CustomIcons.wm,
+                                                              color: Theme.of(
+                                                                      context)
                                                                   .iconTheme
                                                                   .color,
-                                                          size: 27,
+                                                              size: 27,
+                                                            ),
+                                                            const Text('Слово',
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontFamily:
+                                                                      'Tektur',
+                                                                  fontSize: 10,
+                                                                ))
+                                                          ],
                                                         )),
-                                                  )
+                                                  ),
+                                                  const Padding(
+                                                      padding: EdgeInsets.only(
+                                                          right: 10)),
                                                 ],
                                               )
                                             ],

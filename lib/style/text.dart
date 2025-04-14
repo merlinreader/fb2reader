@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 class Text24 extends StatelessWidget {
   final String text;
-  final Color textColor;
+  final Color? textColor;
 
-  const Text24({super.key, required this.text, required this.textColor});
+  const Text24({super.key, required this.text, this.textColor});
 
   @override
   Widget build(BuildContext context) {
     return Text(text, style: Theme
         .of(context)
         .textTheme
-        .titleLarge?.copyWith(color: textColor)
+        .titleLarge
       //TextStyle(
       //fontFamily: 'Tektur',
       //color: textColor,
@@ -23,9 +23,9 @@ class Text24 extends StatelessWidget {
 
 class Text22 extends StatelessWidget {
   final String text;
-  final Color textColor;
+  final Color? textColor;
 
-  const Text22({super.key, required this.text, required this.textColor});
+  const Text22({super.key, required this.text, this.textColor});
 
   @override
   Widget build(BuildContext context) {
@@ -127,9 +127,9 @@ class Text7 extends StatelessWidget {
 
 class Text18 extends StatelessWidget {
   final String text;
-  final Color textColor;
+  final Color? textColor;
 
-  const Text18({super.key, required this.text, required this.textColor});
+  const Text18({super.key, required this.text, this.textColor});
 
   @override
   Widget build(BuildContext context) {
@@ -166,9 +166,9 @@ class Text20 extends StatelessWidget {
 
 class Text16 extends StatelessWidget {
   final String text;
-  final Color textColor;
+  final Color? textColor;
 
-  const Text16({super.key, required this.text, required this.textColor});
+  const Text16({super.key, required this.text, this.textColor});
 
   @override
   Widget build(BuildContext context) {
