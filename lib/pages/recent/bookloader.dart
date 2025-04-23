@@ -18,6 +18,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 // import 'package:merlin/pages/reader/reader.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:archive/archive.dart';
+import 'package:flutter_charset_detector/flutter_charset_detector.dart';
+
 
 class ImageLoader {
   String title = "Название не найдено";
@@ -64,7 +66,7 @@ class ImageLoader {
         path = await extractFB2FromZip(result!.files.single.path!);
         if (path != '') {
           // print('НАЙДЕН FB2');
-          fileContent = utf8.decode((File(path).readAsBytesSync()));
+          fileContent = (await CharsetDetector.autoDecode((File(path).readAsBytesSync()))).string;
         } else {
           // print("Файл fb2 не найден в архиве");
           return;

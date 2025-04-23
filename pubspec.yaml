@@ -43,6 +43,7 @@ dependencies:
   showcaseview: ^3.0.0
   appmetrica_plugin: ^2.1.0
   is_first_run: ^1.0.0
+  flutter_charset_detector: ^5.0.0
 
 dev_dependencies:
   flutter_test:

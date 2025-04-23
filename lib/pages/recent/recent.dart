@@ -9,7 +9,7 @@ import 'package:merlin/UI/router.dart';
 import 'package:merlin/functions/book.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/style/colors.dart';
-import 'package:merlin/pages/recent/imageloader.dart';
+import 'package:merlin/pages/recent/bookloader.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

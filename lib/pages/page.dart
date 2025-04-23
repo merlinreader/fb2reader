@@ -15,7 +15,7 @@ import 'package:merlin/pages/achievements/achievements.dart';
 import 'package:merlin/style/text.dart';
 import 'package:merlin/pages/recent/recent.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
-import 'package:merlin/pages/recent/imageloader.dart';
+import 'package:merlin/pages/recent/bookloader.dart';
 import 'package:merlin/pages/statistic/statistic.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
