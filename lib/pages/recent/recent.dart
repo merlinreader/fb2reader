@@ -2,19 +2,22 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:merlin/UI/router.dart';
+import 'package:merlin/components/books_page_header.dart';
+import 'package:merlin/domain/books_repository.dart';
 import 'package:merlin/functions/book.dart';
-import 'package:merlin/style/text.dart';
-import 'package:merlin/style/colors.dart';
+import 'package:merlin/functions/recent_book.dart';
+import 'package:merlin/pages/books/book_item.dart';
 import 'package:merlin/pages/recent/bookloader.dart';
+import 'package:merlin/style/colors.dart';
+import 'package:merlin/style/text.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'package:dynamic_height_grid_view/dynamic_height_grid_view.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 class RecentPage extends StatefulWidget {
   const RecentPage({super.key});
@@ -23,52 +26,23 @@ class RecentPage extends StatefulWidget {
   State<RecentPage> createState() => RecentPageState();
 }
 
-class ImageInfo {
-  Uint8List? imageBytes;
-  String title;
-  String author;
-  String fileName;
-  double progress;
-
-  ImageInfo(
-      {this.imageBytes,
-      required this.title,
-      required this.author,
-      required this.fileName,
-      required this.progress});
-
-  Map<String, dynamic> toJson() {
-    return {
-      'imageBytes': imageBytes,
-      'title': title,
-      'author': author,
-      'fileName': fileName,
-      'progress': progress,
-    };
-  }
-
-  factory ImageInfo.fromJson(Map<String, dynamic> json) {
-    return ImageInfo(
-      imageBytes: Uint8List.fromList(List<int>.from(json['imageBytes'])),
-      title: json['title'],
-      author: json['author'],
-      fileName: json['fileName'],
-      progress: json['progress']?.toDouble() ?? 0.0,
-    );
-  }
-}
-
 class RecentPageState extends State<RecentPage> {
-  final ImageLoader imageLoader = ImageLoader();
+  final BooksRepository _booksRepo = BooksRepository();
+  final BookLoader imageLoader = BookLoader();
   final ScrollController _scrollController = ScrollController();
   Uint8List? imageBytes;
   List<ImageInfo> images = [];
-  List<Book> books = [];
+  List<BookItem> books = [];
+  List<BookItem> _booksFiltered = [];
+  List<RecentBook> recentBooksInfo = [];
   String? firstName;
   String? lastName;
   String? name;
   String? title;
   bool _isOperationInProgress = false;
+  bool _isLoadingBooksProgress = true;
+  String? _searchQuery;
+  BooksSort _selectedSort = BooksSort.dateAddedDesc;
 
   @override
   void initState() {
@@ -80,8 +54,11 @@ class RecentPageState extends State<RecentPage> {
       ],
     );
 
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _initData();
+    });
+
     super.initState();
-    _initData();
   }
 
   @override
@@ -100,27 +77,36 @@ class RecentPageState extends State<RecentPage> {
     super.dispose();
   }
 
-  Future<void> updateFromJSON() async {
-    // print('Start updateFromJSON...');
-
-    await _initData();
-  }
-
   Future<void> _fetchFromJSON() {
     // print('_fetchFromJSON...');
     return Future.delayed(const Duration(milliseconds: 200), () async {
+      final recentBooks = await _booksRepo.getAllRecent();
+
       final Directory? externalDir = Platform.isAndroid
           ? await getExternalStorageDirectory()
           : await getApplicationDocumentsDirectory();
-      final String path = '${externalDir?.path}/books';
+      final String path = '${externalDir?.path}/books/';
       List<FileSystemEntity> files = Directory(path).listSync();
+
       int length = books.length;
       int index = 0;
-      for (FileSystemEntity file in files) {
-        if (file is File) {
+      for (final recent in recentBooks) {
+        final title = recent.title;
+        String fileName = '$title.json';
+        FileSystemEntity? file;
+        try {
+          file = files.firstWhere(
+            (file) => file is File && file.uri.pathSegments.last == fileName,
+          );
+        } catch (e) {
+          continue;
+        }
+        if (file is File && await file.exists()) {
           if (index > length) {
             return;
           } else {
+            recentBooksInfo[index] = recent;
+
             String content = await file.readAsString();
             Map<String, dynamic> jsonMap = jsonDecode(content);
 
@@ -144,9 +130,8 @@ class RecentPageState extends State<RecentPage> {
           index = index + 1;
         }
       }
-      // for (var item in books) {
-      //   print('Book ${item.customTitle} = ${item.progress}');
-      // }
+
+      _filterAndSort();
       setState(() {
         books;
       });
@@ -154,16 +139,33 @@ class RecentPageState extends State<RecentPage> {
   }
 
   Future<void> _initData() async {
-    // print('Start _initData => processFiles');
-    await processFiles();
-    setState(() {});
+    setState(() => _isLoadingBooksProgress = true);
+
+    final prefs = await SharedPreferences.getInstance();
+    final str = prefs.getString("booksRecentSort");
+    if (str == null) {
+      _selectedSort = BooksSort.dateAddedDesc;
+    } else {
+      _selectedSort = BooksSort.fromString(str);
+    }
+
+    try {
+      await loadRecent();
+    } finally {
+      setState(() => _isLoadingBooksProgress = false);
+    }
   }
 
-  Future<void> processFiles() async {
+  Future<void> loadRecent() async {
+    final books = await _booksRepo.getAllRecent();
+    await processFiles(books);
+  }
+
+  Future<void> processFiles(List<RecentBook> recentBooks) async {
     final Directory? externalDir = Platform.isAndroid
         ? await getExternalStorageDirectory()
         : await getApplicationDocumentsDirectory();
-    final String path = '${externalDir?.path}/books';
+    final String path = '${externalDir?.path}/books/';
     final Directory booksDir = Directory(path);
 
     // Проверяем, существует ли уже директория, если нет - создаем
@@ -171,31 +173,59 @@ class RecentPageState extends State<RecentPage> {
       await booksDir.create(recursive: true);
     }
 
-    List<FileSystemEntity> files = Directory(path).listSync();
-    List<Future<Book>> futures = [];
+    List<FileSystemEntity> files = booksDir.listSync();
 
-    // print(files);
-    for (FileSystemEntity file in files) {
-      if (file is File) {
-        Future<Book> futureBook = _readBookFromFile(file);
+    List<Future<BookItem>> futures = [];
+
+    for (final recent in recentBooks) {
+      recentBooksInfo.add(recent);
+
+      final title = recent.title;
+      String targetFileName = '$title.json';
+      FileSystemEntity? targetFile;
+      try {
+        targetFile = files.firstWhere(
+          (file) =>
+              file is File && file.uri.pathSegments.last == targetFileName,
+        );
+      } catch (e) {
+        continue;
+      }
+      if (targetFile is File && await targetFile.exists()) {
+        final futureBook = _readBookFromFile(targetFile);
         futures.add(futureBook);
       }
     }
 
-    List<Book> loadedBooks = await Future.wait(futures);
+    final loadedBooks = await Future.wait(futures);
 
     books.addAll(loadedBooks);
+    _filterAndSort();
   }
 
-  Future<Book> _readBookFromFile(File file) async {
+  Future<BookItem> _readBookFromFile(File file) async {
     try {
       String content = await file.readAsString();
       Map<String, dynamic> jsonMap = jsonDecode(content);
-      Book book = Book.fromJson(jsonMap);
-      return book;
+      final book = Book.fromJson(jsonMap);
+      return BookItem(
+          fileSize: await file.length(),
+          filePath: book.filePath,
+          text: book.text,
+          title: book.title,
+          customTitle: book.customTitle,
+          author: book.author,
+          lastPosition: book.lastPosition,
+          sequence: book.sequence,
+          imageBytes: book.imageBytes,
+          progress: book.progress,
+          lp: book.lp,
+          version: book.version,
+          dateAdded: book.dateAdded);
     } catch (e) {
       print('Error reading file: $e');
-      return Book(
+      return BookItem(
+          fileSize: 0,
           filePath: '',
           text: '',
           title: '',
@@ -203,8 +233,18 @@ class RecentPageState extends State<RecentPage> {
           lastPosition: 0,
           imageBytes: null,
           progress: 0,
-          customTitle: '');
+          customTitle: '',
+          sequence: null,
+          dateAdded: DateTime.fromMillisecondsSinceEpoch(0));
     }
+  }
+
+  void _filterAndSort() {
+    final query = _searchQuery?.toLowerCase();
+    _booksFiltered =
+        books.where((book) => book.filterByMetadata(query)).toList();
+    _booksFiltered.sort((a, b) => _selectedSort.sort(a, b));
+    setState(() {});
   }
 
   bool isSended = false;
@@ -256,10 +296,12 @@ class RecentPageState extends State<RecentPage> {
                     );
                   } else {
                     if (yourVariable == 'authorInput') {
-                      await books[index].updateAuthorInFile(updatedValue);
+                      await _booksFiltered[index]
+                          .updateAuthorInFile(updatedValue);
                       await _fetchFromJSON();
                     } else if (yourVariable == 'bookNameInput') {
-                      await books[index].updateTitleInFile(updatedValue);
+                      await _booksFiltered[index]
+                          .updateTitleInFile(updatedValue);
                       await _fetchFromJSON();
                     }
                     // ignore: use_build_context_synchronously
@@ -284,7 +326,7 @@ class RecentPageState extends State<RecentPage> {
   }
 
   bool checkBooks() {
-    if (books.isNotEmpty) {
+    if (_booksFiltered.isNotEmpty) {
       return false;
     } else {
       return true;
@@ -330,7 +372,7 @@ class RecentPageState extends State<RecentPage> {
         const PopupMenuItem(
           value: 'delete',
           child: Text(
-            "Удалить",
+            "Удалить из последних",
             style: TextStyle(color: Colors.red, fontSize: 13),
           ),
         ),
@@ -353,7 +395,7 @@ class RecentPageState extends State<RecentPage> {
               child: AlertDialog(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0)),
-                title: Text(books[index].customTitle),
+                title: Text(_booksFiltered[index].customTitle),
                 content: const Text("Вы уверены, что хотите удалить книгу?"),
                 actions: <Widget>[
                   TextButton(
@@ -367,8 +409,9 @@ class RecentPageState extends State<RecentPage> {
                   ),
                   TextButton(
                     onPressed: () {
-                      books[index].deleteFileByTitle(books[index].title);
-                      books.removeAt(index);
+                      _booksRepo.deleteRecent(recentBooksInfo[index]);
+                      _booksFiltered.removeAt(index);
+                      recentBooksInfo.removeAt(index);
                       setState(() {});
                       Navigator.of(context).pop();
                     },
@@ -401,21 +444,34 @@ class RecentPageState extends State<RecentPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(18, 20, 24, 16),
-              child: Text24(
-                text: "Последнее",
-              ),
+            BooksPageHeader(
+              title: "Последнее",
+              sort: _selectedSort,
+              onSortChanged: (sort) async {
+                _selectedSort = sort;
+                _filterAndSort();
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setString("booksRecentSort", sort.name);
+              },
+              onSearch: (query) {
+                _searchQuery = query;
+                _filterAndSort();
+              },
             ),
             Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (books.isEmpty)
-                    TextTektur(
-                        text: "Пока вы не добавили никаких книг",
-                        fontsize: 16,
-                        textColor: MyColors.grey)
+                  if (_isLoadingBooksProgress)
+                    const CircularProgressIndicator(
+                      color: MyColors.purple,
+                    ),
+                  if (_booksFiltered.isEmpty && !_isLoadingBooksProgress)
+                    if (_booksFiltered.isEmpty)
+                      TextTektur(
+                          text: "Пока вы не прочли никаких книг",
+                          fontsize: 16,
+                          textColor: MyColors.grey)
                 ],
               ),
             ),
@@ -424,9 +480,9 @@ class RecentPageState extends State<RecentPage> {
               child: OrientationBuilder(builder: (context, orientation) {
                 return DynamicHeightGridView(
                   controller: _scrollController,
-                  itemCount: books.length,
+                  itemCount: _booksFiltered.length,
                   crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
+                  mainAxisSpacing: 20,
                   crossAxisCount: booksInWidth,
                   builder: (ctx, index) {
                     return GestureDetector(
@@ -434,7 +490,7 @@ class RecentPageState extends State<RecentPage> {
                         if (!_isOperationInProgress) {
                           _isOperationInProgress = true;
                           try {
-                            await sendFileTitle(books[index].title);
+                            await sendFileTitle(_booksFiltered[index].title);
                             if (isSended) {
                               isSended = false;
                               // ignore: use_build_context_synchronously
@@ -460,13 +516,13 @@ class RecentPageState extends State<RecentPage> {
                       },
                       child: Column(
                         children: [
-                          if (books[index].imageBytes != null)
+                          if (_booksFiltered[index].imageBytes != null)
                             Stack(
                               alignment: Alignment.bottomCenter,
                               children: [
-                                books[index].imageBytes?.first != 0
+                                _booksFiltered[index].imageBytes?.first != 0
                                     ? Image.memory(
-                                        books[index].imageBytes!,
+                                        _booksFiltered[index].imageBytes!,
                                         width: bookWidth,
                                         height: bookHeight,
                                         fit: BoxFit.fill,
@@ -501,7 +557,7 @@ class RecentPageState extends State<RecentPage> {
                                     right: 10,
                                     child: LinearProgressIndicator(
                                       minHeight: 4,
-                                      value: books[index].progress,
+                                      value: _booksFiltered[index].progress,
                                       backgroundColor: Colors.white,
                                       valueColor:
                                           const AlwaysStoppedAnimation<Color>(
@@ -510,18 +566,23 @@ class RecentPageState extends State<RecentPage> {
                               ],
                             ),
                           const SizedBox(height: 4),
-                          Text(books[index].author.length > 15
-                              ? '${books[index].author.substring(0, books[index].author.length ~/ 1.5)}...'
-                              : books[index].author),
                           Text(
-                            books[index].customTitle.length > 20
-                                ? books[index].customTitle.length > 15
-                                    ? '${books[index].customTitle.substring(0, books[index].customTitle.length ~/ 2.5)}...'
-                                    : '${books[index].customTitle.substring(0, books[index].customTitle.length ~/ 2)}...'
-                                : books[index].customTitle,
-                            maxLines: 1,
+                            _booksFiltered[index].author.length > 15
+                                ? '${_booksFiltered[index].author.substring(0, _booksFiltered[index].author.length ~/ 1.5)}...'
+                                : _booksFiltered[index].author,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            _booksFiltered[index].customTitle.length > 40
+                                ? _booksFiltered[index].customTitle.length > 30
+                                    ? '${_booksFiltered[index].customTitle.substring(0, _booksFiltered[index].customTitle.length ~/ 2.5)}...'
+                                    : '${_booksFiltered[index].customTitle.substring(0, _booksFiltered[index].customTitle.length ~/ 2)}...'
+                                : _booksFiltered[index].customTitle,
+                            maxLines: 2,
                             textAlign: TextAlign.center,
                             overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(height: 1.2),
                           ),
                         ],
                       ),

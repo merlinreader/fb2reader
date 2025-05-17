@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:merlin/functions/book.dart';
+import 'package:merlin/functions/location.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
-import 'package:merlin/functions/location.dart';
 
 Future<DateTime?> getSavedDateTime() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -32,7 +33,8 @@ List<Book> books = [];
 
 Future<void> processFiles() async {
   final Directory? externalDir = Platform.isAndroid
-      ? await getExternalStorageDirectory() : await getApplicationDocumentsDirectory();
+      ? await getExternalStorageDirectory()
+      : await getApplicationDocumentsDirectory();
   final String path = '${externalDir?.path}/books';
   List<FileSystemEntity> files = Directory(path).listSync();
   List<Future<Book>> futures = [];
@@ -59,7 +61,17 @@ Future<Book> _readBookFromFile(File file) async {
     return book;
   } catch (e) {
     // print('Error reading file: $e');
-    return Book(filePath: '', text: '', title: '', author: '', lastPosition: 0, imageBytes: null, progress: 0, customTitle: '');
+    return Book(
+        filePath: '',
+        text: '',
+        title: '',
+        author: '',
+        lastPosition: 0,
+        imageBytes: null,
+        progress: 0,
+        customTitle: '',
+        sequence: null,
+        dateAdded: DateTime.fromMillisecondsSinceEpoch(0));
   }
 }
 
@@ -84,9 +96,12 @@ getPageCount(String inputFilePath, bool isWM) async {
   for (final entry in books) {
     Codec<String, String> stringToBase64 = utf8.fuse(base64);
     if (entry.title == inputFilePath) {
-      double countFromStorage = prefs.getDouble('pageCount-${stringToBase64.encode(entry.filePath)}') ?? 0;
+      double countFromStorage = prefs.getDouble(
+              'pageCount-${stringToBase64.encode(entry.filePath)}') ??
+          0;
       prefs.remove('pageCount-${entry.title}');
-      double lastCountFromStorage = prefs.getDouble('lastPageCount-${entry.filePath}') ?? 0;
+      double lastCountFromStorage =
+          prefs.getDouble('lastPageCount-${entry.filePath}') ?? 0;
       double diff = countFromStorage - lastCountFromStorage;
       diff = diff < 0 ? 0 : diff;
 
@@ -119,7 +134,8 @@ getPageCount(String inputFilePath, bool isWM) async {
 
   int pageCountSimpleMode = 0;
   int pageCountWordMode = 0;
-  String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(DateTime.now().toUtc());
+  String nowDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00")
+      .format(DateTime.now().toUtc());
   pageCountWordMode = 0;
   pageCountSimpleMode = 0;
 
@@ -140,14 +156,17 @@ getPageCount(String inputFilePath, bool isWM) async {
 
   // Fluttertoast.showToast(msg: 'pageSM: $pageCountSimpleMode | pageWM: $pageCountWordMode', toastLength: Toast.LENGTH_LONG);
   // print('pageSM: $pageCountSimpleMode | pageWM: $pageCountWordMode');
-  String savedDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00").format(savedDateTime.toUtc());
+  String savedDataUTC = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ+00:00")
+      .format(savedDateTime.toUtc());
   if (token == '') {
     if (prefs.getString("deviceId") == null) {
       saveDeviceIdToLocalStorage();
     }
-    await postAnonymStatisticData(pageCountSimpleMode, pageCountWordMode, nowDataUTC, savedDataUTC);
+    await postAnonymStatisticData(
+        pageCountSimpleMode, pageCountWordMode, nowDataUTC, savedDataUTC);
   } else {
-    await postUserStatisticData(token, pageCountSimpleMode, pageCountWordMode, nowDataUTC, savedDataUTC);
+    await postUserStatisticData(token, pageCountSimpleMode, pageCountWordMode,
+        nowDataUTC, savedDataUTC);
   }
 }
 
@@ -158,7 +177,8 @@ void saveDeviceIdToLocalStorage() async {
   await prefs.setString('deviceId', deviceId);
 }
 
-Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC, String savedDateUTC) async {
+Future<void> postUserStatisticData(String token, int pageCountSimpleMode,
+    int pageCountWordMode, String nowDataUTC, String savedDateUTC) async {
   if (pageCountSimpleMode > 0 || pageCountWordMode > 0) {
     final Map<String, dynamic> data = {
       "pageCountSimpleMode": pageCountSimpleMode,
@@ -192,7 +212,8 @@ Future<void> postUserStatisticData(String token, int pageCountSimpleMode, int pa
   }
 }
 
-Future<void> postAnonymStatisticData(int pageCountSimpleMode, int pageCountWordMode, String nowDataUTC, String savedDateUTC) async {
+Future<void> postAnonymStatisticData(int pageCountSimpleMode,
+    int pageCountWordMode, String nowDataUTC, String savedDateUTC) async {
   // print('Anonym func pagesSM $pageCountSimpleMode pagesWM $pageCountWordMode');
   if (pageCountSimpleMode > 0 || pageCountWordMode > 0) {
     final prefs = await SharedPreferences.getInstance();

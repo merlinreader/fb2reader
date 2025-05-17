@@ -345,6 +345,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.0.4"
+  external_path:
+    dependency: "direct main"
+    description:
+      name: external_path
+      sha256: "68a18a2aa51ec012d7013ea2a80305dc5372f3577a2bbcc7dcc5550b25a5a73b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.0"
   fake_async:
     dependency: transitive
     description:
@@ -866,7 +874,7 @@ packages:
     source: hosted
     version: "2.2.0"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       sha256: "75cca69d1490965be98c73ceaea117e8a04dd21217b37b292c9ddbec0d955bc5"
@@ -890,13 +898,13 @@ packages:
     source: hosted
     version: "2.1.5"
   path_provider_android:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path_provider_android
-      sha256: "0ca7359dad67fd7063cb2892ab0c0737b2daafd807cf1acecd62374c8fae6c12"
+      sha256: d0d310befe2c8ab9e7f393288ccbb11b60c019c6b5afc21973eeee4dda2b35e9
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.16"
+    version: "2.2.17"
   path_provider_foundation:
     dependency: transitive
     description:
@@ -1073,6 +1081,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.8"
+  sembast:
+    dependency: "direct main"
+    description:
+      name: sembast
+      sha256: d3f0d0ba501a5f1fd7d6c8532ee01385977c8a069c334635dae390d059ae3d6d
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.8.5"
+  sembast_sqflite:
+    dependency: "direct main"
+    description:
+      name: sembast_sqflite
+      sha256: "38ffa967af36d6867d087ec82c37b70b55707b2cd533157e8a32d15aa66e40d2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.2.1"
   shared_preferences:
     dependency: "direct main"
     description:
@@ -1191,7 +1215,7 @@ packages:
     source: hosted
     version: "7.0.0"
   sqflite:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: sqflite
       sha256: e2297b1da52f127bc7a3da11439985d9b536f75070f3325e62ada69a5c585d03
@@ -1470,6 +1494,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.5"
+  workmanager:
+    dependency: "direct main"
+    description:
+      path: workmanager
+      ref: main
+      resolved-ref: "4ce065135dc1b91fee918f81596b42a56850391d"
+      url: "https://github.com/fluttercommunity/flutter_workmanager.git"
+    source: git
+    version: "0.5.2"
   xdg_directories:
     dependency: transitive
     description:
