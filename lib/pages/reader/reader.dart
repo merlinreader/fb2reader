@@ -4,7 +4,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:flutter/rendering.dart';
+import 'dart:ui' as ui;
+
+import 'package:battery_plus/battery_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screen_wake/flutter_screen_wake.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -24,10 +27,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:battery_plus/battery_plus.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 
 class LastPosition {
   double offset;
@@ -66,7 +66,9 @@ class Reader extends State with WidgetsBindingObserver {
       customTitle: "customTitle",
       author: "author",
       progress: 0,
-      lastPosition: 0);
+      lastPosition: 0,
+      sequence: null,
+      dateAdded: DateTime.fromMillisecondsSinceEpoch(0));
   bool loading = true;
   double fontSize = 18;
   bool isDarkTheme = false;
@@ -2822,7 +2824,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                               Alignment.center,
                                                           child: Text11(
                                                               text:
-                                                                  "${percentage}%",
+                                                                  "$percentage%",
                                                               textColor: MyColors
                                                                   .darkGray),
                                                         )
