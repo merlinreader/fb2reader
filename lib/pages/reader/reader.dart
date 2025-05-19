@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screen_wake/flutter_screen_wake.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
@@ -2092,14 +2091,16 @@ class Reader extends State with WidgetsBindingObserver {
           if (storedData == null) {
             await prefs.setString('lastCallTimestamp', "19710101T030000+0300");
           }
-          if (elapsedTime.inHours >= 24 || storedData == null) {
-            wordModeDialog(context);
-          } else {
-            var tempWE = await loadWordCountFromLocalStorage();
-            if (tempWE.filePath != '') {
-              replaceWordsWithTranslation(tempWE.wordEntries);
-            }
-          }
+          wordModeDialog(context);
+          // TODO: пока убрано
+          // if (elapsedTime.inHours >= 24 || storedData == null) {
+          //   wordModeDialog(context);
+          // } else {
+          //   var tempWE = await loadWordCountFromLocalStorage();
+          //   if (tempWE.filePath != '') {
+          //     replaceWordsWithTranslation(tempWE.wordEntries);
+          //   }
+          // }
         } else {
           wordModeDialog(context);
         }
@@ -2113,17 +2114,18 @@ class Reader extends State with WidgetsBindingObserver {
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         isBorder = false;
         setState(() {});
-        var timeLast = await readTimeFromJsonFile(fileName);
-        if (timeLast != null) {
-          final formattedTime = DateFormat('dd.MM.yy HH:mm')
-              .format(timeLast.add(const Duration(days: 1)));
+        // TODO: пока убрано
+        // var timeLast = await readTimeFromJsonFile(fileName);
+        // if (timeLast != null) {
+        //   final formattedTime = DateFormat('dd.MM.yy HH:mm')
+        //       .format(timeLast.add(const Duration(days: 1)));
 
-          Fluttertoast.showToast(
-            msg: 'Новый перевод будет доступен $formattedTime',
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.BOTTOM,
-          );
-        }
+        //   Fluttertoast.showToast(
+        //     msg: 'Новый перевод будет доступен $formattedTime',
+        //     toastLength: Toast.LENGTH_LONG,
+        //     gravity: ToastGravity.BOTTOM,
+        //   );
+        // }
         break;
     }
   }
