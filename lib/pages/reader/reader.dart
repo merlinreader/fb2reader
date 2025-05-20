@@ -315,7 +315,7 @@ class Reader extends State with WidgetsBindingObserver {
             _scrollOffsetController.animateScroll(
                 offset: book.lastPosition ?? 0,
                 duration: const Duration(microseconds: 1));
-            book.version = 2;
+            // book.version = 2;
           }
         });
       } catch (e) {
@@ -2136,11 +2136,15 @@ class Reader extends State with WidgetsBindingObserver {
     final size = MediaQuery.of(context);
 
     return PopScope(
-        onPopInvoked: (bool didPop) async {
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, result) async {
           await update();
 
           await _savePageCountToLocalStorage();
           await getPageCount(book.title, isBorder);
+          if (!didPop) {
+            Navigator.pop(context, percentage / 100);
+          }
         },
         child: !loading
             ? ShowCaseWidget(builder: (context) {
@@ -2156,7 +2160,7 @@ class Reader extends State with WidgetsBindingObserver {
                                 leading: GestureDetector(
                                     onTap: () async {
                                       await update();
-                                      Navigator.pop(context, true);
+                                      Navigator.pop(context, percentage / 100);
                                     },
                                     child: Theme(
                                       data: lightTheme(),

@@ -109,18 +109,18 @@ class BookInfo {
 }
 
 class Book {
-  String filePath;
-  String text;
-  String title;
-  String customTitle;
-  String author;
-  double? lastPosition = 0;
-  Uint8List? imageBytes;
-  double? progress;
-  LastPosition? lp;
-  int version;
-  BookSequence? sequence;
-  DateTime dateAdded;
+  final String filePath;
+  final String text;
+  final String title;
+  final String customTitle;
+  final String author;
+  final double? lastPosition;
+  final Uint8List? imageBytes;
+  final double? progress;
+  final LastPosition? lp;
+  final int version;
+  final BookSequence? sequence;
+  final DateTime dateAdded;
 
   Book(
       {required this.filePath,
@@ -128,7 +128,7 @@ class Book {
       required this.title,
       required this.customTitle,
       required this.author,
-      required this.lastPosition,
+      this.lastPosition = 0,
       required this.sequence,
       required this.dateAdded,
       this.imageBytes,

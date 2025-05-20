@@ -65,9 +65,20 @@ class BooksRepository {
     String fileContent = '';
 
     if (p.extension(bookPath) == '.zip') {
-      final extractPath = await _extractFB2FromZip(bookPath);
+      final tempDir = await getTemporaryDirectory();
+      String tempPath = tempDir.path;
+
+      String unzipPath = '$tempPath/unzipped/';
+      final unzipDir = Directory(unzipPath);
+      await unzipDir.create();
+
+      final extractPath = await _extractFB2FromZip(bookPath, unzipPath);
       if (extractPath.isNotEmpty) {
-        fileContent = await _readFile(extractPath);
+        try {
+          fileContent = await _readFile(extractPath);
+        } finally {
+          await unzipDir.delete(recursive: true);
+        }
       } else {
         return SaveBookResultInvalidFormat();
       }
@@ -169,16 +180,11 @@ class BooksRepository {
     }
   }
 
-  Future<String> _extractFB2FromZip(String zipFilePath) async {
+  Future<String> _extractFB2FromZip(
+      String zipFilePath, String unzipPath) async {
     try {
       File zipFile = File(zipFilePath);
       List<int> bytes = await zipFile.readAsBytes();
-
-      final tempDir = await getTemporaryDirectory();
-      String tempPath = tempDir.path;
-
-      String unzipPath = '$tempPath/unzipped/';
-      Directory(unzipPath).createSync();
 
       Archive archive = ZipDecoder().decodeBytes(bytes);
 
@@ -203,4 +209,4 @@ class BooksRepository {
 }
 
 Future<String> _readFile(String path) async =>
-    (await CharsetDetector.autoDecode((File(path).readAsBytesSync()))).string;
+    (await CharsetDetector.autoDecode(await (File(path).readAsBytes()))).string;

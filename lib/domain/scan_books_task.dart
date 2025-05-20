@@ -8,7 +8,8 @@ import 'package:path/path.dart' as p;
 
 enum ScanBooksTaskState {
   inProgress,
-  completed,
+  noNewBooks,
+  hasNewBooks,
 }
 
 class ScanBooksTask {
@@ -28,6 +29,7 @@ class ScanBooksTask {
     final sendPort = IsolateNameServer.lookupPortByName(name);
     sendPort?.send(ScanBooksTaskState.inProgress.index);
 
+    bool hasNewBook = false;
     try {
       final dirs = await ExternalPath.getExternalStorageDirectories();
       if (dirs == null) {
@@ -49,6 +51,11 @@ class ScanBooksTask {
       for (final book in books) {
         try {
           final result = await _booksRepo.save(book.path);
+          if (result case SaveBookResultSuccess()) {
+            if (!hasNewBook) {
+              hasNewBook = true;
+            }
+          }
           if (kDebugMode) {
             print('Save result: ${result.runtimeType} | Book: ${book.path}');
           }
@@ -60,7 +67,9 @@ class ScanBooksTask {
     } catch (e) {
       return Future.error(e);
     } finally {
-      sendPort?.send(ScanBooksTaskState.completed.index);
+      sendPort?.send(hasNewBook
+          ? ScanBooksTaskState.hasNewBooks.index
+          : ScanBooksTaskState.noNewBooks.index);
     }
 
     return Future.value(true);
