@@ -245,9 +245,9 @@ class Reader extends State with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       await _savePageCountToLocalStorage();
-      await getPageCount(book.title, isBorder);
+      getPageCount(book.title, isBorder);
+      update();
       final prefs = await SharedPreferences.getInstance();
-      await update();
       lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
       prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
     }
@@ -462,8 +462,8 @@ class Reader extends State with WidgetsBindingObserver {
   void replaceWordsWithTranslation(List<WordEntry> wordEntries) async {
     final prefs = await SharedPreferences.getInstance();
     await _savePageCountToLocalStorage();
-    await getPageCount(book.title, isBorder);
-    await update();
+    getPageCount(book.title, isBorder);
+    update();
     lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
     prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
 
@@ -574,10 +574,10 @@ class Reader extends State with WidgetsBindingObserver {
     if (code == 'ru') {
       if (result == true) {
         await _savePageCountToLocalStorage();
-        await getPageCount(book.title, isBorder);
-        final prefs = await SharedPreferences.getInstance();
+        getPageCount(book.title, isBorder);
+        update();
 
-        await update();
+        final prefs = await SharedPreferences.getInstance();
 
         lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
@@ -591,9 +591,9 @@ class Reader extends State with WidgetsBindingObserver {
         await showTableDialog(context, wordCount, true);
       } else if (result == false) {
         await _savePageCountToLocalStorage();
-        await getPageCount(book.title, isBorder);
+        getPageCount(book.title, isBorder);
+        update();
         final prefs = await SharedPreferences.getInstance();
-        await update();
         lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         // Действие, выполняемое после нажатия "Нет"
@@ -693,7 +693,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                       0, 0, 20, 0),
                                               icon: const Icon(Icons.close),
                                               onPressed: () async {
-                                                await saveWordCountToLocalstorage(
+                                                saveWordCountToLocalstorage(
                                                     wordCount);
                                                 replaceWordsWithTranslation(
                                                     wordCount.wordEntries);
@@ -2141,7 +2141,7 @@ class Reader extends State with WidgetsBindingObserver {
           await update();
 
           await _savePageCountToLocalStorage();
-          await getPageCount(book.title, isBorder);
+          getPageCount(book.title, isBorder);
           if (!didPop) {
             Navigator.pop(context, percentage / 100);
           }

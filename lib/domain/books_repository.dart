@@ -31,7 +31,7 @@ class SaveBookResultAlreadyExists extends SaveBookResult {
 class SaveBookResultInvalidFormat extends SaveBookResult {}
 
 class BooksRepository {
-  static const supportedExtensions = ['.fb2', '.zip'];
+  static const supportedExtensions = {'.fb2', '.zip'};
 
   final _store = stringMapStoreFactory.store('RecentBook');
 

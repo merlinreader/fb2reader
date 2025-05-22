@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
 import 'package:merlin/domain/data_providers/sembast_provider.dart';
-import 'package:merlin/domain/scan_books_task.dart';
 import 'package:merlin/domain/workmanager.dart';
 import 'package:merlin/style/colors.dart';
 import 'package:provider/provider.dart';
@@ -40,11 +39,6 @@ Future<void> _initWorkmanager() async {
     isInDebugMode: kDebugMode,
   );
   initWmPorts();
-
-  wm.registerPeriodicTask(ScanBooksTask.periodicTaskId, ScanBooksTask.name,
-      frequency: const Duration(days: 1));
-  wm.registerOneOffTask(ScanBooksTask.oneOffTaskId, ScanBooksTask.name,
-      existingWorkPolicy: ExistingWorkPolicy.replace);
 }
 
 class MerlinApp extends StatefulWidget {

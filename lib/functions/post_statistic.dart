@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 // import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -31,12 +33,14 @@ Future<double?> getPageSize() async {
 
 List<Book> books = [];
 
-Future<void> processFiles() async {
+Future<List<Book>> processFiles(RootIsolateToken token) async {
+  BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+
   final Directory? externalDir = Platform.isAndroid
       ? await getExternalStorageDirectory()
       : await getApplicationDocumentsDirectory();
   final String path = '${externalDir?.path}/books';
-  List<FileSystemEntity> files = Directory(path).listSync();
+  List<FileSystemEntity> files = await Directory(path).list().toList();
   List<Future<Book>> futures = [];
 
   for (FileSystemEntity file in files) {
@@ -48,9 +52,9 @@ Future<void> processFiles() async {
 
   List<Book> loadedBooks = await Future.wait(futures);
 
-  books.addAll(loadedBooks);
-
   // print('Длина списка с книжками ${books.length}');
+
+  return loadedBooks;
 }
 
 Future<Book> _readBookFromFile(File file) async {
@@ -89,7 +93,7 @@ getPageCount(String inputFilePath, bool isWM) async {
   }
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  await processFiles();
+  books.addAll(await compute(processFiles, RootIsolateToken.instance!));
 
   Map<double, bool> dataToSend = {};
 

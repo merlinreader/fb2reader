@@ -28,7 +28,6 @@ import 'package:merlin/style/colors.dart';
 import 'package:merlin/style/text.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workmanager/workmanager.dart';
 
 class BooksPage extends StatefulWidget {
   const BooksPage({super.key});
@@ -47,6 +46,7 @@ class BooksPageState extends State<BooksPage> {
   String? name;
   String? title;
   bool _isOperationInProgress = false;
+  bool _isScanningInProgress = false;
   bool _isStoragePermissionGranted = true;
   StreamSubscription? _wmStreamSubscription;
   BooksSort _selectedSort = BooksSort.dateAddedDesc;
@@ -64,15 +64,19 @@ class BooksPageState extends State<BooksPage> {
     _wmStreamSubscription = wmScanBooksStream?.listen((stateIndex) async {
       final state = ScanBooksTaskState.values[stateIndex];
       switch (state) {
-        case ScanBooksTaskState.hasNewBooks:
-          final cubit = context.read<BooksCubit>();
-          cubit.load(force: true);
+        case ScanBooksTaskState.inProgress:
+          setState(() {
+            _isScanningInProgress = true;
+          });
         default:
-          return;
+          setState(() {
+            _isScanningInProgress = false;
+          });
       }
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final pref = await SharedPreferences.getInstance();
       final isGranted = await _checkStoragePermissionGranted();
       setState(() {
         _isStoragePermissionGranted = isGranted;
@@ -80,19 +84,19 @@ class BooksPageState extends State<BooksPage> {
       if (mounted) {
         if (isGranted) {
           AppPage.startShowCase(context);
-        } else {
+        } else if (pref.getBool("isShowPermissionsDialogLater") != true) {
           final result = await showDialog<bool>(
               context: context,
-              builder: (context) => const _StoragePermissionDialog());
+              builder: (context) => _StoragePermissionDialog(onShowLater: () {
+                    pref.setBool("isShowPermissionsDialogLater", true);
+                  }));
           if (mounted) {
             AppPage.startShowCase(context);
           }
           if (result == true) {
             final isGranted = await _requestStoragePermission();
             if (isGranted) {
-              Workmanager().registerOneOffTask(
-                  ScanBooksTask.oneOffTaskId, ScanBooksTask.name,
-                  existingWorkPolicy: ExistingWorkPolicy.replace);
+              compute(runScanBooksTask, RootIsolateToken.instance!);
             }
 
             setState(() {
@@ -404,19 +408,34 @@ class BooksPageState extends State<BooksPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      switch (state) {
-                        BooksStateInitial() ||
-                        BooksStateLoading() =>
-                          const CircularProgressIndicator(
-                            color: MyColors.purple,
+                      if (state case BooksStateInitial() || BooksStateLoading())
+                        const CircularProgressIndicator(
+                          color: MyColors.purple,
+                        )
+                      else if (state case BooksStateLoaded(:final books)
+                          when books.isEmpty)
+                        if (_isScanningInProgress) ...[
+                          const SizedBox(
+                            width: 16.0,
+                            height: 16.0,
+                            child: CircularProgressIndicator(
+                              color: MyColors.purple,
+                            ),
                           ),
-                        BooksStateLoaded(:final books) when books.isEmpty =>
+                          const SizedBox(
+                            width: 16.0,
+                          ),
+                          TextTektur(
+                              text: "Добавляю ваши книги",
+                              fontsize: 16,
+                              textColor: MyColors.grey),
+                        ] else
                           TextTektur(
                               text: "Пока вы не добавили никаких книг",
                               fontsize: 16,
-                              textColor: MyColors.grey),
-                        _ => const SizedBox.shrink()
-                      }
+                              textColor: MyColors.grey)
+                      else
+                        const SizedBox.shrink()
                     ],
                   ),
                 ),
@@ -443,11 +462,8 @@ class BooksPageState extends State<BooksPage> {
                                   final isGranted =
                                       await _checkStoragePermissionGranted();
                                   if (isGranted) {
-                                    Workmanager().registerOneOffTask(
-                                        ScanBooksTask.oneOffTaskId,
-                                        ScanBooksTask.name,
-                                        existingWorkPolicy:
-                                            ExistingWorkPolicy.replace);
+                                    compute(runScanBooksTask,
+                                        RootIsolateToken.instance!);
                                   }
                                   setState(() {
                                     _isStoragePermissionGranted = isGranted;
@@ -638,7 +654,9 @@ class _RequestPermissionButton extends StatelessWidget {
 }
 
 class _StoragePermissionDialog extends StatelessWidget {
-  const _StoragePermissionDialog();
+  final VoidCallback onShowLater;
+
+  const _StoragePermissionDialog({required this.onShowLater});
 
   @override
   Widget build(BuildContext context) {
@@ -655,6 +673,7 @@ class _StoragePermissionDialog extends StatelessWidget {
               textColor: MyColors.black,
             ),
             onPressed: () {
+              onShowLater();
               Navigator.of(context).pop();
             },
           ),

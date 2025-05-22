@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:external_path/external_path.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:merlin/domain/books_repository.dart';
 import 'package:path/path.dart' as p;
 
@@ -12,16 +13,18 @@ enum ScanBooksTaskState {
   hasNewBooks,
 }
 
+Future<void> runScanBooksTask(RootIsolateToken token) async {
+  BackgroundIsolateBinaryMessenger.ensureInitialized(token);
+  await ScanBooksTask.run();
+}
+
 class ScanBooksTask {
-  static const oneOffTaskId = "scan_books";
   static const periodicTaskId = "scan_books_periodic";
   static const name = "scanBooks";
 
-  final BooksRepository _booksRepo;
+  static Future<bool> run() async {
+    final booksRepo = BooksRepository();
 
-  ScanBooksTask() : _booksRepo = BooksRepository();
-
-  Future<bool> run() async {
     if (!Platform.isAndroid) {
       return Future.error('Platform not supported');
     }
@@ -50,7 +53,7 @@ class ScanBooksTask {
 
       for (final book in books) {
         try {
-          final result = await _booksRepo.save(book.path);
+          final result = await booksRepo.save(book.path);
           if (result case SaveBookResultSuccess()) {
             if (!hasNewBook) {
               hasNewBook = true;

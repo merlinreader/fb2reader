@@ -8,10 +8,10 @@ import 'package:workmanager/workmanager.dart';
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) {
-    if (task == ScanBooksTask.name) {
-      return ScanBooksTask().run();
-    }
-    return Future.value(false);
+    return switch (task) {
+      ScanBooksTask.name => ScanBooksTask.run(),
+      _ => Future.value(false)
+    };
   });
 }
 

@@ -1,6 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -8,6 +12,8 @@ import 'package:http/http.dart' as http;
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/components/svg/svg_asset.dart';
+import 'package:merlin/domain/scan_books_task.dart';
+import 'package:merlin/domain/workmanager.dart';
 import 'package:merlin/functions/helper.dart';
 import 'package:merlin/pages/achievements/achievements.dart';
 import 'package:merlin/pages/books/books.dart';
@@ -23,6 +29,7 @@ import 'package:merlin/style/text.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:workmanager/workmanager.dart';
 
 final GlobalKey _one = GlobalKey();
 final GlobalKey _two = GlobalKey();
@@ -30,6 +37,7 @@ final GlobalKey _three = GlobalKey();
 final GlobalKey _four = GlobalKey();
 final GlobalKey _five = GlobalKey();
 bool _isShowCasesShown = false;
+bool _isRecentShowCasesShown = false;
 
 class AppPage extends StatefulWidget {
   const AppPage({super.key});
@@ -40,8 +48,15 @@ class AppPage extends StatefulWidget {
   static Future<void> startShowCase(BuildContext context) async {
     if (!_isShowCasesShown && await firstRun()) {
       _isShowCasesShown = true;
-      ShowCaseWidget.of(context)
-          .startShowCase([_one, _two, _three, _four, _five]);
+      ShowCaseWidget.of(context).startShowCase([_one, _two, _three, _four]);
+    }
+  }
+
+  static Future<void> startRecentPageShowCase(BuildContext context) async {
+    if (!_isRecentShowCasesShown && await firstRun()) {
+      _isRecentShowCasesShown = true;
+      await Future.delayed(const Duration(milliseconds: 500));
+      ShowCaseWidget.of(context).startShowCase([_five]);
     }
   }
 }
@@ -60,11 +75,37 @@ class Page extends State<AppPage> {
     AchievementsPage(),
     StatisticPage(),
   ];
+  StreamSubscription? _wmStreamSubscription;
+  final _booksCubit = BooksCubit();
+  final _booksRecentCubit = BooksRecentCubit();
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Workmanager().registerPeriodicTask(
+          ScanBooksTask.periodicTaskId, ScanBooksTask.name,
+          frequency: const Duration(days: 1));
+      compute(runScanBooksTask, RootIsolateToken.instance!);
+    });
+
+    _wmStreamSubscription = wmScanBooksStream?.listen((stateIndex) async {
+      final state = ScanBooksTaskState.values[stateIndex];
+      switch (state) {
+        case ScanBooksTaskState.hasNewBooks:
+          _booksCubit.load(force: true);
+        default:
+          return;
+      }
+    });
+
     getBookName();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _wmStreamSubscription?.cancel();
+    super.dispose();
   }
 
   @override
@@ -154,12 +195,8 @@ class Page extends State<AppPage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => BooksCubit(),
-        ),
-        BlocProvider(
-          create: (context) => BooksRecentCubit(),
-        ),
+        BlocProvider.value(value: _booksCubit),
+        BlocProvider.value(value: _booksRecentCubit)
       ],
       child: Stack(
         children: [
@@ -229,26 +266,26 @@ class Page extends State<AppPage> {
                     ),
                     BottomNavigationBarItem(
                       icon: Showcase(
-                          key: _four,
+                          key: _three,
                           description:
                               "На вкладке достижения можно увидеть заслуженные вами Ачивки.\n"
                               "В дальнейшем наличие Ачивок будет давать дополнительные преимущества при использовании наших приложений.",
                           disableMovingAnimation: true,
                           onToolTipClick: () {
-                            ShowCaseWidget.of(context).completed(_four);
+                            ShowCaseWidget.of(context).completed(_three);
                           },
                           child: const Icon(CustomIcons.trophy)),
                       label: 'Достижения',
                     ),
                     BottomNavigationBarItem(
                       icon: Showcase(
-                          key: _five,
+                          key: _four,
                           disableMovingAnimation: true,
                           description:
                               "Статистика. На вкладке  учитывается количество страниц в режиме чтения и в режиме Слово, которые вы прочитали за разные промежутки времени.\nРейтинг пользователей составляется за день, неделю, месяц, полгода, год, в разрезе города, региона, страны. Статистика попадает на сервер за прошедшие сутки и выгружается раз в 24 часа.\n"
                               "Если вы не авторизованный пользователь, вы увидите свою статистику на сервере только за 24 часа",
                           onToolTipClick: () {
-                            ShowCaseWidget.of(context).completed(_five);
+                            ShowCaseWidget.of(context).completed(_four);
                           },
                           child: const Icon(CustomIcons.chart)),
                       label: 'Статистика',
@@ -279,51 +316,52 @@ class Page extends State<AppPage> {
                       )
                     : _widgetOptions[_selectedPage],
                 floatingActionButton: profile == false && _selectedPage != 0
-                    ? FloatingActionButton(
-                        onPressed: () async {
-                          await getBookName();
-                          try {
-                            // if (RecentPageState().checkBooks() == true) {
-                            //   Fluttertoast.showToast(
-                            //     msg: 'Нет последней книги',
-                            //     toastLength: Toast.LENGTH_SHORT, // Длительность отображения
-                            //     gravity: ToastGravity.BOTTOM,
-                            //   ); // Расположение уведомления
-                            // } else {
-                            if (bookName == '') {
+                    ? Showcase(
+                        key: _five,
+                        disableMovingAnimation: true,
+                        description:
+                            "Нажав на такую иконку вы можете продолжить читать любую ранее начатую книгу",
+                        onToolTipClick: () {
+                          ShowCaseWidget.of(context).completed(_five);
+                        },
+                        child: FloatingActionButton(
+                          onPressed: () async {
+                            await getBookName();
+                            try {
+                              // if (RecentPageState().checkBooks() == true) {
+                              //   Fluttertoast.showToast(
+                              //     msg: 'Нет последней книги',
+                              //     toastLength: Toast.LENGTH_SHORT, // Длительность отображения
+                              //     gravity: ToastGravity.BOTTOM,
+                              //   ); // Расположение уведомления
+                              // } else {
+                              if (bookName == '') {
+                                Fluttertoast.showToast(
+                                  msg: 'Нет последней книги',
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.BOTTOM,
+                                );
+                              } else {
+                                Navigator.pushNamed(context, RouteNames.reader);
+                              }
+                              return;
+                            } catch (e) {
                               Fluttertoast.showToast(
                                 msg: 'Нет последней книги',
                                 toastLength: Toast.LENGTH_SHORT,
                                 gravity: ToastGravity.BOTTOM,
                               );
-                            } else {
-                              Navigator.pushNamed(context, RouteNames.reader);
                             }
-                            return;
-                          } catch (e) {
-                            Fluttertoast.showToast(
-                              msg: 'Нет последней книги',
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                            );
-                          }
-                        },
-                        backgroundColor: MyColors.purple,
-                        shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.zero)),
-                        autofocus: true,
-                        child: Showcase(
-                            key: _three,
-                            disableMovingAnimation: true,
-                            description:
-                                "Нажав на такую иконку вы можете продолжить читать любую ранее начатую книгу",
-                            onToolTipClick: () {
-                              ShowCaseWidget.of(context).completed(_three);
-                            },
-                            child: Icon(
-                              CustomIcons.bookOpen,
-                              color: Theme.of(context).colorScheme.surface,
-                            )),
+                          },
+                          backgroundColor: MyColors.purple,
+                          shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.zero)),
+                          autofocus: true,
+                          child: Icon(
+                            CustomIcons.bookOpen,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                        ),
                       )
                     : null,
               );
