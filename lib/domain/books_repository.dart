@@ -64,6 +64,7 @@ class BooksRepository {
     List text = [];
     String fileContent = '';
 
+    final bookFile = File(bookPath);
     if (p.extension(bookPath) == '.zip') {
       final tempDir = await getTemporaryDirectory();
       String tempPath = tempDir.path;
@@ -72,10 +73,10 @@ class BooksRepository {
       final unzipDir = Directory(unzipPath);
       await unzipDir.create();
 
-      final extractPath = await _extractFB2FromZip(bookPath, unzipPath);
+      final extractPath = await _extractFB2FromZip(bookFile, unzipPath);
       if (extractPath.isNotEmpty) {
         try {
-          fileContent = await _readFile(extractPath);
+          fileContent = await _readFile(File(extractPath));
         } finally {
           await unzipDir.delete(recursive: true);
         }
@@ -83,7 +84,7 @@ class BooksRepository {
         return SaveBookResultInvalidFormat();
       }
     } else {
-      fileContent = await _readFile(bookPath);
+      fileContent = await _readFile(bookFile);
     }
 
     final document = XmlDocument.parse(fileContent);
@@ -151,7 +152,7 @@ class BooksRepository {
         author: name,
         lastPosition: 0,
         sequence: sequence,
-        dateAdded: DateTime.timestamp());
+        dateAdded: await bookFile.lastModified());
     Book book = Book.combine(bookData, imageData);
     Map<String, dynamic> jsonData = book.toJson();
     final Directory? externalDir = Platform.isAndroid
@@ -180,10 +181,8 @@ class BooksRepository {
     }
   }
 
-  Future<String> _extractFB2FromZip(
-      String zipFilePath, String unzipPath) async {
+  Future<String> _extractFB2FromZip(File zipFile, String unzipPath) async {
     try {
-      File zipFile = File(zipFilePath);
       List<int> bytes = await zipFile.readAsBytes();
 
       Archive archive = ZipDecoder().decodeBytes(bytes);
@@ -208,5 +207,5 @@ class BooksRepository {
   }
 }
 
-Future<String> _readFile(String path) async =>
-    (await CharsetDetector.autoDecode(await (File(path).readAsBytes()))).string;
+Future<String> _readFile(File bookFile) async =>
+    (await CharsetDetector.autoDecode(await (bookFile.readAsBytes()))).string;

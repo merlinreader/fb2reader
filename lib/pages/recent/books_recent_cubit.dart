@@ -55,8 +55,10 @@ class BooksRecentCubit extends Cubit<BooksRecentState> {
         await booksDir.create(recursive: true);
       }
 
-      _books.addAll(await compute(
-          _readBooks, _LoadBooksMessage(recentBooks: recentBooks, path: path)));
+      final newBooks = await compute(
+          _readBooks, _LoadBooksMessage(recentBooks: recentBooks, path: path));
+      _books.clear();
+      _books.addAll(newBooks);
     } catch (e) {
       if (kDebugMode) {
         print('Error reading books: $e');

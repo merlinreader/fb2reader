@@ -1,20 +1,11 @@
 import 'package:equatable/equatable.dart';
-import 'package:merlin/domain/books_repository.dart';
 import 'package:merlin/functions/book.dart';
-import 'package:path/path.dart' as path;
 
 class BookItem extends Book with EquatableMixin {
   final int fileSize;
 
-  String get bookTypeName {
-    final extension =
-        path.extension(filePath, 2).replaceFirst('.', '').toUpperCase();
-    if (BooksRepository.supportedExtensions.contains(extension)) {
-      return extension;
-    } else {
-      return path.extension(filePath, 1).replaceFirst('.', '').toUpperCase();
-    }
-  }
+  // TODO: change if support for other formats is planned
+  String get bookTypeName => "FB2";
 
   BookItem(
       {required this.fileSize,
