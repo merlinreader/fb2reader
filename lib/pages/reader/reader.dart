@@ -4,11 +4,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
-import 'package:flutter/rendering.dart';
+import 'dart:ui' as ui;
+
+import 'package:battery_plus/battery_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screen_wake/flutter_screen_wake.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
 import 'package:merlin/UI/icon/custom_icon.dart';
 import 'package:merlin/UI/router.dart';
 import 'package:merlin/UI/theme/theme.dart';
@@ -24,10 +26,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:battery_plus/battery_plus.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 
 class LastPosition {
   double offset;
@@ -66,7 +65,9 @@ class Reader extends State with WidgetsBindingObserver {
       customTitle: "customTitle",
       author: "author",
       progress: 0,
-      lastPosition: 0);
+      lastPosition: 0,
+      sequence: null,
+      dateAdded: DateTime.fromMillisecondsSinceEpoch(0));
   bool loading = true;
   double fontSize = 18;
   bool isDarkTheme = false;
@@ -244,9 +245,9 @@ class Reader extends State with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.paused) {
       await _savePageCountToLocalStorage();
-      await getPageCount(book.title, isBorder);
+      getPageCount(book.title, isBorder);
+      update();
       final prefs = await SharedPreferences.getInstance();
-      await update();
       lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
       prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
     }
@@ -314,7 +315,7 @@ class Reader extends State with WidgetsBindingObserver {
             _scrollOffsetController.animateScroll(
                 offset: book.lastPosition ?? 0,
                 duration: const Duration(microseconds: 1));
-            book.version = 2;
+            // book.version = 2;
           }
         });
       } catch (e) {
@@ -461,8 +462,8 @@ class Reader extends State with WidgetsBindingObserver {
   void replaceWordsWithTranslation(List<WordEntry> wordEntries) async {
     final prefs = await SharedPreferences.getInstance();
     await _savePageCountToLocalStorage();
-    await getPageCount(book.title, isBorder);
-    await update();
+    getPageCount(book.title, isBorder);
+    update();
     lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
     prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
 
@@ -573,10 +574,10 @@ class Reader extends State with WidgetsBindingObserver {
     if (code == 'ru') {
       if (result == true) {
         await _savePageCountToLocalStorage();
-        await getPageCount(book.title, isBorder);
-        final prefs = await SharedPreferences.getInstance();
+        getPageCount(book.title, isBorder);
+        update();
 
-        await update();
+        final prefs = await SharedPreferences.getInstance();
 
         lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
@@ -590,9 +591,9 @@ class Reader extends State with WidgetsBindingObserver {
         await showTableDialog(context, wordCount, true);
       } else if (result == false) {
         await _savePageCountToLocalStorage();
-        await getPageCount(book.title, isBorder);
+        getPageCount(book.title, isBorder);
+        update();
         final prefs = await SharedPreferences.getInstance();
-        await update();
         lastPageCount = prefs.getDouble('pageCount-${book.filePath}') ?? 0;
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         // Действие, выполняемое после нажатия "Нет"
@@ -692,7 +693,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                       0, 0, 20, 0),
                                               icon: const Icon(Icons.close),
                                               onPressed: () async {
-                                                await saveWordCountToLocalstorage(
+                                                saveWordCountToLocalstorage(
                                                     wordCount);
                                                 replaceWordsWithTranslation(
                                                     wordCount.wordEntries);
@@ -2090,14 +2091,16 @@ class Reader extends State with WidgetsBindingObserver {
           if (storedData == null) {
             await prefs.setString('lastCallTimestamp', "19710101T030000+0300");
           }
-          if (elapsedTime.inHours >= 24 || storedData == null) {
-            wordModeDialog(context);
-          } else {
-            var tempWE = await loadWordCountFromLocalStorage();
-            if (tempWE.filePath != '') {
-              replaceWordsWithTranslation(tempWE.wordEntries);
-            }
-          }
+          wordModeDialog(context);
+          // TODO: пока убрано
+          // if (elapsedTime.inHours >= 24 || storedData == null) {
+          //   wordModeDialog(context);
+          // } else {
+          //   var tempWE = await loadWordCountFromLocalStorage();
+          //   if (tempWE.filePath != '') {
+          //     replaceWordsWithTranslation(tempWE.wordEntries);
+          //   }
+          // }
         } else {
           wordModeDialog(context);
         }
@@ -2111,17 +2114,18 @@ class Reader extends State with WidgetsBindingObserver {
         prefs.setDouble('lastPageCount-${book.filePath}', lastPageCount);
         isBorder = false;
         setState(() {});
-        var timeLast = await readTimeFromJsonFile(fileName);
-        if (timeLast != null) {
-          final formattedTime = DateFormat('dd.MM.yy HH:mm')
-              .format(timeLast.add(const Duration(days: 1)));
+        // TODO: пока убрано
+        // var timeLast = await readTimeFromJsonFile(fileName);
+        // if (timeLast != null) {
+        //   final formattedTime = DateFormat('dd.MM.yy HH:mm')
+        //       .format(timeLast.add(const Duration(days: 1)));
 
-          Fluttertoast.showToast(
-            msg: 'Новый перевод будет доступен $formattedTime',
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.BOTTOM,
-          );
-        }
+        //   Fluttertoast.showToast(
+        //     msg: 'Новый перевод будет доступен $formattedTime',
+        //     toastLength: Toast.LENGTH_LONG,
+        //     gravity: ToastGravity.BOTTOM,
+        //   );
+        // }
         break;
     }
   }
@@ -2132,11 +2136,15 @@ class Reader extends State with WidgetsBindingObserver {
     final size = MediaQuery.of(context);
 
     return PopScope(
-        onPopInvoked: (bool didPop) async {
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, result) async {
           await update();
 
           await _savePageCountToLocalStorage();
-          await getPageCount(book.title, isBorder);
+          getPageCount(book.title, isBorder);
+          if (!didPop) {
+            Navigator.pop(context, percentage / 100);
+          }
         },
         child: !loading
             ? ShowCaseWidget(builder: (context) {
@@ -2152,7 +2160,7 @@ class Reader extends State with WidgetsBindingObserver {
                                 leading: GestureDetector(
                                     onTap: () async {
                                       await update();
-                                      Navigator.pop(context, true);
+                                      Navigator.pop(context, percentage / 100);
                                     },
                                     child: Theme(
                                       data: lightTheme(),
@@ -2822,7 +2830,7 @@ class Reader extends State with WidgetsBindingObserver {
                                                               Alignment.center,
                                                           child: Text11(
                                                               text:
-                                                                  "${percentage}%",
+                                                                  "$percentage%",
                                                               textColor: MyColors
                                                                   .darkGray),
                                                         )
